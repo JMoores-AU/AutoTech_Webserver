@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ tool_name }} - T1 Tools</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="app-container">
+        
+        <!-- ========================================
+             SIDEBAR NAVIGATION
+             ======================================== -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <span class="sidebar-logo-icon">🛠️</span>
+                    <div>
+                        <div class="sidebar-logo-text">T1 Tools</div>
+                        <div class="sidebar-logo-subtitle">Mining Equipment</div>
+                    </div>
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Main</div>
+                    <a href="{{ url_for('dashboard') }}" class="nav-item">
+                        <span class="nav-item-icon">📊</span>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="{{ url_for('run_tool', tool_name='IP Finder') }}" class="nav-item">
+                        <span class="nav-item-icon">🔍</span>
+                        <span>IP Finder</span>
+                    </a>
+                </div>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="sidebar-status">
+                    <span class="status-indicator {{ 'online' if online else 'offline' }}"></span>
+                    <span>{{ 'Network Online' if online else 'Offline Mode' }}</span>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- ========================================
+             MAIN CONTENT AREA
+             ======================================== -->
+        <main class="main-content">
+            
+            <header class="top-header">
+                <h1 class="header-title">{{ tool_name }}</h1>
+                <div class="header-actions">
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-secondary btn-sm">
+                        ← Back to Dashboard
+                    </a>
+                </div>
+            </header>
+            
+            <div class="content-container">
+                
+                <!-- Tool Information Card -->
+                <section class="mb-5">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">
+                                <span class="card-title-icon">🔧</span>
+                                {{ tool_name }}
+                            </h2>
+                        </div>
+                        <div class="card-body">
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                                <div>
+                                    <div class="text-muted mb-1">Tool Name</div>
+                                    <div class="text-bright">{{ tool_name }}</div>
+                                </div>
+                                <div>
+                                    <div class="text-muted mb-1">Network Mode</div>
+                                    <div class="text-bright">{{ 'Online' if online else 'Offline' }}</div>
+                                </div>
+                                <div>
+                                    <div class="text-muted mb-1">Gateway IP</div>
+                                    <div class="text-bright" style="font-family: monospace;">{{ gateway_ip }}</div>
+                                </div>
+                                <div>
+                                    <div class="text-muted mb-1">Timestamp</div>
+                                    <div class="text-bright">{{ timestamp }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Tool Content Area -->
+                <section>
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">
+                                <span class="card-title-icon">⚙️</span>
+                                Tool Output
+                            </h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="empty-state">
+                                <div class="empty-state-icon">🔧</div>
+                                <div class="empty-state-title">Tool Ready</div>
+                                <div class="empty-state-description">
+                                    {{ tool_name }} is ready to use. Tool-specific functionality will be displayed here.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+            </div>
+        </main>
+        
+    </div>
+    
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <div class="flash-messages">
+            {% for message in messages %}
+            <div class="flash">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    {% endwith %}
+</body>
+</html>

@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IP Finder - T1 Tools</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        /* Search Section */
+        .search-section {
+            background: var(--theme-bg-card);
+            border: 1px solid var(--theme-border);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 32px;
+        }
+        
+        .search-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--theme-border);
+        }
+        .search-header .icon { font-size: 1.5rem; }
+        .search-header h2 { font-size: 1.1rem; font-weight: 600; color: var(--theme-text-bright); margin: 0; }
+        
+        .search-form {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .search-input {
+            flex: 1;
+            background: var(--theme-bg);
+            border: 1px solid var(--theme-border);
+            border-radius: var(--radius-sm);
+            padding: 12px 16px;
+            color: var(--theme-text);
+            font-size: 1rem;
+        }
+        .search-input:focus {
+            outline: none;
+            border-color: var(--theme-primary);
+            box-shadow: 0 0 0 3px var(--theme-primary-light);
+        }
+        .search-input::placeholder { color: var(--theme-text-muted); }
+        
+        .btn-search {
+            background: linear-gradient(135deg, var(--theme-primary), var(--theme-primary-hover));
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-search:hover:not(:disabled) { background: linear-gradient(135deg, var(--theme-primary-hover), #1d4ed8); }
+        .btn-search:disabled { opacity: 0.6; cursor: not-allowed; }
+        
+        /* Results Section */
+        .results-section {
+            display: none;
+        }
+        .results-section.active { display: block; }
+        
+        .equipment-card {
+            background: var(--theme-bg-card);
+            border: 1px solid var(--theme-border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+        }
+        
+        .equipment-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 24px;
+            background: var(--theme-bg);
+            border-bottom: 1px solid var(--theme-border);
+        }
+        
+        .equipment-id {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--theme-text-bright);
+        }
+        
+        .status-badge {
+            padding: 6px 14px;
+            border-radius: 16px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .status-badge.online { background: rgba(34, 197, 94, 0.15); color: var(--status-online); border: 1px solid rgba(34, 197, 94, 0.3); }
+        .status-badge.offline { background: rgba(239, 68, 68, 0.15); color: var(--status-offline); border: 1px solid rgba(239, 68, 68, 0.3); }
+        .status-badge.simulated { background: rgba(168, 85, 247, 0.15); color: #a855f7; border: 1px solid rgba(168, 85, 247, 0.3); }
+        
+        .equipment-body {
+            padding: 24px;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+        
+        .info-section {
+            background: var(--theme-bg);
+            border-radius: var(--radius-md);
+            padding: 16px;
+        }
+        
+        .info-section h3 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--theme-text-bright);
+            margin: 0 0 12px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--theme-border);
+        }
+        .info-row:last-child { border-bottom: none; }
+        
+        .info-label {
+            font-size: 0.85rem;
+            color: var(--theme-text-muted);
+        }
+        
+        .info-value {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Consolas', monospace;
+            color: var(--theme-text);
+        }
+        
+        .btn-copy {
+            background: rgba(59, 130, 246, 0.15);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: var(--status-info);
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.75rem;
+        }
+        .btn-copy:hover { background: rgba(59, 130, 246, 0.25); }
+        
+        /* Action Buttons */
+        .actions-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            padding-top: 16px;
+            border-top: 1px solid var(--theme-border);
+        }
+        
+        .action-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+        .action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        .btn-vnc { background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white; }
+        .btn-vnc:hover:not(:disabled) { background: linear-gradient(135deg, #7c3aed, #6d28d9); }
+        
+        .btn-avi { background: linear-gradient(135deg, #06b6d4, #0891b2); color: white; }
+        .btn-avi:hover:not(:disabled) { background: linear-gradient(135deg, #0891b2, #0e7490); }
+        
+        .btn-flight { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; }
+        .btn-flight:hover:not(:disabled) { background: linear-gradient(135deg, #d97706, #b45309); }
+        
+        .btn-tru { background: linear-gradient(135deg, #10b981, #059669); color: white; }
+        .btn-tru:hover:not(:disabled) { background: linear-gradient(135deg, #059669, #047857); }
+        
+        /* Loading & Error States */
+        .loading-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--theme-text-muted);
+        }
+        .loading-state .spinner-lg {
+            width: 32px;
+            height: 32px;
+            border: 3px solid var(--theme-border);
+            border-top-color: var(--theme-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+        
+        .error-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--status-offline);
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: var(--theme-text-muted);
+        }
+        .no-results .icon { font-size: 3rem; margin-bottom: 16px; opacity: 0.5; }
+        
+        /* Action Log */
+        .action-log {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            margin-top: 16px;
+            font-family: 'Consolas', monospace;
+            font-size: 0.8rem;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+        }
+        .action-log.active { display: block; }
+        .log-line { padding: 2px 0; }
+        .log-line.success { color: var(--status-online); }
+        .log-line.error { color: var(--status-offline); }
+        .log-line.info { color: var(--status-info); }
+        
+        /* Spinner */
+        .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: currentColor; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        /* TRU Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background: var(--theme-bg-card);
+            border: 1px solid var(--theme-border);
+            border-radius: var(--radius-lg);
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+            border-bottom: 1px solid var(--theme-border);
+        }
+        .modal-header h3 { margin: 0; color: var(--theme-text-bright); }
+        .modal-close { background: none; border: none; color: var(--theme-text-muted); font-size: 1.5rem; cursor: pointer; }
+        
+        .modal-body { padding: 20px; }
+        
+        .tru-info-grid {
+            display: grid;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .tru-info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: var(--theme-bg);
+            border-radius: var(--radius-sm);
+        }
+        .tru-info-row label { color: var(--theme-text-muted); font-size: 0.85rem; }
+        .tru-info-row span { font-family: 'Consolas', monospace; color: var(--theme-text-bright); }
+        
+        .tru-instructions {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: var(--radius-md);
+            padding: 16px;
+        }
+        .tru-instructions h4 { margin: 0 0 12px 0; color: #10b981; font-size: 0.9rem; }
+        .tru-instructions ol { margin: 0; padding-left: 20px; color: var(--theme-text); font-size: 0.85rem; }
+        .tru-instructions li { margin-bottom: 8px; }
+        
+        .modal-footer {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            padding: 20px;
+            border-top: 1px solid var(--theme-border);
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <span class="sidebar-logo-icon">🛠️</span>
+                    <div>
+                        <div class="sidebar-logo-text">T1 Tools</div>
+                        <div class="sidebar-logo-subtitle">Mining Equipment</div>
+                    </div>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Main</div>
+                    <a href="{{ url_for('dashboard') }}" class="nav-item"><span class="nav-item-icon">📊</span><span>Dashboard</span></a>
+                    <a href="{{ url_for('run_tool', tool_name='IP Finder') }}" class="nav-item active"><span class="nav-item-icon">🔍</span><span>IP Finder</span></a>
+                    <a href="{{ url_for('run_tool', tool_name='Playback Tools') }}" class="nav-item"><span class="nav-item-icon">▶️</span><span>Playback Tools</span></a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Equipment Tools</div>
+                    <a href="{{ url_for('run_tool', tool_name='PTX Uptime') }}" class="nav-item"><span class="nav-item-icon">⏱️</span><span>PTX Uptime</span></a>
+                    <a href="{{ url_for('run_tool', tool_name='PTX Health Check') }}" class="nav-item"><span class="nav-item-icon">💓</span><span>PTX Health Check</span></a>
+                </div>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="sidebar-status">
+                    <span class="status-indicator {{ 'online' if online else 'offline' }}"></span>
+                    <span>{{ 'Network Online' if online else 'Offline Mode' }}</span>
+                </div>
+            </div>
+        </aside>
+        
+        <main class="main-content">
+            <header class="top-header">
+                <h1 class="header-title">IP Finder</h1>
+                <div class="header-actions">
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-secondary btn-sm">← Dashboard</a>
+                </div>
+            </header>
+            
+            <div class="content-container">
+                <!-- Search Section -->
+                <div class="search-section">
+                    <div class="search-header">
+                        <span class="icon">🔍</span>
+                        <h2>Search Equipment</h2>
+                    </div>
+                    <form class="search-form" id="searchForm" onsubmit="searchEquipment(event)">
+                        <input type="text" class="search-input" id="searchInput" 
+                               placeholder="Enter equipment ID (e.g., RD190, AHG135) or PTX IP address..." 
+                               autocomplete="off" required>
+                        <button type="submit" class="btn-search" id="searchBtn">
+                            🔍 Search
+                        </button>
+                    </form>
+                </div>
+                
+                <!-- Results Section -->
+                <div class="results-section" id="resultsSection">
+                    <!-- Results will be populated here -->
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <div class="toast-container" id="toastContainer"></div>
+    
+    <script>
+        const IS_OFFLINE = {{ 'true' if not online else 'false' }};
+        let currentEquipment = null;
+        
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            const icons = { info: 'ℹ️', success: '✅', error: '❌', warning: '⚠️' };
+            toast.innerHTML = `<span class="toast-icon">${icons[type]}</span><span class="toast-message">${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 5000);
+        }
+        
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast(`Copied: ${text}`, 'success');
+            }).catch(() => {
+                showToast('Failed to copy', 'error');
+            });
+        }
+        
+        function getFlightRecorderIP(ptxIP) {
+            if (!ptxIP) return null;
+            const parts = ptxIP.split('.');
+            if (parts.length !== 4) return null;
+            return `${parts[0]}.${parts[1]}.${parts[2]}.${parseInt(parts[3]) + 1}`;
+        }
+        
+        async function searchEquipment(event) {
+            event.preventDefault();
+            
+            const query = document.getElementById('searchInput').value.trim();
+            if (!query) return;
+            
+            const resultsSection = document.getElementById('resultsSection');
+            const searchBtn = document.getElementById('searchBtn');
+            
+            resultsSection.className = 'results-section active';
+            resultsSection.innerHTML = `
+                <div class="equipment-card">
+                    <div class="loading-state">
+                        <div class="spinner-lg"></div>
+                        <div>Searching for ${query}...</div>
+                    </div>
+                </div>
+            `;
+            
+            searchBtn.disabled = true;
+            searchBtn.innerHTML = '<span class="spinner"></span> Searching...';
+            
+            try {
+                const response = await fetch('/api/equipment_search', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query: query })
+                });
+                
+                const data = await response.json();
+                
+                if (data.found) {
+                    currentEquipment = data;
+                    displayResults(data);
+                    showToast(`Found: ${data.OID}`, 'success');
+                } else {
+                    resultsSection.innerHTML = `
+                        <div class="equipment-card">
+                            <div class="no-results">
+                                <div class="icon">🔍</div>
+                                <div style="font-size: 1.1rem; margin-bottom: 8px;">No equipment found for "${query}"</div>
+                                <div style="font-size: 0.85rem;">Try a different equipment ID or IP address</div>
+                            </div>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Search error:', error);
+                resultsSection.innerHTML = `
+                    <div class="equipment-card">
+                        <div class="error-state">
+                            <div style="font-size: 2rem; margin-bottom: 16px;">❌</div>
+                            <div>Search failed. Please try again.</div>
+                        </div>
+                    </div>
+                `;
+                showToast('Search failed', 'error');
+            } finally {
+                searchBtn.disabled = false;
+                searchBtn.innerHTML = '🔍 Search';
+            }
+        }
+        
+        function displayResults(data) {
+            const resultsSection = document.getElementById('resultsSection');
+            const statusClass = data.vehicle_status === 'Online' ? 'online' : 
+                               data.vehicle_status === 'Simulated' ? 'simulated' : 'offline';
+            
+            // Check for K830E/K930E profiles for flight recorder
+            const hasFlightRecorder = data.profile === 'K830E' || data.profile === 'K930E';
+            const flightRecorderIP = data.flight_recorder_ip || (hasFlightRecorder ? getFlightRecorderIP(data.ptx_ip) : null);
+            
+            // Determine PTX model display
+            const ptxModel = data.ptxc_found ? 'PTXC' : (data.ptx_model || 'PTX10');
+            
+            resultsSection.innerHTML = `
+                <div class="equipment-card">
+                    <div class="equipment-header">
+                        <div class="equipment-id">${data.OID}</div>
+                        <span class="status-badge ${statusClass}">${data.vehicle_status || 'Unknown'}</span>
+                    </div>
+                    
+                    <div class="equipment-body">
+                        <div class="info-grid">
+                            <div class="info-section">
+                                <h3>📋 Equipment Details</h3>
+                                <div class="info-row">
+                                    <span class="info-label">Equipment ID</span>
+                                    <span class="info-value">${data.OID}</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Profile / Type</span>
+                                    <span class="info-value">${data.profile || 'Unknown'}</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">PTX Model</span>
+                                    <span class="info-value">${ptxModel}${data.ptxc_found ? ' ✓' : ''}</span>
+                                </div>
+                                ${data.cid ? `
+                                <div class="info-row">
+                                    <span class="info-label">Category</span>
+                                    <span class="info-value">${data.cid}</span>
+                                </div>
+                                ` : ''}
+                            </div>
+                            
+                            <div class="info-section">
+                                <h3>🌐 Network Info</h3>
+                                <div class="info-row">
+                                    <span class="info-label">PTX IP</span>
+                                    <span class="info-value">
+                                        ${data.ptx_ip || 'N/A'}
+                                        ${data.ptx_ip ? `<button class="btn-copy" onclick="copyToClipboard('${data.ptx_ip}')">📋</button>` : ''}
+                                    </span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">AVI IP</span>
+                                    <span class="info-value">
+                                        ${data.avi_ip || 'N/A'}
+                                        ${data.avi_ip ? `<button class="btn-copy" onclick="copyToClipboard('${data.avi_ip}')">📋</button>` : ''}
+                                    </span>
+                                </div>
+                                ${flightRecorderIP ? `
+                                <div class="info-row">
+                                    <span class="info-label">Flight Recorder IP</span>
+                                    <span class="info-value">
+                                        ${flightRecorderIP}
+                                        <button class="btn-copy" onclick="copyToClipboard('${flightRecorderIP}')">📋</button>
+                                    </span>
+                                </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                        
+                        <div class="actions-section">
+                            <button class="action-btn btn-vnc" ${!data.ptx_ip ? 'disabled' : ''} onclick="openVNC('${data.ptx_ip}', ${data.ptxc_found || false}, '${data.OID}', '${ptxModel}')">
+                                🖥️ Open VNC
+                            </button>
+                            <button class="action-btn btn-avi" ${!data.avi_ip ? 'disabled' : ''} onclick="openAVI('${data.avi_ip}')">
+                                📹 Open AVI
+                            </button>
+                            ${flightRecorderIP ? `
+                            <button class="action-btn btn-flight" onclick="openFlightRecorder('${flightRecorderIP}')">
+                                🛩️ Flight Recorder
+                            </button>
+                            ` : ''}
+                            <button class="action-btn btn-tru" ${!data.ptx_ip ? 'disabled' : ''} onclick="openTRU('${data.OID}', '${data.ptx_ip}')">
+                                🚛 TRU Access
+                            </button>
+                        </div>
+                        
+                        <div class="action-log" id="actionLog"></div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function openVNC(ip, isPTXC, equipmentName, ptxModel) {
+            if (!ip) { 
+                showToast('No PTX IP available', 'error'); 
+                return; 
+            }
+            
+            const logEl = document.getElementById('actionLog');
+            logEl.className = 'action-log active';
+            logEl.innerHTML = '';
+            
+            addLogLine(logEl, `🔍 Starting VNC session for ${equipmentName || 'equipment'}...`, 'info');
+            addLogLine(logEl, `📡 PTX IP: ${ip}`, 'info');
+            if (ptxModel) {
+                addLogLine(logEl, `🖥️ PTX Model: ${ptxModel}`, 'info');
+            }
+            addLogLine(logEl, `⚙️ Calling MMS server VNC setup script via plink...`, 'info');
+            
+            // Disable button while connecting
+            const btn = event?.target;
+            const originalHTML = btn?.innerHTML;
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<span class="spinner"></span> Starting VNC...';
+            }
+            
+            // Call the /api/vnc/start endpoint
+            fetch('/api/vnc/start', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    ptx_ip: ip,
+                    equipment_name: equipmentName || 'Unknown',
+                    ptx_model: ptxModel || ''
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    if (data.ptx_type && data.ptx_type !== 'Unknown') {
+                        addLogLine(logEl, `✅ PTX Type: ${data.ptx_type}`, 'success');
+                    }
+                    addLogLine(logEl, `✅ VNC script completed`, 'success');
+                    
+                    // Show script output if available (for debugging)
+                    if (data.script_output) {
+                        addLogLine(logEl, `📋 Script output: ${data.script_output}`, 'info');
+                    }
+                    
+                    if (data.manual_connect) {
+                        addLogLine(logEl, `⚠️ VNC Viewer not found`, 'warning');
+                        addLogLine(logEl, `📋 Connect manually to: ${data.vnc_display}`, 'info');
+                        showToast(`Connect manually to ${data.vnc_display}`, 'info');
+                        
+                        // Copy connection string to clipboard
+                        if (navigator.clipboard) {
+                            navigator.clipboard.writeText(data.vnc_display);
+                            addLogLine(logEl, `📋 Connection address copied to clipboard`, 'success');
+                        }
+                    } else {
+                        addLogLine(logEl, `✅ VNC Viewer launched to ${data.vnc_display}`, 'success');
+                        addLogLine(logEl, `🎯 VNC window should open shortly...`, 'info');
+                        showToast('VNC session started', 'success');
+                    }
+                } else {
+                    addLogLine(logEl, `❌ ${data.message || 'VNC connection failed'}`, 'error');
+                    showToast(data.message || 'VNC connection failed', 'error');
+                }
+            })
+            .catch(err => {
+                console.error('VNC error:', err);
+                addLogLine(logEl, `❌ Connection error: ${err.message}`, 'error');
+                showToast('VNC connection failed', 'error');
+            })
+            .finally(() => {
+                // Re-enable button
+                if (btn && originalHTML) {
+                    btn.disabled = false;
+                    btn.innerHTML = originalHTML;
+                }
+            });
+        }
+        
+        function openAVI(ip) {
+            if (!ip) { showToast('No AVI IP available', 'error'); return; }
+            window.open(`http://${ip}`, '_blank');
+            showToast('Opening AVI interface', 'info');
+        }
+        
+        function openFlightRecorder(ip) {
+            if (!ip) { showToast('No Flight Recorder IP available', 'error'); return; }
+            window.open(`http://${ip}`, '_blank');
+            showToast('Opening Flight Recorder', 'info');
+        }
+        
+        async function openTRU(equipmentId, ptxIP) {
+            if (!ptxIP) { showToast('No PTX IP available', 'error'); return; }
+            
+            const truBtn = document.querySelector('.btn-tru');
+            truBtn.disabled = true;
+            truBtn.innerHTML = '<span class="spinner"></span> Connecting...';
+            
+            try {
+                const response = await fetch('/api/tru_setup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ equipment_ip: ptxIP, equipment_name: equipmentId })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showTRUModal(data);
+                    showToast('TRU access established', 'success');
+                } else {
+                    showToast(data.message || 'TRU connection failed', 'error');
+                }
+            } catch (error) {
+                showToast('TRU connection error', 'error');
+            } finally {
+                truBtn.disabled = false;
+                truBtn.innerHTML = '🚛 TRU Access';
+            }
+        }
+        
+        function showTRUModal(data) {
+            const modal = document.createElement('div');
+            modal.id = 'truModal';
+            modal.className = 'modal-overlay';
+            modal.onclick = (e) => { if (e.target === modal) closeTRUModal(); };
+            
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>🛩️ TRU Access Established</h3>
+                        <button class="modal-close" onclick="closeTRUModal()">×</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="tru-info-grid">
+                            <div class="tru-info-row">
+                                <label>Equipment</label>
+                                <span>${data.equipment_name || 'Unknown'}</span>
+                            </div>
+                            <div class="tru-info-row">
+                                <label>IP Address</label>
+                                <span>${data.ip_address || 'N/A'}</span>
+                            </div>
+                            <div class="tru-info-row">
+                                <label>GNSS 1 Port</label>
+                                <span>localhost:${data.local_ports ? data.local_ports[0] : '5001'}</span>
+                                <button class="btn-copy" onclick="copyToClipboard('localhost:${data.local_ports ? data.local_ports[0] : '5001'}')">📋</button>
+                            </div>
+                            <div class="tru-info-row">
+                                <label>GNSS 2 Port</label>
+                                <span>localhost:${data.local_ports ? data.local_ports[1] : '5002'}</span>
+                                <button class="btn-copy" onclick="copyToClipboard('localhost:${data.local_ports ? data.local_ports[1] : '5002'}')">📋</button>
+                            </div>
+                        </div>
+                        <div class="tru-instructions">
+                            <h4>📋 TRU Configuration Steps:</h4>
+                            <ol>
+                                <li>Open your TRU software</li>
+                                <li>Configure GNSS connections:
+                                    <ul style="margin-top: 4px;">
+                                        <li><strong>GNSS 1:</strong> localhost:${data.local_ports ? data.local_ports[0] : '5001'}</li>
+                                        <li><strong>GNSS 2:</strong> localhost:${data.local_ports ? data.local_ports[1] : '5002'}</li>
+                                    </ul>
+                                </li>
+                                <li>Set connection type to TCP/IP</li>
+                            </ol>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="action-btn btn-tru" onclick="closeTRUModal()">✅ Got It</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+        
+        function closeTRUModal() {
+            const modal = document.getElementById('truModal');
+            if (modal) modal.remove();
+        }
+        
+        function addLogLine(logEl, message, type = 'info') {
+            const line = document.createElement('div');
+            line.className = `log-line ${type}`;
+            line.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logEl.appendChild(line);
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+        
+        // Focus search input on load
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('searchInput').focus();
+        });
+    </script>
+</body>
+</html>

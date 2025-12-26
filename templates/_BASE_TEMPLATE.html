@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title }} - T1 Tools</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="app-container">
+        
+        <!-- ========================================
+             SIDEBAR NAVIGATION
+             Copy this section to all pages
+             ======================================== -->
+        <aside class="sidebar" id="sidebar">
+            
+            <!-- Sidebar Header -->
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <span class="sidebar-logo-icon">🛠️</span>
+                    <div>
+                        <div class="sidebar-logo-text">T1 Tools</div>
+                        <div class="sidebar-logo-subtitle">Mining Equipment</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sidebar Navigation -->
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Main</div>
+                    
+                    <a href="{{ url_for('dashboard') }}" class="nav-item">
+                        <span class="nav-item-icon">📊</span>
+                        <span>Dashboard</span>
+                    </a>
+                    
+                    <a href="{{ url_for('run_tool', tool_name='IP Finder') }}" class="nav-item">
+                        <span class="nav-item-icon">🔍</span>
+                        <span>IP Finder</span>
+                    </a>
+                </div>
+                
+                <!-- Add more nav sections as needed -->
+            </nav>
+            
+            <!-- Sidebar Footer -->
+            <div class="sidebar-footer">
+                <div class="sidebar-status">
+                    <span class="status-indicator {{ 'online' if online else 'offline' }}"></span>
+                    <span>{{ 'Network Online' if online else 'Offline Mode' }}</span>
+                </div>
+            </div>
+            
+        </aside>
+        
+        <!-- ========================================
+             MAIN CONTENT AREA
+             ======================================== -->
+        <main class="main-content">
+            
+            <!-- Top Header Bar -->
+            <header class="top-header">
+                <h1 class="header-title">{{ page_title }}</h1>
+                <div class="header-actions">
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-secondary btn-sm">
+                        ← Back to Dashboard
+                    </a>
+                </div>
+            </header>
+            
+            <!-- Content Container -->
+            <div class="content-container">
+                
+                <!-- ========================================
+                     SECTION: Example Card Section
+                     ======================================== -->
+                <section class="mb-5">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <span class="section-title-icon">📋</span>
+                            Section Title
+                        </h2>
+                        <button class="btn btn-ghost btn-sm" onclick="someAction()">
+                            🔄 Action Button
+                        </button>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <span class="card-title-icon">🔧</span>
+                                Card Title
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <!-- Card content goes here -->
+                            <p class="text-muted">Card body content.</p>
+                        </div>
+                        <div class="card-footer">
+                            <!-- Optional footer -->
+                            <button class="btn btn-primary">Primary Action</button>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- ========================================
+                     SECTION: Grid Example
+                     ======================================== -->
+                <section class="mb-5">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <span class="section-title-icon">📊</span>
+                            Grid Section
+                        </h2>
+                    </div>
+                    
+                    <div class="tools-grid">
+                        <!-- Repeat this card pattern -->
+                        <div class="tool-card">
+                            <span class="tool-card-icon">🔧</span>
+                            <span class="tool-card-title">Item Title</span>
+                            <span class="tool-card-description">Brief description here.</span>
+                        </div>
+                        <!-- More cards... -->
+                    </div>
+                </section>
+                
+                <!-- ========================================
+                     SECTION: Info Display
+                     ======================================== -->
+                <section>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <span class="card-title-icon">ℹ️</span>
+                                Information
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px;">
+                                <div>
+                                    <div class="text-muted mb-1">Label 1</div>
+                                    <div class="text-bright">Value 1</div>
+                                </div>
+                                <div>
+                                    <div class="text-muted mb-1">Label 2</div>
+                                    <div class="text-bright">Value 2</div>
+                                </div>
+                                <div>
+                                    <div class="text-muted mb-1">Label 3</div>
+                                    <div class="text-bright" style="font-family: monospace;">10.110.19.107</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+            </div>
+        </main>
+        
+    </div>
+    
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+    
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <div class="flash-messages" id="flashMessages">
+            {% for message in messages %}
+            <div class="flash">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    {% endwith %}
+    
+    <!-- ========================================
+         JAVASCRIPT
+         ======================================== -->
+    <script>
+        // ========================================
+        // TOAST NOTIFICATION SYSTEM
+        // ========================================
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            let icon = 'ℹ️';
+            if (type === 'success') icon = '✅';
+            if (type === 'error') icon = '❌';
+            if (type === 'warning') icon = '⚠️';
+            
+            toast.innerHTML = `
+                <span class="toast-icon">${icon}</span>
+                <span class="toast-message">${message}</span>
+            `;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideIn 0.3s ease reverse';
+                setTimeout(() => toast.remove(), 300);
+            }, 5000);
+        }
+        
+        // ========================================
+        // FLASH MESSAGE HANDLING
+        // ========================================
+        document.addEventListener('DOMContentLoaded', function() {
+            const flashContainer = document.getElementById('flashMessages');
+            if (flashContainer) {
+                setTimeout(() => {
+                    flashContainer.style.opacity = '0';
+                    flashContainer.style.transition = 'opacity 0.3s ease';
+                    setTimeout(() => flashContainer.remove(), 300);
+                }, 5000);
+            }
+        });
+        
+        // ========================================
+        // YOUR CUSTOM FUNCTIONS
+        // ========================================
+        function someAction() {
+            showToast('Action triggered!', 'info');
+        }
+    </script>
+</body>
+</html>

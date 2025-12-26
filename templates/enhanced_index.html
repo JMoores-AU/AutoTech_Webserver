@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>T1 Tools Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        /* VNC Button Styles */
+        .vnc-section {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+        }
+        
+        .vnc-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 24px;
+            border: none;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .vnc-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        
+        .vnc-btn-ws1 {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            color: white;
+        }
+        .vnc-btn-ws1:hover:not(:disabled) { background: linear-gradient(135deg, #7c3aed, #6d28d9); transform: translateY(-2px); }
+        
+        .vnc-btn-ws2 {
+            background: linear-gradient(135deg, #06b6d4, #0891b2);
+            color: white;
+        }
+        .vnc-btn-ws2:hover:not(:disabled) { background: linear-gradient(135deg, #0891b2, #0e7490); transform: translateY(-2px); }
+        
+        .vnc-btn .spinner {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: currentColor;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        /* Legacy Button in Sidebar */
+        .legacy-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            padding: 12px 16px;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            border: none;
+            border-radius: var(--radius-sm);
+            color: white;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .legacy-btn:hover { background: linear-gradient(135deg, #d97706, #b45309); transform: translateY(-1px); }
+        .legacy-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        
+        /* Simplified Quick Access */
+        .quick-tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        
+        .quick-tool-card {
+            background: var(--theme-bg-card);
+            border: 1px solid var(--theme-border);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+        .quick-tool-card:hover { border-color: var(--theme-primary); transform: translateY(-2px); }
+        .quick-tool-card.disabled { opacity: 0.5; pointer-events: none; }
+        
+        .quick-tool-icon {
+            width: 56px;
+            height: 56px;
+            background: var(--theme-bg);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+        }
+        
+        .quick-tool-info { flex: 1; }
+        .quick-tool-title { font-size: 1.1rem; font-weight: 600; color: var(--theme-text-bright); margin-bottom: 4px; }
+        .quick-tool-desc { font-size: 0.85rem; color: var(--theme-text-muted); }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        
+        <!-- ========================================
+             SIDEBAR NAVIGATION
+             ======================================== -->
+        <aside class="sidebar" id="sidebar">
+            
+            <!-- Sidebar Header / Logo -->
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <span class="sidebar-logo-icon">🛠️</span>
+                    <div>
+                        <div class="sidebar-logo-text">T1 Tools</div>
+                        <div class="sidebar-logo-subtitle">Mining Equipment</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sidebar Navigation -->
+            <nav class="sidebar-nav">
+                
+                <!-- SECTION: Main -->
+                <div class="nav-section">
+                    <div class="nav-section-title">Main</div>
+                    
+                    <a href="{{ url_for('dashboard') }}" class="nav-item active">
+                        <span class="nav-item-icon">📊</span>
+                        <span>Dashboard</span>
+                    </a>
+                    
+                    {% if logged_in %}
+                    <a href="{{ url_for('run_tool', tool_name='IP Finder') }}" class="nav-item">
+                        <span class="nav-item-icon">🔍</span>
+                        <span>IP Finder</span>
+                    </a>
+                    <a href="{{ url_for('run_tool', tool_name='Playback Tools') }}" class="nav-item">
+                        <span class="nav-item-icon">▶️</span>
+                        <span>Playback Tools</span>
+                    </a>
+                    {% else %}
+                    <div class="nav-item disabled">
+                        <span class="nav-item-icon">🔍</span>
+                        <span>IP Finder</span>
+                        <span class="nav-item-badge">🔒</span>
+                    </div>
+                    <div class="nav-item disabled">
+                        <span class="nav-item-icon">▶️</span>
+                        <span>Playback Tools</span>
+                        <span class="nav-item-badge">🔒</span>
+                    </div>
+                    {% endif %}
+                </div>
+                
+            </nav>
+            
+            <!-- Sidebar Footer -->
+            <div class="sidebar-footer">
+                <!-- Legacy T1 Tools Button -->
+                <button class="legacy-btn" onclick="launchLegacyTools()" id="legacyBtn">
+                    <span>📦</span>
+                    <span>T1 Tools Legacy</span>
+                </button>
+                
+                <div class="sidebar-status">
+                    <span class="status-indicator {{ 'online' if online else 'offline' }}" id="statusIndicator"></span>
+                    <span id="networkStatus">{{ 'Network Online' if online else 'Offline Mode' }}</span>
+                </div>
+            </div>
+            
+        </aside>
+        
+        <!-- ========================================
+             MAIN CONTENT AREA
+             ======================================== -->
+        <main class="main-content">
+            
+            <!-- Top Header Bar -->
+            <header class="top-header">
+                <h1 class="header-title">Dashboard Overview</h1>
+                <div class="header-actions">
+                    {% if logged_in %}
+                        <span class="text-success" style="display: flex; align-items: center; gap: 6px;">
+                            <span>✅</span> Tools Unlocked
+                        </span>
+                        <a href="{{ url_for('logout') }}" class="btn btn-secondary btn-sm">Logout</a>
+                    {% else %}
+                        <span class="text-warning" style="display: flex; align-items: center; gap: 6px;">
+                            <span>🔒</span> Login Required
+                        </span>
+                        <button class="btn btn-primary btn-sm" onclick="openLoginModal()">Login</button>
+                    {% endif %}
+                </div>
+            </header>
+            
+            <!-- Content Container -->
+            <div class="content-container">
+
+                <!-- ========================================
+                     SECTION: Quick Access Tools
+                     ======================================== -->
+                <section class="mb-5">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <span class="section-title-icon">⚡</span>
+                            Quick Access Tools
+                        </h2>
+                    </div>
+                    
+                    <div class="quick-tools-grid">
+                        <a class="quick-tool-card {% if not logged_in %}disabled{% endif %}"
+                           {% if logged_in %}href="{{ url_for('run_tool', tool_name='IP Finder') }}"{% else %}href="#"{% endif %}>
+                            <div class="quick-tool-icon">🔍</div>
+                            <div class="quick-tool-info">
+                                <div class="quick-tool-title">IP Finder</div>
+                                <div class="quick-tool-desc">Search equipment by name or IP address</div>
+                            </div>
+                        </a>
+                        
+                        <a class="quick-tool-card {% if not logged_in %}disabled{% endif %}"
+                           {% if logged_in %}href="{{ url_for('run_tool', tool_name='Playback Tools') }}"{% else %}href="#"{% endif %}>
+                            <div class="quick-tool-icon">▶️</div>
+                            <div class="quick-tool-info">
+                                <div class="quick-tool-title">Playback Tools</div>
+                                <div class="quick-tool-desc">Download and manage playback files</div>
+                            </div>
+                        </a>
+                    </div>
+                </section>
+                
+                <!-- ========================================
+                     SECTION: WorkShop Skid VNC Access
+                     ======================================== -->
+                <section class="mb-5">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <span class="section-title-icon">🖥️</span>
+                            WorkShop Skid Direct VNC Access
+                        </h2>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="vnc-section">
+                                <button class="vnc-btn vnc-btn-ws1" onclick="openVNCSession('WS1')" id="vncBtnWS1" {% if not logged_in %}disabled{% endif %}>
+                                    🖥️ VNC - WS1
+                                </button>
+                                <button class="vnc-btn vnc-btn-ws2" onclick="openVNCSession('WS2')" id="vncBtnWS2" {% if not logged_in %}disabled{% endif %}>
+                                    🖥️ VNC - WS2
+                                </button>
+                            </div>
+                            {% if not logged_in %}
+                            <p style="color: var(--theme-text-muted); font-size: 0.85rem; margin-top: 12px;">
+                                🔒 Login required to access VNC sessions
+                            </p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- ========================================
+                     SECTION: FrontRunner (BareMetal Status)
+                     ======================================== -->
+                <section class="mb-5">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <span class="section-title-icon">🌐</span>
+                            FrontRunner (BareMetal Status)
+                        </h2>
+                        <button class="btn btn-ghost btn-sm" onclick="refreshServerHealth()">
+                            🔄 Refresh
+                        </button>
+                    </div>
+                    
+                    <div class="server-grid" id="serverGrid">
+                        <!-- Server tiles populated by JavaScript -->
+                        <div class="loading-card">
+                            <div class="loading-spinner"></div>
+                            <span>Loading server status...</span>
+                        </div>
+                    </div>
+                </section>
+                
+                
+                
+                <!-- ========================================
+                     SECTION: System Information
+                     ======================================== -->
+                <section>
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <span class="section-title-icon">ℹ️</span>
+                            System Information
+                        </h2>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-body">
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px;">
+                                <div>
+                                    <div class="text-muted mb-1">Current Time</div>
+                                    <div class="text-bright" id="currentTime">{{ current_time }}</div>
+                                </div>                               
+                                <div>
+                                    <div class="text-muted mb-1">Version</div>
+                                    <div class="text-bright">T1 Tools v2.0</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+            </div>
+        </main>
+        
+    </div>
+    
+    <!-- ========================================
+         LOGIN MODAL
+         ======================================== -->
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    <span>🔐</span>
+                    Access Control
+                </h3>
+                <button class="modal-close" onclick="closeLoginModal()">&times;</button>
+            </div>
+            <form method="POST" action="{{ url_for('dashboard') }}">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="form-label" for="password">Enter Password</label>
+                        <input type="password" 
+                               id="password" 
+                               name="password" 
+                               class="form-input" 
+                               placeholder="Enter password to unlock tools"
+                               autocomplete="current-password"
+                               required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeLoginModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Unlock Tools</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- ========================================
+         TOAST CONTAINER
+         ======================================== -->
+    <div class="toast-container" id="toastContainer"></div>
+    
+    <!-- ========================================
+         FLASH MESSAGES
+         ======================================== -->
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <div class="flash-messages" id="flashMessages">
+            {% for message in messages %}
+            <div class="flash">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    {% endwith %}
+    
+    <!-- ========================================
+         JAVASCRIPT
+         ======================================== -->
+    <script>
+        // ========================================
+        // TOAST NOTIFICATIONS
+        // ========================================
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            const icons = { info: 'ℹ️', success: '✅', error: '❌', warning: '⚠️' };
+            toast.innerHTML = `<span class="toast-icon">${icons[type]}</span><span class="toast-message">${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 5000);
+        }
+        
+        // ========================================
+        // VNC SESSION FUNCTIONS
+        // ========================================
+        async function openVNCSession(workstation) {
+            const btn = document.getElementById(`vncBtn${workstation}`);
+            const originalText = btn.innerHTML;
+            
+            btn.disabled = true;
+            btn.innerHTML = `<span class="spinner"></span> Connecting...`;
+            
+            console.log(`VNC: Starting ${workstation} session...`);
+            
+            try {
+                const response = await fetch('/api/vnc/workstation', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ workstation: workstation })
+                });
+                
+                const data = await response.json();
+                
+                console.log(`VNC ${workstation} response:`, data);
+                
+                if (data.success) {
+                    showToast(`VNC ${workstation} session started`, 'success');
+                    console.log(`VNC ${workstation} launched successfully`);
+                } else {
+                    const errorMsg = data.message || `Failed to start VNC ${workstation}`;
+                    showToast(errorMsg, 'error');
+                    console.error(`VNC ${workstation} error:`, errorMsg);
+                }
+            } catch (error) {
+                console.error('VNC fetch error:', error);
+                showToast(`Connection error: ${error.message}`, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        }
+        
+        // ========================================
+        // LEGACY TOOLS LAUNCHER
+        // ========================================
+        async function launchLegacyTools() {
+            const btn = document.getElementById('legacyBtn');
+            const originalText = btn.innerHTML;
+            
+            btn.disabled = true;
+            btn.innerHTML = `<span class="spinner"></span> Launching...`;
+            
+            try {
+                const response = await fetch('/api/launch-legacy', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showToast('T1 Tools Legacy launched', 'success');
+                } else {
+                    showToast(data.message || 'Failed to launch Legacy Tools', 'error');
+                }
+            } catch (error) {
+                console.error('Legacy tools error:', error);
+                showToast(`Launch error: ${error.message}`, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        }
+        
+        // ========================================
+        // LOGIN MODAL FUNCTIONS
+        // ========================================
+        function openLoginModal() {
+            const modal = document.getElementById('loginModal');
+            modal.classList.add('active');
+            setTimeout(() => {
+                document.getElementById('password').focus();
+            }, 100);
+        }
+        
+        function closeLoginModal() {
+            const modal = document.getElementById('loginModal');
+            modal.classList.remove('active');
+        }
+        
+        // Close modal on overlay click
+        document.getElementById('loginModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeLoginModal();
+            }
+        });
+        
+        // Close modal on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeLoginModal();
+            }
+        });
+        
+        // ========================================
+        // SERVER HEALTH FUNCTIONS
+        // ========================================
+        async function loadServerHealth() {
+            const grid = document.getElementById('serverGrid');
+            
+            try {
+                const response = await fetch('/api/remote-stats');
+                const servers = await response.json();
+                
+                if (servers.length === 0) {
+                    grid.innerHTML = `
+                        <div class="empty-state" style="grid-column: 1 / -1;">
+                            <div class="empty-state-icon">🌐</div>
+                            <div class="empty-state-title">No Servers Configured</div>
+                            <div class="empty-state-description">Server health monitoring is not available.</div>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                grid.innerHTML = servers.map(server => `
+                    <div class="server-tile ${server.status === 'online' ? 'online' : 'offline'}">
+                        <div class="server-tile-header">
+                            <span class="server-name">${server.name}</span>
+                            <span class="server-status-dot ${server.status === 'online' ? 'online' : 'offline'}"></span>
+                        </div>
+                        <div class="server-details">
+                            <div class="server-detail-row">
+                                <span class="server-detail-label">IP Address</span>
+                                <span class="server-detail-value">${server.ip}</span>
+                            </div>
+                            <div class="server-detail-row">
+                                <span class="server-detail-label">Status</span>
+                                <span class="server-detail-value ${server.status === 'online' ? 'text-success' : 'text-danger'}">
+                                    ${server.status.toUpperCase()}
+                                </span>
+                            </div>
+                            <div class="server-detail-row">
+                                <span class="server-detail-label">Latency</span>
+                                <span class="server-detail-value">
+                                    ${server.latency !== null ? server.latency + ' ms' : '—'}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+                
+            } catch (error) {
+                console.error('Failed to load server health:', error);
+                grid.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1 / -1;">
+                        <div class="empty-state-icon">⚠️</div>
+                        <div class="empty-state-title">Connection Error</div>
+                        <div class="empty-state-description">Failed to fetch server status. Please try again.</div>
+                    </div>
+                `;
+            }
+        }
+        
+        function refreshServerHealth() {
+            const grid = document.getElementById('serverGrid');
+            grid.innerHTML = `
+                <div class="loading-card" style="grid-column: 1 / -1;">
+                    <div class="loading-spinner"></div>
+                    <span>Refreshing server status...</span>
+                </div>
+            `;
+            loadServerHealth();
+        }
+        
+        // ========================================
+        // NETWORK MODE REFRESH
+        // ========================================
+        async function refreshNetworkMode() {
+            try {
+                const response = await fetch('/api/mode');
+                const data = await response.json();
+                
+                const indicator = document.getElementById('statusIndicator');
+                const statusText = document.getElementById('networkStatus');
+                const modeText = document.getElementById('networkMode');
+                
+                if (indicator) {
+                    indicator.className = 'status-indicator ' + (data.online ? 'online' : 'offline');
+                }
+                if (statusText) {
+                    statusText.textContent = data.online ? 'Network Online' : 'Offline Mode';
+                }
+                if (modeText) {
+                    modeText.textContent = data.online ? 'Online' : 'Offline';
+                }
+                
+            } catch (error) {
+                console.error('Failed to refresh network mode:', error);
+            }
+        }
+        
+        // ========================================
+        // TIME UPDATE
+        // ========================================
+        function updateTime() {
+            const timeEl = document.getElementById('currentTime');
+            if (timeEl) {
+                const now = new Date();
+                timeEl.textContent = now.toLocaleString();
+            }
+        }
+        
+        // ========================================
+        // FLASH MESSAGE HANDLING
+        // ========================================
+        function removeFlashMessages() {
+            const flashContainer = document.getElementById('flashMessages');
+            if (flashContainer) {
+                setTimeout(() => {
+                    flashContainer.style.opacity = '0';
+                    flashContainer.style.transition = 'opacity 0.3s ease';
+                    setTimeout(() => flashContainer.remove(), 300);
+                }, 5000);
+            }
+        }
+        
+        // ========================================
+        // MOBILE SIDEBAR TOGGLE
+        // ========================================
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('open');
+        }
+        
+        // ========================================
+        // INITIALIZATION
+        // ========================================
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load initial data
+            loadServerHealth();
+            removeFlashMessages();
+            
+            // Set up auto-refresh intervals
+            setInterval(loadServerHealth, 30000);      // Every 30 seconds
+            setInterval(refreshNetworkMode, 15000);    // Every 15 seconds
+            setInterval(updateTime, 1000);             // Every second
+        });
+    </script>
+</body>
+</html>

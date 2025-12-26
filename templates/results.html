@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ tool }} Results</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h2>{{ tool }} Results</h2>
+    <pre>{{ result }}</pre>
+    <a class="button action" href="{{ url_for('dashboard') }}">Back to Dashboard</a>
+</body>
+</html>

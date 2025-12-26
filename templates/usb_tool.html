@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ tool_name }} - T1 Tools</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        /* USB Tool Specific Styles */
+        .usb-status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+        
+        .usb-drive-card {
+            background: var(--theme-bg-card);
+            border: 1px solid var(--theme-border);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            transition: all 0.2s ease;
+        }
+        
+        .usb-drive-card:hover {
+            border-color: var(--theme-border-light);
+            background: var(--theme-bg-card-hover);
+        }
+        
+        .drive-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .drive-icon {
+            font-size: 2rem;
+        }
+        
+        .drive-letter {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--theme-text-bright);
+        }
+        
+        .drive-label {
+            color: var(--theme-text-muted);
+            font-size: 0.85rem;
+        }
+        
+        .drive-info {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .drive-info-row {
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .drive-info-label {
+            color: var(--theme-text-muted);
+        }
+        
+        .drive-info-value {
+            color: var(--theme-text);
+            font-family: 'Consolas', monospace;
+        }
+        
+        .tool-status-card {
+            background: var(--theme-bg-card);
+            border: 1px solid var(--theme-border);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+        
+        .tool-status-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        
+        .tool-status-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .tool-status-icon {
+            font-size: 2.5rem;
+        }
+        
+        .tool-status-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--theme-text-bright);
+        }
+        
+        .tool-status-desc {
+            color: var(--theme-text-muted);
+            font-size: 0.85rem;
+        }
+        
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        .status-badge.found {
+            background: rgba(34, 197, 94, 0.15);
+            color: var(--status-online);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+        
+        .status-badge.not-found {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--status-offline);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+        
+        .status-badge.scanning {
+            background: rgba(59, 130, 246, 0.15);
+            color: var(--status-info);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+        
+        .tool-details {
+            background: var(--theme-bg);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+        
+        .tool-details-row {
+            display: flex;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--theme-border);
+        }
+        
+        .tool-details-row:last-child {
+            border-bottom: none;
+        }
+        
+        .tool-details-label {
+            width: 140px;
+            color: var(--theme-text-muted);
+            font-size: 0.85rem;
+        }
+        
+        .tool-details-value {
+            flex: 1;
+            color: var(--theme-text);
+            font-family: 'Consolas', monospace;
+            font-size: 0.9rem;
+        }
+        
+        .tool-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .btn-launch {
+            background: linear-gradient(135deg, var(--status-online), #16a34a);
+            color: white;
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        
+        .btn-launch:hover:not(:disabled) {
+            background: linear-gradient(135deg, #16a34a, #15803d);
+            transform: translateY(-1px);
+        }
+        
+        .btn-launch:disabled {
+            background: var(--theme-bg-card);
+            color: var(--theme-text-muted);
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        
+        .btn-rescan {
+            background: var(--theme-bg-card);
+            border: 1px solid var(--theme-border);
+            color: var(--theme-text);
+        }
+        
+        .btn-rescan:hover {
+            background: var(--theme-bg-card-hover);
+            border-color: var(--theme-border-light);
+        }
+        
+        .no-drives-message {
+            text-align: center;
+            padding: 40px;
+            color: var(--theme-text-muted);
+        }
+        
+        .no-drives-icon {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .info-box {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            margin-top: 20px;
+        }
+        
+        .info-box-title {
+            color: var(--status-info);
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .info-box-content {
+            color: var(--theme-text-muted);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        
+        <!-- SIDEBAR -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <span class="sidebar-logo-icon">🛠️</span>
+                    <div>
+                        <div class="sidebar-logo-text">T1 Tools</div>
+                        <div class="sidebar-logo-subtitle">Mining Equipment</div>
+                    </div>
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Main</div>
+                    <a href="{{ url_for('dashboard') }}" class="nav-item">
+                        <span class="nav-item-icon">📊</span>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="{{ url_for('run_tool', tool_name='IP Finder') }}" class="nav-item">
+                        <span class="nav-item-icon">🔍</span>
+                        <span>IP Finder</span>
+                    </a>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">USB Tools</div>
+                    <a href="{{ url_for('run_tool', tool_name='CamStudio USB') }}" class="nav-item {{ 'active' if tool_name == 'CamStudio USB' else '' }}">
+                        <span class="nav-item-icon">🎬</span>
+                        <span>CamStudio USB</span>
+                    </a>
+                    <a href="{{ url_for('run_tool', tool_name='Playback USB') }}" class="nav-item {{ 'active' if tool_name == 'Playback USB' else '' }}">
+                        <span class="nav-item-icon">▶️</span>
+                        <span>Playback USB</span>
+                    </a>
+                </div>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="sidebar-status">
+                    <span class="status-indicator {{ 'online' if online else 'offline' }}"></span>
+                    <span>{{ 'Network Online' if online else 'Offline Mode' }}</span>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            <header class="top-header">
+                <h1 class="header-title">{{ tool_name }}</h1>
+                <div class="header-actions">
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-secondary btn-sm">
+                        ← Back to Dashboard
+                    </a>
+                </div>
+            </header>
+            
+            <div class="content-container">
+                
+                <!-- Tool Status Card -->
+                <div class="tool-status-card" id="toolStatusCard">
+                    <div class="tool-status-header">
+                        <div class="tool-status-title">
+                            <span class="tool-status-icon">{{ tool_icon }}</span>
+                            <div>
+                                <div class="tool-status-name">{{ tool_display_name }}</div>
+                                <div class="tool-status-desc">{{ tool_description }}</div>
+                            </div>
+                        </div>
+                        <div class="status-badge scanning" id="statusBadge">
+                            <span class="spinner"></span>
+                            Scanning...
+                        </div>
+                    </div>
+                    
+                    <div class="tool-details" id="toolDetails">
+                        <div class="tool-details-row">
+                            <div class="tool-details-label">Expected Folder:</div>
+                            <div class="tool-details-value">{{ tool_folder }}</div>
+                        </div>
+                        <div class="tool-details-row">
+                            <div class="tool-details-label">Expected File:</div>
+                            <div class="tool-details-value">{{ tool_file }}</div>
+                        </div>
+                        <div class="tool-details-row" id="locationRow" style="display: none;">
+                            <div class="tool-details-label">Found At:</div>
+                            <div class="tool-details-value" id="toolLocation">-</div>
+                        </div>
+                    </div>
+                    
+                    <div class="tool-actions">
+                        <button class="btn btn-launch" id="launchBtn" disabled onclick="launchTool()">
+                            🚀 Launch {{ tool_display_name }}
+                        </button>
+                        <button class="btn btn-rescan" onclick="scanForTool()">
+                            🔄 Rescan USB Drives
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- USB Drives Section -->
+                <section class="mb-5">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <span class="section-title-icon">💾</span>
+                            Detected USB Drives
+                        </h2>
+                        <span class="text-muted" id="driveCount">Scanning...</span>
+                    </div>
+                    
+                    <div id="drivesContainer">
+                        <div class="no-drives-message">
+                            <div class="no-drives-icon">💾</div>
+                            <div>Scanning for USB drives...</div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Info Box -->
+                <div class="info-box">
+                    <div class="info-box-title">
+                        ℹ️ How to Use
+                    </div>
+                    <div class="info-box-content">
+                        <p><strong>1.</strong> Insert the USB drive containing {{ tool_display_name }}.</p>
+                        <p><strong>2.</strong> Click "Rescan USB Drives" if the drive was inserted after page load.</p>
+                        <p><strong>3.</strong> Once the tool is detected, click "Launch" to start it.</p>
+                        <p style="margin-top: 12px; color: var(--theme-text-muted);">
+                            <strong>Note:</strong> The tool must be in the <code>{{ tool_folder }}</code> folder on the USB drive.
+                        </p>
+                    </div>
+                </div>
+                
+            </div>
+        </main>
+    </div>
+    
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+    
+    <script>
+        // Tool configuration from server
+        const TOOL_ID = "{{ tool_id }}";
+        const TOOL_NAME = "{{ tool_display_name }}";
+        
+        // ========================================
+        // TOAST NOTIFICATIONS
+        // ========================================
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            let icon = 'ℹ️';
+            if (type === 'success') icon = '✅';
+            if (type === 'error') icon = '❌';
+            if (type === 'warning') icon = '⚠️';
+            
+            toast.innerHTML = `
+                <span class="toast-icon">${icon}</span>
+                <span class="toast-message">${message}</span>
+            `;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideIn 0.3s ease reverse';
+                setTimeout(() => toast.remove(), 300);
+            }, 5000);
+        }
+        
+        // ========================================
+        // USB SCANNING
+        // ========================================
+        async function scanForTool() {
+            const statusBadge = document.getElementById('statusBadge');
+            const launchBtn = document.getElementById('launchBtn');
+            const locationRow = document.getElementById('locationRow');
+            const toolLocation = document.getElementById('toolLocation');
+            
+            // Show scanning state
+            statusBadge.className = 'status-badge scanning';
+            statusBadge.innerHTML = '<span class="spinner"></span> Scanning...';
+            launchBtn.disabled = true;
+            
+            try {
+                const response = await fetch(`/api/usb/scan/${TOOL_ID}`);
+                const data = await response.json();
+                
+                // Update drives display
+                updateDrivesDisplay(data.drives);
+                
+                // Update tool status
+                if (data.found) {
+                    statusBadge.className = 'status-badge found';
+                    statusBadge.innerHTML = '✅ Found';
+                    launchBtn.disabled = false;
+                    locationRow.style.display = 'flex';
+                    toolLocation.textContent = data.details.file_path;
+                    showToast(`${TOOL_NAME} found on ${data.details.drive.letter}:\\`, 'success');
+                } else {
+                    statusBadge.className = 'status-badge not-found';
+                    statusBadge.innerHTML = '❌ Not Found';
+                    launchBtn.disabled = true;
+                    locationRow.style.display = 'none';
+                    
+                    if (data.drives_scanned === 0) {
+                        showToast('No USB drives detected. Please insert a USB drive.', 'warning');
+                    } else {
+                        showToast(`${TOOL_NAME} not found on any USB drive.`, 'warning');
+                    }
+                }
+                
+            } catch (error) {
+                console.error('Scan error:', error);
+                statusBadge.className = 'status-badge not-found';
+                statusBadge.innerHTML = '❌ Error';
+                showToast('Error scanning USB drives. Please try again.', 'error');
+            }
+        }
+        
+        function updateDrivesDisplay(drives) {
+            const container = document.getElementById('drivesContainer');
+            const countEl = document.getElementById('driveCount');
+            
+            if (!drives || drives.length === 0) {
+                container.innerHTML = `
+                    <div class="no-drives-message">
+                        <div class="no-drives-icon">💾</div>
+                        <div>No USB drives detected</div>
+                        <p style="margin-top: 8px; font-size: 0.85rem;">Insert a USB drive and click "Rescan"</p>
+                    </div>
+                `;
+                countEl.textContent = '0 drives found';
+                return;
+            }
+            
+            countEl.textContent = `${drives.length} drive${drives.length !== 1 ? 's' : ''} found`;
+            
+            container.innerHTML = `
+                <div class="usb-status-grid">
+                    ${drives.map(drive => `
+                        <div class="usb-drive-card">
+                            <div class="drive-header">
+                                <span class="drive-icon">💾</span>
+                                <div>
+                                    <div class="drive-letter">${drive.letter}:\\</div>
+                                    <div class="drive-label">${drive.label}</div>
+                                </div>
+                            </div>
+                            <div class="drive-info">
+                                <div class="drive-info-row">
+                                    <span class="drive-info-label">Free Space</span>
+                                    <span class="drive-info-value">${drive.free_space ? drive.free_space + ' GB' : 'Unknown'}</span>
+                                </div>
+                                <div class="drive-info-row">
+                                    <span class="drive-info-label">Path</span>
+                                    <span class="drive-info-value">${drive.path}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+        
+        // ========================================
+        // LAUNCH TOOL
+        // ========================================
+        async function launchTool() {
+            const launchBtn = document.getElementById('launchBtn');
+            const originalText = launchBtn.innerHTML;
+            
+            launchBtn.disabled = true;
+            launchBtn.innerHTML = '<span class="spinner"></span> Launching...';
+            
+            try {
+                const response = await fetch(`/api/usb/launch/${TOOL_ID}`, {
+                    method: 'POST'
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    showToast(data.message, 'success');
+                    launchBtn.innerHTML = '✅ Launched!';
+                    setTimeout(() => {
+                        launchBtn.innerHTML = originalText;
+                        launchBtn.disabled = false;
+                    }, 3000);
+                } else {
+                    showToast(data.message, 'error');
+                    launchBtn.innerHTML = originalText;
+                    launchBtn.disabled = false;
+                }
+                
+            } catch (error) {
+                console.error('Launch error:', error);
+                showToast('Error launching tool. Please try again.', 'error');
+                launchBtn.innerHTML = originalText;
+                launchBtn.disabled = false;
+            }
+        }
+        
+        // ========================================
+        // INIT
+        // ========================================
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initial scan
+            scanForTool();
+        });
+    </script>
+</body>
+</html>

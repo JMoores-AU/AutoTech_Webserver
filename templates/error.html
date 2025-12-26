@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error {{ error_code }} - T1 Tools</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .error-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--theme-bg);
+            padding: 20px;
+        }
+        
+        .error-card {
+            background: var(--theme-bg-card);
+            border: 1px solid var(--theme-border);
+            border-radius: var(--radius-xl);
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+            padding: 60px 40px;
+        }
+        
+        .error-code {
+            font-size: 6rem;
+            font-weight: 700;
+            color: var(--status-offline);
+            line-height: 1;
+            margin-bottom: 16px;
+        }
+        
+        .error-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--theme-text-bright);
+            margin-bottom: 12px;
+        }
+        
+        .error-description {
+            color: var(--theme-text-muted);
+            margin-bottom: 32px;
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-card">
+            <div class="error-code">{{ error_code }}</div>
+            <h1 class="error-title">
+                {% if error_code == 404 %}
+                    Page Not Found
+                {% elif error_code == 500 %}
+                    Server Error
+                {% else %}
+                    Error Occurred
+                {% endif %}
+            </h1>
+            <p class="error-description">
+                {{ error_message }}
+            </p>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-lg">
+                ← Return to Dashboard
+            </a>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ tool }} - T1 Tools</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .form-container {
+            max-width: 600px;
+            margin: 20px auto;
+            background: #1e1e1e;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: left;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            color: #f0f0f0;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            background: #2d2d30;
+            border: 1px solid #3f3f46;
+            border-radius: 5px;
+            color: white;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #5a5a66;
+            background: #3f3f46;
+        }
+        
+        .form-actions {
+            text-align: center;
+            margin-top: 30px;
+        }
+        
+        .button {
+            display: inline-block;
+            padding: 12px 25px;
+            background-color: #3f3f46;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            margin: 10px;
+            font-size: 14px;
+            min-width: 120px;
+        }
+        
+        .button:hover {
+            background-color: #5a5a66;
+        }
+        
+        .tool-info {
+            background: #2d3440;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 25px;
+            border-left: 4px solid #4CAF50;
+        }
+        
+        .tool-info h2 {
+            margin-top: 0;
+            color: #4CAF50;
+        }
+        
+        .warning-box {
+            background: #4a3728;
+            border-left: 4px solid #ff9800;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        
+        .warning-box h4 {
+            margin-top: 0;
+            color: #ff9800;
+        }
+        
+        .quick-select {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .quick-btn {
+            padding: 4px 8px;
+            background: #3f3f46;
+            color: #bfc7d5;
+            border: 1px solid #5a5a66;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+        
+        .quick-btn:hover {
+            background: #5a5a66;
+        }
+    </style>
+</head>
+<body>
+    <h1>{{ tool }}</h1>
+    
+    <div class="form-container">
+        <div class="tool-info">
+            <h2>{{ tool }}</h2>
+            <p>
+                {% if tool == "IP Finder Enhanced" %}
+                Enter equipment name (e.g., RD001, AHG135) or PTX IP address to retrieve detailed equipment information including network configuration and status.
+                {% elif tool == "AVI/MM2 Reboot" %}
+                Enter PTX IP address to remotely reboot AVI Radio and MM2 components. This operation will temporarily interrupt radio communications.
+                {% elif tool == "Watchdog Deploy" %}
+                Deploy AVI-PTX watchdog monitoring service to automatically restart AVI and PTX services if failures are detected.
+                {% endif %}
+            </p>
+        </div>
+
+        {% if tool == "AVI/MM2 Reboot" %}
+        <div class="warning-box">
+            <h4>⚠️ CRITICAL OPERATION WARNING</h4>
+            <p><strong>This will reboot AVI Radio and MM2 components!</strong></p>
+            <ul>
+                <li>Equipment will be temporarily unavailable</li>
+                <li>All radio communications will be interrupted</li>
+                <li>Systems will restart automatically within 2-3 minutes</li>
+                <li>Monitor equipment status after reboot completion</li>
+            </ul>
+        </div>
+        {% endif %}
+
+        <form method="POST" action="{{ url_for('handle_mms_parameter', tool_name=tool) }}">
+            {% if tool == "IP Finder Enhanced" %}
+            <div class="form-group">
+                <label for="equipment_name">Equipment Name or IP Address</label>
+                <input type="text" id="equipment_name" name="equipment_name" 
+                       placeholder="Enter equipment name (RD001) or IP address" 
+                       style="text-transform: uppercase;" required>
+                <div class="quick-select">
+                    <button type="button" class="quick-btn" onclick="setEquipment('RD001')">RD001</button>
+                    <button type="button" class="quick-btn" onclick="setEquipment('RD111')">RD111</button>
+                    <button type="button" class="quick-btn" onclick="setEquipment('AHG135')">AHG135</button>
+                    <button type="button" class="quick-btn" onclick="setEquipment('AHG54')">AHG54</button>
+                    <button type="button" class="quick-btn" onclick="setEquipment('10.110.21.85')">10.110.21.85</button>
+                </div>
+            </div>
+            
+            {% elif tool == "AVI/MM2 Reboot" %}
+            <div class="form-group">
+                <label for="ptx_ip">PTX IP Address</label>
+                <input type="text" id="ptx_ip" name="ptx_ip" 
+                       placeholder="Enter PTX IP address (e.g., 10.110.21.72)" 
+                       pattern="^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+                       required>
+                <div class="quick-select">
+                    <button type="button" class="quick-btn" onclick="setIP('10.110.21.72')">10.110.21.72</button>
+                    <button type="button" class="quick-btn" onclick="setIP('10.110.21.85')">10.110.21.85</button>
+                    <button type="button" class="quick-btn" onclick="setIP('10.110.20.144')">10.110.20.144</button>
+                </div>
+            </div>
+            
+            {% elif tool == "Watchdog Deploy" %}
+            <div class="form-group">
+                <label for="ptx_ip">PTX IP Address</label>
+                <input type="text" id="ptx_ip" name="ptx_ip" 
+                       placeholder="Enter PTX IP address" 
+                       pattern="^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+                       required>
+                <div class="quick-select">
+                    <button type="button" class="quick-btn" onclick="setIP('10.110.21.72')">10.110.21.72</button>
+                    <button type="button" class="quick-btn" onclick="setIP('10.110.21.85')">10.110.21.85</button>
+                    <button type="button" class="quick-btn" onclick="setIP('10.110.20.144')">10.110.20.144</button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="ptx_model">PTX Model</label>
+                <select id="ptx_model" name="ptx_model">
+                    <option value="PTXC">PTXC</option>
+                    <option value="PTX10">PTX10</option>
+                </select>
+            </div>
+            {% endif %}
+            
+            <div class="form-actions">
+                <button type="submit" class="button">
+                    {% if tool == "IP Finder Enhanced" %}
+                    🔍 Find Equipment Info
+                    {% elif tool == "AVI/MM2 Reboot" %}
+                    🔄 Reboot AVI/MM2
+                    {% elif tool == "Watchdog Deploy" %}
+                    🛡️ Deploy Watchdog
+                    {% else %}
+                    ▶️ Run {{ tool }}
+                    {% endif %}
+                </button>
+                <a href="{{ url_for('dashboard') }}" class="button">Cancel</a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        function setEquipment(name) {
+            document.getElementById('equipment_name').value = name;
+        }
+        
+        function setIP(ip) {
+            document.getElementById('ptx_ip').value = ip;
+        }
+        
+        // Auto-uppercase equipment names
+        const equipmentInput = document.getElementById('equipment_name');
+        if (equipmentInput) {
+            equipmentInput.addEventListener('input', function(e) {
+                e.target.value = e.target.value.toUpperCase();
+            });
+        }
+        
+        // Basic IP validation feedback
+        const ipInput = document.getElementById('ptx_ip');
+        if (ipInput) {
+            ipInput.addEventListener('input', function(e) {
+                const value = e.target.value;
+                const ipPattern = /^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+                
+                if (value && !ipPattern.test(value)) {
+                    e.target.style.borderColor = '#ff6b6b';
+                } else {
+                    e.target.style.borderColor = '#3f3f46';
+                }
+            });
+        }
+        
+        // Confirmation for critical operations
+        {% if tool == "AVI/MM2 Reboot" %}
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const ip = document.getElementById('ptx_ip').value.trim();
+            const confirmMsg = `⚠️ WARNING: This will reboot AVI Radio and MM2 for equipment at ${ip}.\n\n` +
+                             `• Radio communications will be interrupted\n` +
+                             `• Equipment will be temporarily unavailable\n` +
+                             `• Systems will restart within 2-3 minutes\n\n` +
+                             `Continue with AVI/MM2 reboot?`;
+            
+            if (!confirm(confirmMsg)) {
+                e.preventDefault();
+                return false;
+            }
+        });
+        {% endif %}
+    </script>
+</body>
+</html>
