@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>T1 Legacy Tools</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .legacy-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .legacy-layout {
+            display: grid;
+            grid-template-columns: 1fr 600px;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 1400px) {
+            .legacy-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Terminal Section */
+        .terminal-section {
+            background: var(--theme-bg-card);
+            border: 1px solid var(--theme-border);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            height: 600px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .terminal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--theme-border);
+        }
+
+        .terminal-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            color: var(--theme-text-bright);
+        }
+
+        .terminal-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .terminal-btn {
+            padding: 6px 12px;
+            background: var(--theme-bg-secondary);
+            border: 1px solid var(--theme-border);
+            border-radius: var(--radius-sm);
+            color: var(--theme-text);
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .terminal-btn:hover {
+            background: var(--theme-bg-card-hover);
+            border-color: var(--theme-primary);
+        }
+
+        .terminal-btn.active {
+            background: var(--theme-primary);
+            color: white;
+            border-color: var(--theme-primary);
+        }
+
+        .terminal-window {
+            flex: 1;
+            background: #0a0a0a;
+            border: 1px solid #222;
+            border-radius: var(--radius-md);
+            padding: 15px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 13px;
+            color: #00ff00;
+            overflow-y: auto;
+            line-height: 1.4;
+        }
+
+        .terminal-window::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .terminal-window::-webkit-scrollbar-track {
+            background: #0a0a0a;
+        }
+
+        .terminal-window::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 4px;
+        }
+
+        .terminal-input-area {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .terminal-input {
+            flex: 1;
+            background: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: var(--radius-sm);
+            padding: 10px 12px;
+            color: #00ff00;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 13px;
+        }
+
+        .terminal-input:focus {
+            outline: none;
+            border-color: var(--theme-primary);
+        }
+
+        .terminal-send-btn {
+            padding: 10px 20px;
+            background: var(--theme-primary);
+            border: none;
+            border-radius: var(--radius-sm);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .terminal-send-btn:hover {
+            background: var(--theme-primary-hover);
+        }
+
+        .terminal-line {
+            margin: 2px 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .terminal-prompt {
+            color: #ffaa00;
+        }
+
+        .terminal-output {
+            color: #00ff00;
+        }
+
+        .terminal-error {
+            color: #ff4444;
+        }
+
+        .terminal-info {
+            color: #4499ff;
+        }
+
+        /* Tools Grid Section */
+        .tools-section {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .tool-category {
+            background: var(--theme-bg-card);
+            border: 1px solid var(--theme-border);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+        }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--theme-border);
+        }
+
+        .category-icon {
+            font-size: 22px;
+        }
+
+        .category-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--theme-text-bright);
+            margin: 0;
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+        }
+
+        .tool-card {
+            background: var(--theme-bg-secondary);
+            border: 1px solid var(--theme-border);
+            border-radius: var(--radius-md);
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tool-card:hover {
+            background: var(--theme-bg-card-hover);
+            border-color: var(--theme-primary);
+            transform: translateY(-2px);
+        }
+
+        .tool-name {
+            font-weight: 600;
+            color: var(--theme-text-bright);
+            margin-bottom: 4px;
+            font-size: 0.9rem;
+        }
+
+        .tool-command {
+            font-family: 'Consolas', monospace;
+            font-size: 0.7rem;
+            color: var(--theme-primary);
+            background: rgba(59, 130, 246, 0.1);
+            padding: 3px 6px;
+            border-radius: 4px;
+        }
+
+        .equipment-selector {
+            background: var(--theme-bg-card);
+            border: 1px solid var(--theme-border);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .equipment-search {
+            width: 100%;
+            max-width: 500px;
+            padding: 12px;
+            background: var(--theme-bg-secondary);
+            border: 1px solid var(--theme-border);
+            border-radius: var(--radius-md);
+            color: var(--theme-text);
+            font-size: 1rem;
+        }
+
+        .equipment-search:focus {
+            outline: none;
+            border-color: var(--theme-primary);
+        }
+
+        .selected-equipment {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--theme-primary);
+            color: white;
+            padding: 8px 16px;
+            border-radius: var(--radius-md);
+            margin-top: 10px;
+            font-weight: 600;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--theme-bg-card);
+            border: 1px solid var(--theme-border);
+            border-radius: var(--radius-md);
+            padding: 16px 20px;
+            min-width: 300px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            animation: slideIn 0.3s;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .toast.success {
+            border-left: 4px solid var(--status-online);
+        }
+
+        .toast.error {
+            border-left: 4px solid var(--status-offline);
+        }
+
+        .toast-message {
+            color: var(--theme-text);
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2 class="sidebar-title">T1 Tools</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="/" class="sidebar-link">
+                    <span class="sidebar-link-icon">🏠</span>
+                    <span class="sidebar-link-text">Dashboard</span>
+                </a>
+                <a href="/run/IP Finder" class="sidebar-link">
+                    <span class="sidebar-link-icon">🔍</span>
+                    <span class="sidebar-link-text">IP Finder</span>
+                </a>
+                <a href="/legacy" class="sidebar-link active">
+                    <span class="sidebar-link-icon">🛠️</span>
+                    <span class="sidebar-link-text">Legacy Tools</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="network-status">
+                    <span class="status-indicator status-online"></span>
+                    <span>Network Online</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            <header class="top-header">
+                <h1 class="page-title">
+                    <span class="page-title-icon">🛠️</span>
+                    T1 Legacy Tools
+                </h1>
+            </header>
+
+            <div class="content-container">
+                <div class="legacy-container">
+                    
+                    <!-- LAYOUT: Terminal + Tools -->
+                    <div class="legacy-layout">
+                        
+                        <!-- LEFT: Quick Access Tools -->
+                        <div class="tools-section">
+                            <!-- Equipment Selector -->
+                            <div class="equipment-selector">
+                                <label for="equipment-search" style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--theme-text);">
+                                    Select Equipment
+                                </label>
+                                <input 
+                                    type="text" 
+                                    id="equipment-search" 
+                                    class="equipment-search" 
+                                    placeholder="Type equipment name (e.g., RD295, AHG135)..."
+                                    autocomplete="off"
+                                >
+                                <div id="selected-equipment" style="margin-top: 10px;"></div>
+                            </div>
+
+                            <!-- PTX Tools -->
+                            <div class="tool-category">
+                                <div class="category-header">
+                                    <span class="category-icon">💻</span>
+                                    <h2 class="category-title">PTX Quick Access</h2>
+                                </div>
+                                <div class="tools-grid">
+                                    <div class="tool-card" data-command="vnc">
+                                        <div class="tool-name">VNC</div>
+                                        <div class="tool-command">vnc [equip]</div>
+                                    </div>
+                                    <div class="tool-card" data-command="putty">
+                                        <div class="tool-name">PuTTY</div>
+                                        <div class="tool-command">putty [equip]</div>
+                                    </div>
+                                    <div class="tool-card" data-command="cache">
+                                        <div class="tool-name">Cache</div>
+                                        <div class="tool-command">cache [equip]</div>
+                                    </div>
+                                    <div class="tool-card" data-command="ptxr">
+                                        <div class="tool-name">Reboot</div>
+                                        <div class="tool-command">ptxr [equip]</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- AVI Tools -->
+                            <div class="tool-category">
+                                <div class="category-header">
+                                    <span class="category-icon">📡</span>
+                                    <h2 class="category-title">AVI Quick Access</h2>
+                                </div>
+                                <div class="tools-grid">
+                                    <div class="tool-card" data-command="avi">
+                                        <div class="tool-name">AVI UI</div>
+                                        <div class="tool-command">avi [equip]</div>
+                                    </div>
+                                    <div class="tool-card" data-command="avilogs">
+                                        <div class="tool-name">AVI Logs</div>
+                                        <div class="tool-command">avilogs [equip]</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Other Tools -->
+                            <div class="tool-category">
+                                <div class="category-header">
+                                    <span class="category-icon">🛰️</span>
+                                    <h2 class="category-title">Other Tools</h2>
+                                </div>
+                                <div class="tools-grid">
+                                    <div class="tool-card" data-command="tru">
+                                        <div class="tool-name">TRU</div>
+                                        <div class="tool-command">tru [equip]</div>
+                                    </div>
+                                    <div class="tool-card" data-command="help">
+                                        <div class="tool-name">Help</div>
+                                        <div class="tool-command">help</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- RIGHT: Live Terminal -->
+                        <div class="terminal-section">
+                            <div class="terminal-header">
+                                <div class="terminal-title">
+                                    <span>⚡</span>
+                                    <span>T1 Tools Terminal</span>
+                                </div>
+                                <div class="terminal-controls">
+                                    <button class="terminal-btn" id="terminal-start">▶ Start</button>
+                                    <button class="terminal-btn" id="terminal-clear">🗑 Clear</button>
+                                </div>
+                            </div>
+                            <div class="terminal-window" id="terminal-output">
+                                <div class="terminal-line terminal-info">Click "Start" to launch T1_Tools.bat terminal...</div>
+                            </div>
+                            <div class="terminal-input-area">
+                                <input 
+                                    type="text" 
+                                    id="terminal-input" 
+                                    class="terminal-input" 
+                                    placeholder="Type command and press Enter..."
+                                    disabled
+                                >
+                                <button class="terminal-send-btn" id="terminal-send" disabled>Send</button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let selectedEquipment = null;
+        let terminalProcess = null;
+        let terminalPolling = null;
+
+        // Equipment search
+        const equipmentSearch = document.getElementById('equipment-search');
+        const selectedEquipmentDiv = document.getElementById('selected-equipment');
+        const terminalOutput = document.getElementById('terminal-output');
+        const terminalInput = document.getElementById('terminal-input');
+        const terminalSendBtn = document.getElementById('terminal-send');
+        const terminalStartBtn = document.getElementById('terminal-start');
+        const terminalClearBtn = document.getElementById('terminal-clear');
+
+        equipmentSearch.addEventListener('input', function(e) {
+            const value = e.target.value.toUpperCase().trim();
+            if (value.length > 0) {
+                selectedEquipment = value;
+                selectedEquipmentDiv.innerHTML = `
+                    <div class="selected-equipment">
+                        <span>📍 ${value}</span>
+                    </div>
+                `;
+            } else {
+                selectedEquipment = null;
+                selectedEquipmentDiv.innerHTML = '';
+            }
+        });
+
+        // Terminal Functions
+        function appendToTerminal(text, className = 'terminal-output') {
+            const line = document.createElement('div');
+            line.className = `terminal-line ${className}`;
+            line.textContent = text;
+            terminalOutput.appendChild(line);
+            terminalOutput.scrollTop = terminalOutput.scrollHeight;
+        }
+
+        terminalStartBtn.addEventListener('click', function() {
+            if (terminalProcess) {
+                appendToTerminal('Terminal already running!', 'terminal-error');
+                return;
+            }
+
+            appendToTerminal('Starting T1_Tools.bat...', 'terminal-info');
+            
+            fetch('/api/legacy/terminal/start', {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    terminalProcess = data.session_id;
+                    terminalInput.disabled = false;
+                    terminalSendBtn.disabled = false;
+                    terminalStartBtn.classList.add('active');
+                    appendToTerminal(data.message, 'terminal-info');
+                    
+                    // Start polling for output
+                    startTerminalPolling();
+                } else {
+                    appendToTerminal(`Error: ${data.message}`, 'terminal-error');
+                }
+            })
+            .catch(error => {
+                appendToTerminal(`Connection error: ${error}`, 'terminal-error');
+            });
+        });
+
+        terminalClearBtn.addEventListener('click', function() {
+            terminalOutput.innerHTML = '';
+        });
+
+        terminalInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendTerminalCommand();
+            }
+        });
+
+        terminalSendBtn.addEventListener('click', sendTerminalCommand);
+
+        function sendTerminalCommand() {
+            const command = terminalInput.value.trim();
+            if (!command || !terminalProcess) return;
+
+            appendToTerminal(`> ${command}`, 'terminal-prompt');
+            terminalInput.value = '';
+
+            fetch('/api/legacy/terminal/command', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    session_id: terminalProcess,
+                    command: command
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (!data.success) {
+                    appendToTerminal(`Error: ${data.message}`, 'terminal-error');
+                }
+            })
+            .catch(error => {
+                appendToTerminal(`Error: ${error}`, 'terminal-error');
+            });
+        }
+
+        function startTerminalPolling() {
+            terminalPolling = setInterval(() => {
+                if (!terminalProcess) {
+                    stopTerminalPolling();
+                    return;
+                }
+
+                fetch(`/api/legacy/terminal/output?session_id=${terminalProcess}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.output) {
+                        const lines = data.output.split('\n');
+                        lines.forEach(line => {
+                            if (line.trim()) {
+                                appendToTerminal(line, 'terminal-output');
+                            }
+                        });
+                    }
+                    if (data.exited) {
+                        appendToTerminal('Terminal session ended.', 'terminal-info');
+                        stopTerminalPolling();
+                        terminalProcess = null;
+                        terminalInput.disabled = true;
+                        terminalSendBtn.disabled = true;
+                        terminalStartBtn.classList.remove('active');
+                    }
+                })
+                .catch(error => {
+                    console.error('Polling error:', error);
+                });
+            }, 500); // Poll every 500ms
+        }
+
+        function stopTerminalPolling() {
+            if (terminalPolling) {
+                clearInterval(terminalPolling);
+                terminalPolling = null;
+            }
+        }
+
+        // Tool card clicks
+        const toolCards = document.querySelectorAll('.tool-card');
+
+        toolCards.forEach(card => {
+            card.addEventListener('click', function() {
+                const command = this.dataset.command;
+                const toolName = this.querySelector('.tool-name').textContent;
+                
+                // Commands that don't require equipment
+                if (command === 'help') {
+                    executeQuickCommand(command, null);
+                    return;
+                }
+
+                // Check if equipment is selected
+                if (!selectedEquipment) {
+                    showToast('Please select equipment first', 'error');
+                    equipmentSearch.focus();
+                    return;
+                }
+
+                executeQuickCommand(command, selectedEquipment);
+            });
+        });
+
+        function executeQuickCommand(command, equipment) {
+            const fullCommand = equipment ? `${command} ${equipment}` : command;
+            showToast(`Executing: ${fullCommand}`, 'success');
+            
+            fetch('/api/legacy/execute', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    command: command,
+                    equipment: equipment
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast(data.message, 'success');
+                } else {
+                    showToast(data.message || 'Command failed', 'error');
+                }
+            })
+            .catch(error => {
+                showToast('Error executing command', 'error');
+                console.error('Error:', error);
+            });
+        }
+
+        function showToast(message, type) {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `<div class="toast-message">${message}</div>`;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s forwards';
+                setTimeout(() => {
+                    document.body.removeChild(toast);
+                }, 300);
+            }, 3000);
+        }
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', function() {
+            if (terminalProcess) {
+                fetch('/api/legacy/terminal/stop', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        session_id: terminalProcess
+                    }),
+                    keepalive: true
+                });
+            }
+        });
+    </script>
+</body>
+</html>

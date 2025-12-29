@@ -436,33 +436,8 @@
         // ========================================
         // LEGACY TOOLS LAUNCHER
         // ========================================
-        async function launchLegacyTools() {
-            const btn = document.getElementById('legacyBtn');
-            const originalText = btn.innerHTML;
-            
-            btn.disabled = true;
-            btn.innerHTML = `<span class="spinner"></span> Launching...`;
-            
-            try {
-                const response = await fetch('/api/launch-legacy', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    showToast('T1 Tools Legacy launched', 'success');
-                } else {
-                    showToast(data.message || 'Failed to launch Legacy Tools', 'error');
-                }
-            } catch (error) {
-                console.error('Legacy tools error:', error);
-                showToast(`Launch error: ${error.message}`, 'error');
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = originalText;
-            }
+        function launchLegacyTools() {
+            window.location.href = '/legacy';
         }
         
         // ========================================

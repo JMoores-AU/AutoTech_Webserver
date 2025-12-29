@@ -22,10 +22,14 @@ import subprocess
 import sys
 import threading
 import time
+import uuid              
+import queue 
 from datetime import datetime, timedelta
 from functools import lru_cache, wraps
 from io import StringIO
 from pathlib import Path
+from typing import Optional
+
 
 # Third-Party Imports
 try:
@@ -53,26 +57,30 @@ logger = logging.getLogger(__name__)
 # ========================================
 # APPLICATION BASE DIRECTORY
 # ========================================
-# Get the directory where main.py is located (works from USB or any location)
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-TOOLS_DIR = os.path.join(BASE_DIR, 'tools')
+if getattr(sys, 'frozen', False):
+    # Running as PyInstaller executable
+    BASE_DIR = os.path.dirname(sys.executable)
+    # PyInstaller extracts to temp folder, but we bundled templates/static
+    # sys._MEIPASS is added by PyInstaller at runtime (not available during linting)
+    meipass = getattr(sys, '_MEIPASS', BASE_DIR)  # type: ignore
+    template_folder = os.path.join(meipass, 'templates')
+    static_folder = os.path.join(meipass, 'static')
+else:
+    # Running as Python script
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    template_folder = os.path.join(BASE_DIR, 'templates')
+    static_folder = os.path.join(BASE_DIR, 'static')
+
+TOOLS_DIR = os.path.join(BASE_DIR, 'T1_Tools_Web', 'tools')
 PLINK_PATH = os.path.join(TOOLS_DIR, 'plink.exe')
-VNC_VIEWER_PATH = os.path.join(TOOLS_DIR, 'VNC', 'vncviewer.exe')
+VNC_VIEWER_PATH = os.path.join(TOOLS_DIR, 'vncviewer_5.3.2.exe')
 
 logger.info(f"Application Base Directory: {BASE_DIR}")
 logger.info(f"Tools Directory: {TOOLS_DIR}")
+logger.info(f"Template Folder: {template_folder}")
+logger.info(f"Static Folder: {static_folder}")
 
-# ========================================
-# FLASK APP SETUP AND CONFIGURATION
-# ========================================
-
-if getattr(sys, 'frozen', False):
-    template_folder = os.path.join(sys._MEIPASS, 'templates') # type: ignore
-    static_folder   = os.path.join(sys._MEIPASS, 'static') # type: ignore
-else:
-    template_folder = 'templates'
-    static_folder   = 'static'
-
+# NOW we can create the Flask app
 app = Flask(__name__, template_folder=template_folder, static_folder=static_folder)
 app.secret_key = "komatsu-t1-tools-secret-key-change-in-production"
 CORS(app)
@@ -712,13 +720,10 @@ def api_vnc_start():
         # Find plink.exe (on USB drive in tools folder)
         plink_path = PLINK_PATH
         if not os.path.exists(plink_path):
-            # Fallback to old location if still exists
-            plink_path = r"C:\Komatsu_Tier1\T1_Tools\mms_scripts\plink.exe"
-            if not os.path.exists(plink_path):
-                return jsonify({
-                    'success': False,
-                    'message': f'plink.exe not found. Expected at: {PLINK_PATH}'
-                })
+            return jsonify({
+                'success': False,
+                'message': f'plink.exe not found at: {PLINK_PATH}'
+            })
         
         # MMS server details
         mms_server = MMS_SERVER['ip']
@@ -731,19 +736,18 @@ def api_vnc_start():
             # plink.exe -batch -t mms@10.110.19.107 -pw password "script ip"
             plink_cmd = [
                 plink_path,
-                '-batch',
-                '-t',
+                '-batch', '-t',
                 f'{mms_user}@{mms_server}',
                 '-pw', mms_password,
-                f'{vnc_script} {ptx_ip}'  # NO quotes around this!
+                f'{vnc_script} {ptx_ip}'  # NO QUOTES!
             ]
-            
-            logger.info(f"VNC: Executing plink command")
-            
-            # Run plink and wait for completion
+
+            logger.info(f"VNC: Executing plink with auto-confirmation")
+
             if platform.system() == 'Windows':
                 result = subprocess.run(
                     plink_cmd,
+                    input="Y\n",  # AUTO-CONFIRM
                     capture_output=True,
                     text=True,
                     timeout=45,
@@ -752,6 +756,7 @@ def api_vnc_start():
             else:
                 result = subprocess.run(
                     plink_cmd,
+                    input="Y\n",
                     capture_output=True,
                     text=True,
                     timeout=45
@@ -770,12 +775,8 @@ def api_vnc_start():
                 ptx_type = 'PTX10'
             
             # Find VNC viewer (check USB location first, then system locations)
-            vnc_viewer_path = None
             possible_vnc_paths = [
-                VNC_VIEWER_PATH,  # USB drive: USB:\T1_Tools_Web\tools\VNC\vncviewer.exe
-                r"C:\Komatsu_Tier1\T1_Tools\tools\VNC\vncviewer.exe",  # Old location
-                r"C:\Program Files\RealVNC\VNC Viewer\vncviewer.exe",
-                r"C:\Program Files (x86)\RealVNC\VNC Viewer\vncviewer.exe"
+                VNC_VIEWER_PATH,  # USB location
             ]
             
             for path in possible_vnc_paths:
@@ -796,13 +797,23 @@ def api_vnc_start():
             # Launch VNC viewer to PTX_IP:0 (exactly like batch file)
             vnc_target = f'{ptx_ip}:0'
             
+            # Launch VNC viewer with flags to bypass unencrypted warning
             if platform.system() == 'Windows':
                 subprocess.Popen(
-                    [vnc_viewer_path, vnc_target],
+                    [vnc_viewer_path, 
+                    '-WarnUnencrypted=0',  # Bypass unencrypted connection prompt
+                    f'{ptx_ip}:0'],
                     creationflags=subprocess.CREATE_NEW_CONSOLE
                 )
             else:
-                subprocess.Popen([vnc_viewer_path, vnc_target])
+                subprocess.Popen([
+                vnc_viewer_path,
+                '-WarnUnencrypted=0',           # No unencrypted warning
+                '-SecurityNotificationTimeout=0', # No security notification timeout
+                '-FullScreen=0',                # Don't start fullscreen
+                '-ViewOnly=0',                  # Not view-only (allow interaction)
+                f'{ptx_ip}:0'
+            ])
             
             logger.info(f"VNC: Launched viewer to {vnc_target}")
             
@@ -900,6 +911,7 @@ VNC_WORKSTATIONS = {
 def api_vnc_workstation():
     """
     VNC Workstation Access using plink.exe
+    Mimics the batch file: echo Y | plink.exe ...
     """
     try:
         data = request.get_json()
@@ -927,16 +939,13 @@ def api_vnc_workstation():
                 'simulated': True
             })
         
-        # Find plink.exe (on USB drive in tools folder)
+        # Find plink.exe on USB
         plink_path = PLINK_PATH
         if not os.path.exists(plink_path):
-            # Fallback to old location if still exists
-            plink_path = r"C:\Komatsu_Tier1\T1_Tools\mms_scripts\plink.exe"
-            if not os.path.exists(plink_path):
-                return jsonify({
-                    'success': False,
-                    'message': f'plink.exe not found. Expected at: {PLINK_PATH}'
-                })
+            return jsonify({
+                'success': False,
+                'message': f'plink.exe not found at: {PLINK_PATH}'
+            })
         
         # MMS server details
         mms_server = MMS_SERVER['ip']
@@ -952,15 +961,16 @@ def api_vnc_workstation():
                 '-t',
                 f'{mms_user}@{mms_server}',
                 '-pw', mms_password,
-                f'{vnc_script} {ws_ip}'  # NO quotes around this!
+                f'{vnc_script} {ws_ip}'  # NO quotes!
             ]
             
-            logger.info(f"VNC WS{workstation}: Executing plink command")
+            logger.info(f"VNC WS{workstation}: Executing plink with auto-confirmation")
             
-            # Run plink and wait for completion
+            # Run plink with auto-confirmation (mimics: echo Y | plink.exe)
             if platform.system() == 'Windows':
                 result = subprocess.run(
                     plink_cmd,
+                    input="Y\n",  # Auto-confirm "Start VNC manually? [Y/N]"
                     capture_output=True,
                     text=True,
                     timeout=45,
@@ -969,6 +979,7 @@ def api_vnc_workstation():
             else:
                 result = subprocess.run(
                     plink_cmd,
+                    input="Y\n",  # Auto-confirm
                     capture_output=True,
                     text=True,
                     timeout=45
@@ -976,36 +987,28 @@ def api_vnc_workstation():
             
             logger.info(f"VNC WS{workstation}: Script output: {result.stdout[:200]}")
             
-            # Find VNC viewer (check USB location first, then system locations)
-            vnc_viewer_path = None
-            possible_paths = [
-                VNC_VIEWER_PATH,  # USB drive: USB:\T1_Tools_Web\tools\VNC\vncviewer.exe
-                r"C:\Komatsu_Tier1\T1_Tools\tools\VNC\vncviewer.exe",  # Old location
-                r"C:\Program Files\RealVNC\VNC Viewer\vncviewer.exe",
-                r"C:\Program Files (x86)\RealVNC\VNC Viewer\vncviewer.exe"
-            ]
-            
-            for path in possible_paths:
-                if os.path.exists(path):
-                    vnc_viewer_path = path
-                    break
-            
-            if not vnc_viewer_path:
+            # Find VNC viewer on USB
+            vnc_viewer_path = VNC_VIEWER_PATH
+            if not os.path.exists(vnc_viewer_path):
                 return jsonify({
                     'success': True,
                     'message': f'VNC server started. Connect manually to {ws_ip}:0',
                     'manual_connect': True,
-                    'ip': ws_ip
+                    'ip': ws_ip,
+                    'note': f'VNC viewer not found at: {vnc_viewer_path}'
                 })
             
             # Launch VNC viewer
+            logger.info(f"VNC WS{workstation}: Launching viewer: {vnc_viewer_path}")
             if platform.system() == 'Windows':
                 subprocess.Popen(
-                    [vnc_viewer_path, f'{ws_ip}:0'],
+                    [vnc_viewer_path, 
+                    '-WarnUnencrypted=0',  # Bypass unencrypted connection prompt
+                    f'{ws_ip}:0'],
                     creationflags=subprocess.CREATE_NEW_CONSOLE
                 )
             else:
-                subprocess.Popen([vnc_viewer_path, f'{ws_ip}:0'])
+                subprocess.Popen([vnc_viewer_path, '-WarnUnencrypted=0', f'{ws_ip}:0'])
             
             return jsonify({
                 'success': True,
@@ -1944,6 +1947,455 @@ def api_ptx_status():
         
     except Exception as e:
         return jsonify({'success': False, 'message': f'Status check failed: {str(e)}'}), 500
+    
+# ========================================
+# T1 LEGACY TOOLS
+# ========================================
+
+import uuid
+import queue
+import threading
+
+
+# ========================================
+# T1 LEGACY TOOLS - TERMINAL SUPPORT
+# ========================================
+
+terminal_sessions = {}
+
+class TerminalSession:
+    """Manages a T1_Tools.bat terminal session"""
+    def __init__(self, session_id: str):
+        self.session_id = session_id
+        self.process: Optional[subprocess.Popen] = None
+        self.output_queue: queue.Queue = queue.Queue()
+        self.running = False
+        
+    def start(self) -> tuple[bool, str]:
+        """Start T1_Tools.bat process"""
+        if getattr(sys, 'frozen', False):
+            base_dir = os.path.dirname(sys.executable)
+        else:
+            base_dir = os.path.dirname(os.path.abspath(__file__))
+        
+        possible_paths = [
+            os.path.join(base_dir, 'T1_Tools_Legacy', 'bin', 'T1_Tools.bat'),
+            os.path.join(base_dir, 'T1_Tools.bat'),
+            os.path.join(TOOLS_DIR, '..', 'T1_Tools_Legacy', 'bin', 'T1_Tools.bat')
+        ]
+        
+        bat_file = None
+        for path in possible_paths:
+            if os.path.exists(path):
+                bat_file = path
+                break
+        
+        if not bat_file:
+            return False, "T1_Tools.bat not found on USB"
+        
+        try:
+            if platform.system() == 'Windows':
+                self.process = subprocess.Popen(
+                    [bat_file],
+                    stdin=subprocess.PIPE,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
+                    text=True,
+                    bufsize=1,
+                    creationflags=subprocess.CREATE_NO_WINDOW
+                )
+            else:
+                return False, "Terminal only supported on Windows"
+            
+            self.running = True
+            output_thread = threading.Thread(target=self._read_output, daemon=True)
+            output_thread.start()
+            return True, "Terminal started successfully"
+            
+        except Exception as e:
+            return False, str(e)
+    
+    def _read_output(self) -> None:
+        """Read output from process in background thread"""
+        try:
+            while self.running and self.process and self.process.poll() is None:
+                if self.process.stdout is not None:
+                    line = self.process.stdout.readline()
+                    if line:
+                        self.output_queue.put(line.rstrip('\n\r'))
+        except Exception as e:
+            logger.error(f"Terminal output read error: {e}")
+        finally:
+            self.running = False
+    
+    def send_command(self, command: str) -> bool:
+        """Send command to terminal"""
+        if self.process and self.process.poll() is None:
+            try:
+                if self.process.stdin is not None:
+                    self.process.stdin.write(command + '\n')
+                    self.process.stdin.flush()
+                    return True
+            except Exception as e:
+                logger.error(f"Terminal command send error: {e}")
+                return False
+        return False
+    
+    def get_output(self) -> str:
+        """Get accumulated output"""
+        lines = []
+        try:
+            while not self.output_queue.empty():
+                lines.append(self.output_queue.get_nowait())
+        except queue.Empty:
+            pass
+        return '\n'.join(lines)
+    
+    def is_running(self) -> bool:
+        """Check if process is still running"""
+        return self.process is not None and self.process.poll() is None
+    
+    def stop(self) -> None:
+        """Stop the terminal session"""
+        self.running = False
+        if self.process:
+            try:
+                self.process.terminate()
+                self.process.wait(timeout=5)
+            except Exception:
+                self.process.kill()
+
+
+@app.route('/legacy')
+@login_required
+def legacy_tools():
+    """T1 Legacy Tools page with live terminal"""
+    return render_template('t1_legacy.html')
+
+
+@app.route('/api/legacy/terminal/start', methods=['POST'])
+@login_required
+def api_legacy_terminal_start():
+    """Start a new terminal session"""
+    try:
+        session_id = str(uuid.uuid4())
+        session = TerminalSession(session_id)
+        success, message = session.start()
+        
+        if success:
+            terminal_sessions[session_id] = session
+            return jsonify({'success': True, 'session_id': session_id, 'message': 'T1_Tools.bat terminal started'})
+        else:
+            return jsonify({'success': False, 'message': message})
+            
+    except Exception as e:
+        logger.error(f"Terminal start error: {e}")
+        return jsonify({'success': False, 'message': str(e)})
+
+
+@app.route('/api/legacy/terminal/command', methods=['POST'])
+@login_required
+def api_legacy_terminal_command():
+    """Send command to terminal session"""
+    try:
+        data = request.get_json()
+        session_id = data.get('session_id')
+        command = data.get('command', '')
+        
+        if session_id not in terminal_sessions:
+            return jsonify({'success': False, 'message': 'Terminal session not found'})
+        
+        session = terminal_sessions[session_id]
+        
+        if session.send_command(command):
+            return jsonify({'success': True, 'message': 'Command sent'})
+        else:
+            return jsonify({'success': False, 'message': 'Failed to send command'})
+            
+    except Exception as e:
+        logger.error(f"Terminal command error: {e}")
+        return jsonify({'success': False, 'message': str(e)})
+
+
+@app.route('/api/legacy/terminal/output', methods=['GET'])
+@login_required
+def api_legacy_terminal_output():
+    """Get terminal output"""
+    try:
+        session_id = request.args.get('session_id')
+        
+        if session_id not in terminal_sessions:
+            return jsonify({'success': False, 'message': 'Terminal session not found'})
+        
+        session = terminal_sessions[session_id]
+        output = session.get_output()
+        
+        return jsonify({'success': True, 'output': output, 'exited': not session.is_running()})
+        
+    except Exception as e:
+        logger.error(f"Terminal output error: {e}")
+        return jsonify({'success': False, 'message': str(e)})
+
+
+@app.route('/api/legacy/terminal/stop', methods=['POST'])
+@login_required
+def api_legacy_terminal_stop():
+    """Stop terminal session"""
+    try:
+        data = request.get_json()
+        session_id = data.get('session_id')
+        
+        if session_id in terminal_sessions:
+            session = terminal_sessions[session_id]
+            session.stop()
+            del terminal_sessions[session_id]
+            
+        return jsonify({'success': True, 'message': 'Terminal stopped'})
+        
+    except Exception as e:
+        logger.error(f"Terminal stop error: {e}")
+        return jsonify({'success': False, 'message': str(e)})
+
+
+# Keep existing equipment list route
+@app.route('/api/legacy/equipment-list', methods=['GET'])
+@login_required
+def api_legacy_equipment_list():
+    """Get equipment list from IP_list.dat"""
+    try:
+        if getattr(sys, 'frozen', False):
+            base_dir = os.path.dirname(sys.executable)
+        else:
+            base_dir = os.path.dirname(os.path.abspath(__file__))
+        
+        possible_paths = [
+            os.path.join(base_dir, 'T1_Tools_Legacy', 'bin', 'IP_list.dat'),
+            os.path.join(base_dir, 'IP_list.dat'),
+            os.path.join(TOOLS_DIR, 'IP_list.dat')
+        ]
+        
+        ip_list_file = None
+        for path in possible_paths:
+            if os.path.exists(path):
+                ip_list_file = path
+                break
+        
+        if not ip_list_file:
+            return jsonify({
+                'success': False,
+                'message': 'IP_list.dat not found'
+            })
+        
+        equipment_list = []
+        with open(ip_list_file, 'r') as f:
+            lines = f.readlines()
+            for line in lines[1:]:  # Skip header
+                line = line.strip()
+                if not line or line.startswith('#'):
+                    continue
+                parts = line.split()
+                if len(parts) >= 3:
+                    equipment_list.append({
+                        'name': parts[0],
+                        'ptx_ip': parts[1],
+                        'avi_ip': parts[2]
+                    })
+        
+        return jsonify({
+            'success': True,
+            'equipment': equipment_list,
+            'count': len(equipment_list)
+        })
+        
+    except Exception as e:
+        logger.error(f"Equipment list error: {e}")
+        return jsonify({'success': False, 'message': str(e)})
+
+
+# Helper function for equipment IPs
+def get_equipment_ips(equipment_name):
+    """Get PTX and AVI IPs for equipment"""
+    try:
+        if getattr(sys, 'frozen', False):
+            base_dir = os.path.dirname(sys.executable)
+        else:
+            base_dir = os.path.dirname(os.path.abspath(__file__))
+        
+        possible_paths = [
+            os.path.join(base_dir, 'T1_Tools_Legacy', 'bin', 'IP_list.dat'),
+            os.path.join(base_dir, 'IP_list.dat'),
+            os.path.join(TOOLS_DIR, 'IP_list.dat')
+        ]
+        
+        ip_list_file = None
+        for path in possible_paths:
+            if os.path.exists(path):
+                ip_list_file = path
+                break
+        
+        if not ip_list_file:
+            return None, None
+        
+        with open(ip_list_file, 'r') as f:
+            lines = f.readlines()
+            for line in lines[1:]:
+                line = line.strip()
+                if not line or line.startswith('#'):
+                    continue
+                parts = line.split()
+                if len(parts) >= 3:
+                    if parts[0].upper() == equipment_name.upper():
+                        return parts[1], parts[2]  # ptx_ip, avi_ip
+        
+        return None, None
+        
+    except Exception as e:
+        logger.error(f"Error reading IP list: {e}")
+        return None, None
+
+
+# Keep existing execute route for quick access buttons
+@app.route('/api/legacy/execute', methods=['POST'])
+@login_required
+def api_legacy_execute():
+    """Execute quick access commands (PuTTY, WinSCP, etc.)"""
+    try:
+        data = request.get_json()
+        command = data.get('command', '').lower()
+        equipment = data.get('equipment', '').upper()
+        
+        # Get equipment IPs
+        if command != 'help':
+            ptx_ip, avi_ip = get_equipment_ips(equipment)
+            if not ptx_ip:
+                return jsonify({
+                    'success': False,
+                    'message': f'Equipment {equipment} not found in IP list'
+                })
+        
+        # VNC
+        if command == 'vnc':
+            return jsonify({
+                'success': True,
+                'message': f'Use VNC button in IP Finder for {equipment}',
+                'redirect': '/run/IP Finder'
+            })
+        
+        # PUTTY
+        elif command == 'putty':
+            putty_path = os.path.join(TOOLS_DIR, 'putty.exe')
+            if not os.path.exists(putty_path):
+                return jsonify({'success': False, 'message': f'putty.exe not found'})
+            
+            try:
+                subprocess.Popen([putty_path, '-ssh', f'dlog@{ptx_ip}', '-pw', 'gold'])
+                return jsonify({
+                    'success': True,
+                    'message': f'PuTTY opened to {equipment} ({ptx_ip})'
+                })
+            except Exception as e:
+                return jsonify({'success': False, 'message': f'Failed to launch PuTTY: {str(e)}'})
+        
+        # AVI
+        elif command == 'avi':
+            try:
+                if platform.system() == 'Windows':
+                    os.startfile(f'http://{avi_ip}')
+                else:
+                    import webbrowser
+                    webbrowser.open(f'http://{avi_ip}')
+                
+                return jsonify({
+                    'success': True,
+                    'message': f'Opened AVI for {equipment} ({avi_ip})'
+                })
+            except Exception as e:
+                return jsonify({'success': False, 'message': f'Failed to open AVI: {str(e)}'})
+        
+        # CACHE
+        elif command == 'cache':
+            winscp_path = os.path.join(TOOLS_DIR, 'WinSCP', 'WinSCP.exe')
+            if not os.path.exists(winscp_path):
+                return jsonify({'success': False, 'message': f'WinSCP.exe not found'})
+            
+            try:
+                cache_path = '/usr/local/modular/cache/'
+                subprocess.Popen([winscp_path, f'scp://dlog:gold@{ptx_ip}{cache_path}'])
+                return jsonify({
+                    'success': True,
+                    'message': f'Opened cache for {equipment} ({ptx_ip})'
+                })
+            except Exception as e:
+                return jsonify({'success': False, 'message': f'Failed to launch WinSCP: {str(e)}'})
+        
+        # AVI LOGS
+        elif command == 'avilogs':
+            winscp_path = os.path.join(TOOLS_DIR, 'WinSCP', 'WinSCP.exe')
+            if not os.path.exists(winscp_path):
+                return jsonify({'success': False, 'message': f'WinSCP.exe not found'})
+            
+            try:
+                logs_path = '/mnt/bulk/'
+                subprocess.Popen([winscp_path, f'scp://root:root@{avi_ip}{logs_path}'])
+                return jsonify({
+                    'success': True,
+                    'message': f'Opened AVI logs for {equipment} ({avi_ip})'
+                })
+            except Exception as e:
+                return jsonify({'success': False, 'message': f'Failed to launch WinSCP: {str(e)}'})
+        
+        # TRU
+        elif command == 'tru':
+            tru_path = os.path.join(TOOLS_DIR, 'Topcon', 'TRU.exe')
+            if not os.path.exists(tru_path):
+                return jsonify({'success': False, 'message': f'TRU.exe not found'})
+            
+            try:
+                subprocess.Popen([tru_path])
+                return jsonify({
+                    'success': True,
+                    'message': f'Launched TRU for {equipment}'
+                })
+            except Exception as e:
+                return jsonify({'success': False, 'message': f'Failed to launch TRU: {str(e)}'})
+        
+        # PTX REBOOT
+        elif command == 'ptxr':
+            try:
+                plink_path = PLINK_PATH
+                if not os.path.exists(plink_path):
+                    return jsonify({'success': False, 'message': f'plink.exe not found'})
+                
+                result = subprocess.run(
+                    [plink_path, '-batch', '-pw', 'gold', f'dlog@{ptx_ip}', 'sudo reboot'],
+                    capture_output=True,
+                    text=True,
+                    timeout=10
+                )
+                
+                return jsonify({
+                    'success': True,
+                    'message': f'Reboot command sent to {equipment} ({ptx_ip})'
+                })
+            except Exception as e:
+                return jsonify({'success': False, 'message': f'Failed to reboot: {str(e)}'})
+        
+        # HELP
+        elif command == 'help':
+            return jsonify({
+                'success': True,
+                'message': 'Use terminal or quick access buttons'
+            })
+        
+        else:
+            return jsonify({
+                'success': False,
+                'message': f'Command "{command}" not implemented'
+            })
+        
+    except Exception as e:
+        logger.error(f"Legacy API error: {e}")
+        return jsonify({'success': False, 'message': str(e)})
 
 # ========================================
 # ERROR HANDLERS
@@ -2017,3 +2469,4 @@ if __name__ == '__main__':
         print(f"\nStartup Error: {e}")
         print("Please check that port 8888 is available and try again.")
         sys.exit(1)
+        

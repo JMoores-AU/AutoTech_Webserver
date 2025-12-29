@@ -1,0 +1,61 @@
+╔════════════════════════════════════════════════════════════════════╗
+║          QUICK REFERENCE - SAFE WORKFLOW FOR MAIN.PY              ║
+╚════════════════════════════════════════════════════════════════════╝
+
+📋 BEFORE MAKING ANY CHANGE
+────────────────────────────────────────────────────────────────────
+1. git commit -am "Before adding [feature]"
+2. copy main.py backups\main_backup.py
+3. python check_main.py main.py
+
+✏️ MAKING CHANGES
+────────────────────────────────────────────────────────────────────
+✅ DO: One small change at a time
+❌ DON'T: Add 500 lines at once
+
+✅ AFTER MAKING A CHANGE
+────────────────────────────────────────────────────────────────────
+1. python check_main.py main.py     (verify nothing missing)
+2. python -m py_compile main.py      (check syntax)
+3. git diff main.py                  (see what changed)
+4. python main.py                    (test it!)
+5. git commit -am "Added [feature]"  (save if it works)
+6. git checkout main.py              (undo if broken)
+
+🆘 IF SOMETHING BREAKS
+────────────────────────────────────────────────────────────────────
+git diff main.py                     (see what changed)
+git checkout main.py                 (undo changes)
+copy backups\main_backup.py main.py  (restore backup)
+
+🎯 GOLDEN RULES
+────────────────────────────────────────────────────────────────────
+1. Always run check_main.py BEFORE accepting new files
+2. Always commit working versions
+3. Test immediately after every change
+4. Keep dated backups
+5. Use git diff to review changes
+6. Make small changes only
+
+📞 COMMANDS CHEAT SHEET
+────────────────────────────────────────────────────────────────────
+git commit -am "message"      Save current state
+git diff main.py              See what changed
+git checkout main.py          Undo changes
+git log --oneline             See history
+python check_main.py main.py  Check for missing code
+python -m py_compile main.py  Check syntax
+
+⚠️ STOP IF YOU SEE
+────────────────────────────────────────────────────────────────────
+❌ check_main.py reports MISSING items
+❌ check_main.py reports DUPLICATE items
+❌ 10+ Pylance errors suddenly
+❌ Routes return 404
+❌ Features suddenly broken
+
+► Action: git diff → git checkout → try again more carefully
+
+╔════════════════════════════════════════════════════════════════════╗
+║  REMEMBER: Small changes + Git commits = Never lose working code! ║
+╚════════════════════════════════════════════════════════════════════╝
