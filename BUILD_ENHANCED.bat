@@ -85,6 +85,10 @@ echo ============================================
 echo  Starting Development Server...
 echo ============================================
 echo.
+echo  Clearing Python cache...
+if exist __pycache__ rmdir /s /q __pycache__
+if exist tools\__pycache__ rmdir /s /q tools\__pycache__
+echo.
 echo  Access at: http://localhost:8888
 echo  Password: komatsu
 echo.

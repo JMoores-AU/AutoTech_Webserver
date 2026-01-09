@@ -29,6 +29,7 @@ from functools import lru_cache, wraps
 from io import StringIO
 from pathlib import Path
 from typing import Optional
+from tools.log_cleanup import cleanup_logs
 
 
 # Third-Party Imports
@@ -488,6 +489,432 @@ def get_flight_recorder_ip(equipment_type):
     base_ip_parts = PTX_BASE_IP.split('.')
     last_octet = int(base_ip_parts[-1]) + profile['ptx_offset']
     return '.'.join(base_ip_parts[:-1] + [str(last_octet)])
+
+# ========================================
+# PTX LOG CLEANUP
+# ========================================
+
+def connect_to_equipment(ip_address):
+    """
+    Try to connect to equipment using both credential sets.
+    Returns: (ssh_client, credential_name) or (None, error_message)
+    """
+    credentials = [
+        {"user": "dlog", "password": "gold", "name": "PTXC"},
+        {"user": "mms", "password": "modular", "name": "PTX10"}
+    ]
+    
+    for cred in credentials:
+        try:
+            if paramiko is None:
+                return None, "paramiko library not available"
+            ssh = paramiko.SSHClient()
+            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            ssh.connect(
+                hostname=ip_address,
+                username=cred['user'],
+                password=cred['password'],
+                timeout=10,
+                look_for_keys=False,
+                allow_agent=False
+            )
+            return ssh, cred['name']
+        except Exception as e:
+            continue
+    
+    return None, f"Could not connect to {ip_address} with any credentials"
+
+
+def find_log_directory(ssh):
+    """
+    Find the log directory path on the remote system.
+    Returns: (path, None) or (None, error_message)
+    """
+    # Strategy 1: Check user's home
+    stdin, stdout, stderr = ssh.exec_command("echo $HOME")
+    user_home = stdout.read().decode().strip()
+    
+    if user_home:
+        user_path = f"{user_home}/frontrunnerV3/logs"
+        stdin, stdout, stderr = ssh.exec_command(f"test -d {user_path} && echo EXISTS")
+        if stdout.read().decode().strip() == "EXISTS":
+            return user_path, None
+    
+    # Strategy 2: Common paths
+    base_paths = ["/real_home", "/home/dlog", "/home/mms", "/home", "/opt"]
+    
+    for base in base_paths:
+        test_path = f"{base}/frontrunnerV3/logs"
+        stdin, stdout, stderr = ssh.exec_command(f"test -d {test_path} && echo EXISTS")
+        if stdout.read().decode().strip() == "EXISTS":
+            return test_path, None
+    
+    # Strategy 3: Search filesystem
+    stdin, stdout, stderr = ssh.exec_command(
+        "find /real_home /home /opt /usr -type d -path '*/frontrunnerV3/logs' 2>/dev/null | head -1"
+    )
+    found_path = stdout.read().decode().strip()
+    
+    if found_path:
+        return found_path, None
+    
+    return None, "Could not locate log directory"
+
+
+def get_folder_list(ssh, log_path):
+    """Get list of monthly folders with their age."""
+    cmd = f"cd {log_path} && ls -d */ 2>/dev/null | sed 's|/||'"
+    stdin, stdout, stderr = ssh.exec_command(cmd)
+    output = stdout.read().decode()
+    
+    folders = []
+    current_date = datetime.now()
+    
+    for line in output.strip().split('\n'):
+        folder = line.strip()
+        if not folder:
+            continue
+        
+        if len(folder) == 6 and folder.isdigit():
+            folder_year_month = int(folder)
+            folder_year = folder_year_month // 100
+            folder_month = folder_year_month % 100
+            
+            if 1 <= folder_month <= 12:
+                months_diff = (current_date.year - folder_year) * 12 + (current_date.month - folder_month)
+                folders.append((folder, months_diff))
+            else:
+                folders.append((folder, 0))
+        else:
+            folders.append((folder, 0))
+    
+    return folders
+
+
+def get_broken_logs(ssh, log_path):
+    """Find 0-byte files in root directory."""
+    cmd = f'cd {log_path} && find . -maxdepth 1 -type f -size 0 -printf "%p:%T@\\n"'
+    stdin, stdout, stderr = ssh.exec_command(cmd)
+    output = stdout.read().decode()
+    
+    broken_files = []
+    current_time = datetime.now().timestamp()
+    
+    for line in output.strip().split('\n'):
+        if not line or ':' not in line:
+            continue
+        
+        try:
+            filepath, mtime = line.rsplit(':', 1)
+            filepath = filepath.lstrip('./')
+            days_old = int((current_time - float(mtime)) / 86400)
+            broken_files.append((filepath, days_old))
+        except (ValueError, IndexError):
+            continue
+    
+    return broken_files
+
+
+def get_loose_files(ssh, log_path):
+    """Find loose log files in root directory."""
+    cmd = f'cd {log_path} && find . -maxdepth 1 -type f ! -size 0 -printf "%p:%T@\\n"'
+    stdin, stdout, stderr = ssh.exec_command(cmd)
+    output = stdout.read().decode()
+    
+    loose_files = []
+    current_time = datetime.now().timestamp()
+    
+    for line in output.strip().split('\n'):
+        if not line or ':' not in line:
+            continue
+        
+        try:
+            filepath, mtime = line.rsplit(':', 1)
+            filepath = filepath.lstrip('./')
+            days_old = int((current_time - float(mtime)) / 86400)
+            loose_files.append((filepath, days_old))
+        except (ValueError, IndexError):
+            continue
+    
+    return loose_files
+
+
+def cleanup_logs(ip_address, folder_retention=2, file_retention=7, dry_run=True):
+    """
+    Main cleanup function for web interface.
+    Returns: dict with results and logs
+    """
+    results = {
+        "success": False,
+        "log": [],
+        "stats": {
+            "folders_deleted": 0,
+            "broken_deleted": 0,
+            "loose_deleted": 0,
+            "total_deleted": 0
+        }
+    }
+    
+    def log(msg):
+        results["log"].append(msg)
+    
+    try:
+        # Connect
+        log(f"Connecting to {ip_address}...")
+        ssh, cred_type = connect_to_equipment(ip_address)
+        if not ssh:
+            results["error"] = cred_type
+            return results
+        
+        log(f"✓ Connected as {cred_type}")
+        
+        # Find log directory
+        log("Searching for log directory...")
+        log_path, error = find_log_directory(ssh)
+        if not log_path:
+            results["error"] = error
+            ssh.close()
+            return results
+        
+        log(f"✓ Found logs: {log_path}")
+        
+        # Get folders
+        log("\nScanning folders...")
+        folders = get_folder_list(ssh, log_path)
+        log(f"Found {len(folders)} folders")
+        
+        # Get broken logs
+        log("Scanning 0-byte files...")
+        broken_files = get_broken_logs(ssh, log_path)
+        log(f"Found {len(broken_files)} broken files")
+        
+        # Get loose files
+        log("Scanning loose files...")
+        loose_files = get_loose_files(ssh, log_path)
+        log(f"Found {len(loose_files)} loose files")
+        
+        # Process folders
+        log(f"\n{'='*50}")
+        log(f"FOLDER CLEANUP (Keep: current + last {folder_retention} months)")
+        log(f"{'='*50}")
+        
+        kept_folders = []
+        for folder, months_old in sorted(folders, key=lambda x: x[1], reverse=True):
+            if months_old > folder_retention:
+                if dry_run:
+                    log(f"WOULD DELETE: {folder} ({months_old} months old)")
+                else:
+                    log(f"Deleting: {folder} ({months_old} months old)")
+                    cmd = f"cd {log_path} && rm -rf '{folder}'"
+                    ssh.exec_command(cmd)
+                    log(f"  ✓ Deleted")
+                results["stats"]["folders_deleted"] += 1
+            else:
+                log(f"Keeping: {folder} ({months_old} months old)")
+                if len(folder) == 6 and folder.isdigit():
+                    kept_folders.append(folder)
+        
+        # Process broken logs
+        log(f"\n{'='*50}")
+        log(f"0-BYTE FILE CLEANUP (Retention: {file_retention} days)")
+        log(f"{'='*50}")
+        
+        for filepath, days_old in sorted(broken_files, key=lambda x: x[1], reverse=True):
+            if days_old > file_retention:
+                if dry_run:
+                    log(f"WOULD DELETE: {filepath} ({days_old} days old)")
+                else:
+                    log(f"Deleting: {filepath} ({days_old} days old)")
+                    cmd = f"cd {log_path} && rm -f '{filepath}'"
+                    ssh.exec_command(cmd)
+                    log(f"  ✓ Deleted")
+                results["stats"]["broken_deleted"] += 1
+        
+        # Process loose files
+        log(f"\n{'='*50}")
+        log(f"LOOSE FILE CLEANUP (Retention: {file_retention} days)")
+        log(f"{'='*50}")
+        
+        for filepath, days_old in sorted(loose_files, key=lambda x: x[1], reverse=True):
+            if days_old > file_retention:
+                if dry_run:
+                    log(f"WOULD DELETE: {filepath} ({days_old} days old)")
+                else:
+                    log(f"Deleting: {filepath} ({days_old} days old)")
+                    cmd = f"cd {log_path} && rm -f '{filepath}'"
+                    ssh.exec_command(cmd)
+                    log(f"  ✓ Deleted")
+                results["stats"]["loose_deleted"] += 1
+        
+        # Summary
+        results["stats"]["total_deleted"] = (
+            results["stats"]["folders_deleted"] + 
+            results["stats"]["broken_deleted"] + 
+            results["stats"]["loose_deleted"]
+        )
+        
+        log(f"\n{'='*50}")
+        log(f"{'DRY RUN ' if dry_run else ''}COMPLETE")
+        log(f"{'='*50}")
+        log(f"Folders: {results['stats']['folders_deleted']}")
+        log(f"Broken files: {results['stats']['broken_deleted']}")
+        log(f"Loose files: {results['stats']['loose_deleted']}")
+        log(f"Total: {results['stats']['total_deleted']}")
+        
+        if kept_folders:
+            log(f"\n✓ Files in kept folders ({', '.join(kept_folders)}) were preserved")
+        
+        ssh.close()
+        results["success"] = True
+        
+    except Exception as e:
+        log(f"\n✗ ERROR: {str(e)}")
+        results["error"] = str(e)
+    
+    return results
+
+# ============================================================================
+# OFFLINE MODE: Log Cleanup Test Function
+# ============================================================================
+
+def cleanup_logs_test_mode(folder_retention=2, file_retention=7, dry_run=True):
+    """
+    Offline mode cleanup - uses local test data.
+    Auto-called when is_online_network() returns False.
+    """
+    import os
+    import shutil
+
+    # Use test_logs directory in project root (same directory as main.py)
+    TEST_PATH = os.path.join(os.path.dirname(__file__), "test_logs")
+
+    results = {
+        "success": False,
+        "log": [],
+        "stats": {"folders_deleted": 0, "broken_deleted": 0, "loose_deleted": 0, "total_deleted": 0}
+    }
+
+    def log(msg):
+        results["log"].append(msg)
+
+    try:
+        print(f"[DEBUG] Looking for test data at: {TEST_PATH}")
+        print(f"[DEBUG] __file__ = {__file__}")
+        print(f"[DEBUG] Path exists: {os.path.exists(TEST_PATH)}")
+
+        # Auto-generate test data if it doesn't exist
+        if not os.path.exists(TEST_PATH):
+            log("[OFFLINE MODE] Test data not found - generating now...")
+            print("[CLEANUP] Auto-generating test data...")
+
+            import subprocess
+            import sys
+            generator_path = os.path.join(os.path.dirname(__file__), 'tools', 'test_log_generator.py')
+
+            try:
+                result = subprocess.run([sys.executable, generator_path],
+                                      capture_output=True, text=True, timeout=60)
+                if result.returncode != 0:
+                    results["error"] = f"Failed to generate test data: {result.stderr}"
+                    return results
+                log("[SUCCESS] Test data generated successfully")
+                print("[CLEANUP] Test data generation complete")
+            except Exception as gen_error:
+                results["error"] = f"Failed to generate test data: {str(gen_error)}"
+                return results
+
+        log("[OFFLINE MODE] Using local test data")
+        log(f"Path: {TEST_PATH}")
+        
+        current_date = datetime.now()
+        current_time = current_date.timestamp()
+        
+        # Scan folders
+        folders = []
+        for item in os.listdir(TEST_PATH):
+            path = os.path.join(TEST_PATH, item)
+            if os.path.isdir(path) and len(item) == 6 and item.isdigit():
+                year, month = int(item) // 100, int(item) % 100
+                if 1 <= month <= 12:
+                    months_diff = (current_date.year - year) * 12 + (current_date.month - month)
+                    folders.append((item, months_diff))
+        
+        # Scan 0-byte files
+        broken = [(f, int((current_time - os.path.getmtime(os.path.join(TEST_PATH, f))) / 86400))
+                  for f in os.listdir(TEST_PATH)
+                  if os.path.isfile(os.path.join(TEST_PATH, f)) and os.path.getsize(os.path.join(TEST_PATH, f)) == 0]
+        
+        # Scan loose files
+        loose = [(f, int((current_time - os.path.getmtime(os.path.join(TEST_PATH, f))) / 86400))
+                 for f in os.listdir(TEST_PATH)
+                 if os.path.isfile(os.path.join(TEST_PATH, f)) and os.path.getsize(os.path.join(TEST_PATH, f)) > 0]
+        
+        log(f"\nFound {len(folders)} folders, {len(broken)} 0-byte files, {len(loose)} loose files")
+        
+        # Process folders
+        log(f"\n{'='*50}\nFOLDER CLEANUP (Keep: current + last {folder_retention} months)\n{'='*50}")
+        kept = []
+        for folder, age in sorted(folders, key=lambda x: x[1], reverse=True):
+            if age > folder_retention:
+                log(f"{'WOULD DELETE' if dry_run else 'Deleting'}: {folder} ({age} months old)")
+                if not dry_run:
+                    shutil.rmtree(os.path.join(TEST_PATH, folder))
+                results["stats"]["folders_deleted"] += 1
+            else:
+                log(f"Keeping: {folder} ({age} months old)")
+                kept.append(folder)
+        
+        # Process 0-byte
+        log(f"\n{'='*50}\n0-BYTE FILE CLEANUP (Retention: {file_retention} days)\n{'='*50}")
+        for file, age in broken:
+            if age > file_retention:
+                log(f"{'WOULD DELETE' if dry_run else 'Deleting'}: {file} ({age} days old)")
+                if not dry_run:
+                    os.remove(os.path.join(TEST_PATH, file))
+                results["stats"]["broken_deleted"] += 1
+        
+        # Process loose
+        log(f"\n{'='*50}\nLOOSE FILE CLEANUP (Retention: {file_retention} days)\n{'='*50}")
+        for file, age in loose:
+            if age > file_retention:
+                log(f"{'WOULD DELETE' if dry_run else 'Deleting'}: {file} ({age} days old)")
+                if not dry_run:
+                    os.remove(os.path.join(TEST_PATH, file))
+                results["stats"]["loose_deleted"] += 1
+        
+        results["stats"]["total_deleted"] = sum(results["stats"].values())
+        
+        log(f"\n{'='*50}\n{'DRY RUN ' if dry_run else ''}COMPLETE\n{'='*50}")
+        log(f"Folders: {results['stats']['folders_deleted']}")
+        log(f"Broken: {results['stats']['broken_deleted']}")
+        log(f"Loose: {results['stats']['loose_deleted']}")
+        log(f"Total: {results['stats']['total_deleted']}")
+        
+        if kept:
+            log(f"\n[KEPT] Folders: {', '.join(kept)}")
+
+        results["success"] = True
+
+        # Delete test_logs folder after successful execution (not dry run)
+        if not dry_run:
+            log(f"\n{'='*50}")
+            log("CLEANUP COMPLETE - RESETTING TEST DATA")
+            log(f"{'='*50}")
+
+            import shutil
+            try:
+                shutil.rmtree(TEST_PATH)
+                log(f"[RESET] Test data folder deleted: {TEST_PATH}")
+                log(f"[NOTE] Fresh test data will be auto-generated on next cleanup")
+                print(f"[CLEANUP] Test data folder deleted and reset")
+            except Exception as del_error:
+                log(f"[WARNING] Could not delete test folder: {str(del_error)}")
+
+    except Exception as e:
+        log(f"\n[ERROR] {str(e)}")
+        results["error"] = str(e)
+
+    return results
 
 # ========================================
 # AUTHENTICATION ROUTES
@@ -1295,9 +1722,19 @@ def api_playback_server_check():
     Check if playback server is reachable.
     """
     try:
+        # OFFLINE MODE: Return disconnected status
+        if not is_online_network():
+            return jsonify({
+                'connected': False,
+                'ip': PLAYBACK_SERVER['ip'],
+                'port': PLAYBACK_SERVER['port'],
+                'offline_mode': True,
+                'message': 'Server unavailable in offline mode'
+            })
+
         # Try ping first
         connected = False
-        
+
         if ping3:
             result = ping3.ping(PLAYBACK_SERVER['ip'], timeout=3)
             connected = result is not None
@@ -1305,13 +1742,13 @@ def api_playback_server_check():
             # Fallback to socket test
             try:
                 with socket.create_connection(
-                    (PLAYBACK_SERVER['ip'], PLAYBACK_SERVER['port']), 
+                    (PLAYBACK_SERVER['ip'], PLAYBACK_SERVER['port']),
                     timeout=3
                 ):
                     connected = True
             except:
                 connected = False
-        
+
         return jsonify({
             'connected': connected,
             'ip': PLAYBACK_SERVER['ip'],
@@ -1445,9 +1882,19 @@ def api_playback_server_files():
     List playback files on the server via SFTP.
     """
     try:
+        # OFFLINE MODE: Return mock files
+        if not is_online_network():
+            mock_files = [
+                {'name': 'AHS_LOG_20260108_120000_AEST.dat', 'size': 15728640, 'modified': time.time() - 3600},
+                {'name': 'AHS_LOG_20260108_114500_AEST.dat', 'size': 15728640, 'modified': time.time() - 5400},
+                {'name': 'AHS_LOG_20260108_113000_AEST.dat', 'size': 15728640, 'modified': time.time() - 7200},
+                {'name': 'AHS_LOG_20260107_150000_AEST.dat', 'size': 15728640, 'modified': time.time() - 86400},
+            ]
+            return jsonify({'files': mock_files, 'count': len(mock_files), 'offline_mode': True})
+
         if not paramiko:
             return jsonify({'error': 'SSH library not available', 'files': []})
-        
+
         # Connect via SSH
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -1509,16 +1956,30 @@ def api_playback_find_file():
     try:
         date_str = request.args.get('date')  # YYYY-MM-DD
         time_str = request.args.get('time')  # HH:MM
-        
+
         if not date_str or not time_str:
             return jsonify({'found': False, 'error': 'Date and time required'})
-        
+
         # Parse requested datetime
         requested_dt = datetime.strptime(f"{date_str} {time_str}", "%Y-%m-%d %H:%M")
-        
+
+        # OFFLINE MODE: Return mock file that matches the requested time
+        if not is_online_network():
+            # Round down to nearest 15-minute block
+            minutes = (requested_dt.minute // 15) * 15
+            block_start = requested_dt.replace(minute=minutes, second=0, microsecond=0)
+            filename = f"AHS_LOG_{block_start.strftime('%Y%m%d_%H%M%S')}_AEST.dat"
+            return jsonify({
+                'found': True,
+                'filename': filename,
+                'size': 15728640,
+                'time_str': block_start.strftime('%H:%M:%S'),
+                'offline_mode': True
+            })
+
         if not paramiko:
             return jsonify({'found': False, 'error': 'SSH library not available'})
-        
+
         # Connect to server
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -1628,26 +2089,35 @@ def api_playback_download_file():
         data = request.get_json()
         filename = data.get('filename')
         file_size = data.get('size', 0)
-        
+
         if not filename:
             return jsonify({'success': False, 'message': 'Filename required'})
-        
+
+        # OFFLINE MODE: Simulate successful download
+        if not is_online_network():
+            return jsonify({
+                'success': True,
+                'message': f'[OFFLINE MODE] Simulated download of {filename}',
+                'local_path': f'USB:/playback/{filename}',
+                'offline_mode': True
+            })
+
         # Find local USB path
         from tools.usb_tools import find_tool_on_usb
         result = find_tool_on_usb("frontrunnerV3-3.7.0-076-full", "V3.7.0 Playback Tool.bat")
-        
+
         if not result:
             return jsonify({'success': False, 'message': 'Playback USB not detected'})
-        
+
         local_path = Path(result['folder_path']) / 'playback' / filename
         remote_path = PLAYBACK_SERVER['path'] + filename
-        
+
         # Ensure local directory exists
         local_path.parent.mkdir(parents=True, exist_ok=True)
-        
+
         if not paramiko:
             return jsonify({'success': False, 'message': 'SSH library not available'})
-        
+
         # Connect and download
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -1721,16 +2191,13 @@ def api_playback_find_files():
         time_from = request.args.get('time_from')  # HH:MM
         time_to = request.args.get('time_to')  # HH:MM
         mode = request.args.get('mode', 'single')  # single or range
-        
+
         if not date_str:
             return jsonify({'files': [], 'error': 'Date required'})
-        
+
         if not time_from:
             return jsonify({'files': [], 'error': 'Time required'})
-        
-        if not paramiko:
-            return jsonify({'files': [], 'error': 'SSH library not available'})
-        
+
         # Parse times
         try:
             from_hour, from_minute = map(int, time_from.split(':'))
@@ -1740,7 +2207,31 @@ def api_playback_find_files():
                 to_hour, to_minute = from_hour, from_minute
         except:
             return jsonify({'files': [], 'error': 'Invalid time format'})
-        
+
+        # OFFLINE MODE: Return mock files in the time range
+        if not is_online_network():
+            mock_files = []
+            current_hour = from_hour
+            current_minute = (from_minute // 15) * 15  # Round to 15-min block
+
+            while (current_hour < to_hour) or (current_hour == to_hour and current_minute <= to_minute):
+                filename = f"AHS_LOG_{date_str.replace('-', '')}_{current_hour:02d}{current_minute:02d}00_AEST.dat"
+                mock_files.append({
+                    'name': filename,
+                    'size': 15728640,
+                    'time_str': f"{current_hour:02d}:{current_minute:02d}:00"
+                })
+                # Increment by 15 minutes
+                current_minute += 15
+                if current_minute >= 60:
+                    current_minute = 0
+                    current_hour += 1
+
+            return jsonify({'files': mock_files, 'count': len(mock_files), 'offline_mode': True})
+
+        if not paramiko:
+            return jsonify({'files': [], 'error': 'SSH library not available'})
+
         # Connect to server
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -1915,15 +2406,27 @@ def api_ptx_status():
     """Check PTX equipment status via ping and SSH"""
     data = request.get_json()
     ip_address = data.get('ip_address')
-    
+
     if not ip_address:
         return jsonify({'success': False, 'message': 'IP address required'}), 400
-    
+
     try:
+        # OFFLINE MODE: Return simulated online status
+        if not is_online_network():
+            return jsonify({
+                'success': True,
+                'ping_status': True,
+                'ping_time': 0.025,  # Simulated 25ms ping
+                'ssh_status': True,
+                'ssh_details': 'SSH available (simulated)',
+                'overall_status': 'Online',
+                'offline_mode': True
+            })
+
         # Test ping connectivity
         ping_result = None
         ping_status = False
-        
+
         if ping3:
             ping_result = ping3.ping(ip_address, timeout=3)
             ping_status = ping_result is not None
@@ -1931,7 +2434,7 @@ def api_ptx_status():
             # Fallback for testing
             ping_status = True
             ping_result = 0.05  # Simulated ping time
-        
+
         # Simulate SSH status for offline mode
         ssh_status = ping_status  # Assume SSH available if ping works
         ssh_details = "SSH status simulated" if not paramiko else "SSH check available"
@@ -1952,15 +2455,6 @@ def api_ptx_status():
 # T1 LEGACY TOOLS
 # ========================================
 
-import uuid
-import queue
-import threading
-
-
-# ========================================
-# T1 LEGACY TOOLS - TERMINAL SUPPORT
-# ========================================
-
 terminal_sessions = {}
 
 class TerminalSession:
@@ -1970,28 +2464,46 @@ class TerminalSession:
         self.process: Optional[subprocess.Popen] = None
         self.output_queue: queue.Queue = queue.Queue()
         self.running = False
+        self.offline_mode = False
         
     def start(self) -> tuple[bool, str]:
-        """Start T1_Tools.bat process"""
+        """Start T1_Tools.bat process or offline simulation"""
+
+        # First, search for T1_Tools.bat (works both online and offline)
         if getattr(sys, 'frozen', False):
             base_dir = os.path.dirname(sys.executable)
         else:
             base_dir = os.path.dirname(os.path.abspath(__file__))
-        
+
+        # Search in multiple locations including all drives
         possible_paths = [
             os.path.join(base_dir, 'T1_Tools_Legacy', 'bin', 'T1_Tools.bat'),
             os.path.join(base_dir, 'T1_Tools.bat'),
             os.path.join(TOOLS_DIR, '..', 'T1_Tools_Legacy', 'bin', 'T1_Tools.bat')
         ]
-        
+
+        # Also search all removable drives (D: through Z:)
+        import string
+        for drive_letter in string.ascii_uppercase[3:]:  # D through Z
+            drive_path = f"{drive_letter}:/T1_Tools_Legacy/bin/T1_Tools.bat"
+            possible_paths.append(drive_path)
+            drive_path2 = f"{drive_letter}:/T1_Tools.bat"
+            possible_paths.append(drive_path2)
+
         bat_file = None
         for path in possible_paths:
             if os.path.exists(path):
                 bat_file = path
+                print(f"[LEGACY] Found T1_Tools.bat at: {path}")
                 break
-        
+
+        # If USB not found, fall back to simulation mode
         if not bat_file:
-            return False, "T1_Tools.bat not found on USB"
+            self.running = True
+            self.offline_mode = True
+            self.output_queue.put("[SIMULATION MODE] T1_Tools.bat not found on USB\n")
+            self.output_queue.put("Using simulated terminal. Type 'help' for commands.\n")
+            return True, "Simulation mode (USB not detected)"
         
         try:
             if platform.system() == 'Windows':
@@ -2029,7 +2541,14 @@ class TerminalSession:
             self.running = False
     
     def send_command(self, command: str) -> bool:
-        """Send command to terminal"""
+        """Send command to terminal or simulate in offline mode"""
+        # Offline mode - simulate command responses
+        if self.offline_mode:
+            self.output_queue.put(f"\n> {command}\n")
+            self._simulate_command(command.strip().lower())
+            return True
+
+        # Online mode - send to actual process
         if self.process and self.process.poll() is None:
             try:
                 if self.process.stdin is not None:
@@ -2040,6 +2559,27 @@ class TerminalSession:
                 logger.error(f"Terminal command send error: {e}")
                 return False
         return False
+
+    def _simulate_command(self, command: str):
+        """Simulate command responses in offline mode"""
+        if command == 'help':
+            self.output_queue.put("Available commands:\n")
+            self.output_queue.put("  help     - Show this help message\n")
+            self.output_queue.put("  status   - Show system status\n")
+            self.output_queue.put("  clear    - Clear terminal\n")
+            self.output_queue.put("\n[NOTE] Offline mode - commands are simulated\n")
+        elif command == 'status':
+            self.output_queue.put("System Status:\n")
+            self.output_queue.put("  Mode: OFFLINE (Simulation)\n")
+            self.output_queue.put("  Tools: T1_Tools_Legacy (Simulated)\n")
+            self.output_queue.put("  Status: Ready\n")
+        elif command == 'clear':
+            self.output_queue.put("\033[2J\033[H")  # ANSI clear screen
+        elif command:
+            self.output_queue.put(f"[OFFLINE] Simulated response for: {command}\n")
+            self.output_queue.put("Command executed successfully (simulation)\n")
+        else:
+            self.output_queue.put("\n")
     
     def get_output(self) -> str:
         """Get accumulated output"""
@@ -2070,7 +2610,9 @@ class TerminalSession:
 @login_required
 def legacy_tools():
     """T1 Legacy Tools page with live terminal"""
-    return render_template('t1_legacy.html')
+    return render_template('t1_legacy.html',
+                         online=is_online_network(),
+                         gateway_ip=GATEWAY_IP)
 
 
 @app.route('/api/legacy/terminal/start', methods=['POST'])
@@ -2156,7 +2698,6 @@ def api_legacy_terminal_stop():
         logger.error(f"Terminal stop error: {e}")
         return jsonify({'success': False, 'message': str(e)})
 
-
 # Keep existing equipment list route
 @app.route('/api/legacy/equipment-list', methods=['GET'])
 @login_required
@@ -2211,7 +2752,6 @@ def api_legacy_equipment_list():
         logger.error(f"Equipment list error: {e}")
         return jsonify({'success': False, 'message': str(e)})
 
-
 # Helper function for equipment IPs
 def get_equipment_ips(equipment_name):
     """Get PTX and AVI IPs for equipment"""
@@ -2253,8 +2793,196 @@ def get_equipment_ips(equipment_name):
         logger.error(f"Error reading IP list: {e}")
         return None, None
 
+@app.route('/api/legacy/grm-script', methods=['POST'])
+@login_required
+def api_legacy_grm_script():
+    """Execute GRM T1 Scripts via SSH (plink)"""
+    try:
+        data = request.get_json()
+        script_name = data.get('script', '').lower()
 
-# Keep existing execute route for quick access buttons
+        # Script mapping to remote commands
+        # Format: plink mms@10.110.19.107 -pw password "remote_script_path equipment_ip"
+        grm_scripts = {
+            'ip-finder': {
+                'name': 'IP Finder',
+                'command': 'IP_Finder.bat',
+                'description': 'Find equipment IP addresses'
+            },
+            'ptx-uptime': {
+                'name': 'PTX Uptime Report',
+                'command': '/home/mms/bin/remote_check/TempTool/MM2/Check_Exe.sh',
+                'requires_ip': True,
+                'description': 'Generate PTX uptime report'
+            },
+            'mineview-sessions': {
+                'name': 'Mineview Sessions',
+                'command': 'MineView_Session.bat',
+                'description': 'Check active Mineview sessions'
+            },
+            'start-vnc': {
+                'name': 'Start PTX VNC',
+                'command': 'Start_VNC.bat',
+                'requires_ip': True,
+                'description': 'Start VNC connection to PTX'
+            },
+            'ptx-health': {
+                'name': 'PTX Health Check',
+                'command': 'PTXC_Health_Check.bat',
+                'requires_ip': True,
+                'description': 'Check PTX system health'
+            },
+            'avi-reboot': {
+                'name': 'MM2 AVI Reboot',
+                'command': 'AVI_MM2_Reboot.bat',
+                'requires_ip': True,
+                'description': 'Reboot AVI system'
+            },
+            'watchdog': {
+                'name': 'PTX-AVI Watchdog Deploy',
+                'command': 'PTX-AVI_Watchdog_SingleDeploy.bat',
+                'requires_ip': True,
+                'description': 'Deploy watchdog to PTX-AVI'
+            },
+            'koa-data': {
+                'name': 'Live KOA Data',
+                'command': 'LIVE_KOA_DataCheck.bat',
+                'requires_ip': True,
+                'description': 'Check live KOA data'
+            },
+            'speed-limit': {
+                'name': 'Live Speed Limit Data',
+                'command': 'Latest_SpeedLimit_DataCheck.bat',
+                'requires_ip': True,
+                'description': 'Check speed limit data'
+            },
+            'linux-perf': {
+                'name': 'Linux Perf/Usage Check',
+                'command': 'Linux_Health_Check.bat',
+                'requires_ip': True,
+                'description': 'Check Linux performance and usage'
+            },
+            'component-tracking': {
+                'name': 'Field Component Tracking',
+                'command': 'ComponentTracking.bat',
+                'requires_ip': True,
+                'description': 'Track field components'
+            },
+            'log-downloader': {
+                'name': 'Linux Logs Downloader',
+                'command': 'Log_Downloader.bat',
+                'requires_ip': True,
+                'description': 'Download Linux system logs'
+            }
+        }
+
+        # Check if script exists
+        if script_name not in grm_scripts:
+            return jsonify({
+                'success': False,
+                'message': f'Unknown script: {script_name}'
+            })
+
+        script = grm_scripts[script_name]
+
+        # OFFLINE MODE: Simulate script execution
+        if not is_online_network():
+            output_lines = [
+                f"[OFFLINE MODE] Simulating: {script['name']}",
+                f"Script: {script['command']}",
+                f"Description: {script['description']}",
+                "",
+                "This would execute on MMS server: 10.110.19.107",
+                "Command output would appear here in online mode.",
+                "",
+                "[SIMULATION] Script completed successfully"
+            ]
+            return jsonify({
+                'success': True,
+                'output': '\n'.join(output_lines),
+                'message': f'{script["name"]} simulated (offline mode)'
+            })
+
+        # ONLINE MODE: Execute via plink
+        # Check if plink exists
+        plink_path = PLINK_PATH
+        if not os.path.exists(plink_path):
+            return jsonify({
+                'success': False,
+                'message': f'plink.exe not found at: {plink_path}'
+            })
+
+        # MMS server connection details
+        mms_server = MMS_SERVER['ip']
+        mms_user = MMS_SERVER['user']
+        mms_password = MMS_SERVER['password']
+
+        # Build plink command
+        # Format: plink -batch -t mms@10.110.19.107 -pw password "command"
+        plink_cmd = [
+            plink_path,
+            '-batch',
+            '-t',
+            f'{mms_user}@{mms_server}',
+            '-pw', mms_password,
+            script['command']
+        ]
+
+        logger.info(f"GRM Script: Executing {script['name']}")
+
+        # Execute plink command
+        try:
+            if platform.system() == 'Windows':
+                result = subprocess.run(
+                    plink_cmd,
+                    capture_output=True,
+                    text=True,
+                    timeout=60,
+                    creationflags=subprocess.CREATE_NO_WINDOW
+                )
+            else:
+                result = subprocess.run(
+                    plink_cmd,
+                    capture_output=True,
+                    text=True,
+                    timeout=60
+                )
+
+            # Combine stdout and stderr
+            output = result.stdout
+            if result.stderr:
+                output += f"\n[ERRORS]\n{result.stderr}"
+
+            if result.returncode == 0:
+                return jsonify({
+                    'success': True,
+                    'output': output,
+                    'message': f'{script["name"]} executed successfully'
+                })
+            else:
+                return jsonify({
+                    'success': False,
+                    'output': output,
+                    'message': f'{script["name"]} failed with code {result.returncode}'
+                })
+
+        except subprocess.TimeoutExpired:
+            return jsonify({
+                'success': False,
+                'message': f'{script["name"]} timed out after 60 seconds'
+            })
+        except Exception as e:
+            logger.error(f"GRM Script error: {e}")
+            return jsonify({
+                'success': False,
+                'message': f'Failed to execute {script["name"]}: {str(e)}'
+            })
+
+    except Exception as e:
+        logger.error(f"GRM Script API error: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
 @app.route('/api/legacy/execute', methods=['POST'])
 @login_required
 def api_legacy_execute():
@@ -2396,6 +3124,140 @@ def api_legacy_execute():
     except Exception as e:
         logger.error(f"Legacy API error: {e}")
         return jsonify({'success': False, 'message': str(e)})
+    
+# ========================================
+# LOG - CLEANUP TOOL
+# ========================================
+    
+@app.route('/api/cleanup-logs', methods=['POST'])
+@login_required
+def api_cleanup_logs():
+    """Execute log cleanup - auto-detects online/offline mode."""
+    print("[CLEANUP ROUTE] /api/cleanup-logs called")
+    try:
+        data = request.json
+        if data is None:
+            return jsonify({"success": False, "error": "No JSON data provided"}), 400
+        folder_retention = int(data.get('folder_retention', 2))
+        file_retention = int(data.get('file_retention', 7))
+        dry_run = data.get('dry_run', True)
+
+        print(f"[CLEANUP] Received: dry_run={dry_run}, folder_retention={folder_retention}, file_retention={file_retention}")
+
+        # AUTO-DETECT OFFLINE MODE
+        if not is_online_network():
+            print(f"[CLEANUP] OFFLINE MODE - Using test data (dry_run={dry_run})")
+            results = cleanup_logs_test_mode(
+                folder_retention=folder_retention,
+                file_retention=file_retention,
+                dry_run=dry_run
+            )
+            return jsonify(results)
+        
+        # ONLINE MODE
+        print("[CLEANUP] ONLINE MODE - Connecting to equipment")
+        ip_address = data.get('ip')
+        
+        if not ip_address:
+            return jsonify({"success": False, "error": "No IP address provided"}), 400
+        
+        results = cleanup_logs(
+            ip_address=ip_address,
+            folder_retention=folder_retention,
+            file_retention=file_retention,
+            dry_run=dry_run
+        )
+        
+        return jsonify(results)
+        
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@app.route('/api/cleanup-logs/preview', methods=['POST'])
+@login_required
+def api_cleanup_logs_preview():
+    """Preview cleanup - auto-detects online/offline mode."""
+    print("[CLEANUP ROUTE] /api/cleanup-logs/preview called")
+    try:
+        data = request.json
+        if data is None:
+            return jsonify({"success": False, "error": "No JSON data provided"}), 400
+        folder_retention = int(data.get('folder_retention', 2))
+        file_retention = int(data.get('file_retention', 7))
+        
+        # AUTO-DETECT OFFLINE MODE
+        if not is_online_network():
+            print("[CLEANUP] OFFLINE MODE - Preview with test data")
+            results = cleanup_logs_test_mode(
+                folder_retention=folder_retention,
+                file_retention=file_retention,
+                dry_run=True
+            )
+            return jsonify(results)
+        
+        # ONLINE MODE
+        print("[CLEANUP] ONLINE MODE - Preview real equipment")
+        ip_address = data.get('ip')
+        
+        if not ip_address:
+            return jsonify({"success": False, "error": "No IP address provided"}), 400
+        
+        results = cleanup_logs(
+            ip_address=ip_address,
+            folder_retention=folder_retention,
+            file_retention=file_retention,
+            dry_run=True
+        )
+        
+        return jsonify(results)
+
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@app.route('/api/cleanup-logs/generate-test-data', methods=['POST'])
+@login_required
+def api_generate_test_data():
+    """Generate test data for offline mode testing."""
+    try:
+        # Only works in offline mode
+        if is_online_network():
+            return jsonify({"success": False, "error": "Test data generation only available in offline mode"}), 400
+
+        print("[TEST DATA] Generating test log files...")
+
+        import subprocess
+        import sys
+
+        generator_path = os.path.join(os.path.dirname(__file__), 'tools', 'test_log_generator.py')
+
+        if not os.path.exists(generator_path):
+            return jsonify({"success": False, "error": f"Generator not found at {generator_path}"}), 500
+
+        # Run the generator
+        result = subprocess.run([sys.executable, generator_path],
+                              capture_output=True, text=True, timeout=60)
+
+        if result.returncode == 0:
+            print("[TEST DATA] Generation complete")
+            return jsonify({
+                "success": True,
+                "message": "Test data generated successfully"
+            })
+        else:
+            error_msg = result.stderr[:500] if result.stderr else "Unknown error"
+            print(f"[TEST DATA] Generation failed: {error_msg}")
+            return jsonify({
+                "success": False,
+                "error": f"Generation failed: {error_msg}"
+            }), 500
+
+    except subprocess.TimeoutExpired:
+        return jsonify({"success": False, "error": "Test data generation timed out"}), 500
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
 
 # ========================================
 # ERROR HANDLERS
@@ -2450,23 +3312,24 @@ def open_browser():
 if __name__ == '__main__':
     # Display startup banner
     print_startup_banner()
-    
+
     # Start browser in separate thread
     browser_thread = threading.Thread(target=open_browser, daemon=True)
     browser_thread.start()
-    
+
     # Development server configuration
     try:
         app.run(
             host='0.0.0.0',  # Listen on all network interfaces (allows remote access)
             port=8888,
             debug=True,
-            use_reloader=False  # Prevents duplicate startup messages
+            use_reloader=False,  # Disabled - Windows caching issues. Restart manually after code changes.
+            passthrough_errors=False  # Handle errors gracefully
         )
     except KeyboardInterrupt:
-        print("\n\nT1 Tools Web Dashboard stopped by user.")
+        print("\n\n[SHUTDOWN] T1 Tools Web Dashboard stopped by user.")
+        sys.exit(0)
     except Exception as e:
-        print(f"\nStartup Error: {e}")
+        print(f"\n[ERROR] Startup Error: {e}")
         print("Please check that port 8888 is available and try again.")
         sys.exit(1)
-        

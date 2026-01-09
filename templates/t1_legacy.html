@@ -6,24 +6,21 @@
     <title>T1 Legacy Tools</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <style>
+        /* Fix button.nav-item styling to match a.nav-item */
+        button.nav-item {
+            background: none;
+            border: none;
+            width: 100%;
+            text-align: left;
+            font-family: inherit;
+        }
+
         .legacy-container {
             max-width: 1600px;
             margin: 0 auto;
             padding: 20px;
         }
 
-        .legacy-layout {
-            display: grid;
-            grid-template-columns: 1fr 600px;
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        @media (max-width: 1400px) {
-            .legacy-layout {
-                grid-template-columns: 1fr;
-            }
-        }
 
         /* Terminal Section */
         .terminal-section {
@@ -236,42 +233,6 @@
             border-radius: 4px;
         }
 
-        .equipment-selector {
-            background: var(--theme-bg-card);
-            border: 1px solid var(--theme-border);
-            border-radius: var(--radius-lg);
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-
-        .equipment-search {
-            width: 100%;
-            max-width: 500px;
-            padding: 12px;
-            background: var(--theme-bg-secondary);
-            border: 1px solid var(--theme-border);
-            border-radius: var(--radius-md);
-            color: var(--theme-text);
-            font-size: 1rem;
-        }
-
-        .equipment-search:focus {
-            outline: none;
-            border-color: var(--theme-primary);
-        }
-
-        .selected-equipment {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: var(--theme-primary);
-            color: white;
-            padding: 8px 16px;
-            border-radius: var(--radius-md);
-            margin-top: 10px;
-            font-weight: 600;
-        }
-
         .toast {
             position: fixed;
             bottom: 20px;
@@ -319,23 +280,80 @@
                 <h2 class="sidebar-title">T1 Tools</h2>
             </div>
             <nav class="sidebar-nav">
-                <a href="/" class="sidebar-link">
-                    <span class="sidebar-link-icon">🏠</span>
-                    <span class="sidebar-link-text">Dashboard</span>
-                </a>
-                <a href="/run/IP Finder" class="sidebar-link">
-                    <span class="sidebar-link-icon">🔍</span>
-                    <span class="sidebar-link-text">IP Finder</span>
-                </a>
-                <a href="/legacy" class="sidebar-link active">
-                    <span class="sidebar-link-icon">🛠️</span>
-                    <span class="sidebar-link-text">Legacy Tools</span>
-                </a>
+                <!-- Main Navigation -->
+                <div class="nav-section">
+                    <div class="nav-section-title">Navigation</div>
+                    <a href="/" class="nav-item">
+                        <span class="nav-item-icon">🏠</span>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="/run/IP Finder" class="nav-item">
+                        <span class="nav-item-icon">🔍</span>
+                        <span>IP Finder</span>
+                    </a>
+                    <a href="/legacy" class="nav-item active">
+                        <span class="nav-item-icon">🛠️</span>
+                        <span>Legacy Tools</span>
+                    </a>
+                </div>
+
+                <!-- GRM T1 Legacy Tools -->
+                <div class="nav-section">
+                    <div class="nav-section-title">Komatsu GRM T1 Scripts</div>
+                    <button class="nav-item" data-tool="ip-finder">
+                        <span class="nav-item-icon">🔍</span>
+                        <span>IP Finder</span>
+                    </button>
+                    <button class="nav-item" data-tool="ptx-uptime">
+                        <span class="nav-item-icon">⏱️</span>
+                        <span>PTX Uptime Report</span>
+                    </button>
+                    <button class="nav-item" data-tool="mineview-sessions">
+                        <span class="nav-item-icon">👥</span>
+                        <span>Mineview Sessions</span>
+                    </button>
+                    <button class="nav-item" data-tool="start-vnc">
+                        <span class="nav-item-icon">🖥️</span>
+                        <span>Start PTX VNC</span>
+                    </button>
+                    <button class="nav-item" data-tool="ptx-health">
+                        <span class="nav-item-icon">❤️</span>
+                        <span>PTX Health Check</span>
+                    </button>
+                    <button class="nav-item" data-tool="avi-reboot">
+                        <span class="nav-item-icon">🔄</span>
+                        <span>MM2 AVI Reboot</span>
+                    </button>
+                    <button class="nav-item" data-tool="watchdog">
+                        <span class="nav-item-icon">🐕</span>
+                        <span>PTX-AVI Watchdog Deploy</span>
+                    </button>
+                    <button class="nav-item" data-tool="koa-data">
+                        <span class="nav-item-icon">📊</span>
+                        <span>Live KOA Data</span>
+                    </button>
+                    <button class="nav-item" data-tool="speed-limit">
+                        <span class="nav-item-icon">🚦</span>
+                        <span>Live Speed Limit Data</span>
+                    </button>
+                    <button class="nav-item" data-tool="linux-perf">
+                        <span class="nav-item-icon">💻</span>
+                        <span>Linux Perf/Usage Check</span>
+                    </button>
+                    <button class="nav-item" data-tool="component-tracking">
+                        <span class="nav-item-icon">📦</span>
+                        <span>Field Component Tracking</span>
+                    </button>
+                    <button class="nav-item" data-tool="log-downloader">
+                        <span class="nav-item-icon">📥</span>
+                        <span>Linux Logs Downloader</span>
+                    </button>
+                </div>
             </nav>
             <div class="sidebar-footer">
-                <div class="network-status">
-                    <span class="status-indicator status-online"></span>
-                    <span>Network Online</span>
+                <div class="sidebar-status">
+                    <span class="status-indicator {{ 'online' if online else 'offline' }}"></span>
+                    <span>{{ 'Network Online' if online else 'Offline Mode' }}</span>
                 </div>
             </div>
         </aside>
@@ -351,151 +369,31 @@
 
             <div class="content-container">
                 <div class="legacy-container">
-                    
-                    <!-- LAYOUT: Terminal + Tools -->
-                    <div class="legacy-layout">
-                        
-                        <!-- LEFT: Quick Access Tools -->
-                        <div class="tools-section">
-                            <!-- Equipment Selector -->
-                            <div class="equipment-selector">
-                                <label for="equipment-search" style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--theme-text);">
-                                    Select Equipment
-                                </label>
-                                <input 
-                                    type="text" 
-                                    id="equipment-search" 
-                                    class="equipment-search" 
-                                    placeholder="Type equipment name (e.g., RD295, AHG135)..."
-                                    autocomplete="off"
-                                >
-                                <div id="selected-equipment" style="margin-top: 10px;"></div>
-                            </div>
 
-                            <!-- PTX Tools -->
-                            <div class="tool-category">
-                                <div class="category-header">
-                                    <span class="category-icon">💻</span>
-                                    <h2 class="category-title">PTX Quick Access</h2>
-                                </div>
-                                <div class="tools-grid">
-                                    <div class="tool-card" data-command="vnc">
-                                        <div class="tool-name">VNC</div>
-                                        <div class="tool-command">vnc [equip]</div>
-                                    </div>
-                                    <div class="tool-card" data-command="putty">
-                                        <div class="tool-name">PuTTY</div>
-                                        <div class="tool-command">putty [equip]</div>
-                                    </div>
-                                    <div class="tool-card" data-command="cache">
-                                        <div class="tool-name">Cache</div>
-                                        <div class="tool-command">cache [equip]</div>
-                                    </div>
-                                    <div class="tool-card" data-command="ptxr">
-                                        <div class="tool-name">Reboot</div>
-                                        <div class="tool-command">ptxr [equip]</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- AVI Tools -->
-                            <div class="tool-category">
-                                <div class="category-header">
-                                    <span class="category-icon">📡</span>
-                                    <h2 class="category-title">AVI Quick Access</h2>
-                                </div>
-                                <div class="tools-grid">
-                                    <div class="tool-card" data-command="avi">
-                                        <div class="tool-name">AVI UI</div>
-                                        <div class="tool-command">avi [equip]</div>
-                                    </div>
-                                    <div class="tool-card" data-command="avilogs">
-                                        <div class="tool-name">AVI Logs</div>
-                                        <div class="tool-command">avilogs [equip]</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Other Tools -->
-                            <div class="tool-category">
-                                <div class="category-header">
-                                    <span class="category-icon">🛰️</span>
-                                    <h2 class="category-title">Other Tools</h2>
-                                </div>
-                                <div class="tools-grid">
-                                    <div class="tool-card" data-command="tru">
-                                        <div class="tool-name">TRU</div>
-                                        <div class="tool-command">tru [equip]</div>
-                                    </div>
-                                    <div class="tool-card" data-command="help">
-                                        <div class="tool-name">Help</div>
-                                        <div class="tool-command">help</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- RIGHT: Live Terminal -->
-                        <div class="terminal-section">
+                    <!-- GRM Scripts Terminal -->
+                    <div class="terminal-section">
                             <div class="terminal-header">
                                 <div class="terminal-title">
                                     <span>⚡</span>
-                                    <span>T1 Tools Terminal</span>
+                                    <span>GRM Scripts Terminal</span>
                                 </div>
                                 <div class="terminal-controls">
-                                    <button class="terminal-btn" id="terminal-start">▶ Start</button>
                                     <button class="terminal-btn" id="terminal-clear">🗑 Clear</button>
                                 </div>
                             </div>
                             <div class="terminal-window" id="terminal-output">
-                                <div class="terminal-line terminal-info">Click "Start" to launch T1_Tools.bat terminal...</div>
-                            </div>
-                            <div class="terminal-input-area">
-                                <input 
-                                    type="text" 
-                                    id="terminal-input" 
-                                    class="terminal-input" 
-                                    placeholder="Type command and press Enter..."
-                                    disabled
-                                >
-                                <button class="terminal-send-btn" id="terminal-send" disabled>Send</button>
+                                <div class="terminal-line terminal-info">Click a tool in the sidebar to execute a GRM script...</div>
                             </div>
                         </div>
 
-                    </div>
                 </div>
             </div>
         </main>
     </div>
 
     <script>
-        let selectedEquipment = null;
-        let terminalProcess = null;
-        let terminalPolling = null;
-
-        // Equipment search
-        const equipmentSearch = document.getElementById('equipment-search');
-        const selectedEquipmentDiv = document.getElementById('selected-equipment');
         const terminalOutput = document.getElementById('terminal-output');
-        const terminalInput = document.getElementById('terminal-input');
-        const terminalSendBtn = document.getElementById('terminal-send');
-        const terminalStartBtn = document.getElementById('terminal-start');
         const terminalClearBtn = document.getElementById('terminal-clear');
-
-        equipmentSearch.addEventListener('input', function(e) {
-            const value = e.target.value.toUpperCase().trim();
-            if (value.length > 0) {
-                selectedEquipment = value;
-                selectedEquipmentDiv.innerHTML = `
-                    <div class="selected-equipment">
-                        <span>📍 ${value}</span>
-                    </div>
-                `;
-            } else {
-                selectedEquipment = null;
-                selectedEquipmentDiv.innerHTML = '';
-            }
-        });
 
         // Terminal Functions
         function appendToTerminal(text, className = 'terminal-output') {
@@ -506,88 +404,40 @@
             terminalOutput.scrollTop = terminalOutput.scrollHeight;
         }
 
-        terminalStartBtn.addEventListener('click', function() {
-            if (terminalProcess) {
-                appendToTerminal('Terminal already running!', 'terminal-error');
-                return;
-            }
+        terminalClearBtn.addEventListener('click', function() {
+            terminalOutput.innerHTML = '';
+            appendToTerminal('Terminal cleared. Click a tool to execute a script.', 'terminal-info');
+        });
 
-            appendToTerminal('Starting T1_Tools.bat...', 'terminal-info');
-            
-            fetch('/api/legacy/terminal/start', {
-                method: 'POST'
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    terminalProcess = data.session_id;
-                    terminalInput.disabled = false;
-                    terminalSendBtn.disabled = false;
-                    terminalStartBtn.classList.add('active');
-                    appendToTerminal(data.message, 'terminal-info');
-                    
-                    // Start polling for output
-                    startTerminalPolling();
-                } else {
-                    appendToTerminal(`Error: ${data.message}`, 'terminal-error');
-                }
-            })
-            .catch(error => {
-                appendToTerminal(`Connection error: ${error}`, 'terminal-error');
+        // Sidebar tool button clicks
+        const toolButtons = document.querySelectorAll('[data-tool]');
+
+        toolButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const toolName = this.dataset.tool;
+                const toolLabel = this.querySelector('span:not(.nav-item-icon)').textContent;
+
+                executeGRMScript(toolName, toolLabel);
             });
         });
 
-        terminalClearBtn.addEventListener('click', function() {
-            terminalOutput.innerHTML = '';
-        });
+        function executeGRMScript(toolName, toolLabel) {
+            appendToTerminal(`\n> Executing: ${toolLabel}`, 'terminal-prompt');
+            appendToTerminal('Connecting to GRM script...', 'terminal-info');
 
-        terminalInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                sendTerminalCommand();
-            }
-        });
-
-        terminalSendBtn.addEventListener('click', sendTerminalCommand);
-
-        function sendTerminalCommand() {
-            const command = terminalInput.value.trim();
-            if (!command || !terminalProcess) return;
-
-            appendToTerminal(`> ${command}`, 'terminal-prompt');
-            terminalInput.value = '';
-
-            fetch('/api/legacy/terminal/command', {
+            fetch('/api/legacy/grm-script', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    session_id: terminalProcess,
-                    command: command
+                    script: toolName
                 })
             })
             .then(response => response.json())
             .then(data => {
-                if (!data.success) {
-                    appendToTerminal(`Error: ${data.message}`, 'terminal-error');
-                }
-            })
-            .catch(error => {
-                appendToTerminal(`Error: ${error}`, 'terminal-error');
-            });
-        }
-
-        function startTerminalPolling() {
-            terminalPolling = setInterval(() => {
-                if (!terminalProcess) {
-                    stopTerminalPolling();
-                    return;
-                }
-
-                fetch(`/api/legacy/terminal/output?session_id=${terminalProcess}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success && data.output) {
+                if (data.success) {
+                    if (data.output) {
                         const lines = data.output.split('\n');
                         lines.forEach(line => {
                             if (line.trim()) {
@@ -595,77 +445,15 @@
                             }
                         });
                     }
-                    if (data.exited) {
-                        appendToTerminal('Terminal session ended.', 'terminal-info');
-                        stopTerminalPolling();
-                        terminalProcess = null;
-                        terminalInput.disabled = true;
-                        terminalSendBtn.disabled = true;
-                        terminalStartBtn.classList.remove('active');
+                    if (data.message) {
+                        appendToTerminal(data.message, 'terminal-info');
                     }
-                })
-                .catch(error => {
-                    console.error('Polling error:', error);
-                });
-            }, 500); // Poll every 500ms
-        }
-
-        function stopTerminalPolling() {
-            if (terminalPolling) {
-                clearInterval(terminalPolling);
-                terminalPolling = null;
-            }
-        }
-
-        // Tool card clicks
-        const toolCards = document.querySelectorAll('.tool-card');
-
-        toolCards.forEach(card => {
-            card.addEventListener('click', function() {
-                const command = this.dataset.command;
-                const toolName = this.querySelector('.tool-name').textContent;
-                
-                // Commands that don't require equipment
-                if (command === 'help') {
-                    executeQuickCommand(command, null);
-                    return;
-                }
-
-                // Check if equipment is selected
-                if (!selectedEquipment) {
-                    showToast('Please select equipment first', 'error');
-                    equipmentSearch.focus();
-                    return;
-                }
-
-                executeQuickCommand(command, selectedEquipment);
-            });
-        });
-
-        function executeQuickCommand(command, equipment) {
-            const fullCommand = equipment ? `${command} ${equipment}` : command;
-            showToast(`Executing: ${fullCommand}`, 'success');
-            
-            fetch('/api/legacy/execute', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    command: command,
-                    equipment: equipment
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showToast(data.message, 'success');
                 } else {
-                    showToast(data.message || 'Command failed', 'error');
+                    appendToTerminal(`Error: ${data.message || 'Script execution failed'}`, 'terminal-error');
                 }
             })
             .catch(error => {
-                showToast('Error executing command', 'error');
+                appendToTerminal(`Connection error: ${error}`, 'terminal-error');
                 console.error('Error:', error);
             });
         }
@@ -683,22 +471,6 @@
                 }, 300);
             }, 3000);
         }
-
-        // Cleanup on page unload
-        window.addEventListener('beforeunload', function() {
-            if (terminalProcess) {
-                fetch('/api/legacy/terminal/stop', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        session_id: terminalProcess
-                    }),
-                    keepalive: true
-                });
-            }
-        });
     </script>
 </body>
 </html>
