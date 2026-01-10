@@ -25,8 +25,8 @@ Before building the client setup, download the following portable versions:
 
 ## 5. VNC Viewer (Remote Desktop)
 - **Download:** https://www.realvnc.com/en/connect/download/viewer/windows/
-- **Get:** VNC Viewer standalone executable
-- **Save as:** `vncviewer.exe`
+- **Get:** VNC Viewer standalone executable (version 5.3.2)
+- **Save as:** `vncviewer_5.3.2.exe`
 - **Place in:** `client_setup/tools/`
 
 ## Alternative: Use Existing Tools from T1_Tools_Legacy
@@ -48,6 +48,6 @@ Copy them to `client_setup/tools/`
    - plink.exe
    - pscp.exe
    - WinSCP.exe
-   - vncviewer.exe
+   - vncviewer_5.3.2.exe
 
 2. You can then package the installer or serve it from the web server

@@ -26,7 +26,7 @@ if "!PORTDISP!"=="" (
 )
 
 REM Build VNC Viewer command
-set "VNC_CMD=C:\T1_Tools_Client\vncviewer.exe"
+set "VNC_CMD=C:\T1_Tools_Client\vncviewer_5.3.2.exe"
 
 REM VNC Viewer format: host::port or host:display
 REM If port > 100, use ::port format, otherwise use :display

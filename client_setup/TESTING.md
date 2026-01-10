@@ -34,7 +34,7 @@
 3. **Verify Installation:**
    ```
    ✓ C:\T1_Tools_Client\ folder created
-   ✓ Tools copied: putty.exe, plink.exe, pscp.exe, WinSCP.exe, vncviewer.exe
+   ✓ Tools copied: putty.exe, plink.exe, pscp.exe, WinSCP.exe, vncviewer_5.3.2.exe
    ✓ Scripts folder: C:\T1_Tools_Client\scripts\
    ✓ Launcher scripts: launch_putty.bat, launch_winscp.bat, launch_vnc.bat
    ✓ Uninstaller created: C:\T1_Tools_Client\Uninstall.bat
