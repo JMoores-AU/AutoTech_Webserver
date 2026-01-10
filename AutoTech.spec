@@ -1,6 +1,6 @@
 # -*- mode: python ; coding: utf-8 -*-
-# T1 Tools Web Dashboard - PyInstaller Spec File
-# Build command: pyinstaller T1_Tools_Web.spec
+# AutoTech Web Dashboard - PyInstaller Spec File
+# Build command: pyinstaller AutoTech.spec
 
 block_cipher = None
 
@@ -47,7 +47,7 @@ exe = EXE(
     a.zipfiles,
     a.datas,
     [],
-    name='T1_Tools_Web',
+    name='AutoTech',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,

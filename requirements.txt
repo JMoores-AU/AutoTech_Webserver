@@ -1,5 +1,5 @@
-# T1 Tools Requirements - Fixed and Stable (Python 3.8-3.13 Compatible)
-# Generated for Ultimate Manager
+# AutoTech Requirements - Fixed and Stable (Python 3.8-3.13 Compatible)
+# Generated for AutoTech Web Dashboard
 # Locked versions to prevent conflicts
 
 # Core Flask Framework

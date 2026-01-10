@@ -72,7 +72,7 @@ else:
     template_folder = os.path.join(BASE_DIR, 'templates')
     static_folder = os.path.join(BASE_DIR, 'static')
 
-TOOLS_DIR = os.path.join(BASE_DIR, 'T1_Tools_Web', 'tools')
+TOOLS_DIR = os.path.join(BASE_DIR, 'AutoTech', 'tools')
 PLINK_PATH = os.path.join(TOOLS_DIR, 'plink.exe')
 VNC_VIEWER_PATH = os.path.join(TOOLS_DIR, 'vncviewer_5.3.2.exe')
 
@@ -1464,7 +1464,7 @@ def api_vnc_workstation():
 @app.route('/api/launch-legacy', methods=['POST'])
 def api_launch_legacy():
     """
-    Launch T1 Tools Legacy from USB drive
+    Launch T1_Tools_Legacy from USB drive (legacy tool suite)
     Path: T1_Tools_Legacy\\bin\\Run T1 Tools.bat
     """
     try:
@@ -2458,7 +2458,7 @@ def api_ptx_status():
 terminal_sessions = {}
 
 class TerminalSession:
-    """Manages a T1_Tools.bat terminal session"""
+    """Manages a T1_Tools.bat terminal session (legacy tool)"""
     def __init__(self, session_id: str):
         self.session_id = session_id
         self.process: Optional[subprocess.Popen] = None
@@ -3829,7 +3829,7 @@ if __name__ == '__main__':
             passthrough_errors=False  # Handle errors gracefully
         )
     except KeyboardInterrupt:
-        print("\n\n[SHUTDOWN] T1 Tools Web Dashboard stopped by user.")
+        print("\n\n[SHUTDOWN] AutoTech Web Dashboard stopped by user.")
         sys.exit(0)
     except Exception as e:
         print(f"\n[ERROR] Startup Error: {e}")

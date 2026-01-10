@@ -1,6 +1,6 @@
 @echo off
 :: ============================================
-:: T1 Tools Web - Enhanced Build & Test Script
+:: AutoTech Web - Enhanced Build & Test Script
 :: ============================================
 :: Features:
 ::  - Git version control integration
@@ -9,7 +9,7 @@
 ::  - Version management
 :: ============================================
 
-title T1 Tools - Enhanced Build Script
+title AutoTech - Enhanced Build Script
 
 :: Check if Git is available
 git --version >nul 2>&1
@@ -407,12 +407,12 @@ if exist "check_main.py" (
 )
 
 echo Building with PyInstaller...
-python -m PyInstaller T1_Tools_Web.spec --noconfirm
+python -m PyInstaller AutoTech.spec --noconfirm
 echo.
 
-if exist "dist\T1_Tools_Web.exe" (
+if exist "dist\AutoTech.exe" (
     echo [SUCCESS] Build complete!
-    echo Location: dist\T1_Tools_Web.exe
+    echo Location: dist\AutoTech.exe
     
     :: Tag this build in Git if available
     if %GIT_AVAILABLE%==1 (
@@ -442,14 +442,14 @@ echo  Testing Executable...
 echo ============================================
 echo.
 
-if not exist "dist\T1_Tools_Web.exe" (
+if not exist "dist\AutoTech.exe" (
     echo [ERROR] Executable not found!
     echo Run option 9 to build first.
     pause
     goto MENU
 )
 
-echo Starting T1_Tools_Web.exe...
+echo Starting AutoTech.exe...
 echo.
 echo  Access at: http://localhost:8888
 echo  Password: komatsu
@@ -464,7 +464,7 @@ echo  - No console errors (F12)
 echo.
 echo  Close the application window to return here.
 echo ============================================
-start /wait dist\T1_Tools_Web.exe
+start /wait dist\AutoTech.exe
 goto MENU
 
 :: ============================================
@@ -582,10 +582,10 @@ echo   [OK] Clean complete
 echo.
 
 echo [5/7] Building executable...
-python -m PyInstaller T1_Tools_Web.spec --noconfirm
+python -m PyInstaller AutoTech.spec --noconfirm
 echo.
 
-if not exist "dist\T1_Tools_Web.exe" (
+if not exist "dist\AutoTech.exe" (
     echo   [ERROR] Build failed!
     pause
     goto MENU
@@ -610,7 +610,7 @@ echo ============================================
 echo  BUILD SUCCESSFUL!
 echo ============================================
 echo.
-echo  Executable: dist\T1_Tools_Web.exe
+echo  Executable: dist\AutoTech.exe
 echo  Backup: backups\main_PREBUILD_%backup_date%.py
 echo.
 echo  NEXT STEPS:
@@ -688,7 +688,7 @@ echo [OK] Files added
 echo.
 
 echo Creating initial commit...
-git commit -m "Initial commit - T1 Tools Web Dashboard"
+git commit -m "Initial commit - AutoTech Web Dashboard"
 echo [OK] Initial commit created
 echo.
 
