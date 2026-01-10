@@ -297,13 +297,9 @@
                     </a>
                 </div>
 
-                <!-- GRM T1 Legacy Tools -->
+                <!-- GRM T1 Legacy Tools (No Equipment Required) -->
                 <div class="nav-section">
                     <div class="nav-section-title">Komatsu GRM T1 Scripts</div>
-                    <button class="nav-item" data-tool="ip-finder">
-                        <span class="nav-item-icon">🔍</span>
-                        <span>IP Finder</span>
-                    </button>
                     <button class="nav-item" data-tool="ptx-uptime">
                         <span class="nav-item-icon">⏱️</span>
                         <span>PTX Uptime Report</span>
@@ -312,22 +308,6 @@
                         <span class="nav-item-icon">👥</span>
                         <span>Mineview Sessions</span>
                     </button>
-                    <button class="nav-item" data-tool="start-vnc">
-                        <span class="nav-item-icon">🖥️</span>
-                        <span>Start PTX VNC</span>
-                    </button>
-                    <button class="nav-item" data-tool="ptx-health">
-                        <span class="nav-item-icon">❤️</span>
-                        <span>PTX Health Check</span>
-                    </button>
-                    <button class="nav-item" data-tool="avi-reboot">
-                        <span class="nav-item-icon">🔄</span>
-                        <span>MM2 AVI Reboot</span>
-                    </button>
-                    <button class="nav-item" data-tool="watchdog">
-                        <span class="nav-item-icon">🐕</span>
-                        <span>PTX-AVI Watchdog Deploy</span>
-                    </button>
                     <button class="nav-item" data-tool="koa-data">
                         <span class="nav-item-icon">📊</span>
                         <span>Live KOA Data</span>
@@ -335,18 +315,6 @@
                     <button class="nav-item" data-tool="speed-limit">
                         <span class="nav-item-icon">🚦</span>
                         <span>Live Speed Limit Data</span>
-                    </button>
-                    <button class="nav-item" data-tool="linux-perf">
-                        <span class="nav-item-icon">💻</span>
-                        <span>Linux Perf/Usage Check</span>
-                    </button>
-                    <button class="nav-item" data-tool="component-tracking">
-                        <span class="nav-item-icon">📦</span>
-                        <span>Field Component Tracking</span>
-                    </button>
-                    <button class="nav-item" data-tool="log-downloader">
-                        <span class="nav-item-icon">📥</span>
-                        <span>Linux Logs Downloader</span>
                     </button>
                 </div>
             </nav>
@@ -381,6 +349,49 @@
                                     <button class="terminal-btn" id="terminal-clear">🗑 Clear</button>
                                 </div>
                             </div>
+
+                            <!-- Equipment Input (Always Visible) -->
+                            <div style="padding: 12px; border-bottom: 1px solid var(--theme-border); background: var(--theme-bg-secondary); display: flex; align-items: center; gap: 10px; flex-wrap: nowrap;">
+                                <label for="equipment-input" style="font-weight: 600; color: var(--theme-text); white-space: nowrap; flex-shrink: 0;">
+                                    Equipment:
+                                </label>
+                                <input
+                                    type="text"
+                                    id="equipment-input"
+                                    placeholder="Enter equipment name..."
+                                    style="width: 180px; padding: 8px 12px; background: var(--theme-bg-card); border: 1px solid var(--theme-border); border-radius: var(--radius-sm); color: var(--theme-text); font-size: 0.9rem; flex-shrink: 0;"
+                                >
+                                <span id="equipment-status" style="padding: 4px 12px; border-radius: var(--radius-sm); font-size: 0.85rem; flex-shrink: 0;"></span>
+                                <button class="terminal-btn" data-tool="ip-finder" style="white-space: nowrap; flex-shrink: 0;">
+                                    <span>🔍</span> Find Details
+                                </button>
+                            </div>
+
+                            <!-- Equipment-Based Tools -->
+                            <div style="padding: 8px 12px; border-bottom: 1px solid var(--theme-border); background: var(--theme-bg-secondary); display: flex; gap: 4px; flex-wrap: nowrap; justify-content: space-between;">
+                                <button class="terminal-btn" data-tool="start-vnc" style="white-space: nowrap; font-size: 0.8rem; padding: 6px 10px; flex: 1;">
+                                    <span>🖥️</span> Start PTX VNC
+                                </button>
+                                <button class="terminal-btn" data-tool="ptx-health" style="white-space: nowrap; font-size: 0.8rem; padding: 6px 10px; flex: 1;">
+                                    <span>❤️</span> PTX Health Check
+                                </button>
+                                <button class="terminal-btn" data-tool="avi-reboot" style="white-space: nowrap; font-size: 0.8rem; padding: 6px 10px; flex: 1;">
+                                    <span>🔄</span> MM2 AVI Reboot
+                                </button>
+                                <button class="terminal-btn" data-tool="component-tracking" style="white-space: nowrap; font-size: 0.8rem; padding: 6px 10px; flex: 1;">
+                                    <span>📦</span> Component Tracking
+                                </button>
+                                <button class="terminal-btn" data-tool="watchdog" style="white-space: nowrap; font-size: 0.8rem; padding: 6px 10px; flex: 1;">
+                                    <span>🐕</span> Watchdog Deploy
+                                </button>
+                                <button class="terminal-btn" data-tool="linux-perf" style="white-space: nowrap; font-size: 0.8rem; padding: 6px 10px; flex: 1;">
+                                    <span>💻</span> Linux Perf/Usage Check
+                                </button>
+                                <button class="terminal-btn" data-tool="log-downloader" style="white-space: nowrap; font-size: 0.8rem; padding: 6px 10px; flex: 1;">
+                                    <span>📥</span> Linux Logs Downloader
+                                </button>
+                            </div>
+
                             <div class="terminal-window" id="terminal-output">
                                 <div class="terminal-line terminal-info">Click a tool in the sidebar to execute a GRM script...</div>
                             </div>
@@ -394,6 +405,12 @@
     <script>
         const terminalOutput = document.getElementById('terminal-output');
         const terminalClearBtn = document.getElementById('terminal-clear');
+        const equipmentInput = document.getElementById('equipment-input');
+        const equipmentStatus = document.getElementById('equipment-status');
+
+        // Track current equipment status
+        let currentEquipmentStatus = null;
+        let currentEquipmentIP = null;
 
         // Terminal Functions
         function appendToTerminal(text, className = 'terminal-output') {
@@ -403,6 +420,58 @@
             terminalOutput.appendChild(line);
             terminalOutput.scrollTop = terminalOutput.scrollHeight;
         }
+
+        // Update equipment button states
+        function updateEquipmentButtons() {
+            const equipmentButtons = document.querySelectorAll('.terminal-btn[data-tool]');
+            const hasEquipment = equipmentInput.value.trim().length > 0;
+
+            equipmentButtons.forEach(btn => {
+                const toolName = btn.dataset.tool;
+
+                // IP Finder is always enabled (it's used to find equipment)
+                if (toolName === 'ip-finder') {
+                    btn.disabled = !hasEquipment;
+                    btn.style.opacity = hasEquipment ? '1' : '0.5';
+                    btn.style.cursor = hasEquipment ? 'pointer' : 'not-allowed';
+                    return;
+                }
+
+                // Other equipment tools
+                if (currentEquipmentStatus === 'offline') {
+                    btn.disabled = true;
+                    btn.style.opacity = '0.5';
+                    btn.style.cursor = 'not-allowed';
+                } else if (!hasEquipment) {
+                    btn.disabled = true;
+                    btn.style.opacity = '0.5';
+                    btn.style.cursor = 'not-allowed';
+                } else {
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
+                    btn.style.cursor = 'pointer';
+                }
+            });
+        }
+
+        // Equipment input change - show status
+        equipmentInput.addEventListener('input', function() {
+            const value = this.value.trim().toUpperCase();
+            if (value) {
+                equipmentStatus.textContent = `✓ ${value}`;
+                equipmentStatus.style.background = 'var(--status-online)';
+                equipmentStatus.style.color = 'white';
+                // Reset status when equipment changes
+                currentEquipmentStatus = null;
+                currentEquipmentIP = null;
+            } else {
+                equipmentStatus.textContent = '';
+                equipmentStatus.style.background = 'transparent';
+                currentEquipmentStatus = null;
+                currentEquipmentIP = null;
+            }
+            updateEquipmentButtons();
+        });
 
         terminalClearBtn.addEventListener('click', function() {
             terminalOutput.innerHTML = '';
@@ -421,8 +490,26 @@
             });
         });
 
-        function executeGRMScript(toolName, toolLabel) {
+        async function executeGRMScript(toolName, toolLabel) {
             appendToTerminal(`\n> Executing: ${toolLabel}`, 'terminal-prompt');
+
+            // Scripts that require equipment IP/Name
+            const requiresEquipment = [
+                'ip-finder', 'start-vnc', 'ptx-health', 'component-tracking',
+                'avi-reboot', 'watchdog', 'linux-perf', 'log-downloader'
+            ];
+
+            let equipment = null;
+            if (requiresEquipment.includes(toolName)) {
+                equipment = equipmentInput.value.trim().toUpperCase();
+                if (!equipment) {
+                    appendToTerminal('⚠️ Please enter equipment name in the field above', 'terminal-error');
+                    equipmentInput.focus();
+                    return;
+                }
+                appendToTerminal(`Equipment: ${equipment}`, 'terminal-info');
+            }
+
             appendToTerminal('Connecting to GRM script...', 'terminal-info');
 
             fetch('/api/legacy/grm-script', {
@@ -431,22 +518,55 @@
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    script: toolName
+                    script: toolName,
+                    equipment: equipment
                 })
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
+                    // Update equipment status and IP if returned
+                    if (data.equipment_status) {
+                        currentEquipmentStatus = data.equipment_status;
+                        if (data.equipment_status === 'online') {
+                            equipmentStatus.style.background = 'var(--status-online)';
+                        } else if (data.equipment_status === 'offline') {
+                            equipmentStatus.style.background = 'var(--status-offline)';
+                        }
+                    }
+                    if (data.equipment_ip) {
+                        currentEquipmentIP = data.equipment_ip;
+                    }
+                    updateEquipmentButtons();
+
                     if (data.output) {
                         const lines = data.output.split('\n');
                         lines.forEach(line => {
                             if (line.trim()) {
-                                appendToTerminal(line, 'terminal-output');
+                                // Color debug lines differently
+                                if (line.startsWith('[DEBUG]')) {
+                                    appendToTerminal(line, 'terminal-info');
+                                } else {
+                                    appendToTerminal(line, 'terminal-output');
+                                }
                             }
                         });
                     }
                     if (data.message) {
                         appendToTerminal(data.message, 'terminal-info');
+                    }
+
+                    // Handle file download if ready
+                    if (data.download_ready && data.download_url) {
+                        appendToTerminal(`Downloading ${data.filename}...`, 'terminal-info');
+                        // Trigger file download in browser
+                        const downloadLink = document.createElement('a');
+                        downloadLink.href = data.download_url;
+                        downloadLink.download = data.filename;
+                        document.body.appendChild(downloadLink);
+                        downloadLink.click();
+                        document.body.removeChild(downloadLink);
+                        appendToTerminal(`File downloaded to your Downloads folder`, 'terminal-info');
                     }
                 } else {
                     appendToTerminal(`Error: ${data.message || 'Script execution failed'}`, 'terminal-error');
@@ -471,6 +591,9 @@
                 }, 300);
             }, 3000);
         }
+
+        // Initialize button states on page load
+        updateEquipmentButtons();
     </script>
 </body>
 </html>

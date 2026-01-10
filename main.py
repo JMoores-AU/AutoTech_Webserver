@@ -48,7 +48,7 @@ try:
 except ImportError:
     requests = None
 
-from flask import Flask, render_template, request, session, redirect, url_for, jsonify, flash, Response, make_response
+from flask import Flask, render_template, request, session, redirect, url_for, jsonify, flash, Response, make_response, send_file
 from flask_cors import CORS
 
 # Configure logging
@@ -2793,6 +2793,156 @@ def get_equipment_ips(equipment_name):
         logger.error(f"Error reading IP list: {e}")
         return None, None
 
+def generate_mock_script_output(script_name, equipment, equipment_ip):
+    """Generate realistic mock output for TEST equipment"""
+
+    mock_outputs = {
+        'ip-finder': f"""
++-------+---------+---------------+--------------+
+| _OID_ | _CID_   | _profile      | network_ip   |
++-------+---------+---------------+--------------+
+| {equipment.upper()} | eqmt_test | Test Equipment | {equipment_ip} |
++-------+---------+---------------+--------------+
+PTX IP is: {equipment_ip}
+Vehicle is Online.
+PTXC Found.
+AVI IP is : 10.111.219.99
+""",
+        'start-vnc': f"""
+Starting VNC connection to {equipment_ip}...
+VNC session established.
+Opening VNC viewer...
+""",
+        'ptx-health': f"""
+PTX IP is {equipment_ip}. Health check starting...
+PTXC Found...
+Equipment ID: {equipment.upper()}
+
+**Ping Results: {equipment_ip}-> 192.168.0.100
+Packet Loss: 0%
+Average Latency: 0.125 ms
+
+**Health Check Results of {equipment_ip}:
+CPU Usage: 25.30%
+Memory Usage: 45.12%
+System Uptime: up 5 hours, 23 minutes
+Disk Usage: /dev/mmcblk0p3  5.6G  2.8G  2.6G  52% /media/realroot/home
+
+**AVI Radio Mobile Status:
+Current Time:  1234             Temperature: 28
+Reset Counter: 1                Mode:        ONLINE
+System mode:   LTE              PS state:    Attached
+RSRP (dBm):    -75              SINR (dB):   22.5
+""",
+        'avi-reboot': f"""
+Rebooting AVI Radio and MM2 for {equipment_ip}...
+AVI Radio shutdown initiated...
+MM2 controller reset in progress...
+Reboot completed successfully.
+""",
+        'component-tracking': f"""
+*************************** 1. row ***************************
+                  equipment_name: {equipment.upper()}
+                            type: TestVehicle
+                           model: Test Equipment
+            field_computer_part_name: PTXC
+        field_computer_serial_number: TEST123456
+          field_computer_mac_address: 00:80:07:01:99:99
+          gnss1_hardware_serial_number: 1445-99999
+            gnss1_hardware_firmware: 5.4+TEST
+""",
+        'watchdog': f"""
+AVI-PTX Watchdog Deployment for {equipment_ip}...
+PTXC IP is {equipment_ip}
+Equipment is {equipment.upper()}. Deploying watchdog...
+{equipment.upper()} : Connected {equipment_ip} successfully.
+{equipment.upper()} : AVI IP is 10.111.219.99.
+{equipment.upper()} : Copied er-watchdog.sh successfully.
+{equipment.upper()} : Copied er-reset.pl successfully.
+Watchdog deployment completed.
+""",
+        'linux-perf': f"""
+Performance and Usage Check Results of {equipment_ip}:
+
+CPU Usage: 25.80%
+Memory Usage: 48.06%
+System Uptime: up 5 hours, 23 minutes
+
+Disk Usage:
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/mmcblk0p3  5.6G  2.8G  2.6G  52% /media/realroot/home
+
+Top 5 Processes by CPU Usage:
+  PID  CMD                         %CPU %MEM
+  540  java -DAPP_NAME=_minemobile  12.5 18.9
+  438  /usr/bin/X :0                2.1  1.2
+""",
+        'log-downloader': f"""
+Downloading logs from {equipment_ip}...
+Downloading /home/dlog/frontrunnerV3/logs/gc_minemobile.log....
+Downloading /home/dlog/frontrunnerV3/logs/management_minemobile.dbg....
+Creating archive: {equipment_ip}_TEST_logs.zip
+Download completed: {equipment_ip}_TEST_logs.zip (1.2 MB)
+File saved to Downloads folder.
+""",
+        'ptx-uptime': f"""
+Downloading PTX Uptime Report from MMS server...
+Report file: PTX_Uptime_Report.html
+Downloaded to: C:\\Users\\YourUser\\Downloads\\PTX_Uptime_Report.html
+
+Opening in Microsoft Edge...
+Report contains uptime data for all PTX systems.
+""",
+        'mineview-sessions': f"""
+Checking active Mineview sessions...
+
+Active Sessions Found:
++-----------------+------------------+----------------------+
+| Session ID      | User             | Connected Since      |
++-----------------+------------------+----------------------+
+| SESSION_001     | admin            | 2026-01-10 08:00:00 |
+| SESSION_002     | operator1        | 2026-01-10 09:15:00 |
+| SESSION_003     | support          | 2026-01-10 09:45:00 |
++-----------------+------------------+----------------------+
+Total active sessions: 3
+""",
+        'koa-data': f"""
+Retrieving Live KOA Data...
+
++---------------+----------+---------+---------+------+-------+
+| TravelID      | Location | FromLoc | ToLoc   | Open | Close |
++---------------+----------+---------+---------+------+-------+
+| 1767644342329 | NULL     | INT_27  | R23_05  |    1 |     0 |
+| 1767690576531 | NULL     | INT_34  | INT_48  |    1 |     0 |
+| 1767853995047 | NULL     | INT_104 | R06_16  |    1 |     0 |
++---------------+----------+---------+---------+------+-------+
+Total KOA records: 3
+""",
+        'speed-limit': f"""
+Retrieving Live Speed Limit Data...
+
++---------------------+-----------------+
+| Area_Type           | SpeedLimit_kmhr |
++---------------------+-----------------+
+| LocalSpeedLimitArea |              12 |
+| LocalSpeedLimitArea |              20 |
+| LocalSpeedLimitArea |              55 |
+| LocalSpeedLimitArea |              50 |
+| LocalSpeedLimitArea |              15 |
++---------------------+-----------------+
+Total speed limit areas: 115
+"""
+    }
+
+    # Default output for scripts not in the map
+    default_output = f"""
+Executing {script_name}...
+[TEST MODE] Mock output generated.
+Script completed successfully.
+"""
+
+    return mock_outputs.get(script_name, default_output)
+
 @app.route('/api/legacy/grm-script', methods=['POST'])
 @login_required
 def api_legacy_grm_script():
@@ -2800,78 +2950,82 @@ def api_legacy_grm_script():
     try:
         data = request.get_json()
         script_name = data.get('script', '').lower()
+        equipment = data.get('equipment')  # Equipment name or IP
 
-        # Script mapping to remote commands
-        # Format: plink mms@10.110.19.107 -pw password "remote_script_path equipment_ip"
+        # Script mapping to remote commands on MMS server
+        # Format: plink -t mms@10.110.19.107 -pw password "/full/path/to/script.sh [equipment]"
         grm_scripts = {
             'ip-finder': {
                 'name': 'IP Finder',
-                'command': 'IP_Finder.bat',
+                'command': '/home/mms/bin/remote_check/Random/MySQL/ip_export.sh',
+                'requires_equipment': True,
                 'description': 'Find equipment IP addresses'
             },
             'ptx-uptime': {
                 'name': 'PTX Uptime Report',
-                'command': '/home/mms/bin/remote_check/TempTool/MM2/Check_Exe.sh',
-                'requires_ip': True,
-                'description': 'Generate PTX uptime report'
+                'command': 'download_file',  # Special command for file download
+                'file_path': '/home/mms/Logs/PTX_Uptime_Report.html',
+                'log_command': 'echo $(date): PTX_Uptime_Report Download Initiated from WEB_APP. >> /home/mms/Logs/Report_Download.txt',
+                'description': 'Download PTX uptime report HTML file'
             },
             'mineview-sessions': {
                 'name': 'Mineview Sessions',
-                'command': 'MineView_Session.bat',
+                'command': '/home/mms/bin/MineView-Session.sh',
                 'description': 'Check active Mineview sessions'
             },
             'start-vnc': {
                 'name': 'Start PTX VNC',
-                'command': 'Start_VNC.bat',
-                'requires_ip': True,
+                'command': '/home/mms/bin/remote_check/TempTool/VNC/Check_Exe.sh',
+                'requires_equipment': True,
                 'description': 'Start VNC connection to PTX'
             },
             'ptx-health': {
                 'name': 'PTX Health Check',
-                'command': 'PTXC_Health_Check.bat',
-                'requires_ip': True,
+                'command': '/home/mms/bin/remote_check/ping_check/HealthCheck/ip_export_only.sh',
+                'requires_equipment': True,
                 'description': 'Check PTX system health'
             },
             'avi-reboot': {
                 'name': 'MM2 AVI Reboot',
-                'command': 'AVI_MM2_Reboot.bat',
-                'requires_ip': True,
-                'description': 'Reboot AVI system'
+                'command': '/home/mms/bin/remote_check/TempTool/MM2/Check_Exe.sh',
+                'requires_equipment': True,
+                'log_command': 'echo $(date): Initiated from WEB_APP for {equipment}. >> /home/mms/bin/remote_check/TempTool/MM2/Report.txt',
+                'description': 'Reboot AVI radio and MM2'
             },
             'watchdog': {
                 'name': 'PTX-AVI Watchdog Deploy',
-                'command': 'PTX-AVI_Watchdog_SingleDeploy.bat',
-                'requires_ip': True,
-                'description': 'Deploy watchdog to PTX-AVI'
+                'command': '/home/mms/bin/remote_check/AVI_Watchdog/watchdog_setup_single.sh',
+                'requires_equipment': True,
+                'log_command': 'echo $(date): Initiated from WEB_APP for {equipment}. >> /home/mms/bin/remote_check/AVI_Watchdog/Report.txt',
+                'description': 'Deploy watchdog to PTXC (interactive - may timeout)'
             },
             'koa-data': {
                 'name': 'Live KOA Data',
-                'command': 'LIVE_KOA_DataCheck.bat',
-                'requires_ip': True,
+                'command': '/home/mms/bin/remote_check/Random/MySQL/table_export.sh',
                 'description': 'Check live KOA data'
             },
             'speed-limit': {
                 'name': 'Live Speed Limit Data',
-                'command': 'Latest_SpeedLimit_DataCheck.bat',
-                'requires_ip': True,
+                'command': '/home/mms/bin/remote_check/Random/MySQL/LASL_export.sh',
                 'description': 'Check speed limit data'
             },
             'linux-perf': {
                 'name': 'Linux Perf/Usage Check',
-                'command': 'Linux_Health_Check.bat',
-                'requires_ip': True,
-                'description': 'Check Linux performance and usage'
+                'command': '/home/mms/bin/remote_check/Random/LinuxCheck/For_Support/Check_Exe.sh',
+                'requires_equipment': True,
+                'description': 'Check Linux performance (interactive - may timeout)'
             },
             'component-tracking': {
                 'name': 'Field Component Tracking',
-                'command': 'ComponentTracking.bat',
-                'requires_ip': True,
+                'command': '/home/mms/bin/remote_check/Random/MySQL/Component/site_export.sh',
+                'requires_equipment': True,
                 'description': 'Track field components'
             },
             'log-downloader': {
                 'name': 'Linux Logs Downloader',
-                'command': 'Log_Downloader.bat',
-                'requires_ip': True,
+                'command': '/home/mms/bin/remote_check/TempTool/DOWNLOAD/Log_Get.sh',
+                'requires_equipment': True,  # Requires IP and username
+                'log_command': 'echo $(date): Initiated from WEB_APP for {equipment}. >> /home/mms/bin/remote_check/TempTool/DOWNLOAD/Report.txt',
                 'description': 'Download Linux system logs'
             }
         }
@@ -2885,22 +3039,101 @@ def api_legacy_grm_script():
 
         script = grm_scripts[script_name]
 
-        # OFFLINE MODE: Simulate script execution
+        # Check if script is available
+        if script['command'] is None:
+            return jsonify({
+                'success': False,
+                'message': f'{script["name"]}: {script["description"]}'
+            })
+
+        # Check if equipment is required but not provided
+        if script.get('requires_equipment') and not equipment:
+            return jsonify({
+                'success': False,
+                'message': f'{script["name"]} requires equipment name or IP address'
+            })
+
+        # OFFLINE MODE: Simulate script execution with realistic mock data
         if not is_online_network():
-            output_lines = [
-                f"[OFFLINE MODE] Simulating: {script['name']}",
-                f"Script: {script['command']}",
-                f"Description: {script['description']}",
+            debug_output = []
+            mock_equipment_ip = None
+            mock_equipment_status = 'offline'
+
+            # Check if this is TEST equipment
+            is_test_equipment = equipment and equipment.upper() == 'TEST'
+
+            # For TEST mode, always show debug even for non-equipment scripts
+            if is_test_equipment:
+                debug_output.append(f"[DEBUG] [TEST MODE - OFFLINE] Equipment: {equipment}")
+                mock_equipment_ip = '10.110.99.99'
+                mock_equipment_status = 'online'
+                debug_output.append(f"[DEBUG] Mock IP: {mock_equipment_ip}")
+                debug_output.append(f"[DEBUG] Equipment status: ONLINE")
+
+            if equipment and script.get('requires_equipment'):
+                debug_output.append(f"[DEBUG] [OFFLINE MODE] Looking up IP for equipment: {equipment}")
+
+                # Mock IP lookup results
+                if is_test_equipment:
+                    mock_equipment_ip = '10.110.99.99'
+                    mock_equipment_status = 'online'
+                    debug_output.append(f"[DEBUG] Found PTX IP: {mock_equipment_ip}")
+                    debug_output.append(f"[DEBUG] Equipment status: ONLINE")
+                    debug_output.append(f"[DEBUG] Using parameter: {mock_equipment_ip}")
+                else:
+                    mock_equipment_ip = '10.110.88.88'
+                    mock_equipment_status = 'offline'
+                    debug_output.append(f"[DEBUG] Found PTX IP: {mock_equipment_ip}")
+                    debug_output.append(f"[DEBUG] Equipment status: OFFLINE")
+                    debug_output.append(f"[DEBUG] Using parameter: {mock_equipment_ip}")
+
+                if script.get('log_command'):
+                    debug_output.append(f"[DEBUG] Added logging command")
+
+                remote_cmd = f"{script['command']} {mock_equipment_ip}"
+                debug_output.append(f"[DEBUG] Remote command: {remote_cmd}")
+                debug_output.append(f"[DEBUG] Executing via plink...")
+
+            debug_output.append("")
+
+            # Generate realistic mock output for TEST equipment
+            if is_test_equipment:
+                mock_script_output = generate_mock_script_output(script_name, equipment, mock_equipment_ip)
+                full_output = '\n'.join(debug_output) + '\n' + mock_script_output
+
+                return jsonify({
+                    'success': True,
+                    'output': full_output,
+                    'message': f'{script["name"]} executed successfully (TEST mode - offline)',
+                    'equipment_status': mock_equipment_status,
+                    'equipment_ip': mock_equipment_ip
+                })
+
+            # Generic offline simulation for non-TEST equipment
+            debug_output.append(f"[OFFLINE MODE] Simulating: {script['name']}")
+            debug_output.append(f"Script: {script['command']}")
+            debug_output.append(f"Description: {script['description']}")
+
+            if equipment:
+                debug_output.append(f"Equipment: {equipment}")
+                if mock_equipment_ip:
+                    debug_output.append(f"Equipment IP: {mock_equipment_ip}")
+                    debug_output.append(f"Equipment Status: {mock_equipment_status.upper()}")
+
+            debug_output.extend([
                 "",
                 "This would execute on MMS server: 10.110.19.107",
                 "Command output would appear here in online mode.",
                 "",
                 "[SIMULATION] Script completed successfully"
-            ]
+            ])
+
             return jsonify({
                 'success': True,
-                'output': '\n'.join(output_lines),
-                'message': f'{script["name"]} simulated (offline mode)'
+                'output': '\n'.join(debug_output),
+                'message': f'{script["name"]} simulated (offline mode)',
+                'equipment_status': mock_equipment_status,
+                'equipment_ip': mock_equipment_ip
             })
 
         # ONLINE MODE: Execute via plink
@@ -2917,16 +3150,195 @@ def api_legacy_grm_script():
         mms_user = MMS_SERVER['user']
         mms_password = MMS_SERVER['password']
 
+        # Handle file download scripts (like PTX Uptime Report)
+        if script['command'] == 'download_file':
+            # Log the download
+            if script.get('log_command'):
+                log_cmd = [
+                    plink_path,
+                    '-batch',
+                    f'{mms_user}@{mms_server}',
+                    '-pw', mms_password,
+                    script['log_command']
+                ]
+                try:
+                    subprocess.run(log_cmd, capture_output=True, timeout=10, creationflags=subprocess.CREATE_NO_WINDOW if platform.system() == 'Windows' else 0)
+                except:
+                    pass
+
+            # Use pscp to download file
+            pscp_path = os.path.join(os.path.dirname(plink_path), 'pscp.exe')
+            if not os.path.exists(pscp_path):
+                return jsonify({
+                    'success': False,
+                    'message': f'pscp.exe not found at: {pscp_path}'
+                })
+
+            # Download to Downloads folder
+            download_dir = os.path.join(os.path.expanduser('~'), 'Downloads')
+            local_filename = os.path.basename(script['file_path'])
+            local_path = os.path.join(download_dir, local_filename)
+
+            pscp_cmd = [
+                pscp_path,
+                '-pw', mms_password,
+                f'{mms_user}@{mms_server}:{script["file_path"]}',
+                local_path
+            ]
+
+            try:
+                result = subprocess.run(
+                    pscp_cmd,
+                    capture_output=True,
+                    text=True,
+                    timeout=30,
+                    creationflags=subprocess.CREATE_NO_WINDOW if platform.system() == 'Windows' else 0
+                )
+
+                if result.returncode == 0 and os.path.exists(local_path):
+                    # Store file path in session for download endpoint
+                    session['download_file'] = local_path
+                    session['download_filename'] = local_filename
+
+                    return jsonify({
+                        'success': True,
+                        'message': f'File ready for download',
+                        'output': f'Downloaded: {local_filename}\nPreparing file for your browser...\n\nClick the download link to save to your computer.',
+                        'download_ready': True,
+                        'download_url': '/api/legacy/download-file',
+                        'filename': local_filename
+                    })
+                else:
+                    return jsonify({
+                        'success': False,
+                        'message': f'File download failed: {result.stderr}'
+                    })
+            except subprocess.TimeoutExpired:
+                return jsonify({
+                    'success': False,
+                    'message': 'File download timed out after 30 seconds'
+                })
+            except Exception as e:
+                return jsonify({
+                    'success': False,
+                    'message': f'File download error: {str(e)}'
+                })
+
+        # If equipment is provided and script needs IP, run IP finder first to get actual IP
+        equipment_ip = None
+        equipment_status = None
+        debug_output = []
+
+        # Check if this is TEST equipment for mock data
+        is_test_equipment = equipment and equipment.upper() == 'TEST'
+
+        if equipment and script.get('requires_equipment'):
+            # Use mock data for TEST equipment
+            if is_test_equipment:
+                debug_output.append(f"[DEBUG] [TEST MODE] Looking up IP for equipment: {equipment}")
+                equipment_ip = '10.110.99.99'
+                equipment_status = 'online'
+                debug_output.append(f"[DEBUG] Found PTX IP: {equipment_ip}")
+                debug_output.append(f"[DEBUG] Equipment status: ONLINE")
+                debug_output.append(f"[DEBUG] Using parameter: {equipment_ip}")
+
+                # Generate mock script output based on script type
+                mock_output = generate_mock_script_output(script_name, equipment, equipment_ip)
+
+                if script.get('log_command'):
+                    debug_output.append(f"[DEBUG] Added logging command")
+
+                remote_cmd = f"{script['command']} {equipment_ip}"
+                debug_output.append(f"[DEBUG] Remote command: {remote_cmd}")
+                debug_output.append(f"[DEBUG] [TEST MODE] Using mock data instead of real execution")
+                debug_output.append("")
+
+                return jsonify({
+                    'success': True,
+                    'output': '\n'.join(debug_output) + '\n' + mock_output,
+                    'message': f'{script["name"]} executed successfully (TEST mode)',
+                    'equipment_status': equipment_status,
+                    'equipment_ip': equipment_ip
+                })
+
+            # Run IP finder to get equipment IP address
+            debug_output.append(f"[DEBUG] Looking up IP for equipment: {equipment}")
+            ip_finder_cmd = f"/home/mms/bin/remote_check/Random/MySQL/ip_export.sh {equipment}"
+
+            ip_lookup_plink = [
+                plink_path,
+                '-t',
+                f'{mms_user}@{mms_server}',
+                '-pw', mms_password,
+                ip_finder_cmd
+            ]
+
+            try:
+                ip_result = subprocess.run(
+                    ip_lookup_plink,
+                    capture_output=True,
+                    text=True,
+                    timeout=30,
+                    creationflags=subprocess.CREATE_NO_WINDOW if platform.system() == 'Windows' else 0
+                )
+
+                # Parse IP from output (looks for "PTX IP is: X.X.X.X" or network_ip column)
+                for line in ip_result.stdout.split('\n'):
+                    if 'PTX IP is:' in line:
+                        equipment_ip = line.split('PTX IP is:')[1].strip()
+                        debug_output.append(f"[DEBUG] Found PTX IP: {equipment_ip}")
+                    elif 'network_ip' in line:
+                        # Table header, skip
+                        continue
+                    elif line.strip() and '|' in line and not line.startswith('+'):
+                        # Parse table row: | AHG69 | eqmt_lv | LV Single Cab | 10.110.21.87 |
+                        parts = [p.strip() for p in line.split('|') if p.strip()]
+                        if len(parts) >= 4:
+                            equipment_ip = parts[3]  # 4th column is network_ip
+                            debug_output.append(f"[DEBUG] Parsed IP from table: {equipment_ip}")
+
+                    if 'Vehicle is Online' in line or 'Equipment is Online' in line:
+                        equipment_status = 'online'
+                        debug_output.append(f"[DEBUG] Equipment status: ONLINE")
+                    elif 'Vehicle is Offline' in line or 'Equipment is Offline' in line:
+                        equipment_status = 'offline'
+                        debug_output.append(f"[DEBUG] Equipment status: OFFLINE")
+
+                if not equipment_ip:
+                    debug_output.append(f"[DEBUG] Could not find IP for {equipment}, using equipment name as-is")
+                    equipment_ip = equipment  # Fallback to using equipment name
+
+            except Exception as e:
+                debug_output.append(f"[DEBUG] IP lookup failed: {str(e)}, using equipment name as-is")
+                equipment_ip = equipment
+
+        # Build remote command with equipment IP or name
+        remote_command = script['command']
+        if equipment:
+            # Use IP if we found it, otherwise use equipment name
+            param = equipment_ip if equipment_ip else equipment
+            remote_command = f"{script['command']} {param}"
+            debug_output.append(f"[DEBUG] Using parameter: {param}")
+
+        # Add logging command if specified (for scripts that track usage)
+        if script.get('log_command'):
+            log_cmd = script['log_command'].replace('{equipment}', equipment if equipment else 'NONE')
+            remote_command = f"{log_cmd};{remote_command}"
+            debug_output.append(f"[DEBUG] Added logging command")
+
         # Build plink command
-        # Format: plink -batch -t mms@10.110.19.107 -pw password "command"
+        # Format: plink -t mms@10.110.19.107 -pw password "command [equipment]"
+        # NOTE: Do NOT use -batch flag - it disables interactive prompts that scripts need
         plink_cmd = [
             plink_path,
-            '-batch',
             '-t',
             f'{mms_user}@{mms_server}',
             '-pw', mms_password,
-            script['command']
+            remote_command
         ]
+
+        debug_output.append(f"[DEBUG] Remote command: {remote_command}")
+        debug_output.append(f"[DEBUG] Executing via plink...")
 
         logger.info(f"GRM Script: Executing {script['name']}")
 
@@ -2937,7 +3349,7 @@ def api_legacy_grm_script():
                     plink_cmd,
                     capture_output=True,
                     text=True,
-                    timeout=60,
+                    timeout=120,  # Increased to 120s for interactive scripts
                     creationflags=subprocess.CREATE_NO_WINDOW
                 )
             else:
@@ -2945,31 +3357,36 @@ def api_legacy_grm_script():
                     plink_cmd,
                     capture_output=True,
                     text=True,
-                    timeout=60
+                    timeout=120  # Increased to 120s for interactive scripts
                 )
 
-            # Combine stdout and stderr
-            output = result.stdout
+            # Combine debug output, stdout and stderr
+            full_output = '\n'.join(debug_output) + '\n' if debug_output else ''
+            full_output += result.stdout
             if result.stderr:
-                output += f"\n[ERRORS]\n{result.stderr}"
+                full_output += f"\n[ERRORS]\n{result.stderr}"
 
             if result.returncode == 0:
                 return jsonify({
                     'success': True,
-                    'output': output,
-                    'message': f'{script["name"]} executed successfully'
+                    'output': full_output,
+                    'message': f'{script["name"]} executed successfully',
+                    'equipment_status': equipment_status,
+                    'equipment_ip': equipment_ip
                 })
             else:
                 return jsonify({
                     'success': False,
-                    'output': output,
-                    'message': f'{script["name"]} failed with code {result.returncode}'
+                    'output': full_output,
+                    'message': f'{script["name"]} failed with code {result.returncode}',
+                    'equipment_status': equipment_status,
+                    'equipment_ip': equipment_ip
                 })
 
         except subprocess.TimeoutExpired:
             return jsonify({
                 'success': False,
-                'message': f'{script["name"]} timed out after 60 seconds'
+                'message': f'{script["name"]} timed out after 120 seconds (script may require interactive input)'
             })
         except Exception as e:
             logger.error(f"GRM Script error: {e}")
@@ -2980,6 +3397,30 @@ def api_legacy_grm_script():
 
     except Exception as e:
         logger.error(f"GRM Script API error: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@app.route('/api/legacy/download-file', methods=['GET'])
+@login_required
+def api_legacy_download_file():
+    """Serve downloaded file to client browser"""
+    try:
+        file_path = session.get('download_file')
+        filename = session.get('download_filename', 'download.html')
+
+        if not file_path or not os.path.exists(file_path):
+            return jsonify({'success': False, 'message': 'File not found'}), 404
+
+        # Send file to client browser
+        return send_file(
+            file_path,
+            as_attachment=True,
+            download_name=filename,
+            mimetype='text/html'
+        )
+
+    except Exception as e:
+        logger.error(f"File download error: {e}")
         return jsonify({'success': False, 'message': str(e)}), 500
 
 
