@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>T1 Legacy Tools</title>
+    <title>AutoTech Tools</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <style>
         /* Fix button.nav-item styling to match a.nav-item */
@@ -277,7 +277,7 @@
         <!-- SIDEBAR -->
         <aside class="sidebar">
             <div class="sidebar-header">
-                <h2 class="sidebar-title">T1 Tools</h2>
+                <h2 class="sidebar-title">AutoTech</h2>
             </div>
             <nav class="sidebar-nav">
                 <!-- Main Navigation -->
@@ -291,15 +291,15 @@
                         <span class="nav-item-icon">🔍</span>
                         <span>IP Finder</span>
                     </a>
-                    <a href="/legacy" class="nav-item active">
+                    <a href="/autotech" class="nav-item active">
                         <span class="nav-item-icon">🛠️</span>
-                        <span>Legacy Tools</span>
+                        <span>AutoTech Tools</span>
                     </a>
                 </div>
 
-                <!-- GRM T1 Legacy Tools (No Equipment Required) -->
+                <!-- GRM Scripts (No Equipment Required) -->
                 <div class="nav-section">
-                    <div class="nav-section-title">Komatsu GRM T1 Scripts</div>
+                    <div class="nav-section-title">Komatsu GRM Scripts</div>
                     <button class="nav-item" data-tool="ptx-uptime">
                         <span class="nav-item-icon">⏱️</span>
                         <span>PTX Uptime Report</span>
@@ -331,7 +331,7 @@
             <header class="top-header">
                 <h1 class="page-title">
                     <span class="page-title-icon">🛠️</span>
-                    T1 Legacy Tools
+                    AutoTech Tools
                 </h1>
             </header>
 
@@ -575,9 +575,9 @@
                         // Trigger custom URI to launch local app
                         try {
                             window.location.href = data.launch_uri;
-                            appendToTerminal(`If the application didn't launch, you may need to install T1 Tools Client.`, 'terminal-info');
+                            appendToTerminal(`If the application didn't launch, you may need to install AutoTech Client.`, 'terminal-info');
                         } catch (error) {
-                            appendToTerminal(`Failed to launch application. Please install T1 Tools Client.`, 'terminal-error');
+                            appendToTerminal(`Failed to launch application. Please install AutoTech Client.`, 'terminal-error');
                             console.error('Launch error:', error);
                         }
                     }

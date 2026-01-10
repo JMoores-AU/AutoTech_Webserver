@@ -2606,10 +2606,11 @@ class TerminalSession:
                 self.process.kill()
 
 
-@app.route('/legacy')
+@app.route('/autotech')
+@app.route('/legacy')  # Keep legacy route for backwards compatibility
 @login_required
-def legacy_tools():
-    """T1 Legacy Tools page with live terminal"""
+def autotech_tools():
+    """AutoTech Tools page with live terminal"""
     return render_template('t1_legacy.html',
                          online=is_online_network(),
                          gateway_ip=GATEWAY_IP)
@@ -3321,9 +3322,9 @@ def api_legacy_grm_script():
 
             # Build custom URI for client-side launch
             if app_type == 'vnc':
-                # Format: t1vnc://10.110.21.87:5900
+                # Format: autotech-vnc://10.110.21.87:5900
                 host = equipment_ip if equipment_ip else equipment
-                launch_uri = f"t1vnc://{host}:{port}"
+                launch_uri = f"autotech-vnc://{host}:{port}"
                 output_lines = debug_output + [
                     "",
                     "VNC Connection Details:",
@@ -3333,8 +3334,8 @@ def api_legacy_grm_script():
                     "Launching VNC Viewer on your computer..."
                 ]
             elif app_type == 'putty':
-                # Format: t1putty://mms@10.110.19.107:22
-                launch_uri = f"t1putty://{mms_user}@{mms_server}:22"
+                # Format: autotech-ssh://mms@10.110.19.107:22
+                launch_uri = f"autotech-ssh://{mms_user}@{mms_server}:22"
                 output_lines = debug_output + [
                     "",
                     "SSH Connection Details:",
@@ -3345,8 +3346,8 @@ def api_legacy_grm_script():
                     "Launching PuTTY on your computer..."
                 ]
             elif app_type == 'winscp':
-                # Format: t1winscp://mms:password@10.110.19.107:22
-                launch_uri = f"t1winscp://{mms_user}:{mms_password}@{mms_server}:22"
+                # Format: autotech-sftp://mms:password@10.110.19.107:22
+                launch_uri = f"autotech-sftp://{mms_user}:{mms_password}@{mms_server}:22"
                 output_lines = debug_output + [
                     "",
                     "SFTP Connection Details:",

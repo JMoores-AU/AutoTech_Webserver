@@ -1,0 +1,32 @@
+AVI-PTX Watchdog Deployment Process...
+
+Please choose an option:
+1. PTXC
+2. PTX10
+Enter your choice (1/2): 1
+
+Enter PTXC IP Address: 10.110.21.87
+Access granted. Press Return to begin session.
+
+PTXC IP is 10.110.21.87
+Equipment is AHG69,eqmt_lv,LV Single Cab,10.110.21.87. Please confirm [Y/N]? y
+
+AHG69 : Connected 10.110.21.87 successfully.
+AHG69 : AVI IP is 10.111.219.27.
+AHG69 : Copied er-watchdog.sh to 10.110.21.87 successfully.
+AHG69 : Copied er-reset.pl to 10.110.21.87 successfully.
+AHG69 : PTXC Watchdog Files:
+-rwxr-xr-x 1 dlog dlog 2414 Jan 10 09:07 /media/realroot/home/dlog/frontrunnerV3-support/current/mobile/bin/er-reset.pl
+-rwxr-xr-x 1 dlog dlog  371 Jan 10 09:07 /media/realroot/home/dlog/frontrunnerV3-support/current/mobile/bin/er-watchdog.sh
+AHG69 : Copied reset to 10.111.219.27 successfully.
+AHG69 : AVI Watchdog Files:
+-rwxr-xr-x    1 root     root           250 Jan 10 09:07 /www/cgi-bin/reset
+
+
+
+
+
+Please choose an option:
+1. PTXC
+2. PTX10
+Enter your choice (1/2):

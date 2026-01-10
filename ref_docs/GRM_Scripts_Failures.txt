@@ -1,0 +1,301 @@
+Click a tool in the sidebar to execute a GRM script...
+
+> Executing: IP Finder
+Equipment: rd35
+Connecting to GRM script...
++-------+----------+----------+---------------+
+| _OID_ | _CID_    | _profile | network_ip    |
++-------+----------+----------+---------------+
+| RD35  | eqmt_aht | K930E    | 10.110.20.110 |
++-------+----------+----------+---------------+
+PTX IP is: 10.110.20.110
+Vehicle is Online.
+PTXC Found.
+AVI IP is : 10.111.218.230
+IP Finder executed successfully
+
+> Executing: PTX Uptime Report
+Connecting to GRM script...
+Error: PTX Uptime Report: Download PTX uptime report (file download - not available in terminal)
+
+> Executing: Mineview Sessions
+Connecting to GRM script...
+Error: Mineview Sessions timed out after 60 seconds
+
+> Executing: PTX Health Check
+Script cancelled - no equipment specified
+
+> Executing: Start PTX VNC
+Connecting to GRM script...
+Error: Start PTX VNC: Start VNC connection (use VNC button in IP Finder instead)
+
+> Executing: PTX Health Check
+Equipment: rd35
+Connecting to GRM script...
+Error: PTX Health Check timed out after 60 seconds
+
+> Executing: MM2 AVI Reboot
+Equipment: ahg69
+Connecting to GRM script...
+Machine is Offline.
+MM2 AVI Reboot executed successfully
+
+> Executing: PTX-AVI Watchdog Deploy
+Connecting to GRM script...
+Error: PTX-AVI Watchdog Deploy: Deploy watchdog to PTX-AVI (not available in terminal)
+
+> Executing: Live KOA Data
+Connecting to GRM script...
++---------------+----------+---------+---------+------+-------+----------------------------+--------------------------+
+| TravelID      | Location | FromLoc | ToLoc   | Open | Close | Created                    | LastUpdated              |
++---------------+----------+---------+---------+------+-------+----------------------------+--------------------------+
+| 1767644342329 | NULL     | INT_27  | R23_05  |    1 |     0 | 2026-01-06 06:19:02.329000 | 2026-01-09 06:10:51.3110 |
+| 1767690576531 | NULL     | INT_34  | INT_48  |    1 |     0 | 2026-01-06 19:09:36.531000 | 2026-01-09 06:10:51.3530 |
+| 1767853995047 | NULL     | INT_104 | R06_16  |    1 |     0 | 2026-01-08 16:33:15.047000 | 2026-01-09 06:10:51.6130 |
+| 1767914137528 | NULL     | INT_143 | INT_139 |    1 |     0 | 2026-01-09 09:15:37.528000 | 2026-01-09 09:18:49.2440 |
+| 1767915908022 | NULL     | R04_14  | R04_13  |    1 |     0 | 2026-01-09 09:45:08.022000 | 2026-01-09 09:48:28.5380 |
+| 1767972376329 | NULL     | INT_16  | R12_16  |    1 |     0 | 2026-01-10 01:26:16.329000 | 2026-01-10 01:54:55.7240 |
+| 1767972383807 | NULL     | INT_16  | R12_16  |    1 |     0 | 2026-01-10 01:26:23.807000 | 2026-01-10 01:56:07.7510 |
+| 1767987273546 | NULL     | INT_132 | INT_03  |    1 |     0 | 2026-01-10 05:34:33.546000 | 2026-01-10 05:41:10.6030 |
+| 1767992566971 | NULL     | R12_11  | INT_52  |    1 |     0 | 2026-01-10 07:02:46.971000 | 2026-01-10 07:21:04.4990 |
++---------------+----------+---------+---------+------+-------+----------------------------+--------------------------+
+Live KOA Data executed successfully
+
+> Executing: Live KOA Data
+Connecting to GRM script...
++---------------+----------+---------+---------+------+-------+----------------------------+--------------------------+
+| TravelID      | Location | FromLoc | ToLoc   | Open | Close | Created                    | LastUpdated              |
++---------------+----------+---------+---------+------+-------+----------------------------+--------------------------+
+| 1767644342329 | NULL     | INT_27  | R23_05  |    1 |     0 | 2026-01-06 06:19:02.329000 | 2026-01-09 06:10:51.3110 |
+| 1767690576531 | NULL     | INT_34  | INT_48  |    1 |     0 | 2026-01-06 19:09:36.531000 | 2026-01-09 06:10:51.3530 |
+| 1767853995047 | NULL     | INT_104 | R06_16  |    1 |     0 | 2026-01-08 16:33:15.047000 | 2026-01-09 06:10:51.6130 |
+| 1767914137528 | NULL     | INT_143 | INT_139 |    1 |     0 | 2026-01-09 09:15:37.528000 | 2026-01-09 09:18:49.2440 |
+| 1767915908022 | NULL     | R04_14  | R04_13  |    1 |     0 | 2026-01-09 09:45:08.022000 | 2026-01-09 09:48:28.5380 |
+| 1767972376329 | NULL     | INT_16  | R12_16  |    1 |     0 | 2026-01-10 01:26:16.329000 | 2026-01-10 01:54:55.7240 |
+| 1767972383807 | NULL     | INT_16  | R12_16  |    1 |     0 | 2026-01-10 01:26:23.807000 | 2026-01-10 01:56:07.7510 |
+| 1767987273546 | NULL     | INT_132 | INT_03  |    1 |     0 | 2026-01-10 05:34:33.546000 | 2026-01-10 05:41:10.6030 |
+| 1767992566971 | NULL     | R12_11  | INT_52  |    1 |     0 | 2026-01-10 07:02:46.971000 | 2026-01-10 07:21:04.4990 |
++---------------+----------+---------+---------+------+-------+----------------------------+--------------------------+
+Live KOA Data executed successfully
+
+> Executing: Live Speed Limit Data
+Connecting to GRM script...
++---------------------+---------------------+---------------------+---------+----------+-----------------+
+| Area_Type           | Created_Date        | LastCheck_Date      | X       | Y        | SpeedLimit_kmhr |
++---------------------+---------------------+---------------------+---------+----------+-----------------+
+| LocalSpeedLimitArea | 2025-04-01 10:47:55 | 2026-01-10 07:49:06 | -485226 |  5467097 |              12 |
+| LocalSpeedLimitArea | 2025-04-01 10:48:43 | 2026-01-10 07:49:06 | -327520 |  4067689 |              12 |
+| LocalSpeedLimitArea | 2025-07-14 01:18:06 | 2026-01-10 07:49:06 | 2441515 |  9963964 |              20 |
+| LocalSpeedLimitArea | 2025-07-22 10:26:56 | 2026-01-10 07:49:06 | 2203917 |  8961336 |              12 |
+| LocalSpeedLimitArea | 2025-07-22 10:33:10 | 2026-01-10 07:49:06 | 2771465 |  4225066 |              20 |
+| LocalSpeedLimitArea | 2025-08-05 12:25:30 | 2026-01-10 07:49:06 | 1568112 | 10619022 |              20 |
+| LocalSpeedLimitArea | 2025-10-21 08:17:24 | 2026-01-10 07:49:06 | 2841142 |  2552226 |              55 |
+| LocalSpeedLimitArea | 2025-10-25 07:39:21 | 2026-01-10 07:49:06 | 3069444 |  2653818 |              55 |
+| LocalSpeedLimitArea | 2025-11-10 00:09:32 | 2026-01-10 07:49:06 | -559306 |  8867281 |              12 |
+| LocalSpeedLimitArea | 2025-11-10 00:13:52 | 2026-01-10 07:49:06 | 2897059 |  4317920 |              55 |
+| LocalSpeedLimitArea | 2025-11-10 00:40:14 | 2026-01-10 07:49:06 | 2168033 |  2127313 |              55 |
+| LocalSpeedLimitArea | 2025-11-23 05:48:31 | 2026-01-10 07:49:06 |  732541 |  7824472 |              50 |
+| LocalSpeedLimitArea | 2025-11-23 05:50:28 | 2026-01-10 07:49:06 |  916056 |  7272085 |              50 |
+| LocalSpeedLimitArea | 2025-11-24 09:42:39 | 2026-01-10 07:49:06 | 1920266 |  5088983 |              50 |
+| LocalSpeedLimitArea | 2025-12-03 18:55:03 | 2026-01-10 07:49:06 | 3554775 |  2507426 |              12 |
+| LocalSpeedLimitArea | 2025-12-06 22:18:51 | 2026-01-10 07:49:06 | 3705603 |  2787643 |              55 |
+| LocalSpeedLimitArea | 2025-12-08 07:26:33 | 2026-01-10 07:49:06 | 3852954 |  2954013 |              55 |
+| LocalSpeedLimitArea | 2025-12-09 21:44:29 | 2026-01-10 07:49:06 | 3240629 |  2919066 |              55 |
+| LocalSpeedLimitArea | 2025-12-14 05:56:17 | 2026-01-10 07:49:06 | 1411382 |  5036214 |              15 |
+| LocalSpeedLimitArea | 2025-12-21 06:12:27 | 2026-01-10 07:49:06 |  632793 |  6860100 |              12 |
+| LocalSpeedLimitArea | 2025-12-23 00:35:37 | 2026-01-10 07:49:06 | 3437777 |  2852053 |              50 |
+| LocalSpeedLimitArea | 2025-12-23 12:20:48 | 2026-01-10 07:49:06 | 3413384 |  2903766 |              20 |
+| LocalSpeedLimitArea | 2025-12-24 00:29:10 | 2026-01-10 07:49:06 | 1227872 |  4978427 |              15 |
+| LocalSpeedLimitArea | 2025-12-27 21:35:06 | 2026-01-10 07:49:06 | 2285626 |  6939362 |              25 |
+| LocalSpeedLimitArea | 2025-12-30 18:02:09 | 2026-01-10 07:49:06 | -504421 |  9188633 |              20 |
+| LocalSpeedLimitArea | 2026-01-01 06:21:07 | 2026-01-10 07:49:06 | 2388481 |  6806026 |              20 |
+| LocalSpeedLimitArea | 2026-01-01 07:36:40 | 2026-01-10 07:49:06 | 2297910 |  9081710 |              12 |
+| LocalSpeedLimitArea | 2026-01-01 10:02:18 | 2026-01-10 07:49:06 | 1017696 |  7587221 |              13 |
+| LocalSpeedLimitArea | 2026-01-01 18:24:49 | 2026-01-10 07:49:06 | 2261173 |  5271790 |              15 |
+| LocalSpeedLimitArea | 2026-01-02 08:07:12 | 2026-01-10 07:49:06 |  928370 |  9609676 |              15 |
+| LocalSpeedLimitArea | 2026-01-02 09:10:35 | 2026-01-10 07:49:06 | 2542068 |  2839371 |              50 |
+| LocalSpeedLimitArea | 2026-01-02 18:58:36 | 2026-01-10 07:49:06 | 2059462 |  8343587 |              12 |
+| LocalSpeedLimitArea | 2026-01-02 20:44:34 | 2026-01-10 07:49:06 | 2129105 |  8482318 |              15 |
+| LocalSpeedLimitArea | 2026-01-03 03:55:22 | 2026-01-10 07:49:06 | 2792694 |  5464908 |              15 |
+| LocalSpeedLimitArea | 2026-01-03 21:04:08 | 2026-01-10 07:49:06 | 4208866 |  3531210 |              20 |
+| LocalSpeedLimitArea | 2026-01-04 08:14:51 | 2026-01-10 07:49:06 | 2047296 | 10566650 |              12 |
+| LocalSpeedLimitArea | 2026-01-04 10:37:26 | 2026-01-10 07:49:06 | 2898123 |  5701976 |              20 |
+| LocalSpeedLimitArea | 2026-01-04 18:30:42 | 2026-01-10 07:49:06 | 2016858 | 10558160 |              15 |
+| LocalSpeedLimitArea | 2026-01-04 23:26:10 | 2026-01-10 07:49:06 | 2041252 |  5525152 |              12 |
+| LocalSpeedLimitArea | 2026-01-05 17:35:10 | 2026-01-10 07:49:06 |  157068 |  7866493 |              21 |
+| LocalSpeedLimitArea | 2026-01-05 19:46:54 | 2026-01-10 07:49:06 | 4345134 |  2816859 |              14 |
+| LocalSpeedLimitArea | 2026-01-05 23:13:23 | 2026-01-10 07:49:06 | 3459019 |  2861454 |              12 |
+| LocalSpeedLimitArea | 2026-01-06 03:20:11 | 2026-01-10 07:49:06 | 2557087 |  2770709 |              12 |
+| LocalSpeedLimitArea | 2026-01-06 05:27:20 | 2026-01-10 07:49:06 |  364104 |  7742746 |              15 |
+| LocalSpeedLimitArea | 2026-01-06 06:41:21 | 2026-01-10 07:49:06 | 3131195 |  4006171 |              15 |
+| LocalSpeedLimitArea | 2026-01-06 08:24:17 | 2026-01-10 07:49:06 | 3653775 |  6406021 |              15 |
+| LocalSpeedLimitArea | 2026-01-06 11:54:48 | 2026-01-10 07:49:06 | 2471439 |  6305357 |              18 |
+| LocalSpeedLimitArea | 2026-01-06 18:24:18 | 2026-01-10 07:49:06 |  973868 |   151062 |              15 |
+| LocalSpeedLimitArea | 2026-01-06 18:44:00 | 2026-01-10 07:49:06 | 3566999 |  6412661 |              12 |
+| LocalSpeedLimitArea | 2026-01-06 18:45:58 | 2026-01-10 07:49:06 | 3593186 |  6378674 |              12 |
+| LocalSpeedLimitArea | 2026-01-06 19:12:35 | 2026-01-10 07:49:06 | 2565711 |  2746402 |              15 |
+| LocalSpeedLimitArea | 2026-01-06 19:16:34 | 2026-01-10 07:49:06 | 2672116 |  5566049 |              12 |
+| LocalSpeedLimitArea | 2026-01-06 19:19:42 | 2026-01-10 07:49:06 | 2968120 |  4983884 |              15 |
+| LocalSpeedLimitArea | 2026-01-06 19:22:50 | 2026-01-10 07:49:06 | 2594494 |  3905718 |              15 |
+| LocalSpeedLimitArea | 2026-01-06 19:37:08 | 2026-01-10 07:49:06 | -331717 |  4513963 |              15 |
+| LocalSpeedLimitArea | 2026-01-06 19:37:44 | 2026-01-10 07:49:06 | -330970 |  4497536 |              15 |
+| LocalSpeedLimitArea | 2026-01-06 23:37:25 | 2026-01-10 07:49:06 | -495856 |  6014625 |              12 |
+| LocalSpeedLimitArea | 2026-01-06 23:47:02 | 2026-01-10 07:49:06 | 3513009 |  5477680 |              18 |
+| LocalSpeedLimitArea | 2026-01-07 05:22:00 | 2026-01-10 07:49:06 | 3515333 |  5019648 |              20 |
+| LocalSpeedLimitArea | 2026-01-07 07:14:35 | 2026-01-10 07:49:06 | 1585611 |  7292579 |              15 |
+| LocalSpeedLimitArea | 2026-01-07 14:48:39 | 2026-01-10 07:49:06 | 1005604 |  5638953 |              20 |
+| LocalSpeedLimitArea | 2026-01-07 20:26:29 | 2026-01-10 07:49:06 | 2286887 |  8939671 |              18 |
+| LocalSpeedLimitArea | 2026-01-07 23:42:21 | 2026-01-10 07:49:06 | 2292273 |  7600492 |              15 |
+| LocalSpeedLimitArea | 2026-01-08 01:14:30 | 2026-01-10 07:49:06 | 3538424 |  5087434 |              18 |
+| LocalSpeedLimitArea | 2026-01-08 01:54:32 | 2026-01-10 07:49:06 |  642736 |  7888694 |              18 |
+| LocalSpeedLimitArea | 2026-01-08 02:42:24 | 2026-01-10 07:49:06 |  880988 |  6918127 |              20 |
+| LocalSpeedLimitArea | 2026-01-08 02:51:41 | 2026-01-10 07:49:06 | 4030257 |  4031386 |              20 |
+| LocalSpeedLimitArea | 2026-01-08 03:43:07 | 2026-01-10 07:49:06 | 3321337 |  6971687 |              20 |
+| LocalSpeedLimitArea | 2026-01-08 04:02:47 | 2026-01-10 07:49:06 | 2690714 |  2641933 |              14 |
+| LocalSpeedLimitArea | 2026-01-08 10:50:14 | 2026-01-10 07:49:06 | 1363760 |  6508433 |              12 |
+| LocalSpeedLimitArea | 2026-01-08 12:11:30 | 2026-01-10 07:49:06 | 2622799 |  2981282 |              15 |
+| LocalSpeedLimitArea | 2026-01-08 13:22:31 | 2026-01-10 07:49:06 | 1421757 |  8273782 |              16 |
+| LocalSpeedLimitArea | 2026-01-08 13:51:58 | 2026-01-10 07:49:06 | 3988016 |  2738406 |              20 |
+| LocalSpeedLimitArea | 2026-01-08 18:19:34 | 2026-01-10 07:49:06 | 1585747 |  7312662 |              15 |
+| LocalSpeedLimitArea | 2026-01-08 18:24:18 | 2026-01-10 07:49:06 | 4016744 |  4125815 |              20 |
+| LocalSpeedLimitArea | 2026-01-08 18:31:32 | 2026-01-10 07:49:06 | 1809031 |  7354676 |              15 |
+| LocalSpeedLimitArea | 2026-01-08 20:37:09 | 2026-01-10 07:49:06 | -515561 |  9160415 |              12 |
+| LocalSpeedLimitArea | 2026-01-08 21:17:20 | 2026-01-10 07:49:06 | 2406714 |  6529304 |              12 |
+| LocalSpeedLimitArea | 2026-01-08 23:37:53 | 2026-01-10 07:49:06 | 3611445 |  3165475 |              15 |
+| LocalSpeedLimitArea | 2026-01-09 00:18:27 | 2026-01-10 07:49:06 | 2737101 |  4407775 |              15 |
+| LocalSpeedLimitArea | 2026-01-09 02:52:59 | 2026-01-10 07:49:06 |  745362 |  7655810 |              18 |
+| LocalSpeedLimitArea | 2026-01-09 05:50:11 | 2026-01-10 07:49:06 | 1281682 |  6566001 |              12 |
+| LocalSpeedLimitArea | 2026-01-09 07:06:12 | 2026-01-10 07:49:06 | 3104966 | 10104699 |              15 |
+| LocalSpeedLimitArea | 2026-01-09 07:54:08 | 2026-01-10 07:49:06 | 2010579 |  1545414 |              20 |
+| LocalSpeedLimitArea | 2026-01-09 08:13:49 | 2026-01-10 07:49:06 | 1852974 |  6971622 |              12 |
+| LocalSpeedLimitArea | 2026-01-09 10:30:03 | 2026-01-10 07:49:06 | -107586 |  1206735 |              12 |
+| LocalSpeedLimitArea | 2026-01-09 12:02:16 | 2026-01-10 07:49:06 | 3264212 |  9737079 |              15 |
+| LocalSpeedLimitArea | 2026-01-09 12:27:12 | 2026-01-10 07:49:06 | 1864881 |  8473906 |              15 |
+| LocalSpeedLimitArea | 2026-01-09 19:32:47 | 2026-01-10 07:49:06 | 2600182 |  6444259 |              12 |
+| LocalSpeedLimitArea | 2026-01-09 19:52:36 | 2026-01-10 07:49:06 | 3222978 |  3504250 |              20 |
+| LocalSpeedLimitArea | 2026-01-09 20:09:51 | 2026-01-10 07:49:06 | 3866440 |  8678686 |              18 |
+| LocalSpeedLimitArea | 2026-01-09 22:23:32 | 2026-01-10 07:49:06 | 2244418 |  6413088 |              12 |
+| LocalSpeedLimitArea | 2026-01-10 00:28:38 | 2026-01-10 07:49:06 | 3045609 |  3855842 |              20 |
+| LocalSpeedLimitArea | 2026-01-10 01:47:42 | 2026-01-10 07:49:06 | 2456720 |  4510553 |              20 |
+| LocalSpeedLimitArea | 2026-01-10 02:39:45 | 2026-01-10 07:49:06 | 3348423 |  9847637 |              12 |
+| LocalSpeedLimitArea | 2026-01-10 02:42:35 | 2026-01-10 07:49:06 | 2182260 |  9927938 |              15 |
+| LocalSpeedLimitArea | 2026-01-10 02:48:57 | 2026-01-10 07:49:06 | 2372825 | 10099327 |              20 |
+| LocalSpeedLimitArea | 2026-01-10 02:49:28 | 2026-01-10 07:49:06 | 2392800 | 10303875 |              18 |
+| LocalSpeedLimitArea | 2026-01-10 02:49:59 | 2026-01-10 07:49:06 | 2198240 | 10768902 |              18 |
+| LocalSpeedLimitArea | 2026-01-10 02:50:35 | 2026-01-10 07:49:06 |  695691 |  9437342 |              20 |
+| LocalSpeedLimitArea | 2026-01-10 02:51:03 | 2026-01-10 07:49:06 |  540282 |  9537219 |              18 |
+| LocalSpeedLimitArea | 2026-01-10 02:51:42 | 2026-01-10 07:49:06 |  777989 |  9606734 |              18 |
+| LocalSpeedLimitArea | 2026-01-10 02:58:57 | 2026-01-10 07:49:06 | 2647353 |  3874793 |              20 |
+| LocalSpeedLimitArea | 2026-01-10 04:17:48 | 2026-01-10 07:49:06 | -454093 |  9062604 |              12 |
+| LocalSpeedLimitArea | 2026-01-10 05:05:11 | 2026-01-10 07:49:06 | 2477754 |  4527451 |              25 |
+| LocalSpeedLimitArea | 2026-01-10 05:10:46 | 2026-01-10 07:49:06 | 2415864 |  6480095 |              12 |
+| LocalSpeedLimitArea | 2026-01-10 06:00:14 | 2026-01-10 07:49:06 |  857967 |  8109705 |              35 |
+| LocalSpeedLimitArea | 2026-01-10 06:35:39 | 2026-01-10 07:49:06 | 3483174 |  9318148 |              15 |
+| LocalSpeedLimitArea | 2026-01-10 06:43:49 | 2026-01-10 07:49:06 | 3131890 | 10040599 |              15 |
+| LocalSpeedLimitArea | 2026-01-10 07:02:31 | 2026-01-10 07:49:06 | 3404354 |  9669057 |              15 |
++---------------------+---------------------+---------------------+---------+----------+-----------------+
++------------------+
+| Total_SpeedLimit |
++------------------+
+|              110 |
++------------------+
+Live Speed Limit Data executed successfully
+
+> Executing: Linux Perf/Usage Check
+Connecting to GRM script...
+Error: Linux Perf/Usage Check timed out after 60 seconds
+
+> Executing: Field Component Tracking
+Equipment: ahg69
+Connecting to GRM script...
+*************************** 1. row ***************************
+                  record_start_datetime: 2025/12/08 17:00
+                    record_end_datetime: 2025/12/08 17:02
+                                   flag: SE
+                         equipment_name: AHG69
+                                   type: LightVehicle
+                                  model: LV Single Cab
+                 fr_application_version: 03.07.00.0076
+               field_computer_part_name: PTXC
+           field_computer_serial_number: ZDL8246399
+             field_computer_mac_address: 00:80:07:01:12:fe
+               gnss1_hardware_part_name: MM-2 MASTER
+           gnss1_hardware_serial_number: 1445-27003
+             gnss1_hardware_mac_address: 00:04:07:00:3e:12
+                gnss1_hardware_firmware: 5.4+2105281211
+             gnss1_hardware_board_model: 215
+           gnss1_hardware_board_version: B125_4
+Field Component Tracking executed successfully
+
+> Executing: Linux Logs Downloader
+Equipment: ahg69
+Connecting to GRM script...
+Error: Linux Logs Downloader timed out after 60 seconds
+
+Flask.....
+
+INFO:__main__:Application Base Directory: E:\
+INFO:__main__:Tools Directory: E:\T1_Tools_Web\tools
+INFO:__main__:Template Folder: C:\Users\moorjay5\AppData\Local\Temp\_MEI83602\templates
+INFO:__main__:Static Folder: C:\Users\moorjay5\AppData\Local\Temp\_MEI83602\static
+
+============================================================
+         T1 TOOLS WEB DASHBOARD - ENHANCED VERSION
+============================================================
+[MODE] ONLINE tcp 10.110.19.107:22
+Network Mode: ONLINE
+Gateway IP: 10.110.19.107
+Server IP: 10.110.19.105
+
+Access from this PC:     http://localhost:8888
+Access from other PCs:   http://10.110.19.105:8888
+
+Login Password: komatsu
+Python Version: 3.13.7 (tags/v3.13.7:bcee1c3, Aug 14 2025, 14:15:11) [MSC v.1944 64 bit (AMD64)]
+Flask Version: Unknown
+============================================================
+Press Ctrl+C to stop the server
+============================================================
+
+ * Serving Flask app 'main'
+ * Debug mode: on
+INFO:werkzeug:[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8888
+ * Running on http://10.110.19.105:8888
+INFO:werkzeug:[33mPress CTRL+C to quit[0m
+INFO:werkzeug:127.0.0.1 - - [10/Jan/2026 07:52:08] "GET / HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [10/Jan/2026 07:52:08] "GET /static/style.css HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [10/Jan/2026 07:52:08] "[32mGET /api/remote-stats HTTP/1.1[0m" 302 -
+INFO:werkzeug:127.0.0.1 - - [10/Jan/2026 07:52:09] "GET /login HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [10/Jan/2026 07:52:09] "[32mGET /favicon.ico HTTP/1.1[0m" 302 -
+INFO:werkzeug:127.0.0.1 - - [10/Jan/2026 07:52:09] "GET /login HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [10/Jan/2026 07:52:15] "POST / HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [10/Jan/2026 07:52:15] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [10/Jan/2026 07:52:15] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+INFO:werkzeug:127.0.0.1 - - [10/Jan/2026 07:52:16] "GET /api/remote-stats HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [10/Jan/2026 07:52:20] "GET /legacy HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [10/Jan/2026 07:52:21] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+INFO:__main__:GRM Script: Executing IP Finder
+INFO:werkzeug:127.0.0.1 - - [10/Jan/2026 07:52:37] "POST /api/legacy/grm-script HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [10/Jan/2026 07:53:01] "POST /api/legacy/grm-script HTTP/1.1" 200 -
+INFO:__main__:GRM Script: Executing Mineview Sessions
+INFO:werkzeug:127.0.0.1 - - [10/Jan/2026 07:54:18] "POST /api/legacy/grm-script HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [10/Jan/2026 07:57:16] "POST /api/legacy/grm-script HTTP/1.1" 200 -
+INFO:__main__:GRM Script: Executing PTX Health Check
+INFO:werkzeug:127.0.0.1 - - [10/Jan/2026 07:58:39] "POST /api/legacy/grm-script HTTP/1.1" 200 -
+INFO:__main__:GRM Script: Executing MM2 AVI Reboot
+INFO:werkzeug:127.0.0.1 - - [10/Jan/2026 07:58:53] "POST /api/legacy/grm-script HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [10/Jan/2026 08:00:25] "POST /api/legacy/grm-script HTTP/1.1" 200 -
+INFO:__main__:GRM Script: Executing Live KOA Data
+INFO:werkzeug:127.0.0.1 - - [10/Jan/2026 08:00:33] "POST /api/legacy/grm-script HTTP/1.1" 200 -
+INFO:__main__:GRM Script: Executing Live KOA Data
+INFO:werkzeug:127.0.0.1 - - [10/Jan/2026 08:00:44] "POST /api/legacy/grm-script HTTP/1.1" 200 -
+INFO:__main__:GRM Script: Executing Live Speed Limit Data
+INFO:werkzeug:127.0.0.1 - - [10/Jan/2026 08:00:51] "POST /api/legacy/grm-script HTTP/1.1" 200 -
+INFO:__main__:GRM Script: Executing Linux Perf/Usage Check
+INFO:werkzeug:127.0.0.1 - - [10/Jan/2026 08:02:01] "POST /api/legacy/grm-script HTTP/1.1" 200 -
+INFO:__main__:GRM Script: Executing Field Component Tracking
+INFO:werkzeug:127.0.0.1 - - [10/Jan/2026 08:02:12] "POST /api/legacy/grm-script HTTP/1.1" 200 -
+INFO:__main__:GRM Script: Executing Linux Logs Downloader
+INFO:werkzeug:127.0.0.1 - - [10/Jan/2026 08:03:29] "POST /api/legacy/grm-script HTTP/1.1" 200 -
