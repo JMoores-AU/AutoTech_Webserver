@@ -2975,8 +2975,10 @@ def api_legacy_grm_script():
             },
             'start-vnc': {
                 'name': 'Start PTX VNC',
-                'command': '/home/mms/bin/remote_check/TempTool/VNC/Check_Exe.sh',
+                'command': 'launch_local_app',  # Special command for client-side launch
+                'app_type': 'vnc',
                 'requires_equipment': True,
+                'port': 5900,
                 'description': 'Start VNC connection to PTX'
             },
             'ptx-health': {
@@ -3311,6 +3313,64 @@ def api_legacy_grm_script():
             except Exception as e:
                 debug_output.append(f"[DEBUG] IP lookup failed: {str(e)}, using equipment name as-is")
                 equipment_ip = equipment
+
+        # Handle local app launch (VNC, PuTTY, WinSCP) - after IP lookup
+        if script['command'] == 'launch_local_app':
+            app_type = script.get('app_type', 'unknown')
+            port = script.get('port', '')
+
+            # Build custom URI for client-side launch
+            if app_type == 'vnc':
+                # Format: t1vnc://10.110.21.87:5900
+                host = equipment_ip if equipment_ip else equipment
+                launch_uri = f"t1vnc://{host}:{port}"
+                output_lines = debug_output + [
+                    "",
+                    "VNC Connection Details:",
+                    f"Host: {host}",
+                    f"Port: {port}",
+                    "",
+                    "Launching VNC Viewer on your computer..."
+                ]
+            elif app_type == 'putty':
+                # Format: t1putty://mms@10.110.19.107:22
+                launch_uri = f"t1putty://{mms_user}@{mms_server}:22"
+                output_lines = debug_output + [
+                    "",
+                    "SSH Connection Details:",
+                    f"Host: {mms_server}",
+                    f"User: {mms_user}",
+                    f"Port: 22",
+                    "",
+                    "Launching PuTTY on your computer..."
+                ]
+            elif app_type == 'winscp':
+                # Format: t1winscp://mms:password@10.110.19.107:22
+                launch_uri = f"t1winscp://{mms_user}:{mms_password}@{mms_server}:22"
+                output_lines = debug_output + [
+                    "",
+                    "SFTP Connection Details:",
+                    f"Host: {mms_server}",
+                    f"User: {mms_user}",
+                    f"Port: 22",
+                    "",
+                    "Launching WinSCP on your computer..."
+                ]
+            else:
+                return jsonify({
+                    'success': False,
+                    'message': f'Unknown app type: {app_type}'
+                })
+
+            return jsonify({
+                'success': True,
+                'output': '\n'.join(output_lines),
+                'message': f'{script["name"]} - Launching on your computer',
+                'launch_uri': launch_uri,
+                'launch_required': True,
+                'equipment_ip': equipment_ip,
+                'equipment_status': equipment_status
+            })
 
         # Build remote command with equipment IP or name
         remote_command = script['command']

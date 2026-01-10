@@ -568,6 +568,19 @@
                         document.body.removeChild(downloadLink);
                         appendToTerminal(`File downloaded to your Downloads folder`, 'terminal-info');
                     }
+
+                    // Handle local app launch (VNC, PuTTY, WinSCP)
+                    if (data.launch_required && data.launch_uri) {
+                        appendToTerminal(`Launching application on your computer...`, 'terminal-info');
+                        // Trigger custom URI to launch local app
+                        try {
+                            window.location.href = data.launch_uri;
+                            appendToTerminal(`If the application didn't launch, you may need to install T1 Tools Client.`, 'terminal-info');
+                        } catch (error) {
+                            appendToTerminal(`Failed to launch application. Please install T1 Tools Client.`, 'terminal-error');
+                            console.error('Launch error:', error);
+                        }
+                    }
                 } else {
                     appendToTerminal(`Error: ${data.message || 'Script execution failed'}`, 'terminal-error');
                 }
