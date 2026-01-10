@@ -4,7 +4,11 @@
       "Bash(git add:*)",
       "Bash(for file in templates/enhanced_index.html templates/ip_finder.html templates/mms_parameter_form.html templates/playback_tools.html templates/ptx_uptime.html templates/tool_generic.html templates/usb_tool.html templates/_BASE_TEMPLATE.html)",
       "Bash(do sed -i 's/T1 Tools/AutoTech/g' \"$file\")",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(taskkill:*)",
+      "Bash(python -m PyInstaller:*)",
+      "Bash(ls:*)",
+      "Bash(timeout:*)"
     ]
   }
 }
