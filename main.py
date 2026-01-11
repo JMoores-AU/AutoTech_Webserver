@@ -2628,10 +2628,11 @@ def legacy_batch_tools():
 @app.route('/api/launch-batch-tool', methods=['POST'])
 @login_required
 def api_launch_batch_tool():
-    """Launch a batch file in CMD window"""
+    """Launch a batch file in CMD window with password auto-filled"""
     try:
         data = request.get_json()
         tool_name = data.get('tool', '').lower()
+        password = data.get('password', '')
 
         # Map tool names to batch file paths
         batch_files = {
@@ -2664,14 +2665,25 @@ def api_launch_batch_tool():
                 'message': f'Batch file not found: {batch_file}'
             })
 
-        # Launch batch file in new CMD window
-        # Use 'start' command to open in new window
+        # Create a temporary wrapper batch file that auto-fills the password
+        temp_dir = os.path.join(BASE_DIR, 'temp')
+        os.makedirs(temp_dir, exist_ok=True)
+
+        temp_batch = os.path.join(temp_dir, f'launch_{tool_name}_{int(time.time())}.bat')
+
+        with open(temp_batch, 'w') as f:
+            f.write(f'@echo off\n')
+            f.write(f'echo {password}| "{batch_file}"\n')
+            # Keep window open after script completes
+            f.write(f'pause\n')
+
+        # Launch temp batch file in new CMD window
         subprocess.Popen(
-            ['cmd', '/c', 'start', 'cmd', '/k', batch_file],
+            ['cmd', '/c', 'start', 'cmd', '/k', temp_batch],
             creationflags=subprocess.CREATE_NEW_CONSOLE if platform.system() == 'Windows' else 0
         )
 
-        logger.info(f"Launched batch tool: {tool_name}")
+        logger.info(f"Launched batch tool: {tool_name} with auto-filled password")
 
         return jsonify({
             'success': True,
