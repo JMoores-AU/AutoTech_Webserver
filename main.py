@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-T1 TOOLS WEB DASHBOARD - ENHANCED MAIN APPLICATION
+AUTOTECH WEB DASHBOARD - ENHANCED MAIN APPLICATION
 ================================================================
 Mining equipment remote access system for Komatsu equipment
 Enhanced version combining new design with full functionality
@@ -201,7 +201,7 @@ def print_startup_banner():
         server_ip = "Unknown"
     
     print("\n" + "="*60)
-    print("         T1 TOOLS WEB DASHBOARD - ENHANCED VERSION")
+    print("AUTOTECH WEB DASHBOARD - ENHANCED VERSION")
     print("="*60)
     print(f"Network Mode: {'ONLINE' if is_online_network() else 'OFFLINE'}")
     print(f"Gateway IP: {GATEWAY_IP}")
@@ -2986,7 +2986,7 @@ def api_legacy_grm_script():
                 'name': 'PTX Health Check',
                 'command': '/home/mms/bin/remote_check/ping_check/HealthCheck/ip_export_only.sh',
                 'requires_equipment': True,
-                'description': 'Check PTX system health'
+                'description': 'Check PTX system health and network connectivity'
             },
             'avi-reboot': {
                 'name': 'MM2 AVI Reboot',
@@ -3270,6 +3270,7 @@ def api_legacy_grm_script():
 
             ip_lookup_plink = [
                 plink_path,
+                '-batch',
                 '-t',
                 f'{mms_user}@{mms_server}',
                 '-pw', mms_password,
@@ -3388,10 +3389,11 @@ def api_legacy_grm_script():
             debug_output.append(f"[DEBUG] Added logging command")
 
         # Build plink command
-        # Format: plink -t mms@10.110.19.107 -pw password "command [equipment]"
-        # NOTE: Do NOT use -batch flag - it disables interactive prompts that scripts need
+        # Format: plink -batch -t mms@10.110.19.107 -pw password "command [equipment]"
+        # NOTE: MUST use -batch flag for web interface - scripts must be non-interactive
         plink_cmd = [
             plink_path,
+            '-batch',
             '-t',
             f'{mms_user}@{mms_server}',
             '-pw', mms_password,
