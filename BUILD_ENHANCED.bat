@@ -23,7 +23,7 @@ if %ERRORLEVEL% NEQ 0 (
 :MENU
 cls
 echo ============================================
-echo    T1 TOOLS WEB - BUILD ^& TEST
+echo    AUTOTECH WEBSERVER - BUILD ^& TEST
 echo ============================================
 echo.
 echo  DEVELOPMENT ^& TESTING

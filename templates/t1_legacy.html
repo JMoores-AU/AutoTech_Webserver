@@ -287,35 +287,14 @@
                         <span class="nav-item-icon">🏠</span>
                         <span>Dashboard</span>
                     </a>
-                    <a href="/run/IP Finder" class="nav-item">
-                        <span class="nav-item-icon">🔍</span>
-                        <span>IP Finder</span>
-                    </a>
                     <a href="/autotech" class="nav-item active">
                         <span class="nav-item-icon">🛠️</span>
-                        <span>T1 Tools</span>
+                        <span>AutoTech Tools</span>
                     </a>
-                </div>
-
-                <!-- GRM Scripts (No Equipment Required) -->
-                <div class="nav-section">
-                    <div class="nav-section-title">Komatsu GRM T1 Scripts</div>
-                    <button class="nav-item" data-tool="ptx-uptime">
-                        <span class="nav-item-icon">⏱️</span>
-                        <span>PTX Uptime Report</span>
-                    </button>
-                    <button class="nav-item" data-tool="mineview-sessions">
-                        <span class="nav-item-icon">👥</span>
-                        <span>Mineview Sessions</span>
-                    </button>
-                    <button class="nav-item" data-tool="koa-data">
-                        <span class="nav-item-icon">📊</span>
-                        <span>Live KOA Data</span>
-                    </button>
-                    <button class="nav-item" data-tool="speed-limit">
-                        <span class="nav-item-icon">🚦</span>
-                        <span>Live Speed Limit Data</span>
-                    </button>
+                    <a href="/legacy-batch-tools" class="nav-item">
+                        <span class="nav-item-icon">📟</span>
+                        <span>T1 Legacy Batch Tools</span>
+                    </a>
                 </div>
             </nav>
             <div class="sidebar-footer">
@@ -367,30 +346,6 @@
                                 </button>
                             </div>
 
-                            <!-- Equipment-Based Tools -->
-                            <div style="padding: 8px 12px; border-bottom: 1px solid var(--theme-border); background: var(--theme-bg-secondary); display: flex; gap: 4px; flex-wrap: nowrap; justify-content: space-between;">
-                                <button class="terminal-btn" data-tool="start-vnc" style="white-space: nowrap; font-size: 0.8rem; padding: 6px 10px; flex: 1;">
-                                    <span>🖥️</span> Start PTX VNC
-                                </button>
-                                <button class="terminal-btn" data-tool="ptx-health" style="white-space: nowrap; font-size: 0.8rem; padding: 6px 10px; flex: 1;">
-                                    <span>❤️</span> PTX Health Check
-                                </button>
-                                <button class="terminal-btn" data-tool="avi-reboot" style="white-space: nowrap; font-size: 0.8rem; padding: 6px 10px; flex: 1;">
-                                    <span>🔄</span> MM2 AVI Reboot
-                                </button>
-                                <button class="terminal-btn" data-tool="component-tracking" style="white-space: nowrap; font-size: 0.8rem; padding: 6px 10px; flex: 1;">
-                                    <span>📦</span> Component Tracking
-                                </button>
-                                <button class="terminal-btn" data-tool="watchdog" style="white-space: nowrap; font-size: 0.8rem; padding: 6px 10px; flex: 1;">
-                                    <span>🐕</span> Watchdog Deploy
-                                </button>
-                                <button class="terminal-btn" data-tool="linux-perf" style="white-space: nowrap; font-size: 0.8rem; padding: 6px 10px; flex: 1;">
-                                    <span>💻</span> Linux Perf/Usage Check
-                                </button>
-                                <button class="terminal-btn" data-tool="log-downloader" style="white-space: nowrap; font-size: 0.8rem; padding: 6px 10px; flex: 1;">
-                                    <span>📥</span> Linux Logs Downloader
-                                </button>
-                            </div>
 
                             <div class="terminal-window" id="terminal-output">
                                 <div class="terminal-line terminal-info">Click a tool in the sidebar to execute a script...</div>

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>T1 Legacy Tools - AutoTech</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .legacy-batch-container {
+            max-width: 400px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .legacy-batch-window {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .legacy-batch-header {
+            background: #1c2833;
+            padding: 15px 20px;
+            border-bottom: 1px solid #34495e;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .legacy-batch-title {
+            color: #ecf0f1;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .legacy-batch-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .window-control {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+        }
+
+        .window-control.minimize { background: #f39c12; }
+        .window-control.maximize { background: #27ae60; }
+        .window-control.close { background: #e74c3c; }
+
+        .legacy-batch-content {
+            padding: 20px;
+            max-height: 700px;
+            overflow-y: auto;
+        }
+
+        .batch-button {
+            width: 100%;
+            padding: 12px 20px;
+            margin-bottom: 10px;
+            background: #4a5f7f;
+            border: 2px solid #5a6f8f;
+            border-radius: 4px;
+            color: white;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            position: relative;
+        }
+
+        .batch-button:hover {
+            background: #5a7fa0;
+            border-color: #6a8fb0;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .batch-button:active {
+            transform: translateY(0);
+        }
+
+        .batch-button::before {
+            content: '▶';
+            position: absolute;
+            left: 15px;
+            opacity: 0.6;
+        }
+
+        .batch-section-divider {
+            height: 1px;
+            background: linear-gradient(to right, transparent, #5a6f8f, transparent);
+            margin: 20px 0;
+        }
+
+        .batch-info {
+            background: #34495e;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            color: #ecf0f1;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .batch-info-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #3498db;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <span class="sidebar-logo-icon">🛠️</span>
+                    <div class="sidebar-logo-text">AutoTech</div>
+                    <div class="sidebar-logo-subtitle">Mining Equipment</div>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="/" class="nav-item">
+                    <span class="nav-item-icon">🏠</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="/autotech" class="nav-item">
+                    <span class="nav-item-icon">🛠️</span>
+                    <span>AutoTech Tools</span>
+                </a>
+                <a href="/legacy-batch-tools" class="nav-item active">
+                    <span class="nav-item-icon">📟</span>
+                    <span>T1 Legacy Batch Tools</span>
+                </a>
+                <form action="/logout" method="POST" style="margin: 0;">
+                    <button type="submit" class="nav-item" style="background: none; border: none; width: 100%; text-align: left; font-family: inherit;">
+                        <span class="nav-item-icon">🚪</span>
+                        <span>Logout</span>
+                    </button>
+                </form>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="legacy-batch-container">
+                <div class="legacy-batch-window">
+                    <div class="legacy-batch-header">
+                        <div class="legacy-batch-title">T1 PCN Dashboard</div>
+                        <div class="legacy-batch-buttons">
+                            <button class="window-control minimize"></button>
+                            <button class="window-control maximize"></button>
+                            <button class="window-control close"></button>
+                        </div>
+                    </div>
+
+                    <div class="legacy-batch-content">
+                        <div class="batch-info">
+                            <div class="batch-info-title">ℹ️ Legacy Batch Tools</div>
+                            <div>These tools will open in a Command Prompt window. You'll need to enter the MMS password when prompted.</div>
+                        </div>
+
+                        <button class="batch-button" onclick="launchBatchTool('ip-finder')">IP Finder</button>
+                        <button class="batch-button" onclick="launchBatchTool('ptx-uptime')">PTX Uptime Report</button>
+                        <button class="batch-button" onclick="launchBatchTool('mineview-sessions')">Mineview Sessions</button>
+                        <button class="batch-button" onclick="launchBatchTool('start-vnc')">Start PTX VNC</button>
+                        <button class="batch-button" onclick="launchBatchTool('ptx-health')">PTX Health Check</button>
+                        <button class="batch-button" onclick="launchBatchTool('avi-reboot')">MM2/AVI Reboot</button>
+                        <button class="batch-button" onclick="launchBatchTool('watchdog')">PTX-AVI Watchdog Deploy</button>
+                        <button class="batch-button" onclick="launchBatchTool('koa-data')">Live KOA Data</button>
+                        <button class="batch-button" onclick="launchBatchTool('speed-limit')">Live Speed Limit Data</button>
+                        <button class="batch-button" onclick="launchBatchTool('linux-perf')">Linux Perf/Usage Check</button>
+                        <button class="batch-button" onclick="launchBatchTool('component-tracking')">Field Component Tracking</button>
+                        <button class="batch-button" onclick="launchBatchTool('log-downloader')">Linux Logs Downloader</button>
+
+                        <div class="batch-section-divider"></div>
+
+                        <button class="batch-button" onclick="launchBatchTool('t1-tools')">T1 Tools - V1.3</button>
+                        <button class="batch-button" onclick="alert('Insert Playback USB drive')">Playback USB</button>
+                        <button class="batch-button" onclick="alert('Insert CamStudio USB drive')">CamStudio USB</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        async function launchBatchTool(toolName) {
+            try {
+                const response = await fetch('/api/launch-batch-tool', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ tool: toolName })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Show brief success feedback
+                    const button = event.target;
+                    const originalText = button.textContent;
+                    button.textContent = '✓ Launched!';
+                    button.style.background = '#27ae60';
+
+                    setTimeout(() => {
+                        button.textContent = originalText;
+                        button.style.background = '';
+                    }, 1500);
+                } else {
+                    alert('Error: ' + result.message);
+                }
+            } catch (error) {
+                alert('Error launching tool: ' + error.message);
+            }
+        }
+
+        // Disable window control buttons (just for show)
+        document.querySelectorAll('.window-control').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (btn.classList.contains('close')) {
+                    window.location.href = '/';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

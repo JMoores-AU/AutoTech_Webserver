@@ -2610,10 +2610,80 @@ class TerminalSession:
 @app.route('/legacy')  # Keep legacy route for backwards compatibility
 @login_required
 def autotech_tools():
-    """AutoTech Tools page with live terminal"""
+    """AutoTech Tools page with IP Finder only"""
     return render_template('t1_legacy.html',
                          online=is_online_network(),
                          gateway_ip=GATEWAY_IP)
+
+
+@app.route('/legacy-batch-tools')
+@login_required
+def legacy_batch_tools():
+    """T1 Legacy Batch Tools - Opens CMD windows for interactive scripts"""
+    return render_template('legacy_batch_tools.html',
+                         online=is_online_network(),
+                         gateway_ip=GATEWAY_IP)
+
+
+@app.route('/api/launch-batch-tool', methods=['POST'])
+@login_required
+def api_launch_batch_tool():
+    """Launch a batch file in CMD window"""
+    try:
+        data = request.get_json()
+        tool_name = data.get('tool', '').lower()
+
+        # Map tool names to batch file paths
+        batch_files = {
+            'ip-finder': 'legacy_batch_scripts/IP_Finder.bat',
+            'ptx-uptime': 'legacy_batch_scripts/PTX_Uptime.bat',
+            'mineview-sessions': 'legacy_batch_scripts/MineView_Session.bat',
+            'start-vnc': 'legacy_batch_scripts/Start_VNC.bat',
+            'ptx-health': 'legacy_batch_scripts/PTXC_Health_Check.bat',
+            'avi-reboot': 'legacy_batch_scripts/AVI_MM2_Reboot.bat',
+            'watchdog': 'legacy_batch_scripts/PTX-AVI_Watchdog_SingleDeploy.bat',
+            'koa-data': 'legacy_batch_scripts/LIVE_KOA_DataCheck.bat',
+            'speed-limit': 'legacy_batch_scripts/Latest_SpeedLimit_DataCheck.bat',
+            'linux-perf': 'legacy_batch_scripts/Linux_Health_Check.bat',
+            'component-tracking': 'legacy_batch_scripts/ComponentTracking.bat',
+            'log-downloader': 'legacy_batch_scripts/Log_Downloader.bat',
+            't1-tools': 'legacy_batch_scripts/T1_Tools_Launch.bat'
+        }
+
+        if tool_name not in batch_files:
+            return jsonify({
+                'success': False,
+                'message': f'Unknown tool: {tool_name}'
+            })
+
+        batch_file = os.path.join(BASE_DIR, batch_files[tool_name])
+
+        if not os.path.exists(batch_file):
+            return jsonify({
+                'success': False,
+                'message': f'Batch file not found: {batch_file}'
+            })
+
+        # Launch batch file in new CMD window
+        # Use 'start' command to open in new window
+        subprocess.Popen(
+            ['cmd', '/c', 'start', 'cmd', '/k', batch_file],
+            creationflags=subprocess.CREATE_NEW_CONSOLE if platform.system() == 'Windows' else 0
+        )
+
+        logger.info(f"Launched batch tool: {tool_name}")
+
+        return jsonify({
+            'success': True,
+            'message': f'Launched {tool_name} in CMD window'
+        })
+
+    except Exception as e:
+        logger.error(f"Error launching batch tool: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': f'Error: {str(e)}'
+        })
 
 
 @app.route('/api/legacy/terminal/start', methods=['POST'])
