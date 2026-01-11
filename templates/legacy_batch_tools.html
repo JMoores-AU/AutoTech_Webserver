@@ -1,191 +1,21 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>T1 Legacy Tools - AutoTech</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <style>
-        .legacy-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .legacy-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        @media (max-width: 1200px) {
-            .legacy-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .legacy-card {
-            background: var(--theme-bg-card);
-            border: 1px solid var(--theme-border);
-            border-radius: var(--radius-lg);
-            padding: 20px;
-        }
-
-        .legacy-card-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid var(--theme-border);
-        }
-
-        .legacy-card-icon {
-            font-size: 28px;
-        }
-
-        .legacy-card-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: var(--theme-text-bright);
-        }
-
-        .password-input-section {
-            background: var(--theme-bg-secondary);
-            padding: 15px;
-            border-radius: var(--radius-md);
-            margin-bottom: 20px;
-            border-left: 4px solid var(--theme-primary);
-        }
-
-        .password-label {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--theme-text);
-            margin-bottom: 8px;
-            display: block;
-        }
-
-        .password-input {
-            width: 100%;
-            padding: 10px 12px;
-            background: var(--theme-bg-card);
-            border: 1px solid var(--theme-border);
-            border-radius: var(--radius-sm);
-            color: var(--theme-text);
-            font-size: 14px;
-            font-family: monospace;
-        }
-
-        .password-input:focus {
-            outline: none;
-            border-color: var(--theme-primary);
-        }
-
-        .batch-buttons-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-        }
-
-        .batch-button {
-            padding: 12px 16px;
-            background: linear-gradient(135deg, #4a5f7f 0%, #3a4f6f 100%);
-            border: 1px solid #5a6f8f;
-            border-radius: var(--radius-md);
-            color: white;
-            font-size: 13px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-align: left;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .batch-button:hover {
-            background: linear-gradient(135deg, #5a7fa0 0%, #4a6f90 100%);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
-
-        .batch-button:active {
-            transform: translateY(0);
-        }
-
-        .batch-button-icon {
-            font-size: 16px;
-        }
-
-        .ip-finder-section {
-            background: var(--theme-bg-secondary);
-            padding: 15px;
-            border-radius: var(--radius-md);
-            margin-bottom: 15px;
-        }
-
-        .ip-finder-form {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .equipment-input {
-            flex: 1;
-            padding: 10px 12px;
-            background: var(--theme-bg-card);
-            border: 1px solid var(--theme-border);
-            border-radius: var(--radius-sm);
-            color: var(--theme-text);
-            font-size: 14px;
-        }
-
-        .find-button {
-            padding: 10px 20px;
-            background: var(--theme-primary);
-            border: none;
-            border-radius: var(--radius-sm);
-            color: white;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .find-button:hover {
-            background: var(--theme-primary-hover);
-        }
-
-        .terminal-output {
-            background: #0a0a0a;
-            border: 1px solid #222;
-            border-radius: var(--radius-md);
-            padding: 15px;
-            font-family: 'Consolas', 'Monaco', monospace;
-            font-size: 13px;
-            color: #00ff00;
-            min-height: 200px;
-            max-height: 400px;
-            overflow-y: auto;
-            line-height: 1.4;
-            white-space: pre-wrap;
-        }
-
-        .info-box {
-            background: var(--theme-bg-secondary);
-            border-left: 4px solid #3498db;
-            padding: 12px;
-            border-radius: var(--radius-sm);
-            margin-bottom: 15px;
-            font-size: 13px;
-            color: var(--theme-text);
-        }
+        .legacy-container { max-width: 1200px; margin: 40px auto; padding: 20px; }
+        .info-box { background: #e3f2fd; border-left: 4px solid #2196f3; padding: 15px; margin-bottom: 20px; border-radius: 4px; }
+        .scripts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; margin-top: 20px; }
+        .script-card { background: var(--theme-bg-card); border: 1px solid var(--theme-border); border-radius: 8px; padding: 20px; cursor: pointer; transition: all 0.2s; }
+        .script-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .script-icon { font-size: 32px; margin-bottom: 10px; }
+        .script-title { font-weight: 600; color: var(--theme-text-bright); margin-bottom: 5px; }
+        .script-desc { font-size: 13px; color: var(--theme-text-muted); }
     </style>
 </head>
 <body>
     <div class="dashboard-container">
-        <!-- Sidebar -->
         <aside class="sidebar">
             <div class="sidebar-header">
                 <div class="sidebar-logo">
@@ -194,200 +24,105 @@
                     <div class="sidebar-logo-subtitle">Mining Equipment</div>
                 </div>
             </div>
-
             <nav class="sidebar-nav">
-                <a href="/" class="nav-item">
-                    <span class="nav-item-icon">🏠</span>
-                    <span>Dashboard</span>
-                </a>
-                <a href="/autotech" class="nav-item">
-                    <span class="nav-item-icon">🛠️</span>
-                    <span>AutoTech Tools</span>
-                </a>
-                <a href="/legacy-batch-tools" class="nav-item active">
-                    <span class="nav-item-icon">📟</span>
-                    <span>T1 Legacy Tools</span>
-                </a>
+                <a href="/" class="nav-item"><span class="nav-item-icon">🏠</span><span>Dashboard</span></a>
+                <a href="/autotech" class="nav-item"><span class="nav-item-icon">🛠️</span><span>AutoTech Tools</span></a>
+                <a href="/legacy-batch-tools" class="nav-item active"><span class="nav-item-icon">📟</span><span>T1 Legacy Tools</span></a>
                 <form action="/logout" method="POST" style="margin: 0;">
                     <button type="submit" class="nav-item" style="background: none; border: none; width: 100%; text-align: left; font-family: inherit;">
-                        <span class="nav-item-icon">🚪</span>
-                        <span>Logout</span>
+                        <span class="nav-item-icon">🚪</span><span>Logout</span>
                     </button>
                 </form>
             </nav>
         </aside>
-
-        <!-- Main Content -->
         <main class="main-content">
             <div class="legacy-container">
-                <!-- Password Input (Global for all scripts) -->
-                <div class="password-input-section">
-                    <label class="password-label">🔑 MMS Server Password (Auto-fills when launching scripts)</label>
-                    <input type="password" id="mms-password" class="password-input" placeholder="Enter MMS password..." autocomplete="off">
+                <h1 style="margin-bottom: 10px;">📟 T1 Legacy MMS Scripts</h1>
+                <div class="info-box">
+                    <strong>ℹ️ Installation Required:</strong> These scripts run locally on your PC. 
+                    You must install AutoTech Client first: <a href="/download-client-setup" style="color: #2196f3; font-weight: 600;">Download AutoTech Client Setup</a>
+                    <br><br>
+                    Scripts will open in Command Prompt windows. You'll be prompted for MMS password and other inputs.
                 </div>
-
-                <div class="legacy-grid">
-                    <!-- IP Finder (Web-Based) -->
-                    <div class="legacy-card">
-                        <div class="legacy-card-header">
-                            <span class="legacy-card-icon">🔍</span>
-                            <span class="legacy-card-title">IP Finder (Web-Based)</span>
-                        </div>
-
-                        <div class="ip-finder-section">
-                            <div class="ip-finder-form">
-                                <input type="text" id="equipment-name" class="equipment-input" placeholder="Enter equipment name (e.g., AHG69)..." />
-                                <button class="find-button" onclick="findIP()">🔍 Find Details</button>
-                            </div>
-                        </div>
-
-                        <div class="terminal-output" id="ip-output">Ready. Enter equipment name and click Find Details...</div>
+                
+                <div class="scripts-grid">
+                    <div class="script-card" onclick="launchScript('IP_Finder.bat')">
+                        <div class="script-icon">🔍</div>
+                        <div class="script-title">IP Finder</div>
+                        <div class="script-desc">Find equipment IP addresses</div>
                     </div>
-
-                    <!-- Batch Tools (CMD Launch) -->
-                    <div class="legacy-card">
-                        <div class="legacy-card-header">
-                            <span class="legacy-card-icon">📟</span>
-                            <span class="legacy-card-title">T1 Legacy Batch Scripts</span>
-                        </div>
-
-                        <div class="info-box">
-                            ℹ️ These scripts launch in CMD windows with auto-filled password
-                        </div>
-
-                        <div class="batch-buttons-grid">
-                            <button class="batch-button" onclick="launchBatch('ptx-uptime')">
-                                <span class="batch-button-icon">⏱️</span>
-                                <span>PTX Uptime Report</span>
-                            </button>
-                            <button class="batch-button" onclick="launchBatch('mineview-sessions')">
-                                <span class="batch-button-icon">👥</span>
-                                <span>Mineview Sessions</span>
-                            </button>
-                            <button class="batch-button" onclick="launchBatch('start-vnc')">
-                                <span class="batch-button-icon">🖥️</span>
-                                <span>Start PTX VNC</span>
-                            </button>
-                            <button class="batch-button" onclick="launchBatch('ptx-health')">
-                                <span class="batch-button-icon">❤️</span>
-                                <span>PTX Health Check</span>
-                            </button>
-                            <button class="batch-button" onclick="launchBatch('avi-reboot')">
-                                <span class="batch-button-icon">🔄</span>
-                                <span>MM2/AVI Reboot</span>
-                            </button>
-                            <button class="batch-button" onclick="launchBatch('watchdog')">
-                                <span class="batch-button-icon">🐕</span>
-                                <span>Watchdog Deploy</span>
-                            </button>
-                            <button class="batch-button" onclick="launchBatch('koa-data')">
-                                <span class="batch-button-icon">📊</span>
-                                <span>Live KOA Data</span>
-                            </button>
-                            <button class="batch-button" onclick="launchBatch('speed-limit')">
-                                <span class="batch-button-icon">🚦</span>
-                                <span>Speed Limit Data</span>
-                            </button>
-                            <button class="batch-button" onclick="launchBatch('linux-perf')">
-                                <span class="batch-button-icon">💻</span>
-                                <span>Linux Perf Check</span>
-                            </button>
-                            <button class="batch-button" onclick="launchBatch('component-tracking')">
-                                <span class="batch-button-icon">📦</span>
-                                <span>Component Tracking</span>
-                            </button>
-                            <button class="batch-button" onclick="launchBatch('log-downloader')">
-                                <span class="batch-button-icon">📥</span>
-                                <span>Log Downloader</span>
-                            </button>
-                            <button class="batch-button" onclick="launchBatch('t1-tools')">
-                                <span class="batch-button-icon">🛠️</span>
-                                <span>T1 Tools V1.3</span>
-                            </button>
-                        </div>
+                    <div class="script-card" onclick="launchScript('PTXC_Health_Check.bat')">
+                        <div class="script-icon">❤️</div>
+                        <div class="script-title">PTX Health Check</div>
+                        <div class="script-desc">Check PTX system health</div>
+                    </div>
+                    <div class="script-card" onclick="launchScript('PTX_Uptime.bat')">
+                        <div class="script-icon">⏱️</div>
+                        <div class="script-title">PTX Uptime Report</div>
+                        <div class="script-desc">Download uptime report</div>
+                    </div>
+                    <div class="script-card" onclick="launchScript('MineView_Session.bat')">
+                        <div class="script-icon">👥</div>
+                        <div class="script-title">Mineview Sessions</div>
+                        <div class="script-desc">Check active sessions</div>
+                    </div>
+                    <div class="script-card" onclick="launchScript('Start_VNC.bat')">
+                        <div class="script-icon">🖥️</div>
+                        <div class="script-title">Start PTX VNC</div>
+                        <div class="script-desc">Remote desktop connection</div>
+                    </div>
+                    <div class="script-card" onclick="launchScript('AVI_MM2_Reboot.bat')">
+                        <div class="script-icon">🔄</div>
+                        <div class="script-title">MM2/AVI Reboot</div>
+                        <div class="script-desc">Reboot radio and MM2</div>
+                    </div>
+                    <div class="script-card" onclick="launchScript('PTX-AVI_Watchdog_SingleDeploy.bat')">
+                        <div class="script-icon">🐕</div>
+                        <div class="script-title">Watchdog Deploy</div>
+                        <div class="script-desc">Deploy PTX-AVI watchdog</div>
+                    </div>
+                    <div class="script-card" onclick="launchScript('LIVE_KOA_DataCheck.bat')">
+                        <div class="script-icon">📊</div>
+                        <div class="script-title">Live KOA Data</div>
+                        <div class="script-desc">Check KOA data</div>
+                    </div>
+                    <div class="script-card" onclick="launchScript('Latest_SpeedLimit_DataCheck.bat')">
+                        <div class="script-icon">🚦</div>
+                        <div class="script-title">Speed Limit Data</div>
+                        <div class="script-desc">Check speed limit data</div>
+                    </div>
+                    <div class="script-card" onclick="launchScript('Linux_Health_Check.bat')">
+                        <div class="script-icon">💻</div>
+                        <div class="script-title">Linux Perf Check</div>
+                        <div class="script-desc">Performance and usage</div>
+                    </div>
+                    <div class="script-card" onclick="launchScript('ComponentTracking.bat')">
+                        <div class="script-icon">📦</div>
+                        <div class="script-title">Component Tracking</div>
+                        <div class="script-desc">Track field components</div>
+                    </div>
+                    <div class="script-card" onclick="launchScript('Log_Downloader.bat')">
+                        <div class="script-icon">📥</div>
+                        <div class="script-title">Log Downloader</div>
+                        <div class="script-desc">Download Linux logs</div>
                     </div>
                 </div>
             </div>
         </main>
     </div>
-
     <script>
-        async function findIP() {
-            const equipment = document.getElementById('equipment-name').value.trim().toUpperCase();
-            const output = document.getElementById('ip-output');
-
-            if (!equipment) {
-                output.textContent = 'Error: Please enter equipment name';
-                return;
-            }
-
-            output.textContent = `Searching for ${equipment}...\n`;
-
-            try {
-                const response = await fetch('/api/legacy/grm-script', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        script: 'ip-finder',
-                        equipment: equipment
-                    })
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    output.textContent = result.output || 'No output';
-                } else {
-                    output.textContent = `Error: ${result.message}`;
-                }
-            } catch (error) {
-                output.textContent = `Error: ${error.message}`;
-            }
+        function launchScript(scriptName) {
+            // Launch local batch file
+            const scriptPath = `C:\AutoTech_Client\mms_scripts\${scriptName}`;
+            
+            // Try to execute using file:// protocol (works if browser allows)
+            const link = document.createElement('a');
+            link.href = `file:///${scriptPath}`;
+            link.click();
+            
+            // Show user message
+            alert(`Launching ${scriptName}...\n\nIf nothing happens, run this file manually:\n${scriptPath}`);
         }
-
-        async function launchBatch(toolName) {
-            const password = document.getElementById('mms-password').value;
-
-            if (!password) {
-                alert('Please enter MMS password first');
-                return;
-            }
-
-            try {
-                const response = await fetch('/api/launch-batch-tool', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        tool: toolName,
-                        password: password
-                    })
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    // Brief visual feedback
-                    const button = event.target.closest('.batch-button');
-                    const originalBg = button.style.background;
-                    button.style.background = '#27ae60';
-
-                    setTimeout(() => {
-                        button.style.background = originalBg;
-                    }, 800);
-                } else {
-                    alert('Error: ' + result.message);
-                }
-            } catch (error) {
-                alert('Error: ' + error.message);
-            }
-        }
-
-        // Allow Enter key for IP Finder
-        document.getElementById('equipment-name').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                findIP();
-            }
-        });
     </script>
 </body>
 </html>

@@ -10,6 +10,7 @@ echo This will install:
 echo - PuTTY (SSH client)
 echo - WinSCP (SFTP/SCP client)
 echo - VNC Viewer (Remote desktop)
+echo - T1 Legacy MMS Scripts
 echo - Custom URI handlers
 echo.
 echo Installation folder: C:\AutoTech_Client\
@@ -26,18 +27,25 @@ if %errorLevel% neq 0 (
 )
 
 echo.
-echo [1/4] Creating installation folder...
+echo [1/5] Creating installation folder...
 if not exist "C:\AutoTech_Client" mkdir "C:\AutoTech_Client"
 if not exist "C:\AutoTech_Client\scripts" mkdir "C:\AutoTech_Client\scripts"
+if not exist "C:\AutoTech_Client\mms_scripts" mkdir "C:\AutoTech_Client\mms_scripts"
 
-echo [2/4] Copying tools and scripts...
+echo [2/5] Copying tools...
 xcopy /Y /Q "%~dp0..\tools\*.*" "C:\AutoTech_Client\"
+
+echo [3/5] Copying launcher scripts...
 xcopy /Y /Q "%~dp0*.bat" "C:\AutoTech_Client\scripts\"
 
-echo [3/4] Registering custom URI handlers...
+echo [4/5] Copying MMS legacy scripts...
+xcopy /Y /Q "%~dp0mms_scripts\*.bat" "C:\AutoTech_Client\mms_scripts\"
+
+echo [5/5] Registering custom URI handlers...
 regedit /s "%~dp0register_uri_handlers.reg"
 
-echo [4/4] Creating uninstaller...
+echo.
+echo Creating uninstaller...
 (
 echo @echo off
 echo echo Uninstalling AutoTech Client...
