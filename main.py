@@ -2665,7 +2665,15 @@ def api_launch_batch_tool():
                 'message': f'Batch file not found: {batch_file}'
             })
 
-        # Create a temporary wrapper batch file that auto-fills the password
+        # Get correct plink path from web server
+        plink_path = os.path.join(BASE_DIR, 'autotech_client', 'tools', 'plink.exe')
+        if not os.path.exists(plink_path):
+            return jsonify({
+                'success': False,
+                'message': f'plink.exe not found at: {plink_path}'
+            })
+
+        # Create a temporary wrapper batch file that uses correct plink path and auto-fills password
         temp_dir = os.path.join(BASE_DIR, 'temp')
         os.makedirs(temp_dir, exist_ok=True)
 
@@ -2673,6 +2681,8 @@ def api_launch_batch_tool():
 
         with open(temp_batch, 'w') as f:
             f.write(f'@echo off\n')
+            f.write(f'SET PLINK_PATH="{plink_path}"\n')
+            f.write(f'SET PASSWORD={password}\n')
             f.write(f'echo {password}| "{batch_file}"\n')
             # Keep window open after script completes
             f.write(f'pause\n')
@@ -2683,7 +2693,7 @@ def api_launch_batch_tool():
             creationflags=subprocess.CREATE_NEW_CONSOLE if platform.system() == 'Windows' else 0
         )
 
-        logger.info(f"Launched batch tool: {tool_name} with auto-filled password")
+        logger.info(f"Launched batch tool: {tool_name} with auto-filled password and correct plink path")
 
         return jsonify({
             'success': True,

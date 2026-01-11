@@ -28,14 +28,14 @@ exit /b
 
 :callCurrentScript
 set /p ip_address=Enter PTXC IP Address: 
-plink.exe -t mms@10.110.19.107 -pw %password% "echo $(date): Initiated from %COMPUTERNAME% by %USERNAME% for %ip_address%. >> /home/mms/bin/remote_check/AVI_Watchdog/Report.txt; /home/mms/bin/remote_check/AVI_Watchdog/watchdog_setup_single.sh %ip_address%"
+%PLINK_PATH% -t mms@10.110.19.107 -pw %password% "echo $(date): Initiated from %COMPUTERNAME% by %USERNAME% for %ip_address%. >> /home/mms/bin/remote_check/AVI_Watchdog/Report.txt; /home/mms/bin/remote_check/AVI_Watchdog/watchdog_setup_single.sh %ip_address%"
 echo:
 echo:
 goto menu
 
 :callDifferentScript
 set /p ip_address=Enter PTX10 IP Address: 
-plink.exe -t mms@10.110.19.107 -pw %password% "echo $(date): Initiated from %COMPUTERNAME% by %USERNAME% for %ip_address%. >> /home/mms/bin/remote_check/AVI_Watchdog/Report.txt; /home/mms/bin/remote_check/AVI_Watchdog/watchdog_setup_single_PTX10.sh %ip_address%"
+%PLINK_PATH% -t mms@10.110.19.107 -pw %password% "echo $(date): Initiated from %COMPUTERNAME% by %USERNAME% for %ip_address%. >> /home/mms/bin/remote_check/AVI_Watchdog/Report.txt; /home/mms/bin/remote_check/AVI_Watchdog/watchdog_setup_single_PTX10.sh %ip_address%"
 echo:
 echo:
 goto menu

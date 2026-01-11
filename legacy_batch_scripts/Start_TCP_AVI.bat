@@ -8,6 +8,6 @@ cls
 echo Start TCPDump on AVI
 echo:
 echo:
-plink.exe -t mms@10.110.19.107 -pw %password%  "/home/mms/bin/remote_check/for_equipment/SCP/AVI_TCP.sh"
+%PLINK_PATH% -t mms@10.110.19.107 -pw %password%  "/home/mms/bin/remote_check/for_equipment/SCP/AVI_TCP.sh"
 echo:
 TIMEOUT 10

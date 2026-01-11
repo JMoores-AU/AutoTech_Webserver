@@ -8,7 +8,7 @@ echo Welcome Field Component Info Utility
 echo:
 echo:
 set /p ip_address=Enter Equipment Name (CAPS): 
-plink.exe -t mms@10.110.19.107 -pw %password% "/home/mms/bin/remote_check/Random/MySQL/Component/site_export.sh %ip_address%"
+%PLINK_PATH% -t mms@10.110.19.107 -pw %password% "/home/mms/bin/remote_check/Random/MySQL/Component/site_export.sh %ip_address%"
 echo:
 goto loop
 

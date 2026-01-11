@@ -8,7 +8,7 @@ cls
 echo Live MineView Sessions
 echo:
 echo:
-plink.exe mms@10.110.19.107 -pw %password% "/home/mms/bin/MineView-Session.sh"
+%PLINK_PATH% mms@10.110.19.107 -pw %password% "/home/mms/bin/MineView-Session.sh"
 echo:
 echo:
 REM echo Downloading Latest Log File

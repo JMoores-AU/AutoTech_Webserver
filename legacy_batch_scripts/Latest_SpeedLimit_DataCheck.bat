@@ -7,6 +7,6 @@ echo:
 echo SpeedLimit Data at %date% %time%
 echo:
 echo:
-plink.exe -t -noagent mms@10.110.19.107  -pw %password% "/home/mms/bin/remote_check/Random/MySQL/LASL_export.sh"
+%PLINK_PATH% -t -noagent mms@10.110.19.107  -pw %password% "/home/mms/bin/remote_check/Random/MySQL/LASL_export.sh"
 echo:
 pause
