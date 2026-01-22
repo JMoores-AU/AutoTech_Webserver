@@ -48,6 +48,17 @@ try:
 except ImportError:
     paramiko = None
 
+# System Tray Support (optional - only needed for --tray mode)
+try:
+    import pystray
+    from PIL import Image, ImageDraw
+    TRAY_AVAILABLE = True
+except ImportError:
+    TRAY_AVAILABLE = False
+    pystray = None
+    Image = None
+    ImageDraw = None
+
 try:
     import ping3
 except ImportError:
@@ -3705,26 +3716,14 @@ def live_install_client():
 @login_required
 def api_check_client_installed():
     """
-    Check if AutoTech Client is installed on the server machine.
-    This helps determine if the install info box should be shown.
-    Checks for the existence of C:\\AutoTech_Client folder.
+    Returns the server version for comparison.
+    Client-side JavaScript will test if URI handlers work locally.
+
+    NOTE: This endpoint NO LONGER checks the server's C:\\AutoTech_Client.
+    Client detection MUST be done client-side via URI handler testing.
     """
-    client_install_path = "C:\\AutoTech_Client"
-    is_installed = os.path.exists(client_install_path)
-
-    # Also check if key files exist
-    if is_installed:
-        has_scripts = os.path.exists(os.path.join(client_install_path, "mms_scripts"))
-        has_tools = os.path.exists(os.path.join(client_install_path, "plink.exe")) or \
-                    os.path.exists(os.path.join(client_install_path, "putty.exe"))
-        is_installed = has_scripts or has_tools
-
-    # Check versions
+    # Get server version from autotech_client/VERSION (for update comparison)
     server_version = None
-    client_version = None
-    update_available = False
-
-    # Get server version from autotech_client/VERSION
     server_version_file, _ = get_autotech_client_folder()
     if server_version_file:
         version_path = os.path.join(server_version_file, "VERSION")
@@ -3735,30 +3734,26 @@ def api_check_client_installed():
             except:
                 pass
 
-    # Get installed client version
-    if is_installed:
-        client_version_path = os.path.join(client_install_path, "VERSION")
-        if os.path.exists(client_version_path):
-            try:
-                with open(client_version_path, 'r') as f:
-                    client_version = f.read().strip()
-            except:
-                pass
-
-    # Compare versions
-    if server_version and is_installed:
-        if not client_version:
-            update_available = True  # No version file = old client
-        elif server_version != client_version:
-            update_available = True
-
     return jsonify({
-        'installed': is_installed,
-        'path': client_install_path if is_installed else None,
-        'server_version': server_version,
-        'client_version': client_version,
-        'update_available': update_available
+        'server_version': server_version or "1.1.1",
+        'note': 'Client installation must be checked client-side via URI handler test'
     })
+
+
+@app.route('/api/client-version-file')
+@login_required
+def api_client_version_file():
+    """
+    Serves a special file that client-side JavaScript can request via
+    file:// protocol to test if C:\\AutoTech_Client\\VERSION exists.
+    Returns the client's local VERSION file content if present.
+    """
+    # This endpoint is for documentation only - actual check must be done client-side
+    # JavaScript will try to read: file:///C:/AutoTech_Client/VERSION
+    return jsonify({
+        'error': 'This endpoint requires client-side file access',
+        'instruction': 'Use JavaScript FileReader or iframe to test file:///C:/AutoTech_Client/VERSION'
+    }), 400
 
 
 @app.route('/api/launch-batch-tool', methods=['POST'])
@@ -5555,27 +5550,181 @@ def open_browser():
     except Exception as e:
         print(f"Failed to open browser: {e}")
 
-if __name__ == '__main__':
-    # Display startup banner
-    print_startup_banner()
+# ========================================
+# SYSTEM TRAY MODE
+# ========================================
+class AutoTechTrayMode:
+    """System tray application that runs Flask in background"""
 
-    # Start browser in separate thread
-    browser_thread = threading.Thread(target=open_browser, daemon=True)
-    browser_thread.start()
+    def __init__(self):
+        self.icon = None
+        self.flask_thread = None
+        self.server_running = False
 
-    # Development server configuration
-    try:
-        app.run(
-            host='0.0.0.0',  # Listen on all network interfaces (allows remote access)
-            port=8888,
-            debug=True,
-            use_reloader=False,  # Disabled - Windows caching issues. Restart manually after code changes.
-            passthrough_errors=False  # Handle errors gracefully
-        )
-    except KeyboardInterrupt:
-        print("\n\n[SHUTDOWN] AutoTech Web Dashboard stopped by user.")
+    def create_icon_image(self, color='green'):
+        """Create a simple icon for the system tray"""
+        if not TRAY_AVAILABLE:
+            return None
+
+        # Create 64x64 icon with wrench/tool symbol
+        img = Image.new('RGB', (64, 64), color='white')
+        draw = ImageDraw.Draw(img)
+
+        # Draw a simple tool/wrench icon
+        if color == 'green':
+            fill_color = (34, 197, 94)  # Green when running
+        elif color == 'red':
+            fill_color = (239, 68, 68)  # Red when stopped
+        else:
+            fill_color = (156, 163, 175)  # Gray
+
+        # Draw wrench shape
+        draw.ellipse([20, 15, 44, 39], fill=fill_color)
+        draw.rectangle([28, 35, 36, 55], fill=fill_color)
+        draw.rectangle([25, 50, 39, 58], fill=fill_color)
+
+        return img
+
+    def start_flask_server(self):
+        """Start Flask server in background thread"""
+        if self.server_running:
+            return "Already running"
+
+        try:
+            self.flask_thread = threading.Thread(
+                target=lambda: app.run(
+                    host='0.0.0.0',
+                    port=8888,
+                    debug=False,
+                    use_reloader=False
+                ),
+                daemon=True
+            )
+            self.flask_thread.start()
+            time.sleep(2)  # Wait for server to start
+
+            self.server_running = True
+            self.update_icon('green')
+            return "AutoTech started successfully"
+        except Exception as e:
+            return f"Error starting AutoTech: {str(e)}"
+
+    def stop_flask_server(self):
+        """Stop Flask server (note: Flask doesn't support clean shutdown in threads)"""
+        if not self.server_running:
+            return "Not running"
+
+        # Flask running in thread can't be easily stopped, so just exit
+        self.show_notification("Stopping AutoTech...")
+        self.icon.stop()
         sys.exit(0)
-    except Exception as e:
-        print(f"\n[ERROR] Startup Error: {e}")
-        print("Please check that port 8888 is available and try again.")
-        sys.exit(1)
+
+    def restart_server(self):
+        """Restart server (exit and let user restart manually)"""
+        self.show_notification("Please restart AutoTech manually")
+        self.icon.stop()
+        sys.exit(0)
+
+    def open_browser(self):
+        """Open AutoTech dashboard in default browser"""
+        try:
+            import webbrowser
+            webbrowser.open("http://localhost:8888")
+            return "Opening dashboard..."
+        except Exception as e:
+            return f"Error opening browser: {str(e)}"
+
+    def update_icon(self, color):
+        """Update tray icon color"""
+        if self.icon:
+            self.icon.icon = self.create_icon_image(color)
+
+    def show_notification(self, message):
+        """Show system notification"""
+        if self.icon:
+            self.icon.notify(message, "AutoTech")
+
+    # Menu actions
+    def action_open(self, icon, item):
+        """Open dashboard"""
+        msg = self.open_browser()
+        self.show_notification(msg)
+
+    def action_restart(self, icon, item):
+        """Restart server"""
+        self.restart_server()
+
+    def action_exit(self, icon, item):
+        """Exit tray application"""
+        self.stop_flask_server()
+
+    def create_menu(self):
+        """Create system tray menu"""
+        return pystray.Menu(
+            pystray.MenuItem("Open Dashboard", self.action_open, default=True),
+            pystray.Menu.SEPARATOR,
+            pystray.MenuItem("Restart Server", self.action_restart),
+            pystray.MenuItem("Exit", self.action_exit)
+        )
+
+    def run(self):
+        """Run the system tray application"""
+        if not TRAY_AVAILABLE:
+            print("ERROR: System tray mode requires pystray and pillow packages!")
+            print("Run: pip install pystray pillow")
+            sys.exit(1)
+
+        # Start Flask server in background
+        print_startup_banner()
+        start_msg = self.start_flask_server()
+        print(f"\n{start_msg}")
+        print("AutoTech running in system tray (no window)")
+        print("Right-click tray icon to access menu\n")
+
+        # Create system tray icon
+        icon_image = self.create_icon_image('green' if self.server_running else 'red')
+        self.icon = pystray.Icon(
+            "AutoTech",
+            icon_image,
+            "AutoTech Dashboard",
+            menu=self.create_menu()
+        )
+
+        # Show startup notification
+        self.icon.notify(start_msg, "AutoTech")
+
+        # Run the icon (blocking)
+        self.icon.run()
+
+
+if __name__ == '__main__':
+    # Check for --tray flag
+    if '--tray' in sys.argv:
+        # System tray mode (no console window)
+        tray_app = AutoTechTrayMode()
+        tray_app.run()
+    else:
+        # Normal mode with console window
+        # Display startup banner
+        print_startup_banner()
+
+        # Start browser in separate thread
+        browser_thread = threading.Thread(target=open_browser, daemon=True)
+        browser_thread.start()
+
+        # Development server configuration
+        try:
+            app.run(
+                host='0.0.0.0',  # Listen on all network interfaces (allows remote access)
+                port=8888,
+                debug=True,
+                use_reloader=False,  # Disabled - Windows caching issues. Restart manually after code changes.
+                passthrough_errors=False  # Handle errors gracefully
+            )
+        except KeyboardInterrupt:
+            print("\n\n[SHUTDOWN] AutoTech Web Dashboard stopped by user.")
+            sys.exit(0)
+        except Exception as e:
+            print(f"\n[ERROR] Startup Error: {e}")
+            print("Please check that port 8888 is available and try again.")
+            sys.exit(1)

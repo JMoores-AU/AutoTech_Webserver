@@ -123,7 +123,7 @@
             <!-- Sidebar Header / Logo -->
             <div class="sidebar-header">
                 <div class="sidebar-logo">
-                    <span class="sidebar-logo-icon">🛠️</span>
+                    <img src="{{ url_for('static', filename='autotech_logo.png') }}" alt="AutoTech Logo" class="sidebar-logo-img">
                     <div>
                         <div class="sidebar-logo-text">AutoTech</div>
                         <div class="sidebar-logo-subtitle">Built by AHS Specialists, for AHS Systems</div>
@@ -215,6 +215,12 @@
                     <span class="status-indicator {{ 'online' if online else 'offline' }}" id="statusIndicator"></span>
                     <span id="networkStatus">{{ 'Network Online' if online else 'Offline Mode' }}</span>
                 </div>
+
+                <!-- Client Version Status -->
+                <div class="sidebar-status" id="clientVersionStatus" style="margin-top: 8px; border-top: 1px solid var(--theme-border); padding-top: 8px;">
+                    <span class="status-indicator" style="background: var(--theme-text-muted);" id="clientStatusIndicator"></span>
+                    <span id="clientVersionText">Client: Checking...</span>
+                </div>
             </div>
             
         </aside>
@@ -244,6 +250,27 @@
             
             <!-- Content Container -->
             <div class="content-container">
+
+                <!-- ========================================
+                     CLIENT INSTALLATION CHECK
+                     ======================================== -->
+                <div class="info-box" id="clientInstallBanner" style="display: none; background: linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(255, 152, 0, 0.1) 100%); border-left: 4px solid #ffc107;">
+                    <strong>⚠️ AutoTech Client Required:</strong> To use remote tools (SSH, VNC, Scripts), AutoTech Client must be installed on <strong>THIS PC</strong>.
+                    <br><br>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px;">
+                        <a href="/download-client-package" class="download-btn" style="background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                            📦 Download Installer
+                        </a>
+                        <button onclick="testClientInstallation()" class="download-btn" style="background: linear-gradient(135deg, #17a2b8 0%, #138496 100%); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                            🧪 Test Installation
+                        </button>
+                    </div>
+                    <small style="color: var(--theme-text-muted);">
+                        <strong>Installation:</strong> Run <code>E:\AutoTech\autotech_client\Install_AutoTech_Client.bat</code> as Administrator
+                        <br>
+                        <strong>⚠️ IMPORTANT:</strong> Each remote PC must run the installer individually. The web server is shared, but tools run locally.
+                    </small>
+                </div>
 
                 <!-- ========================================
                      SECTION: WorkShop Skid VNC Access
@@ -487,6 +514,87 @@
         // Update status every 5 seconds
         updateSystemStatus();
         setInterval(updateSystemStatus, 5000);
+
+        // ========================================
+        // CLIENT VERSION CHECK (CLIENT-SIDE)
+        // ========================================
+        async function checkClientInstallation() {
+            const indicator = document.getElementById('clientStatusIndicator');
+            const text = document.getElementById('clientVersionText');
+            const banner = document.getElementById('clientInstallBanner');
+
+            try {
+                // Get server version
+                const response = await fetch('/api/check-client-installed');
+                const data = await response.json();
+                const serverVersion = data.server_version;
+
+                // Check localStorage cache (5 min cache)
+                const cachedCheck = localStorage.getItem('autotech_client_check');
+                const cachedVersion = localStorage.getItem('autotech_client_version');
+                const cacheTime = localStorage.getItem('autotech_client_check_time');
+
+                if (cachedCheck && cacheTime && (Date.now() - parseInt(cacheTime)) < 300000) {
+                    // Use cached result
+                    if (cachedCheck === 'true') {
+                        indicator.style.background = '#28a745'; // Green
+                        text.textContent = `Client: v${cachedVersion || serverVersion}`;
+                        banner.style.display = 'none'; // Hide banner
+                    } else {
+                        indicator.style.background = '#dc3545'; // Red
+                        text.textContent = 'Client: Not Installed';
+                        banner.style.display = 'block'; // Show banner
+                    }
+                } else {
+                    // No cache or expired - assume not installed
+                    indicator.style.background = '#ffc107'; // Yellow/Warning
+                    text.textContent = 'Client: Unknown (Test Required)';
+                    banner.style.display = 'block'; // Show banner
+                }
+            } catch (error) {
+                console.error('Client check error:', error);
+                indicator.style.background = '#dc3545';
+                text.textContent = 'Client: Error';
+                banner.style.display = 'block';
+            }
+        }
+
+        // TEST CLIENT INSTALLATION
+        function testClientInstallation() {
+            // Open a test SSH URI
+            window.open('autotech-ssh://test@127.0.0.1', '_blank');
+
+            // Ask user if it worked
+            setTimeout(() => {
+                const result = confirm(
+                    '🧪 CLIENT INSTALLATION TEST\n\n' +
+                    'A PuTTY window should have opened.\n\n' +
+                    'Did PuTTY open successfully?\n\n' +
+                    'Click OK if yes (client installed)\n' +
+                    'Click Cancel if nothing happened'
+                );
+
+                if (result) {
+                    // Success - cache result
+                    fetch('/api/check-client-installed')
+                        .then(response => response.json())
+                        .then(data => {
+                            localStorage.setItem('autotech_client_check', 'true');
+                            localStorage.setItem('autotech_client_version', data.server_version || '1.1.1');
+                            localStorage.setItem('autotech_client_check_time', Date.now().toString());
+
+                            alert('✅ Success! Client is installed and working.\n\nPage will reload.');
+                            location.reload();
+                        });
+                } else {
+                    // Failed
+                    alert('❌ Client not detected.\n\nPlease run:\nE:\\AutoTech\\autotech_client\\Install_AutoTech_Client.bat\n\nas Administrator, then test again.');
+                }
+            }, 1000);
+        }
+
+        // Run client check on page load
+        checkClientInstallation();
 
         // ========================================
         // LOGIN MODAL FUNCTIONS

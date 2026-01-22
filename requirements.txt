@@ -52,7 +52,7 @@ colorama==0.4.6
 
 # System Tray Support
 pystray==0.19.5
-pillow==11.1.0
+pillow==12.1.0
 
 # Development utilities
 setuptools>=60.0

@@ -1,6 +1,10 @@
 # -*- mode: python ; coding: utf-8 -*-
 # AutoTech Web Dashboard - PyInstaller Spec File
 # Build command: pyinstaller AutoTech.spec
+#
+# Usage:
+#   AutoTech.exe          - Normal mode with console window
+#   AutoTech.exe --tray   - System tray mode (no console window)
 
 block_cipher = None
 
@@ -26,6 +30,10 @@ a = Analysis(
         'requests',
         'email.mime.text',
         'email.mime.multipart',
+        'pystray',
+        'PIL',
+        'PIL.Image',
+        'PIL.ImageDraw',
     ],
     hookspath=[],
     hooksconfig={},

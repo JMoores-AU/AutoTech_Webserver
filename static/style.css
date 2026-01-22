@@ -156,6 +156,13 @@ a:hover {
     gap: 12px;
 }
 
+.sidebar-logo-img {
+    width: 42px;
+    height: 42px;
+    object-fit: contain;
+    border-radius: var(--radius-sm);
+}
+
 .sidebar-logo-icon {
     font-size: 1.75rem;
 }
@@ -1142,6 +1149,7 @@ a:hover {
         width: var(--sidebar-collapsed-width);
     }
     
+    .sidebar-logo-img,
     .sidebar-logo-text,
     .sidebar-logo-subtitle,
     .nav-item span:not(.nav-item-icon),
