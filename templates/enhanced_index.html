@@ -516,45 +516,37 @@
         setInterval(updateSystemStatus, 5000);
 
         // ========================================
-        // CLIENT VERSION CHECK (CLIENT-SIDE)
+        // CLIENT CHECK - SIMPLE VERSION
         // ========================================
         async function checkClientInstallation() {
             const indicator = document.getElementById('clientStatusIndicator');
             const text = document.getElementById('clientVersionText');
             const banner = document.getElementById('clientInstallBanner');
 
-            try {
-                // Get server version
-                const response = await fetch('/api/check-client-installed');
-                const data = await response.json();
-                const serverVersion = data.server_version;
+            // Get server version
+            const response = await fetch('/api/check-client-installed');
+            const data = await response.json();
+            const serverVersion = data.server_version;
 
-                // Check localStorage cache (5 min cache)
-                const cachedCheck = localStorage.getItem('autotech_client_check');
-                const cachedVersion = localStorage.getItem('autotech_client_version');
-                const cacheTime = localStorage.getItem('autotech_client_check_time');
+            // Auto-register this connection (track all IPs)
+            fetch('/api/register-client', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ client_version: serverVersion })
+            }).catch(err => console.log('Registration failed:', err));
 
-                if (cachedCheck && cacheTime && (Date.now() - parseInt(cacheTime)) < 300000) {
-                    // Use cached result
-                    if (cachedCheck === 'true') {
-                        indicator.style.background = '#28a745'; // Green
-                        text.textContent = `Client: v${cachedVersion || serverVersion}`;
-                        banner.style.display = 'none'; // Hide banner
-                    } else {
-                        indicator.style.background = '#dc3545'; // Red
-                        text.textContent = 'Client: Not Installed';
-                        banner.style.display = 'block'; // Show banner
-                    }
-                } else {
-                    // No cache or expired - assume not installed
-                    indicator.style.background = '#ffc107'; // Yellow/Warning
-                    text.textContent = 'Client: Unknown (Test Required)';
-                    banner.style.display = 'block'; // Show banner
-                }
-            } catch (error) {
-                console.error('Client check error:', error);
-                indicator.style.background = '#dc3545';
-                text.textContent = 'Client: Error';
+            // Check if user has tested before (localStorage)
+            const tested = localStorage.getItem('autotech_client_check');
+
+            if (tested === 'true') {
+                // Verified - show green
+                indicator.style.background = '#28a745';
+                text.textContent = `Client: v${serverVersion}`;
+                banner.style.display = 'none';
+            } else {
+                // Not verified - show yellow
+                indicator.style.background = '#ffc107';
+                text.textContent = 'Client: Click Test';
                 banner.style.display = 'block';
             }
         }
