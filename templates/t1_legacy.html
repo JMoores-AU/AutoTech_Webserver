@@ -622,25 +622,13 @@
             <div class="content-container">
                 <div class="legacy-container">
 
-                    <!-- Info Box - Hidden if AutoTech Client is installed -->
-                    <div class="info-box" id="install-info-box">
-                        <strong>ℹ️ Installation Required:</strong> AutoTech Client must be installed on <strong>THIS PC</strong> to use these tools.
+                    <!-- Info Box - Shown if AutoTech Client is not installed (check done on Dashboard) -->
+                    <div class="info-box" id="install-info-box" style="display: none;">
+                        <strong>⚠️ Client Not Installed:</strong> Please complete client installation from the <a href="/" style="color: #3b82f6; text-decoration: underline;">Dashboard</a> page.
                         <br><br>
-                        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px;">
-                            <a href="/download-client-package" class="download-btn">📦 Download ZIP Package</a>
-                            <a href="/live-install-client" class="download-btn" style="background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);">⚡ Live Install from USB</a>
-                            <button onclick="testClientInstallation()" class="download-btn" style="background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);">🧪 Test Installation</button>
-                        </div>
                         <small style="color: var(--theme-text-muted);">
-                            <strong>ZIP:</strong> Download, extract, right-click <strong>Install_AutoTech_Client.bat</strong> → "Run as administrator"
-                            <br>
-                            <strong>Live:</strong> Run installer directly from USB drive (E:\AutoTech\autotech_client\Install_AutoTech_Client.bat)
-                            <br>
-                            <strong>Test:</strong> Click "Test Installation" button after running installer to verify it works
+                            The client installation test has been moved to the main dashboard for better tracking.
                         </small>
-                        <br><br>
-                        <strong>⚠️ IMPORTANT:</strong> The installer must be run on <strong>EACH remote PC</strong> that will use AutoTech.
-                        The web server runs centrally, but tools open locally on each client machine.
                     </div>
 
                     <!-- Two-column layout: Web Terminal (left) | MMS Scripts (right) -->
@@ -798,128 +786,38 @@
 
     <script>
         // ========================================
-        // AUTOTECH CLIENT INSTALLATION CHECK (CLIENT-SIDE)
+        // AUTOTECH CLIENT CHECK (READ FROM CACHE ONLY)
         // ========================================
         function checkClientInstalled() {
             const installInfoBox = document.getElementById('install-info-box');
             const sidebarBadge = document.getElementById('sidebar-client-badge');
 
-            // First, get server version for comparison
-            fetch('/api/check-client-installed')
-                .then(response => response.json())
-                .then(serverData => {
-                    const serverVersion = serverData.server_version;
-
-                    // CLIENT-SIDE TEST: Try to create an iframe to test URI handler
-                    testClientURIHandler((isInstalled, clientVersion) => {
-                        if (isInstalled) {
-                            // Client is installed - check version
-                            if (clientVersion && serverVersion && clientVersion !== serverVersion) {
-                                // Update available
-                                installInfoBox.innerHTML = `
-                                    <strong>🔄 Update Available:</strong> A newer version of AutoTech Client is available (v${serverVersion}).
-                                    <br>Your installed version: v${clientVersion}
-                                    <br><br>
-                                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                                        <a href="/download-client-package" class="download-btn">📦 Download Update</a>
-                                        <a href="/live-install-client" class="download-btn" style="background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);">⚡ Live Update from USB</a>
-                                    </div>
-                                `;
-                                installInfoBox.style.display = 'block';
-                                sidebarBadge.className = 'sidebar-client-badge update-available';
-                                sidebarBadge.querySelector('.badge-icon').textContent = '🔄';
-                                sidebarBadge.querySelector('.badge-text').textContent = 'Update Available';
-                            } else {
-                                // Client up to date
-                                installInfoBox.style.display = 'none';
-                                sidebarBadge.className = 'sidebar-client-badge installed';
-                                sidebarBadge.querySelector('.badge-icon').textContent = '✅';
-                                sidebarBadge.querySelector('.badge-text').textContent = 'Client v' + (clientVersion || serverVersion);
-                            }
-                        } else {
-                            // Client NOT installed
-                            installInfoBox.style.display = 'block';
-                            sidebarBadge.className = 'sidebar-client-badge not-installed';
-                            sidebarBadge.querySelector('.badge-icon').textContent = '⚠️';
-                            sidebarBadge.querySelector('.badge-text').textContent = 'Client Not Installed';
-                        }
-                    });
-                })
-                .catch(error => {
-                    console.error('Error checking client:', error);
-                    // Default to showing install box on error
-                    installInfoBox.style.display = 'block';
-                    sidebarBadge.className = 'sidebar-client-badge not-installed';
-                    sidebarBadge.querySelector('.badge-icon').textContent = '⚠️';
-                    sidebarBadge.querySelector('.badge-text').textContent = 'Client Not Installed';
-                });
-        }
-
-        // CLIENT-SIDE URI HANDLER TEST
-        function testClientURIHandler(callback) {
-            // Test if custom URI handlers work by attempting a silent test
-            // We'll use a hidden iframe to test if the protocol handler exists
-
-            // Try to read localStorage to see if we've checked before
+            // Read from localStorage cache (set by Dashboard test)
             const cachedCheck = localStorage.getItem('autotech_client_check');
             const cachedVersion = localStorage.getItem('autotech_client_version');
             const cacheTime = localStorage.getItem('autotech_client_check_time');
 
-            // Cache for 5 minutes
+            // Cache valid for 5 minutes
             if (cachedCheck && cacheTime && (Date.now() - parseInt(cacheTime)) < 300000) {
-                callback(cachedCheck === 'true', cachedVersion);
-                return;
-            }
-
-            // Prompt user to test manually (browsers block automatic URI handler detection)
-            // We'll show a test button that users can click to verify
-            setTimeout(() => {
-                // Assume not installed unless user confirms
-                callback(false, null);
-
-                // Save result
-                localStorage.setItem('autotech_client_check', 'false');
-                localStorage.setItem('autotech_client_check_time', Date.now().toString());
-            }, 100);
-        }
-
-        function resetClientCheck() {
-            // Clear cache and re-check
-            localStorage.removeItem('autotech_client_check');
-            localStorage.removeItem('autotech_client_version');
-            localStorage.removeItem('autotech_client_check_time');
-            checkClientInstalled();
-        }
-
-        // TEST CLIENT INSTALLATION MANUALLY
-        function testClientInstallation() {
-            // Open a test SSH URI to verify the client is installed
-            const testWindow = window.open('autotech-ssh://test@127.0.0.1', '_blank');
-
-            // Give user instructions
-            const result = confirm(
-                '🧪 CLIENT INSTALLATION TEST\n\n' +
-                'A PuTTY window should have opened to test the installation.\n\n' +
-                'Did PuTTY open successfully?\n\n' +
-                'Click OK if PuTTY opened (client is installed)\n' +
-                'Click Cancel if nothing happened (client not installed)'
-            );
-
-            if (result) {
-                // User confirmed client works
-                fetch('/api/check-client-installed')
-                    .then(response => response.json())
-                    .then(data => {
-                        localStorage.setItem('autotech_client_check', 'true');
-                        localStorage.setItem('autotech_client_version', data.server_version || '1.1.1');
-                        localStorage.setItem('autotech_client_check_time', Date.now().toString());
-
-                        alert('✅ Success! AutoTech Client is installed and working.\n\nThe page will now reload.');
-                        location.reload();
-                    });
+                if (cachedCheck === 'true') {
+                    // Client is installed
+                    installInfoBox.style.display = 'none';
+                    sidebarBadge.className = 'sidebar-client-badge installed';
+                    sidebarBadge.querySelector('.badge-icon').textContent = '✅';
+                    sidebarBadge.querySelector('.badge-text').textContent = 'Client v' + (cachedVersion || '1.1.1');
+                } else {
+                    // Client not installed
+                    installInfoBox.style.display = 'block';
+                    sidebarBadge.className = 'sidebar-client-badge not-installed';
+                    sidebarBadge.querySelector('.badge-icon').textContent = '⚠️';
+                    sidebarBadge.querySelector('.badge-text').textContent = 'Not Installed';
+                }
             } else {
-                // User confirmed client doesn't work
-                alert('❌ Client not detected.\n\nPlease run the installer:\n1. Run Install_AutoTech_Client.bat as Administrator\n2. Click "Test Installation" again after installing');
+                // No cache - show warning to complete setup on dashboard
+                installInfoBox.style.display = 'block';
+                sidebarBadge.className = 'sidebar-client-badge not-installed';
+                sidebarBadge.querySelector('.badge-icon').textContent = '⚠️';
+                sidebarBadge.querySelector('.badge-text').textContent = 'Setup Required';
             }
         }
 

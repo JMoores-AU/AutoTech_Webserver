@@ -3716,13 +3716,10 @@ def live_install_client():
 @login_required
 def api_check_client_installed():
     """
-    Returns the server version for comparison.
-    Client-side JavaScript will test if URI handlers work locally.
-
-    NOTE: This endpoint NO LONGER checks the server's C:\\AutoTech_Client.
-    Client detection MUST be done client-side via URI handler testing.
+    Returns server version for comparison.
+    Also returns client IP for tracking purposes.
     """
-    # Get server version from autotech_client/VERSION (for update comparison)
+    # Get server version
     server_version = None
     server_version_file, _ = get_autotech_client_folder()
     if server_version_file:
@@ -3734,26 +3731,49 @@ def api_check_client_installed():
             except:
                 pass
 
+    # Get client info
+    client_ip = request.remote_addr
+    user_agent = request.headers.get('User-Agent', 'Unknown')
+
     return jsonify({
         'server_version': server_version or "1.1.1",
-        'note': 'Client installation must be checked client-side via URI handler test'
+        'client_ip': client_ip,
+        'user_agent': user_agent
     })
 
 
-@app.route('/api/client-version-file')
+@app.route('/api/register-client', methods=['POST'])
 @login_required
-def api_client_version_file():
+def api_register_client():
     """
-    Serves a special file that client-side JavaScript can request via
-    file:// protocol to test if C:\\AutoTech_Client\\VERSION exists.
-    Returns the client's local VERSION file content if present.
+    Called when client installation test succeeds.
+    Registers client with server to track active installations.
     """
-    # This endpoint is for documentation only - actual check must be done client-side
-    # JavaScript will try to read: file:///C:/AutoTech_Client/VERSION
+    data = request.get_json() or {}
+    client_version = data.get('client_version', '1.1.1')
+    test_success = data.get('test_success', False)
+
+    # Get client details
+    client_ip = request.remote_addr
+    user_agent = request.headers.get('User-Agent', 'Unknown')
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    # Log to console (could be stored in database later)
+    print(f"\n{'='*60}")
+    print(f"[CLIENT REGISTERED]")
+    print(f"  IP Address: {client_ip}")
+    print(f"  Version: v{client_version}")
+    print(f"  Timestamp: {timestamp}")
+    print(f"  User Agent: {user_agent[:50]}...")
+    print(f"  Test Success: {test_success}")
+    print(f"{'='*60}\n")
+
     return jsonify({
-        'error': 'This endpoint requires client-side file access',
-        'instruction': 'Use JavaScript FileReader or iframe to test file:///C:/AutoTech_Client/VERSION'
-    }), 400
+        'success': True,
+        'message': f'Client registered: {client_ip}',
+        'client_ip': client_ip,
+        'timestamp': timestamp
+    })
 
 
 @app.route('/api/launch-batch-tool', methods=['POST'])

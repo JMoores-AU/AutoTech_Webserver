@@ -559,38 +559,143 @@
             }
         }
 
-        // TEST CLIENT INSTALLATION
-        function testClientInstallation() {
-            // Open a test SSH URI
-            window.open('autotech-ssh://test@127.0.0.1', '_blank');
+        // TEST CLIENT INSTALLATION - Multi-Step Verification
+        async function testClientInstallation() {
+            // Step 1: Ask user to manually verify folder exists
+            const folderCheck = confirm(
+                '🧪 CLIENT INSTALLATION TEST - STEP 1/3\n\n' +
+                'Please verify that C:\\AutoTech_Client folder exists on THIS PC.\n\n' +
+                'You can check by:\n' +
+                '1. Opening File Explorer\n' +
+                '2. Typing C:\\AutoTech_Client in the address bar\n\n' +
+                'Does the folder exist?\n\n' +
+                'Click OK if folder exists\n' +
+                'Click Cancel if folder does NOT exist'
+            );
 
-            // Ask user if it worked
+            if (!folderCheck) {
+                alert(
+                    '❌ CLIENT NOT INSTALLED\n\n' +
+                    'The C:\\AutoTech_Client folder does not exist.\n\n' +
+                    'TO INSTALL:\n' +
+                    '1. Open File Explorer\n' +
+                    '2. Navigate to E:\\AutoTech\\autotech_client\\\n' +
+                    '3. RIGHT-CLICK Install_AutoTech_Client.bat\n' +
+                    '4. Select "Run as administrator"\n' +
+                    '5. Click "Test Installation" again after installing'
+                );
+                return;
+            }
+
+            // Step 2: Verify key files exist
+            const filesCheck = confirm(
+                '🧪 STEP 2/3 - Verify Files\n\n' +
+                'Please verify these files exist in C:\\AutoTech_Client:\n\n' +
+                '✓ putty.exe\n' +
+                '✓ scripts folder\n' +
+                '✓ mms_scripts folder\n\n' +
+                'Check File Explorer now.\n\n' +
+                'Do these files/folders exist?\n\n' +
+                'Click OK if yes\n' +
+                'Click Cancel if no'
+            );
+
+            if (!filesCheck) {
+                alert(
+                    '❌ INCOMPLETE INSTALLATION\n\n' +
+                    'Files are missing from C:\\AutoTech_Client.\n\n' +
+                    'The installer may not have run correctly.\n\n' +
+                    'Please RE-RUN the installer:\n' +
+                    'E:\\AutoTech\\autotech_client\\Install_AutoTech_Client.bat\n' +
+                    '(RIGHT-CLICK → Run as administrator)'
+                );
+                return;
+            }
+
+            // Step 3: Test URI handler by opening PuTTY
+            alert(
+                '🧪 STEP 3/3 - Test URI Handler\n\n' +
+                'Click OK, then a PuTTY window should open automatically.\n\n' +
+                'Watch for the PuTTY window to appear!\n\n' +
+                '(If your browser asks for permission, click "Allow" or "Open")'
+            );
+
+            // Attempt to open SSH URI
+            try {
+                const testLink = document.createElement('a');
+                testLink.href = 'autotech-ssh://mms@127.0.0.1';
+                testLink.style.display = 'none';
+                document.body.appendChild(testLink);
+                testLink.click();
+                document.body.removeChild(testLink);
+            } catch (e) {
+                console.error('Failed to trigger URI:', e);
+            }
+
+            // Wait for user to see if PuTTY opened
             setTimeout(() => {
-                const result = confirm(
-                    '🧪 CLIENT INSTALLATION TEST\n\n' +
-                    'A PuTTY window should have opened.\n\n' +
-                    'Did PuTTY open successfully?\n\n' +
-                    'Click OK if yes (client installed)\n' +
+                const uriCheck = confirm(
+                    '🧪 FINAL CHECK\n\n' +
+                    'Did PuTTY open?\n\n' +
+                    'Click OK if PuTTY opened (even if connection failed)\n' +
                     'Click Cancel if nothing happened'
                 );
 
-                if (result) {
-                    // Success - cache result
+                if (uriCheck) {
+                    // All checks passed! Register with server
                     fetch('/api/check-client-installed')
                         .then(response => response.json())
                         .then(data => {
+                            const clientVersion = data.server_version || '1.1.1';
+                            const clientIP = data.client_ip || 'Unknown';
+
+                            // Register this client with the server
+                            return fetch('/api/register-client', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    client_version: clientVersion,
+                                    test_success: true
+                                })
+                            }).then(() => ({ clientVersion, clientIP }));
+                        })
+                        .then(({ clientVersion, clientIP }) => {
+                            // Cache locally
                             localStorage.setItem('autotech_client_check', 'true');
-                            localStorage.setItem('autotech_client_version', data.server_version || '1.1.1');
+                            localStorage.setItem('autotech_client_version', clientVersion);
                             localStorage.setItem('autotech_client_check_time', Date.now().toString());
 
-                            alert('✅ Success! Client is installed and working.\n\nPage will reload.');
+                            alert(
+                                '✅ SUCCESS!\n\n' +
+                                'AutoTech Client is fully installed and working!\n\n' +
+                                'Client version: ' + clientVersion + '\n' +
+                                'Your IP: ' + clientIP + '\n\n' +
+                                'Server has been notified.\n\n' +
+                                'The page will now reload.'
+                            );
+                            location.reload();
+                        })
+                        .catch(error => {
+                            console.error('Registration error:', error);
+                            alert('⚠️ Client works but server registration failed.\nReloading anyway...');
                             location.reload();
                         });
                 } else {
-                    // Failed
-                    alert('❌ Client not detected.\n\nPlease run:\nE:\\AutoTech\\autotech_client\\Install_AutoTech_Client.bat\n\nas Administrator, then test again.');
+                    // URI handler not working
+                    alert(
+                        '⚠️ URI HANDLER NOT WORKING\n\n' +
+                        'Files exist but PuTTY did not open.\n\n' +
+                        'This means the registry handlers are not registered.\n\n' +
+                        'SOLUTION:\n' +
+                        '1. CLOSE ALL browser windows\n' +
+                        '2. RE-RUN the installer as Administrator:\n' +
+                        '   E:\\AutoTech\\autotech_client\\Install_AutoTech_Client.bat\n' +
+                        '3. RESTART your browser\n' +
+                        '4. Test again\n\n' +
+                        'Note: Some browsers require restart to recognize new URI handlers.'
+                    );
                 }
-            }, 1000);
+            }, 2000);
         }
 
         // Run client check on page load
