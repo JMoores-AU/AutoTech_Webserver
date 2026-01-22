@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" lang="ru-RU" xml:lang="ru-RU" data-mc-search-type="Stem" data-mc-help-system-file-name="Default.xml" data-mc-path-to-help-system="../../../" data-mc-target-type="WebHelp2" data-mc-runtime-file-type="Topic" data-mc-preload-images="false" data-mc-in-preview-mode="false" data-mc-medium="non-print" data-mc-toc-path="Receiver Managing|Receiver Settings|Tracking &amp; Positioning">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" /><title>RTK Parameters</title>
+        <link href="../../../Skins/Default/Stylesheets/Slideshow.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/TextEffects.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/Topic.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/Components/Styles.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/Components/Tablet.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/Components/Mobile.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../Resources/Stylesheets/TRU.css" rel="stylesheet" />
+        <style>/*&lt;meta /&gt;*/
+
+.button.previous-topic-button
+{
+	-pie-background: url('../../../Skins/Default/Stylesheets/Images/navigate-previous.png') no-repeat center center, linear-gradient(#ffffff, #ececec);
+}
+
+.button.current-topic-index-button
+{
+	-pie-background: linear-gradient(#ffffff, #ececec);
+}
+
+.button.next-topic-button
+{
+	-pie-background: url('../../../Skins/Default/Stylesheets/Images/navigate-next.png') no-repeat center center, linear-gradient(#ffffff, #ececec);
+}
+
+.needs-pie
+{
+	behavior: url('../../../Resources/Scripts/PIE-no-motw.htc');
+}
+
+</style>
+        <script src="../../../Resources/Scripts/custom.modernizr.js">
+        </script>
+        <script src="../../../Resources/Scripts/jquery.min.js">
+        </script>
+        <script src="../../../Resources/Scripts/require.min.js">
+        </script>
+        <script src="../../../Resources/Scripts/require.config.js">
+        </script>
+        <script src="../../../Resources/Scripts/foundation.min.js">
+        </script>
+        <script src="../../../Resources/Scripts/plugins.min.js">
+        </script>
+        <script src="../../../Resources/Scripts/MadCapAll.js">
+        </script>
+    </head>
+    <body class="test">
+        <p class="MCWebHelpFramesetLink MCWebHelpFramesetLinkTop"><a href="../../../Default.htm#Topics/ReceiverManaging/PositioningRTK.htm">Open topic with navigation</a>
+        </p>
+        <div class="MCBreadcrumbsBox_0"><span class="MCBreadcrumbsPrefix">You are here: </span><span class="MCBreadcrumbsSelf">Receiver Managing</span><span class="MCBreadcrumbsDivider"> &gt; </span><a class="MCBreadcrumbsLink" href="ReceiverSettings.htm">Receiver Settings</a><span class="MCBreadcrumbsDivider"> &gt; </span><span class="MCBreadcrumbsSelf">Tracking &amp; Positioning</span><span class="MCBreadcrumbsDivider"> &gt; </span><span class="MCBreadcrumbs">RTK Parameters</span>
+        </div>
+        <h1 class="Heading1">RTK Parameters</h1>
+        <p class="Body">The <i>RTK</i> tab allows setting up the RTK rover.</p>
+        <table class="AutoNumber_p_Bulleted" style="width: 100%; margin-left: 0;" cellspacing="0" cellpadding="0">
+            <col style="width: 12px;" />
+            <col style="width: 12px;" />
+            <col style="width: auto;" />
+            <tr>
+                <td valign="top" />
+                <td class="AutoNumber_p_Bulleted" valign="top"><span>• </span>
+                </td>
+                <td class="AutoNumber_p_Bulleted" valign="top" data-mc-autonum="• "><i>RTK Mode</i> – Position output mode. Controls which output mode is enabled. Default value: <i>Delay</i>.</td>
+            </tr>
+        </table>
+        <ul style="list-style-type: square;">
+            <li value="1"><i>Delay</i> – the RTK engine does not extrapolate the base station's carrier phases in position computation. Instead, the engine will either compute a delayed position or simply output the current stand-alone position (while waiting for new RTK messages from the base station). Note that the delayed position is computed for the time (epoch) to which the last received base station's carrier phase measurements correspond. Accuracies achievable in delay mode are normally on a level with those of post-processing kinematic.</li>
+            <li value="2"><i>Extrapolation</i> – the RTK engine will extrapolate the base station's carrier phase measurements to the current epoch (note that the truth carrier phases measured at the base cannot be transmitted and received at the rover instantly). The final positioning accuracy may be somewhat lower due to additional extrapolation errors, which may be up to a few millimeters vertical and horizontal for a one second extrapolation time. Note that extrapolate mode could be used only when the reference station is static (i.e., not moving).</li>
+        </ul>
+        <table class="AutoNumber_p_Bulleted" style="width: 100%; margin-left: 0;" cellspacing="0" cellpadding="0">
+            <col style="width: 12px;" />
+            <col style="width: 12px;" />
+            <col style="width: auto;" />
+            <tr>
+                <td valign="top" />
+                <td class="AutoNumber_p_Bulleted" valign="top"><span>• </span>
+                </td>
+                <td class="AutoNumber_p_Bulleted" valign="top" data-mc-autonum="• "><i>Extrapolation Time, s</i> – Maximum extrapolation time. In extrapolation mode, if the time elapsed since differential corrections were last received exceeds this value, RTK will stop calculating positions. Default value: 30 seconds.</td>
+            </tr>
+        </table>
+        <table class="AutoNumber_p_Bulleted" style="width: 100%; margin-left: 0;" cellspacing="0" cellpadding="0">
+            <col style="width: 12px;" />
+            <col style="width: 12px;" />
+            <col style="width: auto;" />
+            <tr>
+                <td valign="top" />
+                <td class="AutoNumber_p_Bulleted" valign="top"><span>• </span>
+                </td>
+                <td class="AutoNumber_p_Bulleted" valign="top" data-mc-autonum="• "><i>Base Corrections Period, s</i> – Differential correction update interval (period) for reference station. Instructs the rover receiver to output the RTK position (not the single point position) at the same rate at which differential corrections are updated. Default value: 1 second.</td>
+            </tr>
+        </table>
+        <table class="AutoNumber_p_Bulleted" style="width: 100%; margin-left: 0;" cellspacing="0" cellpadding="0">
+            <col style="width: 12px;" />
+            <col style="width: 12px;" />
+            <col style="width: auto;" />
+            <tr>
+                <td valign="top" />
+                <td class="AutoNumber_p_Bulleted" valign="top"><span>• </span>
+                </td>
+                <td class="AutoNumber_p_Bulleted" valign="top" data-mc-autonum="• "><i>Dynamics</i> – User defined rover dynamics.</td>
+            </tr>
+        </table>
+        <ul style="list-style-type: square;">
+            <li value="1"><i>Static</i> – the engine uses a running average over a few consecutive solutions to decrease the resulting position's noise error.</li>
+            <li value="2"><i>Kinematic</i> – the engine uses only the current epoch of observations to compute the instantaneous position (i.e., no averaging is performed).</li>
+            <li value="3"><i>Stop And Go</i> – the new RTK engine monitors the rover dynamics and automatically selects between static and kinematic models. The receiver will immediately switch to kinematic in two cases:</li>
+        </ul>
+        <blockquote>
+            <ol style="list-style-type: lower-alpha;">
+                <li value="1">if the difference between previous and current instantaneous position estimates changes over 3 centimeters in 3-D vector components;</li>
+                <li value="2">if the difference between an averaged position estimate and a current instantaneous position estimate changes over 4.5 centimeters in 3-D vector components.</li>
+            </ol>
+        </blockquote>
+        <table class="AutoNumber_p_Bulleted" style="width: 100%; margin-left: 0;" cellspacing="0" cellpadding="0">
+            <col style="width: 12px;" />
+            <col style="width: 12px;" />
+            <col style="width: auto;" />
+            <tr>
+                <td valign="top" />
+                <td class="AutoNumber_p_Bulleted" valign="top"><span>• </span>
+                </td>
+                <td class="AutoNumber_p_Bulleted" valign="top" data-mc-autonum="• "><i>Ambiguity Fixing Level</i> – The RTK engine has four conventional levels of RTK probability to get correct ambiguity resolution at the expense of time-to-first-fix (TTFF): <i>Extra Low</i>, <i>Low</i>, <i>Medium</i>, <i>High</i>. The higher this level, the more reliable the ambiguity resolution, and the longer the TTFF. If TTFF is of lesser importance, but solution accuracy is the top priority, then <i>High</i> level is the proper choice. On the other side, for machine control applications (for example), where having fixed solution in all points of trajectory is critical, it is&#160;recommended&#160;to&#160;set&#160;the parameter&#160;to&#160;<i>Extra Low</i>.</td>
+            </tr>
+        </table>
+        <table class="AutoNumber_p_Bulleted" style="width: 100%; margin-left: 0;" cellspacing="0" cellpadding="0">
+            <col style="width: 12px;" />
+            <col style="width: 12px;" />
+            <col style="width: auto;" />
+            <tr>
+                <td valign="top" />
+                <td class="AutoNumber_p_Bulleted" valign="top"><span>• </span>
+                </td>
+                <td class="AutoNumber_p_Bulleted" valign="top" data-mc-autonum="• "><i style="font-weight: bold; font-style: normal;">Advanced</i> button – clicking the buttons opens the  <a href="AdvancedRTK.htm">Adv. RTK </a>. </td>
+            </tr>
+        </table>
+        <div class="buttons clearfix topicToolbarProxy" style="mc-topic-toolbar-items: ;">
+            <div class="button-group-container-left">
+                <button class="button needs-pie previous-topic-button" type="button" title="Navigate previous">
+                    <img src="../../../Skins/Default/Stylesheets/Images/transparent.gif" alt="previous topic" />
+                </button>
+                <div class="button current-topic-index-button disabled"><span class="sequence-index"></span> of <span class="sequence-total"></span></div>
+                <button class="button needs-pie next-topic-button" type="button" title="Navigate next">
+                    <img src="../../../Skins/Default/Stylesheets/Images/transparent.gif" alt="next topic" />
+                </button>
+            </div>
+        </div>
+        <p>&#160;</p>
+    </body>
+</html>

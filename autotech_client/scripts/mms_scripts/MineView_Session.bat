@@ -1,14 +1,22 @@
 @echo off
-
+title MMS Scripts - MineView Sessions
 echo Live MineView Sessions
 echo:
 echo:
-set /p password="Enter Password: " 
+REM Check if password is already set (from launcher)
+if not defined password (
+    title MMS Scripts - MineView Sessions - Enter Password
+    set /p password="Enter Password: "
+) else (
+    echo Password auto-filled from AutoTech launcher
+)
 cls
+title MMS Scripts - MineView Sessions - Loading...
 echo Live MineView Sessions
 echo:
 echo:
-C:AutoTech_Clientplink.exe mms@10.110.19.107 -pw %password% "/home/mms/bin/MineView-Session.sh"
+C:\AutoTech_Client\plink.exe mms@10.110.19.107 -pw %password% "/home/mms/bin/MineView-Session.sh"
+title MMS Scripts - MineView Sessions - Complete
 echo:
 echo:
 REM echo Downloading Latest Log File

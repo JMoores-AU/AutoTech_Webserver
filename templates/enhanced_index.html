@@ -70,42 +70,6 @@
         }
         .legacy-btn:hover { background: linear-gradient(135deg, #d97706, #b45309); transform: translateY(-1px); }
         .legacy-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-        
-        /* Simplified Quick Access */
-        .quick-tools-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
-        }
-        
-        .quick-tool-card {
-            background: var(--theme-bg-card);
-            border: 1px solid var(--theme-border);
-            border-radius: var(--radius-lg);
-            padding: 24px;
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            text-decoration: none;
-            transition: all 0.2s ease;
-        }
-        .quick-tool-card:hover { border-color: var(--theme-primary); transform: translateY(-2px); }
-        .quick-tool-card.disabled { opacity: 0.5; pointer-events: none; }
-        
-        .quick-tool-icon {
-            width: 56px;
-            height: 56px;
-            background: var(--theme-bg);
-            border-radius: var(--radius-md);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.8rem;
-        }
-        
-        .quick-tool-info { flex: 1; }
-        .quick-tool-title { font-size: 1.1rem; font-weight: 600; color: var(--theme-text-bright); margin-bottom: 4px; }
-        .quick-tool-desc { font-size: 0.85rem; color: var(--theme-text-muted); }
     </style>
 </head>
 <body>
@@ -148,6 +112,14 @@
                         <span class="nav-item-icon">▶️</span>
                         <span>Playback Tools</span>
                     </a>
+                    <a href="{{ url_for('run_tool', tool_name='PTX Uptime') }}" class="nav-item">
+                        <span class="nav-item-icon">⏱️</span>
+                        <span>PTX Uptime</span>
+                    </a>
+                    <a href="/database" class="nav-item">
+                        <span class="nav-item-icon">🗄️</span>
+                        <span>Equipment Database</span>
+                    </a>
                     {% else %}
                     <div class="nav-item disabled">
                         <span class="nav-item-icon">🔍</span>
@@ -157,6 +129,16 @@
                     <div class="nav-item disabled">
                         <span class="nav-item-icon">▶️</span>
                         <span>Playback Tools</span>
+                        <span class="nav-item-badge">🔒</span>
+                    </div>
+                    <div class="nav-item disabled">
+                        <span class="nav-item-icon">⏱️</span>
+                        <span>PTX Uptime</span>
+                        <span class="nav-item-badge">🔒</span>
+                    </div>
+                    <div class="nav-item disabled">
+                        <span class="nav-item-icon">🗄️</span>
+                        <span>Equipment Database</span>
                         <span class="nav-item-badge">🔒</span>
                     </div>
                     {% endif %}
@@ -206,38 +188,6 @@
             <!-- Content Container -->
             <div class="content-container">
 
-                <!-- ========================================
-                     SECTION: Quick Access Tools
-                     ======================================== -->
-                <section class="mb-5">
-                    <div class="section-header">
-                        <h2 class="section-title">
-                            <span class="section-title-icon">⚡</span>
-                            Quick Access Tools
-                        </h2>
-                    </div>
-                    
-                    <div class="quick-tools-grid">
-                        <a class="quick-tool-card {% if not logged_in %}disabled{% endif %}"
-                           {% if logged_in %}href="{{ url_for('run_tool', tool_name='IP Finder') }}"{% else %}href="#"{% endif %}>
-                            <div class="quick-tool-icon">🔍</div>
-                            <div class="quick-tool-info">
-                                <div class="quick-tool-title">IP Finder</div>
-                                <div class="quick-tool-desc">Search equipment by name or IP address</div>
-                            </div>
-                        </a>
-                        
-                        <a class="quick-tool-card {% if not logged_in %}disabled{% endif %}"
-                           {% if logged_in %}href="{{ url_for('run_tool', tool_name='Playback Tools') }}"{% else %}href="#"{% endif %}>
-                            <div class="quick-tool-icon">▶️</div>
-                            <div class="quick-tool-info">
-                                <div class="quick-tool-title">Playback Tools</div>
-                                <div class="quick-tool-desc">Download and manage playback files</div>
-                            </div>
-                        </a>
-                    </div>
-                </section>
-                
                 <!-- ========================================
                      SECTION: WorkShop Skid VNC Access
                      ======================================== -->

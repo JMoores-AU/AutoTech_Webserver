@@ -1,0 +1,1299 @@
+Using username "root".
+Keyboard-interactive authentication prompts from server:
+| Password:
+End of keyboard-interactive prompts from server
+
+
+BusyBox v1.30.1 () built-in shell (ash)
+
+  ___________________________________
+ |         __  ___        ___  __    |
+ |        /  \ \  \      /  / |  |   |
+ |       /    \ \  \    /  /  |  |   |
+ |      /  /\  \ \  \  /  /   |  |   |
+ |     /  /  \  \ \  \/  /    |  |   |
+ |    /  /    \  \ \    /     |  |   |
+ |   /__/      \__\ \__/      |__|   |
+ |___________________________________|
+
+   AVIOS (r5.27.16 eam) Console
+ _____________________________________
+
+root@C111:~# uptime
+ 08:43:48 up  1:24,  load average: 0.52, 0.53, 0.53
+root@C111:~# cat /etc/os-release
+NAME="AVIOS"
+VERSION="R5.27.16"
+ID="avios"
+ID_LIKE="AVIOS"
+PRETTY_NAME="AVIOS R5.27.16"
+VERSION_ID="r5.27.16"
+HOME_URL="http://www.avi.com.au/"
+BUG_URL="http://www.avi.com.au/"
+SUPPORT_URL="http://www.avi.com.au/"
+BUILD_ID="r0+10961-1210b9fddf"
+LEDE_BOARD="imx6/generic"
+LEDE_ARCH="arm_cortex-a9_neon"
+LEDE_TAINTS="no-all busybox"
+LEDE_DEVICE_MANUFACTURER="AVI"
+LEDE_DEVICE_MANUFACTURER_URL="http://www.avi.com.au"
+LEDE_DEVICE_PRODUCT="EAM"
+LEDE_DEVICE_REVISION="ARMv7"
+LEDE_RELEASE="AVIOS R5.27.16 HEAD@1210b9fddf"
+root@C111:~# uname -a
+Linux C111 4.14.123 #0 PREEMPT RT Mon Sep 18 01:51:01 2023 armv7l GNU/Linux
+root@C111:~# cat /proc/version
+Linux version 4.14.123 (avi@builder) (gcc version 7.4.0 (AVIOS GCC 7.4.0 r0+10961-1210b9fddf)) #0 PREEMPT RT Mon Sep 18 01:51:01 2023
+root@C111:~# hostname
+C111
+root@C111:~# cat /sys/class/dmi/id/product_serial
+cat: can't open '/sys/class/dmi/id/product_serial': No such file or directory
+root@C111:~# cat /sys/class/dmi/id/board_serial
+cat: can't open '/sys/class/dmi/id/board_serial': No such file or directory
+root@C111:~# dmidecode -s system-serial-number
+-ash: dmidecode: not found
+root@C111:~# cat /proc/cpuinfo | greg Serial
+-ash: greg: not found
+root@C111:~# cat /proc/cpuinfo | grep Serial
+Serial          : 000001
+root@C111:~# cat /sys/class/dmi/id/product_name
+cat: can't open '/sys/class/dmi/id/product_name': No such file or directory
+root@C111:~# dmidecode -s system-product-name
+-ash: dmidecode: not found
+
+Using username "root".
+Keyboard-interactive authentication prompts from server:
+| Password:
+End of keyboard-interactive prompts from server
+
+
+BusyBox v1.30.1 () built-in shell (ash)
+
+  ___________________________________
+ |         __  ___        ___  __    |
+ |        /  \ \  \      /  / |  |   |
+ |       /    \ \  \    /  /  |  |   |
+ |      /  /\  \ \  \  /  /   |  |   |
+ |     /  /  \  \ \  \/  /    |  |   |
+ |    /  /    \  \ \    /     |  |   |
+ |   /__/      \__\ \__/      |__|   |
+ |___________________________________|
+
+   AVIOS (r5.27.16 eam) Console
+ _____________________________________
+
+root@C111:~# free -h
+              total        used        free      shared  buff/cache   available
+Mem:         250804       59788      143136         940       47880      154204
+Swap:             0           0           0
+root@C111:~# cat /proc/meminfo | head -5
+MemTotal:         250804 kB
+MemFree:          142960 kB
+MemAvailable:     154028 kB
+Buffers:           11676 kB
+Cached:            36204 kB
+root@C111:~# df -h
+Filesystem                Size      Used Available Use% Mounted on
+/dev/root                22.0M     22.0M         0 100% /rom
+tmpfs                   122.5M    888.0K    121.6M   1% /tmp
+/dev/ubi0_2              61.6M     16.6M     41.8M  28% /overlay
+overlayfs:/overlay       61.6M     16.6M     41.8M  28% /
+tmpfs                   512.0K         0    512.0K   0% /dev
+/dev/ubi1_0               2.7M     32.0K      2.7M   1% /mnt/permenv
+/dev/mmcblk0p1           14.3G    113.8M     13.4G   1% /mnt/bulk
+root@C111:~# df -h /
+Filesystem                Size      Used Available Use% Mounted on
+overlayfs:/overlay       61.6M     16.6M     41.8M  28% /
+root@C111:~# lsblk
+-ash: lsblk: not found
+root@C111:~# ip addr show
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host
+       valid_lft forever preferred_lft forever
+2: eth0: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc fq_codel master br-AHS state DOWN group default qlen 1000
+    link/ether 9c:f6:dd:a0:44:9a brd ff:ff:ff:ff:ff:ff
+3: ip6tnl0@NONE: <NOARP> mtu 1452 qdisc noop state DOWN group default qlen 1000
+    link/tunnel6 :: brd ::
+4: dummy0: <BROADCAST,NOARP> mtu 1500 qdisc noop state DOWN group default qlen 1000
+    link/ether be:35:bd:76:ca:b2 brd ff:ff:ff:ff:ff:ff
+5: ifb0: <BROADCAST,NOARP> mtu 1500 qdisc noop state DOWN group default qlen 32
+    link/ether de:c9:48:d9:87:84 brd ff:ff:ff:ff:ff:ff
+6: ifb1: <BROADCAST,NOARP> mtu 1500 qdisc noop state DOWN group default qlen 32
+    link/ether c6:7b:03:b8:89:4a brd ff:ff:ff:ff:ff:ff
+7: gre0@NONE: <NOARP> mtu 1476 qdisc noop state DOWN group default qlen 1000
+    link/gre 0.0.0.0 brd 0.0.0.0
+8: gretap0@NONE: <BROADCAST,MULTICAST> mtu 1462 qdisc noop state DOWN group default qlen 1000
+    link/ether 00:00:00:00:00:00 brd ff:ff:ff:ff:ff:ff
+9: erspan0@NONE: <BROADCAST,MULTICAST> mtu 1450 qdisc noop state DOWN group default qlen 1000
+    link/ether 00:00:00:00:00:00 brd ff:ff:ff:ff:ff:ff
+10: ip6gre0@NONE: <NOARP> mtu 1448 qdisc noop state DOWN group default qlen 1000
+    link/gre6 :: brd ::
+11: bond0: <BROADCAST,MULTICAST,MASTER> mtu 1500 qdisc noop state DOWN group default qlen 1000
+    link/ether aa:ed:20:f7:c4:cf brd ff:ff:ff:ff:ff:ff
+12: teql0: <NOARP> mtu 1500 qdisc noop state DOWN group default qlen 100
+    link/void
+13: eth1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel master br-AHS state UP group default qlen 1000
+    link/ether 9c:f6:dd:a0:44:9b brd ff:ff:ff:ff:ff:ff
+14: eth2: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel master br-AHS state UP group default qlen 1000
+    link/ether 9c:f6:dd:a0:44:9c brd ff:ff:ff:ff:ff:ff
+15: eth3: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc fq_codel master br-AHS state DOWN group default qlen 1000
+    link/ether 9c:f6:dd:a0:44:9d brd ff:ff:ff:ff:ff:ff
+16: eth4: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc fq_codel master br-AHS state DOWN group default qlen 1000
+    link/ether 9c:f6:dd:a0:44:9e brd ff:ff:ff:ff:ff:ff
+17: mob1p1: <POINTOPOINT,MULTICAST,NOARP,UP,LOWER_UP> mtu 13568 qdisc fq_codel state UNKNOWN group default qlen 1000
+    link/none
+    inet6 fe80::7799:629b:7c1e:a278/64 scope link stable-privacy
+       valid_lft forever preferred_lft forever
+18: mob1p1w1: <BROADCAST,MULTICAST> mtu 1500 qdisc noop state DOWN group default qlen 1000
+    link/ether b6:2d:6c:ae:25:e6 brd ff:ff:ff:ff:ff:ff
+20: br-AHS: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default qlen 1000
+    link/ether 9c:f6:dd:a0:44:9a brd ff:ff:ff:ff:ff:ff
+    inet 192.168.0.254/24 brd 192.168.0.255 scope global br-AHS
+       valid_lft forever preferred_lft forever
+21: ep3286-LanPIPE: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue master br-AHS state UNKNOWN group default qlen 1000
+    link/ether f6:90:0d:96:9d:41 brd ff:ff:ff:ff:ff:ff
+22: wlan0: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc noqueue state DOWN group default qlen 1000
+    link/ether b8:69:f4:ef:6e:de brd ff:ff:ff:ff:ff:ff
+23: mob1p1_1: <POINTOPOINT,MULTICAST,NOARP,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default qlen 1000
+    link/none
+    inet 10.111.219.116/32 brd 255.255.255.255 scope global mob1p1_1
+       valid_lft forever preferred_lft forever
+    inet6 fe80::7d2f:6a55:f178:65eb/64 scope link stable-privacy
+       valid_lft forever preferred_lft forever
+root@C111:~# ifconfig
+br-AHS    Link encap:Ethernet  HWaddr 9C:F6:DD:A0:44:9A
+          inet addr:192.168.0.254  Bcast:192.168.0.255  Mask:255.255.255.0
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:14671 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:2966 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:1488003 (1.4 MiB)  TX bytes:1101210 (1.0 MiB)
+
+ep3286-LanPIPE Link encap:Ethernet  HWaddr F6:90:0D:96:9D:41
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:143426 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:23667 errors:20 dropped:0 overruns:0 carrier:20
+          collisions:0 txqueuelen:1000
+          RX bytes:81056498 (77.3 MiB)  TX bytes:7751683 (7.3 MiB)
+
+eth0      Link encap:Ethernet  HWaddr 9C:F6:DD:A0:44:9A
+          UP BROADCAST MULTICAST  MTU:1500  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+eth1      Link encap:Ethernet  HWaddr 9C:F6:DD:A0:44:9B
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:56240 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:170856 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:13286018 (12.6 MiB)  TX bytes:89271753 (85.1 MiB)
+
+eth2      Link encap:Ethernet  HWaddr 9C:F6:DD:A0:44:9C
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:27313 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:32362 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:5284410 (5.0 MiB)  TX bytes:6411805 (6.1 MiB)
+
+eth3      Link encap:Ethernet  HWaddr 9C:F6:DD:A0:44:9D
+          UP BROADCAST MULTICAST  MTU:1500  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+eth4      Link encap:Ethernet  HWaddr 9C:F6:DD:A0:44:9E
+          UP BROADCAST MULTICAST  MTU:1500  Metric:1
+          RX packets:3753 errors:0 dropped:14 overruns:0 frame:0
+          TX packets:4501 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:459108 (448.3 KiB)  TX bytes:1274838 (1.2 MiB)
+
+lo        Link encap:Local Loopback
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          inet6 addr: ::1/128 Scope:Host
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:22176 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:22176 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:2349157 (2.2 MiB)  TX bytes:2349157 (2.2 MiB)
+
+mob1p1    Link encap:UNSPEC  HWaddr 00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00
+          inet6 addr: fe80::7799:629b:7c1e:a278/64 Scope:Link
+          UP POINTOPOINT RUNNING NOARP MULTICAST  MTU:13568  Metric:1
+          RX packets:147089 errors:0 dropped:147006 overruns:0 frame:0
+          TX packets:27970 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:87237890 (83.1 MiB)  TX bytes:9944979 (9.4 MiB)
+
+mob1p1_1  Link encap:UNSPEC  HWaddr 00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00
+          inet addr:10.111.219.116  P-t-P:10.111.219.116  Mask:255.255.255.255
+          inet6 addr: fe80::7d2f:6a55:f178:65eb/64 Scope:Link
+          UP POINTOPOINT RUNNING NOARP MULTICAST  MTU:1500  Metric:1
+          RX packets:147089 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:27966 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:88484722 (84.3 MiB)  TX bytes:9832731 (9.3 MiB)
+
+wlan0     Link encap:Ethernet  HWaddr B8:69:F4:EF:6E:DE
+          UP BROADCAST MULTICAST  MTU:1500  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+root@C111:~# ip -s link
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN mode DEFAULT group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    RX: bytes  packets  errors  dropped overrun mcast
+    2352587    22204    0       0       0       0
+    TX: bytes  packets  errors  dropped carrier collsns
+    2352587    22204    0       0       0       0
+2: eth0: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc fq_codel master br-AHS state DOWN mode DEFAULT group default qlen 1000
+    link/ether 9c:f6:dd:a0:44:9a brd ff:ff:ff:ff:ff:ff
+    RX: bytes  packets  errors  dropped overrun mcast
+    0          0        0       0       0       0
+    TX: bytes  packets  errors  dropped carrier collsns
+    0          0        0       0       0       0
+3: ip6tnl0@NONE: <NOARP> mtu 1452 qdisc noop state DOWN mode DEFAULT group default qlen 1000
+    link/tunnel6 :: brd ::
+    RX: bytes  packets  errors  dropped overrun mcast
+    0          0        0       0       0       0
+    TX: bytes  packets  errors  dropped carrier collsns
+    0          0        0       0       0       0
+4: dummy0: <BROADCAST,NOARP> mtu 1500 qdisc noop state DOWN mode DEFAULT group default qlen 1000
+    link/ether be:35:bd:76:ca:b2 brd ff:ff:ff:ff:ff:ff
+    RX: bytes  packets  errors  dropped overrun mcast
+    0          0        0       0       0       0
+    TX: bytes  packets  errors  dropped carrier collsns
+    0          0        0       0       0       0
+5: ifb0: <BROADCAST,NOARP> mtu 1500 qdisc noop state DOWN mode DEFAULT group default qlen 32
+    link/ether de:c9:48:d9:87:84 brd ff:ff:ff:ff:ff:ff
+    RX: bytes  packets  errors  dropped overrun mcast
+    0          0        0       0       0       0
+    TX: bytes  packets  errors  dropped carrier collsns
+    0          0        0       0       0       0
+6: ifb1: <BROADCAST,NOARP> mtu 1500 qdisc noop state DOWN mode DEFAULT group default qlen 32
+    link/ether c6:7b:03:b8:89:4a brd ff:ff:ff:ff:ff:ff
+    RX: bytes  packets  errors  dropped overrun mcast
+    0          0        0       0       0       0
+    TX: bytes  packets  errors  dropped carrier collsns
+    0          0        0       0       0       0
+7: gre0@NONE: <NOARP> mtu 1476 qdisc noop state DOWN mode DEFAULT group default qlen 1000
+    link/gre 0.0.0.0 brd 0.0.0.0
+    RX: bytes  packets  errors  dropped overrun mcast
+    0          0        0       0       0       0
+    TX: bytes  packets  errors  dropped carrier collsns
+    0          0        0       0       0       0
+8: gretap0@NONE: <BROADCAST,MULTICAST> mtu 1462 qdisc noop state DOWN mode DEFAULT group default qlen 1000
+    link/ether 00:00:00:00:00:00 brd ff:ff:ff:ff:ff:ff
+    RX: bytes  packets  errors  dropped overrun mcast
+    0          0        0       0       0       0
+    TX: bytes  packets  errors  dropped carrier collsns
+    0          0        0       0       0       0
+9: erspan0@NONE: <BROADCAST,MULTICAST> mtu 1450 qdisc noop state DOWN mode DEFAULT group default qlen 1000
+    link/ether 00:00:00:00:00:00 brd ff:ff:ff:ff:ff:ff
+    RX: bytes  packets  errors  dropped overrun mcast
+    0          0        0       0       0       0
+    TX: bytes  packets  errors  dropped carrier collsns
+    0          0        0       0       0       0
+10: ip6gre0@NONE: <NOARP> mtu 1448 qdisc noop state DOWN mode DEFAULT group default qlen 1000
+    link/gre6 :: brd ::
+    RX: bytes  packets  errors  dropped overrun mcast
+    0          0        0       0       0       0
+    TX: bytes  packets  errors  dropped carrier collsns
+    0          0        0       0       0       0
+11: bond0: <BROADCAST,MULTICAST,MASTER> mtu 1500 qdisc noop state DOWN mode DEFAULT group default qlen 1000
+    link/ether aa:ed:20:f7:c4:cf brd ff:ff:ff:ff:ff:ff
+    RX: bytes  packets  errors  dropped overrun mcast
+    0          0        0       0       0       0
+    TX: bytes  packets  errors  dropped carrier collsns
+    0          0        0       0       0       0
+12: teql0: <NOARP> mtu 1500 qdisc noop state DOWN mode DEFAULT group default qlen 100
+    link/void
+    RX: bytes  packets  errors  dropped overrun mcast
+    0          0        0       0       0       0
+    TX: bytes  packets  errors  dropped carrier collsns
+    0          0        0       0       0       0
+13: eth1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel master br-AHS state UP mode DEFAULT group default qlen 1000
+    link/ether 9c:f6:dd:a0:44:9b brd ff:ff:ff:ff:ff:ff
+    RX: bytes  packets  errors  dropped overrun mcast
+    13307524   56340    0       0       0       0
+    TX: bytes  packets  errors  dropped carrier collsns
+    89385491   171087   0       0       0       0
+14: eth2: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel master br-AHS state UP mode DEFAULT group default qlen 1000
+    link/ether 9c:f6:dd:a0:44:9c brd ff:ff:ff:ff:ff:ff
+    RX: bytes  packets  errors  dropped overrun mcast
+    5294342    27365    0       0       0       0
+    TX: bytes  packets  errors  dropped carrier collsns
+    6424217    32424    0       0       0       0
+15: eth3: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc fq_codel master br-AHS state DOWN mode DEFAULT group default qlen 1000
+    link/ether 9c:f6:dd:a0:44:9d brd ff:ff:ff:ff:ff:ff
+    RX: bytes  packets  errors  dropped overrun mcast
+    0          0        0       0       0       0
+    TX: bytes  packets  errors  dropped carrier collsns
+    0          0        0       0       0       0
+16: eth4: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc fq_codel master br-AHS state DOWN mode DEFAULT group default qlen 1000
+    link/ether 9c:f6:dd:a0:44:9e brd ff:ff:ff:ff:ff:ff
+    RX: bytes  packets  errors  dropped overrun mcast
+    459108     3753     0       14      0       0
+    TX: bytes  packets  errors  dropped carrier collsns
+    1274838    4501     0       0       0       0
+17: mob1p1: <POINTOPOINT,MULTICAST,NOARP,UP,LOWER_UP> mtu 13568 qdisc fq_codel state UNKNOWN mode DEFAULT group default qlen 1000
+    link/none
+    RX: bytes  packets  errors  dropped overrun mcast
+    87346706   147297   0       147214  0       0
+    TX: bytes  packets  errors  dropped carrier collsns
+    9971102    28038    0       0       0       0
+18: mob1p1w1: <BROADCAST,MULTICAST> mtu 1500 qdisc noop state DOWN mode DEFAULT group default qlen 1000
+    link/ether b6:2d:6c:ae:25:e6 brd ff:ff:ff:ff:ff:ff
+    RX: bytes  packets  errors  dropped overrun mcast
+    0          0        0       0       0       0
+    TX: bytes  packets  errors  dropped carrier collsns
+    0          0        0       0       0       0
+20: br-AHS: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP mode DEFAULT group default qlen 1000
+    link/ether 9c:f6:dd:a0:44:9a brd ff:ff:ff:ff:ff:ff
+    RX: bytes  packets  errors  dropped overrun mcast
+    1489895    14685    0       0       0       0
+    TX: bytes  packets  errors  dropped carrier collsns
+    1101252    2967     0       0       0       0
+21: ep3286-LanPIPE: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue master br-AHS state UNKNOWN mode DEFAULT group default qlen 1000
+    link/ether f6:90:0d:96:9d:41 brd ff:ff:ff:ff:ff:ff
+    RX: bytes  packets  errors  dropped overrun mcast
+    81156118   143604   0       0       0       0
+    TX: bytes  packets  errors  dropped carrier collsns
+    7762657    23703    20      0       20      0
+22: wlan0: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc noqueue state DOWN mode DORMANT group default qlen 1000
+    link/ether b8:69:f4:ef:6e:de brd ff:ff:ff:ff:ff:ff
+    RX: bytes  packets  errors  dropped overrun mcast
+    0          0        0       0       0       0
+    TX: bytes  packets  errors  dropped carrier collsns
+    0          0        0       0       0       0
+23: mob1p1_1: <POINTOPOINT,MULTICAST,NOARP,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP mode DEFAULT group default qlen 1000
+    link/none
+    RX: bytes  packets  errors  dropped overrun mcast
+    88595340   147297   0       0       0       0
+    TX: bytes  packets  errors  dropped carrier collsns
+    9858582    28034    0       0       0       0
+root@C111:~# top -b -n 1 | head -20
+Mem: 107940K used, 142864K free, 940K shrd, 11676K buff, 36212K cached
+CPU:  0.0% usr 20.0% sys  0.0% nic 80.0% idle  0.0% io  0.0% irq  0.0% sirq
+Load average: 0.41 0.46 0.51 1/137 21719
+  PID  PPID USER     STAT   VSZ %VSZ CPU %CPU COMMAND
+21716 21508 root     R     1144  0.4   0 10.0 top -b -n 1
+    8     2 root     SW       0  0.0   0 10.0 [ktimersoftd/0]
+ 3972     1 root     S     6836  2.7   0  0.0 /usr/sbin/ccmsd /tmp/ccmsd.log
+11404     1 root     S     5016  1.9   0  0.0 /usr/sbin/snmpd -Lf /dev/null -f
+21500  3026 root     S     4544  1.8   0  0.0 sshd: root@pts/0
+ 3074     1 root     S     4476  1.7   0  0.0 /usr/sbin/wpa_supplicant -B -P /var/run/wpa_supplicant-wlan0.pid -D nl80211 -i wlan0 -c /var/run/wpa_supplicant-wlan0.conf -C /var/run/wpa_supplicant
+ 3089     1 root     S     3896  1.5   0  0.0 /usr/sbin/uhttpd -f -h /www -r C111 -x /cgi-bin -u /ubus -t 180 -T 30 -k 20 -A 1 -n 3 -N 100 -R -p 0.0.0.0:80 -p [::]:80 -C /etc/uhttpd.crt -K /etc/uhttpd.key -s 0.0.0.0:443 -s [::]:443
+ 3026     1 root     S     3484  1.3   0  0.0 /usr/sbin/sshd -D
+11167     1 ntp      S<    3420  1.3   0  0.0 /sbin/ntpd -g -u ntp:ntp -p /var/run/ntpd/ntpd.pid -n -c /var/run/ntpd/ntpd.conf
+ 2173     1 root     SN    3316  1.3   0  0.0 /usr/sbin/atmanager -ld mob1p1
+ 2910     1 root     S     3252  1.2   0  0.0 /usr/sbin/snmptrapd -Lf /dev/null -f
+ 1922     1 root     S     3016  1.2   0  0.0 /sbin/logd -S 2048
+ 3960  3944 nobody   S<    2432  0.9   0  0.0 /usr/sbin/gpsd -P /var/run/gpsd.pid -N -n -S 2947 /dev/ttyGPS /dev/pps1
+ 1770     1 root     S     1804  0.7   0  0.0 /sbin/rpcd -s /var/run/ubus.sock -t 30
+ 1887     1 root     S     1572  0.6   0  0.0 avios -U
+ 2044     1 root     S     1560  0.6   0  0.0 /sbin/netifd
+root@C111:~# ps aux --sort=-%mem | head -10
+ps: unrecognized option: a
+BusyBox v1.30.1 () multi-call binary.
+
+Usage: ps
+
+Show list of processes
+
+        w       Wide output
+        l       Long output
+        T       Show threads
+root@C111:~# which avi
+root@C111:~# ls /usr/bin/avi*
+ls: /usr/bin/avi*: No such file or directory
+root@C111:~# ls /usr/locol/bin/avi*
+ls: /usr/locol/bin/avi*: No such file or directory
+root@C111:~#
+
+Dashboard DATA - http://10.111.219.116/cgi-bin/luci/
+
+Status
+System
+Hostname	C111
+Device Group	GRM_EMV
+Firmware Version	AVIOS (ARMv7) R5.27.16 (20230920-113820)
+Kernel	4.14.123
+Chassis	8445
+Local Time	2026-01-09 08:58:34 AEST ntp
+Uptime	1h 39m 3s
+/tmp usage (MB)	
+/mnt/bulk usage (MB)	
+Default Routes
+IPv4 priority: mobile
+Protocol: Mobile Data
+Address: 10.111.219.116
+Netmask: 255.255.255.255
+Gateway: 0.0.0.0
+Connected: 1h 37m 41s
+
+Device: Ethernet Adapter: "mob1p1_1"
+
+Wireless
+radio0
+Type: MAC80211 802.11bgn
+Channel: -
+Bitrate: -
+Signal: 0 dBm / Quality: 0%
+SSID: MLINK54
+Mode: Client
+Wireless is not associated
+
+Associated Stations
+Network	MAC-Address	Host	Signal / Noise	RX Rate / TX Rate
+No information available
+Platform
+Temperatures:	Voltages:
+Cpu: 54.2°C	Values are approximate:
+Base: 38.5°C	Input: 14V
+
+Power: stable
+GPS
+Signal	No Signal
+Data	-
+LANpipe
+Collecting data...
+Mobile
+Dev: mob1p1
+mob1p1
+Sierra MC7455	Status: Registered
+RSSI: -58.1 (-62.0,-63.0)dBm
+RSRP: -84.6 (-85.0,-87.0)dBm
+RSRQ: -7.2dB
+SINR: 24.0dB
+TX: LTE1 -36.0dBm
+Operator: BHP BHP
+Mode: LTE
+IMSI: 505310000011351
+IMEI: 359072064759059
+Band: 1
+BW(up): 10.0MHz
+BW(dn): 10.0MHz
+RRC: Connected
+PCI: 41
+CID: 284816?
+TAC: 10300 (283C?)
+Freq(dl): 2145.0MHz
+Temp: 39°C
+
+
+Network	APN	iface	IP	cid	qci	rab	tos	mtu	uptime
+mobile	coal-ops-komahs-prod	mob1p1_1	10.111.219.116	1		5		1500	1:37:50
+100		6			1:37:50
+101		7			1:37:50
+Copyright © 2023 AVI. All Rights Reserved. Device S/N 1004719187. Logged in as root.
+
+Using username "root".
+Keyboard-interactive authentication prompts from server:
+| Password:
+End of keyboard-interactive prompts from server
+
+
+BusyBox v1.30.1 () built-in shell (ash)
+
+  ___________________________________
+ |         __  ___        ___  __    |
+ |        /  \ \  \      /  / |  |   |
+ |       /    \ \  \    /  /  |  |   |
+ |      /  /\  \ \  \  /  /   |  |   |
+ |     /  /  \  \ \  \/  /    |  |   |
+ |    /  /    \  \ \    /     |  |   |
+ |   /__/      \__\ \__/      |__|   |
+ |___________________________________|
+
+   AVIOS (r5.27.16 eam) Console
+ _____________________________________
+
+root@C111:~# free -h
+              total        used        free      shared  buff/cache   available
+Mem:         250804       59788      143136         940       47880      154204
+Swap:             0           0           0
+root@C111:~# cat /proc/meminfo | head -5
+MemTotal:         250804 kB
+MemFree:          142960 kB
+MemAvailable:     154028 kB
+Buffers:           11676 kB
+Cached:            36204 kB
+root@C111:~# df -h
+Filesystem                Size      Used Available Use% Mounted on
+/dev/root                22.0M     22.0M         0 100% /rom
+tmpfs                   122.5M    888.0K    121.6M   1% /tmp
+/dev/ubi0_2              61.6M     16.6M     41.8M  28% /overlay
+overlayfs:/overlay       61.6M     16.6M     41.8M  28% /
+tmpfs                   512.0K         0    512.0K   0% /dev
+/dev/ubi1_0               2.7M     32.0K      2.7M   1% /mnt/permenv
+/dev/mmcblk0p1           14.3G    113.8M     13.4G   1% /mnt/bulk
+root@C111:~# df -h /
+Filesystem                Size      Used Available Use% Mounted on
+overlayfs:/overlay       61.6M     16.6M     41.8M  28% /
+root@C111:~# lsblk
+-ash: lsblk: not found
+root@C111:~# ip addr show
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host
+       valid_lft forever preferred_lft forever
+2: eth0: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc fq_codel master br-AHS state DOWN group default qlen 1000
+    link/ether 9c:f6:dd:a0:44:9a brd ff:ff:ff:ff:ff:ff
+3: ip6tnl0@NONE: <NOARP> mtu 1452 qdisc noop state DOWN group default qlen 1000
+    link/tunnel6 :: brd ::
+4: dummy0: <BROADCAST,NOARP> mtu 1500 qdisc noop state DOWN group default qlen 1000
+    link/ether be:35:bd:76:ca:b2 brd ff:ff:ff:ff:ff:ff
+5: ifb0: <BROADCAST,NOARP> mtu 1500 qdisc noop state DOWN group default qlen 32
+    link/ether de:c9:48:d9:87:84 brd ff:ff:ff:ff:ff:ff
+6: ifb1: <BROADCAST,NOARP> mtu 1500 qdisc noop state DOWN group default qlen 32
+    link/ether c6:7b:03:b8:89:4a brd ff:ff:ff:ff:ff:ff
+7: gre0@NONE: <NOARP> mtu 1476 qdisc noop state DOWN group default qlen 1000
+    link/gre 0.0.0.0 brd 0.0.0.0
+8: gretap0@NONE: <BROADCAST,MULTICAST> mtu 1462 qdisc noop state DOWN group default qlen 1000
+    link/ether 00:00:00:00:00:00 brd ff:ff:ff:ff:ff:ff
+9: erspan0@NONE: <BROADCAST,MULTICAST> mtu 1450 qdisc noop state DOWN group default qlen 1000
+    link/ether 00:00:00:00:00:00 brd ff:ff:ff:ff:ff:ff
+10: ip6gre0@NONE: <NOARP> mtu 1448 qdisc noop state DOWN group default qlen 1000
+    link/gre6 :: brd ::
+11: bond0: <BROADCAST,MULTICAST,MASTER> mtu 1500 qdisc noop state DOWN group default qlen 1000
+    link/ether aa:ed:20:f7:c4:cf brd ff:ff:ff:ff:ff:ff
+12: teql0: <NOARP> mtu 1500 qdisc noop state DOWN group default qlen 100
+    link/void
+13: eth1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel master br-AHS state UP group default qlen 1000
+    link/ether 9c:f6:dd:a0:44:9b brd ff:ff:ff:ff:ff:ff
+14: eth2: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel master br-AHS state UP group default qlen 1000
+    link/ether 9c:f6:dd:a0:44:9c brd ff:ff:ff:ff:ff:ff
+15: eth3: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc fq_codel master br-AHS state DOWN group default qlen 1000
+    link/ether 9c:f6:dd:a0:44:9d brd ff:ff:ff:ff:ff:ff
+16: eth4: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc fq_codel master br-AHS state DOWN group default qlen 1000
+    link/ether 9c:f6:dd:a0:44:9e brd ff:ff:ff:ff:ff:ff
+17: mob1p1: <POINTOPOINT,MULTICAST,NOARP,UP,LOWER_UP> mtu 13568 qdisc fq_codel state UNKNOWN group default qlen 1000
+    link/none
+    inet6 fe80::7799:629b:7c1e:a278/64 scope link stable-privacy
+       valid_lft forever preferred_lft forever
+18: mob1p1w1: <BROADCAST,MULTICAST> mtu 1500 qdisc noop state DOWN group default qlen 1000
+    link/ether b6:2d:6c:ae:25:e6 brd ff:ff:ff:ff:ff:ff
+20: br-AHS: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default qlen 1000
+    link/ether 9c:f6:dd:a0:44:9a brd ff:ff:ff:ff:ff:ff
+    inet 192.168.0.254/24 brd 192.168.0.255 scope global br-AHS
+       valid_lft forever preferred_lft forever
+21: ep3286-LanPIPE: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue master br-AHS state UNKNOWN group default qlen 1000
+    link/ether f6:90:0d:96:9d:41 brd ff:ff:ff:ff:ff:ff
+22: wlan0: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc noqueue state DOWN group default qlen 1000
+    link/ether b8:69:f4:ef:6e:de brd ff:ff:ff:ff:ff:ff
+23: mob1p1_1: <POINTOPOINT,MULTICAST,NOARP,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default qlen 1000
+    link/none
+    inet 10.111.219.116/32 brd 255.255.255.255 scope global mob1p1_1
+       valid_lft forever preferred_lft forever
+    inet6 fe80::7d2f:6a55:f178:65eb/64 scope link stable-privacy
+       valid_lft forever preferred_lft forever
+root@C111:~# ifconfig
+br-AHS    Link encap:Ethernet  HWaddr 9C:F6:DD:A0:44:9A
+          inet addr:192.168.0.254  Bcast:192.168.0.255  Mask:255.255.255.0
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:14671 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:2966 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:1488003 (1.4 MiB)  TX bytes:1101210 (1.0 MiB)
+
+ep3286-LanPIPE Link encap:Ethernet  HWaddr F6:90:0D:96:9D:41
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:143426 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:23667 errors:20 dropped:0 overruns:0 carrier:20
+          collisions:0 txqueuelen:1000
+          RX bytes:81056498 (77.3 MiB)  TX bytes:7751683 (7.3 MiB)
+
+eth0      Link encap:Ethernet  HWaddr 9C:F6:DD:A0:44:9A
+          UP BROADCAST MULTICAST  MTU:1500  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+eth1      Link encap:Ethernet  HWaddr 9C:F6:DD:A0:44:9B
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:56240 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:170856 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:13286018 (12.6 MiB)  TX bytes:89271753 (85.1 MiB)
+
+eth2      Link encap:Ethernet  HWaddr 9C:F6:DD:A0:44:9C
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:27313 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:32362 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:5284410 (5.0 MiB)  TX bytes:6411805 (6.1 MiB)
+
+eth3      Link encap:Ethernet  HWaddr 9C:F6:DD:A0:44:9D
+          UP BROADCAST MULTICAST  MTU:1500  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+eth4      Link encap:Ethernet  HWaddr 9C:F6:DD:A0:44:9E
+          UP BROADCAST MULTICAST  MTU:1500  Metric:1
+          RX packets:3753 errors:0 dropped:14 overruns:0 frame:0
+          TX packets:4501 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:459108 (448.3 KiB)  TX bytes:1274838 (1.2 MiB)
+
+lo        Link encap:Local Loopback
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          inet6 addr: ::1/128 Scope:Host
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:22176 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:22176 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:2349157 (2.2 MiB)  TX bytes:2349157 (2.2 MiB)
+
+mob1p1    Link encap:UNSPEC  HWaddr 00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00
+          inet6 addr: fe80::7799:629b:7c1e:a278/64 Scope:Link
+          UP POINTOPOINT RUNNING NOARP MULTICAST  MTU:13568  Metric:1
+          RX packets:147089 errors:0 dropped:147006 overruns:0 frame:0
+          TX packets:27970 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:87237890 (83.1 MiB)  TX bytes:9944979 (9.4 MiB)
+
+mob1p1_1  Link encap:UNSPEC  HWaddr 00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00
+          inet addr:10.111.219.116  P-t-P:10.111.219.116  Mask:255.255.255.255
+          inet6 addr: fe80::7d2f:6a55:f178:65eb/64 Scope:Link
+          UP POINTOPOINT RUNNING NOARP MULTICAST  MTU:1500  Metric:1
+          RX packets:147089 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:27966 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:88484722 (84.3 MiB)  TX bytes:9832731 (9.3 MiB)
+
+wlan0     Link encap:Ethernet  HWaddr B8:69:F4:EF:6E:DE
+          UP BROADCAST MULTICAST  MTU:1500  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+root@C111:~# ip -s link
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN mode DEFAULT group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    RX: bytes  packets  errors  dropped overrun mcast
+    2352587    22204    0       0       0       0
+    TX: bytes  packets  errors  dropped carrier collsns
+    2352587    22204    0       0       0       0
+2: eth0: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc fq_codel master br-AHS state DOWN mode DEFAULT group default qlen 1000
+    link/ether 9c:f6:dd:a0:44:9a brd ff:ff:ff:ff:ff:ff
+    RX: bytes  packets  errors  dropped overrun mcast
+    0          0        0       0       0       0
+    TX: bytes  packets  errors  dropped carrier collsns
+    0          0        0       0       0       0
+3: ip6tnl0@NONE: <NOARP> mtu 1452 qdisc noop state DOWN mode DEFAULT group default qlen 1000
+    link/tunnel6 :: brd ::
+    RX: bytes  packets  errors  dropped overrun mcast
+    0          0        0       0       0       0
+    TX: bytes  packets  errors  dropped carrier collsns
+    0          0        0       0       0       0
+4: dummy0: <BROADCAST,NOARP> mtu 1500 qdisc noop state DOWN mode DEFAULT group default qlen 1000
+    link/ether be:35:bd:76:ca:b2 brd ff:ff:ff:ff:ff:ff
+    RX: bytes  packets  errors  dropped overrun mcast
+    0          0        0       0       0       0
+    TX: bytes  packets  errors  dropped carrier collsns
+    0          0        0       0       0       0
+5: ifb0: <BROADCAST,NOARP> mtu 1500 qdisc noop state DOWN mode DEFAULT group default qlen 32
+    link/ether de:c9:48:d9:87:84 brd ff:ff:ff:ff:ff:ff
+    RX: bytes  packets  errors  dropped overrun mcast
+    0          0        0       0       0       0
+    TX: bytes  packets  errors  dropped carrier collsns
+    0          0        0       0       0       0
+6: ifb1: <BROADCAST,NOARP> mtu 1500 qdisc noop state DOWN mode DEFAULT group default qlen 32
+    link/ether c6:7b:03:b8:89:4a brd ff:ff:ff:ff:ff:ff
+    RX: bytes  packets  errors  dropped overrun mcast
+    0          0        0       0       0       0
+    TX: bytes  packets  errors  dropped carrier collsns
+    0          0        0       0       0       0
+7: gre0@NONE: <NOARP> mtu 1476 qdisc noop state DOWN mode DEFAULT group default qlen 1000
+    link/gre 0.0.0.0 brd 0.0.0.0
+    RX: bytes  packets  errors  dropped overrun mcast
+    0          0        0       0       0       0
+    TX: bytes  packets  errors  dropped carrier collsns
+    0          0        0       0       0       0
+8: gretap0@NONE: <BROADCAST,MULTICAST> mtu 1462 qdisc noop state DOWN mode DEFAULT group default qlen 1000
+    link/ether 00:00:00:00:00:00 brd ff:ff:ff:ff:ff:ff
+    RX: bytes  packets  errors  dropped overrun mcast
+    0          0        0       0       0       0
+    TX: bytes  packets  errors  dropped carrier collsns
+    0          0        0       0       0       0
+9: erspan0@NONE: <BROADCAST,MULTICAST> mtu 1450 qdisc noop state DOWN mode DEFAULT group default qlen 1000
+    link/ether 00:00:00:00:00:00 brd ff:ff:ff:ff:ff:ff
+    RX: bytes  packets  errors  dropped overrun mcast
+    0          0        0       0       0       0
+    TX: bytes  packets  errors  dropped carrier collsns
+    0          0        0       0       0       0
+10: ip6gre0@NONE: <NOARP> mtu 1448 qdisc noop state DOWN mode DEFAULT group default qlen 1000
+    link/gre6 :: brd ::
+    RX: bytes  packets  errors  dropped overrun mcast
+    0          0        0       0       0       0
+    TX: bytes  packets  errors  dropped carrier collsns
+    0          0        0       0       0       0
+11: bond0: <BROADCAST,MULTICAST,MASTER> mtu 1500 qdisc noop state DOWN mode DEFAULT group default qlen 1000
+    link/ether aa:ed:20:f7:c4:cf brd ff:ff:ff:ff:ff:ff
+    RX: bytes  packets  errors  dropped overrun mcast
+    0          0        0       0       0       0
+    TX: bytes  packets  errors  dropped carrier collsns
+    0          0        0       0       0       0
+12: teql0: <NOARP> mtu 1500 qdisc noop state DOWN mode DEFAULT group default qlen 100
+    link/void
+    RX: bytes  packets  errors  dropped overrun mcast
+    0          0        0       0       0       0
+    TX: bytes  packets  errors  dropped carrier collsns
+    0          0        0       0       0       0
+13: eth1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel master br-AHS state UP mode DEFAULT group default qlen 1000
+    link/ether 9c:f6:dd:a0:44:9b brd ff:ff:ff:ff:ff:ff
+    RX: bytes  packets  errors  dropped overrun mcast
+    13307524   56340    0       0       0       0
+    TX: bytes  packets  errors  dropped carrier collsns
+    89385491   171087   0       0       0       0
+14: eth2: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel master br-AHS state UP mode DEFAULT group default qlen 1000
+    link/ether 9c:f6:dd:a0:44:9c brd ff:ff:ff:ff:ff:ff
+    RX: bytes  packets  errors  dropped overrun mcast
+    5294342    27365    0       0       0       0
+    TX: bytes  packets  errors  dropped carrier collsns
+    6424217    32424    0       0       0       0
+15: eth3: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc fq_codel master br-AHS state DOWN mode DEFAULT group default qlen 1000
+    link/ether 9c:f6:dd:a0:44:9d brd ff:ff:ff:ff:ff:ff
+    RX: bytes  packets  errors  dropped overrun mcast
+    0          0        0       0       0       0
+    TX: bytes  packets  errors  dropped carrier collsns
+    0          0        0       0       0       0
+16: eth4: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc fq_codel master br-AHS state DOWN mode DEFAULT group default qlen 1000
+    link/ether 9c:f6:dd:a0:44:9e brd ff:ff:ff:ff:ff:ff
+    RX: bytes  packets  errors  dropped overrun mcast
+    459108     3753     0       14      0       0
+    TX: bytes  packets  errors  dropped carrier collsns
+    1274838    4501     0       0       0       0
+17: mob1p1: <POINTOPOINT,MULTICAST,NOARP,UP,LOWER_UP> mtu 13568 qdisc fq_codel state UNKNOWN mode DEFAULT group default qlen 1000
+    link/none
+    RX: bytes  packets  errors  dropped overrun mcast
+    87346706   147297   0       147214  0       0
+    TX: bytes  packets  errors  dropped carrier collsns
+    9971102    28038    0       0       0       0
+18: mob1p1w1: <BROADCAST,MULTICAST> mtu 1500 qdisc noop state DOWN mode DEFAULT group default qlen 1000
+    link/ether b6:2d:6c:ae:25:e6 brd ff:ff:ff:ff:ff:ff
+    RX: bytes  packets  errors  dropped overrun mcast
+    0          0        0       0       0       0
+    TX: bytes  packets  errors  dropped carrier collsns
+    0          0        0       0       0       0
+20: br-AHS: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP mode DEFAULT group default qlen 1000
+    link/ether 9c:f6:dd:a0:44:9a brd ff:ff:ff:ff:ff:ff
+    RX: bytes  packets  errors  dropped overrun mcast
+    1489895    14685    0       0       0       0
+    TX: bytes  packets  errors  dropped carrier collsns
+    1101252    2967     0       0       0       0
+21: ep3286-LanPIPE: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue master br-AHS state UNKNOWN mode DEFAULT group default qlen 1000
+    link/ether f6:90:0d:96:9d:41 brd ff:ff:ff:ff:ff:ff
+    RX: bytes  packets  errors  dropped overrun mcast
+    81156118   143604   0       0       0       0
+    TX: bytes  packets  errors  dropped carrier collsns
+    7762657    23703    20      0       20      0
+22: wlan0: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc noqueue state DOWN mode DORMANT group default qlen 1000
+    link/ether b8:69:f4:ef:6e:de brd ff:ff:ff:ff:ff:ff
+    RX: bytes  packets  errors  dropped overrun mcast
+    0          0        0       0       0       0
+    TX: bytes  packets  errors  dropped carrier collsns
+    0          0        0       0       0       0
+23: mob1p1_1: <POINTOPOINT,MULTICAST,NOARP,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP mode DEFAULT group default qlen 1000
+    link/none
+    RX: bytes  packets  errors  dropped overrun mcast
+    88595340   147297   0       0       0       0
+    TX: bytes  packets  errors  dropped carrier collsns
+    9858582    28034    0       0       0       0
+root@C111:~# top -b -n 1 | head -20
+Mem: 107940K used, 142864K free, 940K shrd, 11676K buff, 36212K cached
+CPU:  0.0% usr 20.0% sys  0.0% nic 80.0% idle  0.0% io  0.0% irq  0.0% sirq
+Load average: 0.41 0.46 0.51 1/137 21719
+  PID  PPID USER     STAT   VSZ %VSZ CPU %CPU COMMAND
+21716 21508 root     R     1144  0.4   0 10.0 top -b -n 1
+    8     2 root     SW       0  0.0   0 10.0 [ktimersoftd/0]
+ 3972     1 root     S     6836  2.7   0  0.0 /usr/sbin/ccmsd /tmp/ccmsd.log
+11404     1 root     S     5016  1.9   0  0.0 /usr/sbin/snmpd -Lf /dev/null -f
+21500  3026 root     S     4544  1.8   0  0.0 sshd: root@pts/0
+ 3074     1 root     S     4476  1.7   0  0.0 /usr/sbin/wpa_supplicant -B -P /var/run/wpa_supplicant-wlan0.pid -D nl80211 -i wlan0 -c /var/run/wpa_supplicant-wlan0.conf -C /var/run/wpa_supplicant
+ 3089     1 root     S     3896  1.5   0  0.0 /usr/sbin/uhttpd -f -h /www -r C111 -x /cgi-bin -u /ubus -t 180 -T 30 -k 20 -A 1 -n 3 -N 100 -R -p 0.0.0.0:80 -p [::]:80 -C /etc/uhttpd.crt -K /etc/uhttpd.key -s 0.0.0.0:443 -s [::]:443
+ 3026     1 root     S     3484  1.3   0  0.0 /usr/sbin/sshd -D
+11167     1 ntp      S<    3420  1.3   0  0.0 /sbin/ntpd -g -u ntp:ntp -p /var/run/ntpd/ntpd.pid -n -c /var/run/ntpd/ntpd.conf
+ 2173     1 root     SN    3316  1.3   0  0.0 /usr/sbin/atmanager -ld mob1p1
+ 2910     1 root     S     3252  1.2   0  0.0 /usr/sbin/snmptrapd -Lf /dev/null -f
+ 1922     1 root     S     3016  1.2   0  0.0 /sbin/logd -S 2048
+ 3960  3944 nobody   S<    2432  0.9   0  0.0 /usr/sbin/gpsd -P /var/run/gpsd.pid -N -n -S 2947 /dev/ttyGPS /dev/pps1
+ 1770     1 root     S     1804  0.7   0  0.0 /sbin/rpcd -s /var/run/ubus.sock -t 30
+ 1887     1 root     S     1572  0.6   0  0.0 avios -U
+ 2044     1 root     S     1560  0.6   0  0.0 /sbin/netifd
+root@C111:~# ps aux --sort=-%mem | head -10
+ps: unrecognized option: a
+BusyBox v1.30.1 () multi-call binary.
+
+Usage: ps
+
+Show list of processes
+
+        w       Wide output
+        l       Long output
+        T       Show threads
+root@C111:~# which avi
+root@C111:~# ls /usr/bin/avi*
+ls: /usr/bin/avi*: No such file or directory
+root@C111:~# ls /usr/locol/bin/avi*
+ls: /usr/locol/bin/avi*: No such file or directory
+root@C111:~# ^C
+root@C111:~# clear
+root@C111:~# mmcli --version
+-ash: mmcli: not found
+root@C111:~# mmcli -L
+-ash: mmcli: not found
+root@C111:~# mmcli -m 0
+-ash: mmcli: not found
+root@C111:~# swi_setusbcomp --help
+-ash: swi_setusbcomp: not found
+root@C111:~# swi_setusbcomp -g
+-ash: swi_setusbcomp: not found
+root@C111:~# at!gstatus
+-ash: at!gstatus: not found
+root@C111:~# qmicli --help
+Usage:
+  qmicli [OPTION…] - Control QMI devices
+
+Help Options:
+  -h, --help                                                                                                        Show help options
+  --help-all                                                                                                        Show all help options
+  --help-dms                                                                                                        Show Device Management Service options
+  --help-nas                                                                                                        Show Network Access Service options
+  --help-wds                                                                                                        Show Wireless Data Service options
+  --help-pbm                                                                                                        Show Phonebook Management options
+  --help-pdc                                                                                                        Show platform device configurations options
+  --help-uim                                                                                                        Show User Identity Module options
+  --help-sar                                                                                                        Show Specific Absorption Rate options
+  --help-wms                                                                                                        Show Wireless Messaging Service options
+  --help-wda                                                                                                        Show Wireless Data Administrative options
+  --help-voice                                                                                                      Show Voice Service options
+  --help-loc                                                                                                        Show location options
+  --help-qos                                                                                                        Show Quality of Service options
+  --help-gas                                                                                                        Show General Application Service options
+  --help-gms                                                                                                        Show General Modem Service options
+  --help-dsd                                                                                                        Show Data System Determination options
+  --help-dpm                                                                                                        Show Data Port Mapper Service options
+  --help-fox                                                                                                        Show Foxconn Modem Service options
+  --help-link-management                                                                                            Show link management specific options
+  --help-qmiwwan                                                                                                    Show qmi_wwan driver specific options
+
+Application Options:
+  -d, --device=[PATH]                                                                                               Specify device path
+  --get-service-version-info                                                                                        Get service version info
+  --device-set-instance-id=[Instance ID]                                                                            Set instance ID
+  --device-open-version-info                                                                                        Run version info check when opening device
+  --device-open-sync                                                                                                Run sync operation when opening device
+  -p, --device-open-proxy                                                                                           Request to use the 'qmi-proxy' proxy
+  --device-open-qmi                                                                                                 Open a cdc-wdm device explicitly in QMI mode
+  --device-open-mbim                                                                                                Open a cdc-wdm device explicitly in MBIM mode
+  --device-open-auto                                                                                                Open a cdc-wdm device in either QMI or MBIM mode (default)
+  --device-open-net=[net-802-3|net-raw-ip|net-qos-header|net-no-qos-header]                                         Open device with specific link protocol and QoS flags
+  --client-cid=[CID]                                                                                                Use the given CID, don't allocate a new one
+  --client-no-release-cid                                                                                           Do not release the CID when exiting
+  -t, --timeout                                                                                                     Use the given timeout in seconds (10)
+  -T, --net-start-timeout                                                                                           Network start timeout in seconds (180)
+  -v, --verbose                                                                                                     Run action with verbose logs, including the debug ones
+  --verbose-full                                                                                                    Run action with verbose logs, including the debug ones and personal info
+  --silent                                                                                                          Run action with no logs; not even the error/warning ones
+  -V, --version                                                                                                     Print version
+
+root@C111:~# qmicli -d /dev/cdc-wdm0 --nas-get-signal-info
+[/dev/cdc-wdm0] Successfully got signal info
+LTE:
+        RSSI: '-54 dBm'
+        RSRQ: '-11 dB'
+        RSRP: '-86 dBm'
+        SNR: '0.0 dB'
+root@C111:~# qmicli -d /dev/cdc-wdm0 --nas-get-signal-strength
+[/dev/cdc-wdm0] Successfully got signal strength
+Current:
+        Network 'lte': '-54 dBm'
+RSSI:
+        Network 'lte': '-54 dBm'
+ECIO:
+        Network 'lte': '-2.5 dBm'
+IO: '-106 dBm'
+SINR (8): '9.0 dB'
+RSRQ:
+        Network 'lte': '-11 dB'
+SNR:
+        Network 'lte': '0.0 dB'
+RSRP:
+        Network 'lte': '-86 dBm'
+root@C111:~# ls /dev/tty* | grep -i usb
+/dev/ttyUSB0
+/dev/ttyUSB1
+/dev/ttyUSB2
+root@C111:~# ls /dev/tty* | grep -i modem
+root@C111:~# cat /dev/ttyUSB* 2>/dev/null
+
+^C
+root@C111:~# ls /dev/tty* | grep -i usb
+/dev/ttyUSB0
+/dev/ttyUSB1
+/dev/ttyUSB2
+root@C111:~# ls /var/run/ | grep -i modem
+root@C111:~# cat /tmp/modem* 2>/dev/null
+root@C111:~# cat /var/run/modem* 2>/dev/null
+root@C111:~# ip link show | grep -i wwan
+root@C111:~# ipconfig | grep -i wwan
+-ash: ipconfig: not found
+root@C111:~# uci show network
+network.loopback=interface
+network.loopback.ifname='lo'
+network.loopback.proto='static'
+network.loopback.ipaddr='127.0.0.1'
+network.loopback.netmask='255.0.0.0'
+network.mobile=interface
+network.mobile.proto='mobile'
+network.mobile.card='mob1p1'
+network.mobile.mtu='1450'
+network.mobile.apn='coal-ops-komahs-prod'
+network.mobile.keepalive='2'
+network.mobile.pingtime='5'
+network.mobile.pingwait='5'
+network.mobile.pingretries='15'
+network.mobile.pingips='10.110.19.1'
+network.AHS=interface
+network.AHS.type='bridge'
+network.AHS.proto='static'
+network.AHS.ipaddr='192.168.0.254'
+network.AHS.netmask='255.255.255.0'
+network.AHS._orig_ifname='eth1 eth2 eth3 eth4'
+network.AHS._orig_bridge='true'
+network.AHS.ifname='ep3286-LanPIPE eth0 eth1 eth2 eth3 eth4'
+network.LanPIPE=interface
+network.LanPIPE.proto='lanpipe'
+network.LanPIPE.dstport='4789'
+network.LanPIPE.srcport='4789'
+network.LanPIPE.mtu='1500'
+network.LanPIPE.multicast='1'
+network.LanPIPE.arpblock='192.168.0.0/24'
+network.LanPIPE.keepalive='30'
+network.LanPIPE.lpid='3286'
+network.LanPIPE.peeraddr='10.110.30.72'
+network.mob1p1=mobiledev
+network.mob1p1.antsw='1'
+root@C111:~# uci show modem
+uci: Entry not found
+root@C111:~# uci show mobile
+uci: Entry not found
+root@C111:~# which avi-modem
+root@C111:~# which avi-status
+root@C111:~# ls /usr/sbin/avi* 2>/dev/null
+/usr/sbin/avi-ldap-helper  /usr/sbin/avi-nat-helper
+root@C111:~# ls /usr/bin/avi* 2>/dev/null
+root@C111:~# cat /proc/net/dev | grep -i mob
+mob1p1_1: 288213268  558131    0    0    0     0          0         0 61151879  187911    0    0    0     0       0          0
+mob1p1: 283345134  558131    0 557843    0     0          0         0 61903907  187915    0    0    0     0       0          0
+mob1p1w1:       0       0    0    0    0     0          0         0        0       0    0    0    0     0       0          0
+root@C111:~# cat /sys/class/net/*/statistics/* 2>/dev/null | head -20
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+root@C111:~# df -h /mnt/bulk
+Filesystem                Size      Used Available Use% Mounted on
+/dev/mmcblk0p1           14.3G    113.8M     13.4G   1% /mnt/bulk
+root@C111:~# du -sh /mnt/bulk
+73.8M   /mnt/bulk
+root@C111:~# du -h /mnt/bulk | tail -1
+73.8M   /mnt/bulk
+root@C111:~# cat /etc/config/system
+
+config system
+        option log_size '2048'
+        option ttylogin '0'
+        option urandom_seed '0'
+        option log_proto 'udp'
+        option conloglevel '8'
+        option cronloglevel '8'
+        option log_file '/mnt/bulk/syslog/syslog.log'
+        option leds_off '0'
+        option leds_off_state 'released'
+        option flight_mode '0'
+        option flight_mode_state 'released'
+        option zonename 'Australia/Brisbane'
+        option timezone 'AEST-10'
+        option telnet '0'
+        option ftp '0'
+        option group 'GRM_EMV'
+        option serial '1004719187'
+        option hostname 'C111'
+
+config timeserver 'ntp'
+        option enabled '1'
+        option enable_gps '1'
+        option enable_server '0'
+        option network 'mobile'
+        list server '10.110.19.15'
+
+config button
+        option button 'BTN_0'
+        option action 'released'
+        option min '3'
+        option max '6'
+        option handler '/sbin/configreset $BUTTON &'
+
+config button
+        option button 'BTN_0'
+        option action 'pressed'
+        option handler 'grep active /var/run/eamhw >&/dev/null && sync && logger -t "Button Hotplug" "Reboot due to button press while UPS active" && reboot'
+
+config button
+        option button 'BTN_1'
+        option action 'pressed'
+        option handler 'cp /proc/uptime /var/run/alarm_pressed; kill -s USR1 `cat /var/run/ccmsd.pid 2>/dev/null` >&/dev/null'
+
+config button
+        option button 'BTN_1'
+        option action 'released'
+        option handler 'cp /proc/uptime /var/run/alarm_released'
+
+config button
+        option button 'BTN_0'
+        option action 'pressed'
+        option handler '/bin/ubus call avios button'
+
+root@C111:~# cat /etc/config/avios
+
+config ldap_server
+        option ldap_user_search_filter '(&(objectClass=user)(sAMAccountName=%s))'
+
+config log
+        option logfiles '0'
+
+config power
+
+root@C111:~# uci show system
+system.@system[0]=system
+system.@system[0].log_size='2048'
+system.@system[0].ttylogin='0'
+system.@system[0].urandom_seed='0'
+system.@system[0].log_proto='udp'
+system.@system[0].conloglevel='8'
+system.@system[0].cronloglevel='8'
+system.@system[0].log_file='/mnt/bulk/syslog/syslog.log'
+system.@system[0].leds_off='0'
+system.@system[0].leds_off_state='released'
+system.@system[0].flight_mode='0'
+system.@system[0].flight_mode_state='released'
+system.@system[0].zonename='Australia/Brisbane'
+system.@system[0].timezone='AEST-10'
+system.@system[0].telnet='0'
+system.@system[0].ftp='0'
+system.@system[0].group='GRM_EMV'
+system.@system[0].serial='1004719187'
+system.@system[0].hostname='C111'
+system.ntp=timeserver
+system.ntp.enabled='1'
+system.ntp.enable_gps='1'
+system.ntp.enable_server='0'
+system.ntp.network='mobile'
+system.ntp.server='10.110.19.15'
+system.@button[0]=button
+system.@button[0].button='BTN_0'
+system.@button[0].action='released'
+system.@button[0].min='3'
+system.@button[0].max='6'
+system.@button[0].handler='/sbin/configreset $BUTTON &'
+system.@button[1]=button
+system.@button[1].button='BTN_0'
+system.@button[1].action='pressed'
+system.@button[1].handler='grep active /var/run/eamhw >&/dev/null && sync && logger -t "Button Hotplug" "Reboot due to button press while UPS active" && reboot'
+system.@button[2]=button
+system.@button[2].button='BTN_1'
+system.@button[2].action='pressed'
+system.@button[2].handler='cp /proc/uptime /var/run/alarm_pressed; kill -s USR1 `cat /var/run/ccmsd.pid 2>/dev/null` >&/dev/null'
+system.@button[3]=button
+system.@button[3].button='BTN_1'
+system.@button[3].action='released'
+system.@button[3].handler='cp /proc/uptime /var/run/alarm_released'
+system.@button[4]=button
+system.@button[4].button='BTN_0'
+system.@button[4].action='pressed'
+system.@button[4].handler='/bin/ubus call avios button'
+root@C111:~# uci show avios
+avios.@ldap_server[0]=ldap_server
+avios.@ldap_server[0].ldap_user_search_filter='(&(objectClass=user)(sAMAccountName=%s))'
+avios.@log[0]=log
+avios.@log[0].logfiles='0'
+avios.@power[0]=power
+root@C111:~# cat /etc/hostname
+cat: can't open '/etc/hostname': No such file or directory
+root@C111:~# cat /etc/site 2>/dev/null
+root@C111:~# cat /etc/group 2>/dev/null
+root:x:0:
+daemon:x:1:
+adm:x:4:
+mail:x:8:
+dialout:x:20:
+audio:x:29:
+www-data:x:33:user
+ftp:x:55:user
+users:x:100:user
+network:x:101:user
+nogroup:x:65534:
+dnsmasq:x:453:dnsmasq,user
+mosquitto:x:200:mosquitto,user
+ntp:x:123:ntp,user
+sshd:x:22:sshd,user
+root@C111:~# cat /etc/device_info 2>/dev/null
+DEVICE_MANUFACTURER='AVI'
+DEVICE_MANUFACTURER_URL='http://www.avi.com.au'
+DEVICE_PRODUCT='EAM'
+DEVICE_REVISION='ARMv7'
+
+Using username "root".
+Keyboard-interactive authentication prompts from server:
+| Password:
+End of keyboard-interactive prompts from server
+
+
+BusyBox v1.30.1 () built-in shell (ash)
+
+  ___________________________________
+ |         __  ___        ___  __    |
+ |        /  \ \  \      /  / |  |   |
+ |       /    \ \  \    /  /  |  |   |
+ |      /  /\  \ \  \  /  /   |  |   |
+ |     /  /  \  \ \  \/  /    |  |   |
+ |    /  /    \  \ \    /     |  |   |
+ |   /__/      \__\ \__/      |__|   |
+ |___________________________________|
+
+   AVIOS (r5.27.16 eam) Console
+ _____________________________________
+
+root@C111:~# ps aux | grep http
+ps: unrecognized option: a
+BusyBox v1.30.1 () multi-call binary.
+
+Usage: ps
+
+Show list of processes
+
+        w       Wide output
+        l       Long output
+        T       Show threads
+root@C111:~# ls /www/cgi-bin/
+luci
+root@C111:~# cat /www/index.html | head -50
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Cache-Control" content="no-cache" />
+<meta http-equiv="refresh" content="0; URL=/cgi-bin/luci/" />
+</head>
+<body style="background-color: white">
+<a style="color: black; font-family: arial, helvetica, sans-serif;" href="/cgi-bin/luci/">LuCI - Lua Configuration Interface</a>
+</body>
+</html>
+root@C111:~# ls /www/api/ 2>/dev/null
+root@C111:~# ls /usr/lib/lua/ 2>/dev/null
+iwinfo.so    lucihttp.so  nixio.so     uci.so
+luci         nixio        ubus.so
+root@C111:~# ls /usr/lib/lua/luci/ 2>/dev/null
+cacheloader.lua  debug.lua        ltn12.lua        template
+cbi              dispatcher.lua   model            template.lua
+cbi.lua          http.lua         sgi              tools
+ccache.lua       i18n.lua         store.lua        util.lua
+config.lua       ip.so            sys              version.lua
+controller       jsonc.so         sys.lua          view
+root@C111:~# logread | grep -i modem | tail -20
+Fri Jan  9 07:14:52 2026 kern.info kernel: [   13.939674] cdc_acm: USB Abstract Control Model driver for USB modems and ISDN adapters
+Fri Jan  9 07:14:52 2026 kern.info kernel: [   16.524741] usbserial: USB Serial support registered for GSM modem (1-port)
+Fri Jan  9 07:14:52 2026 kern.info kernel: [   16.543477] usbserial: USB Serial support registered for Qualcomm USB modem
+Fri Jan  9 07:14:52 2026 kern.info kernel: [   16.550799] qcserial 2-1:1.0: Qualcomm USB modem converter detected
+Fri Jan  9 07:14:52 2026 kern.info kernel: [   16.558191] usb 2-1: Qualcomm USB modem converter now attached to ttyUSB0
+Fri Jan  9 07:14:52 2026 kern.info kernel: [   16.565928] qcserial 2-1:1.2: Qualcomm USB modem converter detected
+Fri Jan  9 07:14:52 2026 kern.info kernel: [   16.573297] usb 2-1: Qualcomm USB modem converter now attached to ttyUSB1
+Fri Jan  9 07:14:52 2026 kern.info kernel: [   16.580926] qcserial 2-1:1.3: Qualcomm USB modem converter detected
+Fri Jan  9 07:14:52 2026 kern.info kernel: [   16.588293] usb 2-1: Qualcomm USB modem converter now attached to ttyUSB2
+Fri Jan  9 07:15:38 2026 daemon.notice mobile(mob1p1): Configured modem
+root@C111:~# logread | grep -i mobile | tail -20
+Fri Jan  9 11:12:54 2026 daemon.notice mobile(mob1p1): Cell handover 284117 -> 2880D3
+Fri Jan  9 11:13:13 2026 daemon.notice mobile(mob1p1): Cell handover 2880D3 -> 284117
+Fri Jan  9 11:15:15 2026 daemon.notice mobile(mob1p1): Cell handover 284117 -> 2880D3
+Fri Jan  9 11:15:27 2026 daemon.notice mobile(mob1p1): Cell handover 2880D3 -> 284117
+Fri Jan  9 11:16:22 2026 daemon.notice mobile(mob1p1): Cell handover 284117 -> 2880D3
+Fri Jan  9 11:59:07 2026 daemon.notice mobile(mob1p1): Cell handover 2880D3 -> 284117
+Fri Jan  9 11:59:18 2026 daemon.notice mobile(mob1p1): Cell handover 284117 -> 2880D3
+Fri Jan  9 11:59:48 2026 daemon.notice mobile(mob1p1): Cell handover 2880D3 -> 284117
+Fri Jan  9 12:08:19 2026 daemon.notice mobile(mob1p1): Cell handover 284117 -> 2880D3
+Fri Jan  9 12:13:49 2026 daemon.notice mobile(mob1p1): Cell handover 2880D3 -> 284117
+Fri Jan  9 12:13:56 2026 daemon.notice mobile(mob1p1): Cell handover 284117 -> 2880D3
+Fri Jan  9 12:14:02 2026 daemon.notice mobile(mob1p1): Cell handover 2880D3 -> 284117
+Fri Jan  9 12:14:16 2026 daemon.notice mobile(mob1p1): Cell handover 284117 -> 2880D3
+Fri Jan  9 12:14:18 2026 daemon.notice mobile(mob1p1): Cell handover 2880D3 -> 284117
+Fri Jan  9 12:16:31 2026 daemon.notice mobile(mob1p1): Cell handover 284117 -> 2880D3
+Fri Jan  9 12:16:34 2026 daemon.notice mobile(mob1p1): Cell handover 2880D3 -> 284117
+Fri Jan  9 12:17:24 2026 daemon.notice mobile(mob1p1): Cell handover 284117 -> 2880D3
+Fri Jan  9 12:18:03 2026 daemon.notice mobile(mob1p1): Cell handover 2880D3 -> 284117
+Fri Jan  9 12:18:19 2026 daemon.notice mobile(mob1p1): Cell handover 284117 -> 2880D3
+Fri Jan  9 12:18:46 2026 daemon.notice mobile(mob1p1): Cell handover 2880D3 -> 284117
+root@C111:~# logread | grep -i lte | tail -20
+Fri Jan  9 07:14:52 2026 kern.info kernel: [   13.576761] ip6_tables: (C) 2000-2006 Netfilter Core Team
+Fri Jan  9 07:14:52 2026 kern.info kernel: [   13.652387] Netfilter messages via NETLINK v0.30.
+Fri Jan  9 07:14:52 2026 kern.info kernel: [   13.911562] Bluetooth: BNEP filters: protocol multicast
+Fri Jan  9 07:14:52 2026 kern.info kernel: [   14.032456] ip_tables: (C) 2000-2006 Netfilter Core Team
+Fri Jan  9 07:15:38 2026 daemon.notice mobile(mob1p1): Primary Antenna: LTE1
+Fri Jan  9 11:00:26 2026 daemon.notice mobile(mob1p1): Primary Antenna: LTE2
+Fri Jan  9 11:04:14 2026 daemon.notice mobile(mob1p1): Primary Antenna: LTE1
+root@C111:~# logread | grep -i signal | tail -20
+Fri Jan  9 07:14:52 2026 kern.info kernel: [    0.423482] pcieport 0000:00:00.0: Signaling PME with IRQ 292
+root@C111:~# dmesg | grep -i modem
+[   13.939674] cdc_acm: USB Abstract Control Model driver for USB modems and ISDN adapters
+[   16.524741] usbserial: USB Serial support registered for GSM modem (1-port)
+[   16.543477] usbserial: USB Serial support registered for Qualcomm USB modem
+[   16.550799] qcserial 2-1:1.0: Qualcomm USB modem converter detected
+[   16.558191] usb 2-1: Qualcomm USB modem converter now attached to ttyUSB0
+[   16.565928] qcserial 2-1:1.2: Qualcomm USB modem converter detected
+[   16.573297] usb 2-1: Qualcomm USB modem converter now attached to ttyUSB1
+[   16.580926] qcserial 2-1:1.3: Qualcomm USB modem converter detected
+[   16.588293] usb 2-1: Qualcomm USB modem converter now attached to ttyUSB2
+root@C111:~# dmesg | grep -i wwan
+[   16.388754] qmi_wwan 2-1:1.8: cdc-wdm0: USB WDM device
+[   16.395330] qmi_wwan 2-1:1.8 wwan0: register 'qmi_wwan' at usb-ci_hdrc.1-1, WWAN/QMI device, b6:2d:6c:ae:25:e6
+[   16.406462] qmi_wwan 2-1:1.10: cdc-wdm1: USB WDM device
+[   16.413046] qmi_wwan 2-1:1.10 wwan1: register 'qmi_wwan' at usb-ci_hdrc.1-1, WWAN/QMI device, b6:2d:6c:ae:25:e6
+[   16.423732] usbcore: registered new interface driver qmi_wwan
+[   53.223081] qmi_wwan 2-1:1.8 mob1p1: renamed from wwan0
+[   54.624419] qmi_wwan 2-1:1.10 mob1p1w1: renamed from wwan1
+root@C111:~#
+
+
+

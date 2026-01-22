@@ -1,4 +1,5 @@
 @ECHO OFF
+TITLE MMS Scripts - T1 Tools
 
 REM Optional: enable "stay open" mode if launched with -debug
 IF /I "%~1"=="-debug" (
@@ -542,7 +543,7 @@ REM ============================================================================
     CALL :hostkey
     SET TempFile=temp\temp_errorlevel.txt
     TIMEOUT /T 2 > NUL
-    START cmd /c "!toolsDir!C:AutoTech_Clientplink.exe -v -batch -l dlog -pw gold !IP! 'ls /' & ECHO !ERRORLEVEL! > "!TempFile!""
+    START cmd /c "!toolsDir!plink.exe -v -batch -l dlog -pw gold !IP! 'ls /' & ECHO !ERRORLEVEL! > "!TempFile!""
     TIMEOUT /T 2 > NUL
     FOR /F "delims=" %%A in ('type "!TempFile!"') DO SET "ERRORLEV=%%A"
     ECHO.
@@ -561,7 +562,7 @@ REM ============================================================================
     START !toolsDir!putty.exe -L !aviPortNo!:192.168.0.254:22 -l dlog -pw gold "!IP!" -m temp\autoTunnelCloseCmd
     TIMEOUT /t 2 /nobreak > NUL
     SET "aviIP=unknown"
-    FOR /F "tokens=2 delims=:" %%a in ('echo yes ^| "!toolsDir!C:AutoTech_Clientplink.exe" -batch -l root -pw root -P !aviPortNo! 127.0.0.1 -m temp\radIPCmd') DO (
+    FOR /F "tokens=2 delims=:" %%a in ('echo yes ^| "!toolsDir!plink.exe" -batch -l root -pw root -P !aviPortNo! 127.0.0.1 -m temp\radIPCmd') DO (
         SET "aviIP=%%a"
     )
     ECHO Embedded AVI IP Address found: !aviIP!
@@ -576,7 +577,7 @@ REM ============================================================================
     START /min !toolsDir!putty.exe -L !aviPortNo!:192.168.0.254:22 -l mms -pw modular "!IP!" -m temp\autoTunnelCloseCmd
     TIMEOUT /t 2 /nobreak > NUL
     SET "aviIP=unknown"
-    FOR /F "tokens=2 delims=:" %%a in ('echo yes ^| "!toolsDir!C:AutoTech_Clientplink.exe" -batch -l root -pw root -P !aviPortNo! 127.0.0.1 -m temp\radIPCmd') DO (
+    FOR /F "tokens=2 delims=:" %%a in ('echo yes ^| "!toolsDir!plink.exe" -batch -l root -pw root -P !aviPortNo! 127.0.0.1 -m temp\radIPCmd') DO (
         SET "aviIP=%%a"
     )
     ECHO Embedded AVI IP Address found: !aviIP!
@@ -642,7 +643,7 @@ REM ============================================================================
     ECHO Equipment Online "!IP!"
     SET TempFile=temp\temp_errorlevel.txt
     TIMEOUT /T 2 > NUL
-    START cmd /c "!toolsDir!C:AutoTech_Clientplink.exe -v -batch -l dlog -pw gold !IP! 'ls /' & ECHO !ERRORLEVEL! > "!TempFile!""
+    START cmd /c "!toolsDir!plink.exe -v -batch -l dlog -pw gold !IP! 'ls /' & ECHO !ERRORLEVEL! > "!TempFile!""
     TIMEOUT /T 2 > NUL
     FOR /F "delims=" %%A in ('type "!TempFile!"') DO SET "ERRORLEV=%%A"
     ECHO.
@@ -655,8 +656,8 @@ REM ============================================================================
     
     DEL "!TempFile!"
     REM Connect via PTXC
-    START /min "!equipName! - GNSS 1" !toolsDir!C:AutoTech_Clientplink.exe -v -batch -L !gps1PortNo!:192.168.0.101:8002 dlog@!IP! -pw gold -N
-    START /min "!equipName! - GNSS 2" !toolsDir!C:AutoTech_Clientplink.exe -v -batch -L !gps2PortNo!:192.168.0.102:8002 dlog@!IP! -pw gold -N      
+    START /min "!equipName! - GNSS 1" !toolsDir!plink.exe -v -batch -L !gps1PortNo!:192.168.0.101:8002 dlog@!IP! -pw gold -N
+    START /min "!equipName! - GNSS 2" !toolsDir!plink.exe -v -batch -L !gps2PortNo!:192.168.0.102:8002 dlog@!IP! -pw gold -N      
     ECHO Tunnel to GNSS 1 and GNSS 2 open via PTXC, opening TRU. Please wait...
     TIMEOUT /t 4 /nobreak > NUL
     START "" "!truDir!TRU.exe" 
@@ -666,8 +667,8 @@ REM ============================================================================
     
     REM Connect via PTX10
     :truPTX10
-        START /min "!equipName! - GNSS 1" !toolsDir!C:AutoTech_Clientplink.exe -v -batch -L !gps1PortNo!:192.168.0.101:8002 mms@!IP! -pw modular -N
-        START /min "!equipName! - GNSS 2" !toolsDir!C:AutoTech_Clientplink.exe -v -batch -L !gps2PortNo!:192.168.0.102:8002 mms@!IP! -pw modular -N      
+        START /min "!equipName! - GNSS 1" !toolsDir!plink.exe -v -batch -L !gps1PortNo!:192.168.0.101:8002 mms@!IP! -pw modular -N
+        START /min "!equipName! - GNSS 2" !toolsDir!plink.exe -v -batch -L !gps2PortNo!:192.168.0.102:8002 mms@!IP! -pw modular -N      
         ECHO Tunnel to GNSS 1 and GNSS 2 open via PTX10, opening TRU. Please wait...
         TIMEOUT /t 4 /nobreak > NUL
         START "" "!truDir!TRU.exe" 
@@ -702,7 +703,7 @@ REM ============================================================================
     CALL :hostkey
     SET TempFile=temp\temp_errorlevel.txt
     TIMEOUT /T 2 > NUL
-    START cmd /c "!toolsDir!C:AutoTech_Clientplink.exe -v -batch -l dlog -pw gold !IP! 'ls /' & ECHO !ERRORLEVEL! > "!TempFile!""
+    START cmd /c "!toolsDir!plink.exe -v -batch -l dlog -pw gold !IP! 'ls /' & ECHO !ERRORLEVEL! > "!TempFile!""
     TIMEOUT /T 2 > NUL
     FOR /F "delims=" %%A in ('type "!TempFile!"') DO SET "ERRORLEV=%%A"
     ECHO.
@@ -773,7 +774,7 @@ REM ============================================================================
     CALL :hostkey
     SET TempFile=temp\temp_errorlevel.txt
     TIMEOUT /T 2 > NUL
-    START cmd /c "!toolsDir!C:AutoTech_Clientplink.exe -v -batch -l dlog -pw gold !IP! 'ls /' & ECHO !ERRORLEVEL! > "!TempFile!""
+    START cmd /c "!toolsDir!plink.exe -v -batch -l dlog -pw gold !IP! 'ls /' & ECHO !ERRORLEVEL! > "!TempFile!""
     TIMEOUT /T 2 > NUL
     FOR /F "delims=" %%A in ('type "!TempFile!"') DO SET "ERRORLEV=%%A"
     ECHO.
@@ -868,7 +869,7 @@ REM ============================================================================
     CALL :hostkey
     SET TempFile=temp\temp_errorlevel.txt
     TIMEOUT /T 2 > NUL
-    START cmd /c "!toolsDir!C:AutoTech_Clientplink.exe -v -batch -l dlog -pw gold !IP! 'ls /' & ECHO !ERRORLEVEL! > "!TempFile!""
+    START cmd /c "!toolsDir!plink.exe -v -batch -l dlog -pw gold !IP! 'ls /' & ECHO !ERRORLEVEL! > "!TempFile!""
     TIMEOUT /T 2 > NUL
     FOR /F "delims=" %%A in ('type "!TempFile!"') DO SET "ERRORLEV=%%A"
     ECHO.
@@ -953,7 +954,7 @@ REM ============================================================================
     CALL :hostkey
     SET TempFile=temp\temp_errorlevel.txt
     TIMEOUT /T 2 > NUL
-    START cmd /c "!toolsDir!C:AutoTech_Clientplink.exe -v -batch -l dlog -pw gold !IP! 'ls /' & ECHO !ERRORLEVEL! > "!TempFile!""
+    START cmd /c "!toolsDir!plink.exe -v -batch -l dlog -pw gold !IP! 'ls /' & ECHO !ERRORLEVEL! > "!TempFile!""
     TIMEOUT /T 2 > NUL
     FOR /F "delims=" %%A in ('type "!TempFile!"') DO SET "ERRORLEV=%%A"
     ECHO.
@@ -1039,7 +1040,7 @@ REM ============================================================================
     CALL :hostkey
     SET TempFile=temp\temp_errorlevel.txt
     TIMEOUT /T 2 > NUL
-    START cmd /c "!toolsDir!C:AutoTech_Clientplink.exe -v -batch -l dlog -pw gold !IP! 'ls /' & ECHO !ERRORLEVEL! > "!TempFile!""
+    START cmd /c "!toolsDir!plink.exe -v -batch -l dlog -pw gold !IP! 'ls /' & ECHO !ERRORLEVEL! > "!TempFile!""
     TIMEOUT /T 2 > NUL
     FOR /F "delims=" %%A in ('type "!TempFile!"') DO SET "ERRORLEV=%%A"
     ECHO.
@@ -1058,7 +1059,7 @@ REM ============================================================================
     TIMEOUT /t 1 /nobreak > NUL
     ECHO Please wait, opening VNC Viewer.
     TIMEOUT /t 1 /nobreak > NUL
-    START /min !toolsDir!C:AutoTech_Clientplink.exe -v -ssh -l dlog -pw gold -L  !vncPortNo!:localhost:5900 !IP! -batch "vncserver && sleep 10"
+    START /min !toolsDir!plink.exe -v -ssh -l dlog -pw gold -L  !vncPortNo!:localhost:5900 !IP! -batch "vncserver && sleep 10"
     TIMEOUT /t 6 /nobreak > NUL
     START !vncDir!vncviewer.exe 127.0.0.1:!vncPortNo! 
     TIMEOUT /t 2 /nobreak > NUL
@@ -1076,7 +1077,7 @@ REM ============================================================================
         TIMEOUT /t 1 /nobreak > NUL
         ECHO Please wait, opening VNC Viewer.
         TIMEOUT /t 1 /nobreak > NUL
-        START /min !toolsDir!C:AutoTech_Clientplink.exe -v -ssh -l mms -pw modular -L  !vncPortNo!:localhost:5900 !IP! -batch "vncserver && sleep 10"
+        START /min !toolsDir!plink.exe -v -ssh -l mms -pw modular -L  !vncPortNo!:localhost:5900 !IP! -batch "vncserver && sleep 10"
         TIMEOUT /t 4 /nobreak > NUL
         START !vncDir!vncviewer.exe 127.0.0.1:!vncPortNo!
         TIMEOUT /t 3 /nobreak > NUL
@@ -1170,7 +1171,7 @@ REM ============================================================================
     CALL :hostkey
     SET TempFile=temp\temp_errorlevel.txt
     TIMEOUT /T 2 > NUL
-    START cmd /c "!toolsDir!C:AutoTech_Clientplink.exe -v -batch -l dlog -pw gold !IP! 'ls /' & ECHO !ERRORLEVEL! > "!TempFile!""
+    START cmd /c "!toolsDir!plink.exe -v -batch -l dlog -pw gold !IP! 'ls /' & ECHO !ERRORLEVEL! > "!TempFile!""
     TIMEOUT /T 2 > NUL
     FOR /F "delims=" %%A in ('type "!TempFile!"') DO SET "ERRORLEV=%%A"
     ECHO.
@@ -1195,7 +1196,7 @@ REM ============================================================================
         CALL :vncencrypt
         CALL :vncptxc
         SET /A vncPortNo=!vncPortNo! + 1
-        START /min "!equipName! Config VNC" "!toolsDir!C:AutoTech_Clientplink.exe" -v -ssh -l dlog -pw gold -L !vncPortNo!:localhost:5900 !IP! -batch "vncserver && sleep 10"
+        START /min "!equipName! Config VNC" "!toolsDir!plink.exe" -v -ssh -l dlog -pw gold -L !vncPortNo!:localhost:5900 !IP! -batch "vncserver && sleep 10"
         TIMEOUT /t 6 /nobreak > NUL
         START "" "!toolsDir!HotKey.exe" /Force "temp\putty_key.ahk"
         TIMEOUT /t 1 /nobreak > NUL
@@ -1236,7 +1237,7 @@ REM ============================================================================
     CALL :hostkey
     SET TempFile=temp\temp_errorlevel.txt
     TIMEOUT /T 2 > NUL
-    START cmd /c "!toolsDir!C:AutoTech_Clientplink.exe -v -batch -l dlog -pw gold !IP! 'ls /' & ECHO !ERRORLEVEL! > "!TempFile!""
+    START cmd /c "!toolsDir!plink.exe -v -batch -l dlog -pw gold !IP! 'ls /' & ECHO !ERRORLEVEL! > "!TempFile!""
     TIMEOUT /T 2 > NUL
     FOR /F "delims=" %%A in ('type "!TempFile!"') DO SET "ERRORLEV=%%A"
     ECHO.
@@ -1254,7 +1255,7 @@ REM ============================================================================
     SET /p answer="Reboot !equipName! PTXC ? (Y/N) "
     IF /i "!answer!"=="y" (
         TIMEOUT /t 5 /nobreak
-        START !toolsDir!C:AutoTech_Clientplink.exe -batch dlog@!IP! -pw gold -m temp\reboot -v
+        START !toolsDir!plink.exe -batch dlog@!IP! -pw gold -m temp\reboot -v
     ) ELSE (
         ECHO "Operation Cancelled"
         GOTO rebootFinish 
@@ -1272,7 +1273,7 @@ REM ============================================================================
         CALL :vncptxc
         SET /A vncPortNo=!vncPortNo! + 1
         TIMEOUT /t 1 /nobreak > NUL
-        START /min "!equipName! Reboot VNC" "!toolsDir!C:AutoTech_Clientplink.exe" -v -ssh -l dlog -pw gold -L !vncPortNo!:localhost:5900 !IP! -batch "vncserver && sleep 10"
+        START /min "!equipName! Reboot VNC" "!toolsDir!plink.exe" -v -ssh -l dlog -pw gold -L !vncPortNo!:localhost:5900 !IP! -batch "vncserver && sleep 10"
         TIMEOUT /t 6 /nobreak > NUL
         START "" "!toolsDir!HotKey.exe" /Force "temp\putty_key.ahk"
         TIMEOUT /t 1 /nobreak > NUL
@@ -1296,7 +1297,7 @@ REM ============================================================================
             SET /p answer="Reboot !equipName! PTX10 ? (Y/N) "
             IF /i "!answer!"=="y" (
                 TIMEOUT /t 5 /nobreak
-                START !toolsDir!C:AutoTech_Clientplink.exe -batch mms@!IP! -pw modular -m temp\reboot -v
+                START !toolsDir!plink.exe -batch mms@!IP! -pw modular -m temp\reboot -v
             ) ELSE (
                 ECHO "Operation Cancelled"
                 GOTO rebootFinish 
@@ -1314,7 +1315,7 @@ REM ============================================================================
                 CALL :vncptx10
                 SET /A vncPortNo=!vncPortNo! + 1
                 TIMEOUT /t 1 /nobreak > NUL
-                START /min "!equipName! Reboot VNC" "!toolsDir!C:AutoTech_Clientplink.exe" -v -ssh -l mms -pw modular -L !vncPortNo!:localhost:5900 !IP! -batch "vncserver && sleep 15"
+                START /min "!equipName! Reboot VNC" "!toolsDir!plink.exe" -v -ssh -l mms -pw modular -L !vncPortNo!:localhost:5900 !IP! -batch "vncserver && sleep 15"
                 TIMEOUT /t 6 /nobreak > NUL
                 START "" "!toolsDir!HotKey.exe" /Force "temp\putty_key.ahk"
                 TIMEOUT /t 1 /nobreak > NUL
@@ -1359,7 +1360,7 @@ REM ============================================================================
     CALL :hostkey
     SET TempFile=temp\temp_errorlevel.txt
     TIMEOUT /T 2 > NUL
-    START cmd /c "!toolsDir!C:AutoTech_Clientplink.exe -v -batch -l dlog -pw gold !IP! 'ls /' & ECHO !ERRORLEVEL! > "!TempFile!""
+    START cmd /c "!toolsDir!plink.exe -v -batch -l dlog -pw gold !IP! 'ls /' & ECHO !ERRORLEVEL! > "!TempFile!""
     TIMEOUT /T 2 > NUL
     FOR /F "delims=" %%A in ('type "!TempFile!"') DO SET "ERRORLEV=%%A"
     ECHO.
@@ -1411,7 +1412,7 @@ REM ============================================================================
     CALL :hostkey
     SET TempFile=temp\temp_errorlevel.txt
     TIMEOUT /T 2 > NUL
-    START cmd /c "!toolsDir!C:AutoTech_Clientplink.exe -v -batch -l dlog -pw gold !IP! 'ls /' & ECHO !ERRORLEVEL! > "!TempFile!""
+    START cmd /c "!toolsDir!plink.exe -v -batch -l dlog -pw gold !IP! 'ls /' & ECHO !ERRORLEVEL! > "!TempFile!""
     TIMEOUT /T 2 > NUL
     FOR /F "delims=" %%A in ('type "!TempFile!"') DO SET "ERRORLEV=%%A"
     ECHO.
@@ -1463,7 +1464,7 @@ REM ============================================================================
     CALL :hostkey
     SET TempFile=temp\temp_errorlevel.txt
     TIMEOUT /T 2 > NUL
-    START cmd /c "!toolsDir!C:AutoTech_Clientplink.exe -v -batch -l dlog -pw gold !IP! 'ls /' & ECHO !ERRORLEVEL! > "!TempFile!""
+    START cmd /c "!toolsDir!plink.exe -v -batch -l dlog -pw gold !IP! 'ls /' & ECHO !ERRORLEVEL! > "!TempFile!""
     TIMEOUT /T 2 > NUL
     FOR /F "delims=" %%A in ('type "!TempFile!"') DO SET "ERRORLEV=%%A"
     ECHO.
@@ -1511,7 +1512,7 @@ REM ============================================================================
     CALL :hostkey
     SET TempFile=temp\temp_errorlevel.txt
     TIMEOUT /T 2 > NUL
-    START cmd /c "!toolsDir!C:AutoTech_Clientplink.exe -v -batch -l dlog -pw gold !IP! 'ls /' & ECHO !ERRORLEVEL! > "!TempFile!""
+    START cmd /c "!toolsDir!plink.exe -v -batch -l dlog -pw gold !IP! 'ls /' & ECHO !ERRORLEVEL! > "!TempFile!""
     TIMEOUT /T 2 > NUL
     FOR /F "delims=" %%A in ('type "!TempFile!"') DO SET "ERRORLEV=%%A"
     ECHO.
@@ -1528,9 +1529,9 @@ REM ============================================================================
     ECHO (ENSURE EQUIPMENT STATUS "Not Enter AT") 
     SET /p answer=" Delete cache folder on !equipName! & Reboot PTXC ? (Y/N) "
     IF /i "!answer!"=="y" (
-        START "Cache Delete" "!toolsDir!C:AutoTech_Clientplink.exe" -batch dlog@!IP! -pw gold -m temp\PTXCcachedel -v
+        START "Cache Delete" "!toolsDir!plink.exe" -batch dlog@!IP! -pw gold -m temp\PTXCcachedel -v
         PING 127.0.0.1 -n 5 > NUL
-        START "PTX Reboot" "!toolsDir!C:AutoTech_Clientplink.exe" -batch dlog@!IP! -pw gold -m temp\reboot -v
+        START "PTX Reboot" "!toolsDir!plink.exe" -batch dlog@!IP! -pw gold -m temp\reboot -v
     ) ELSE (
         ECHO "Operation Cancelled"
         GOTO delFinish 
@@ -1547,7 +1548,7 @@ REM ============================================================================
         CALL :vncencrypt
         CALL :vncptxc
         TIMEOUT /t 1 /nobreak > NUL
-        START /min "!equipName! Reboot VNC" "!toolsDir!C:AutoTech_Clientplink.exe" -v -ssh -l dlog -pw gold -L !vncPortNo!:localhost:5900 !IP! -batch "vncserver && sleep 10"
+        START /min "!equipName! Reboot VNC" "!toolsDir!plink.exe" -v -ssh -l dlog -pw gold -L !vncPortNo!:localhost:5900 !IP! -batch "vncserver && sleep 10"
         TIMEOUT /t 6 /nobreak > NUL
         START "" "!toolsDir!HotKey.exe" /Force "temp\putty_key.ahk"
         TIMEOUT /t 1 /nobreak > NUL
@@ -1571,9 +1572,9 @@ REM ============================================================================
             ECHO (ENSURE EQUIPMENT STATUS "Not Enter AT") 
             SET /p answer=" Delete cache folder on !equipName! & Reboot PTX10 ? (Y/N) "
             IF /i "!answer!"=="y" (
-                START "Cache Delete" "!toolsDir!C:AutoTech_Clientplink.exe" -batch mms@!IP! -pw modular -m temp\PTX10cachedel -v
+                START "Cache Delete" "!toolsDir!plink.exe" -batch mms@!IP! -pw modular -m temp\PTX10cachedel -v
                 PING 127.0.0.1 -n 5 > NUL
-                START "PTX Reboot" "!toolsDir!C:AutoTech_Clientplink.exe" -batch mms@!IP! -pw modular -m temp\reboot -v
+                START "PTX Reboot" "!toolsDir!plink.exe" -batch mms@!IP! -pw modular -m temp\reboot -v
             ) ELSE (
                 ECHO "Operation Cancelled"
                 GOTO delFinish 
@@ -1590,7 +1591,7 @@ REM ============================================================================
             CALL :vncencrypt
             CALL :vncptx10
             TIMEOUT /t 1 /nobreak > NUL
-            START /min "!equipName! Reboot VNC" "!toolsDir!C:AutoTech_Clientplink.exe" -v -ssh -l mms -pw modular -L !vncPortNo!:localhost:5900 !IP! -batch "vncserver && sleep 10"
+            START /min "!equipName! Reboot VNC" "!toolsDir!plink.exe" -v -ssh -l mms -pw modular -L !vncPortNo!:localhost:5900 !IP! -batch "vncserver && sleep 10"
             TIMEOUT /t 6 /nobreak > NUL
             START "" "!toolsDir!HotKey.exe" /Force "temp\putty_key.ahk"
             TIMEOUT /t 1 /nobreak > NUL
@@ -1654,7 +1655,7 @@ REM ============================================================================
         )
     ) ELSE (
         REM Fallback to PuTTY plink
-        "!toolsDir!C:AutoTech_Clientplink.exe" -ssh -batch -pw "!sshPass!" !sshUser!@!sshHost! "!sshCmd!"
+        "!toolsDir!plink.exe" -ssh -batch -pw "!sshPass!" !sshUser!@!sshHost! "!sshCmd!"
     )
     GOTO :EOF
 
@@ -1719,7 +1720,7 @@ REM ============================================================================
     ) ELSE (
         REM Fallback to PuTTY method
         SET TempFile=temp\temp_errorlevel.txt
-        START /wait cmd /c "!toolsDir!C:AutoTech_Clientplink.exe -ssh -batch -pw gold dlog@!checkIP! "ls /" & ECHO !ERRORLEVEL! > "!TempFile!""
+        START /wait cmd /c "!toolsDir!plink.exe -ssh -batch -pw gold dlog@!checkIP! "ls /" & ECHO !ERRORLEVEL! > "!TempFile!""
         FOR /F "delims=" %%A in ('type "!TempFile!"') DO SET "ERRORLEV=%%A"
         IF "!ERRORLEV!"=="0 " (
             SET "%~2=PTXC"

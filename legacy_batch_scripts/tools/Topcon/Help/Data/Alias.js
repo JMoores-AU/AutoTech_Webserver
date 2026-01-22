@@ -1,0 +1,6 @@
+var xmlAliasData = "";
+xmlAliasData += '<?xml version=\"1.0\" encoding=\"utf-8\"?>';
+xmlAliasData += '<CatapultAliasFile>';
+xmlAliasData += '    <Map Name=\"NEW2\" Link=\"Topics/WelcometotheApplication.htm\" ResolvedId=\"1002\" />';
+xmlAliasData += '</CatapultAliasFile>';
+MadCap.Utilities.Xhr._FilePathToXmlStringMap.Add('Alias', xmlAliasData);

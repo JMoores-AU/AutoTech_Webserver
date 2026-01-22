@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Equipment Database - AutoTech</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        /* Page-specific styles */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--theme-bg);
+            color: var(--theme-text);
+        }
+
+        .cache-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--theme-bg-card);
+            border: 1px solid var(--theme-border);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--theme-primary);
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--theme-text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-card.online .stat-value { color: #28a745; }
+        .stat-card.offline .stat-value { color: #dc3545; }
+        .stat-card.unknown .stat-value { color: #ffc107; }
+
+        /* Search and Controls */
+        .controls-bar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+
+        .search-input {
+            width: 250px;
+            padding: 10px 14px;
+            border: 1px solid var(--theme-border);
+            border-radius: var(--radius-sm);
+            background: var(--theme-bg-card);
+            color: var(--theme-text);
+            font-size: 0.95rem;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--theme-primary);
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border: 1px solid var(--theme-border);
+            border-radius: var(--radius-sm);
+            background: var(--theme-bg-card);
+            color: var(--theme-text);
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: var(--theme-bg-card-hover);
+            border-color: var(--theme-primary);
+        }
+
+        .btn-primary {
+            background: var(--theme-primary);
+            border-color: var(--theme-primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--theme-primary-dark, #0056b3);
+        }
+
+        /* Equipment Table */
+        .table-container {
+            background: var(--theme-bg-card);
+            border: 1px solid var(--theme-border);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+
+        .table-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--theme-border);
+            background: var(--theme-bg-secondary);
+        }
+
+        .table-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .table-count {
+            font-size: 0.85rem;
+            color: var(--theme-text-muted);
+            font-weight: normal;
+        }
+
+        .equipment-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .equipment-table th,
+        .equipment-table td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--theme-border);
+        }
+
+        .equipment-table th {
+            background: var(--theme-bg-secondary);
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--theme-text-muted);
+        }
+
+        .equipment-table tr:hover {
+            background: var(--theme-bg-card-hover);
+        }
+
+        .equipment-table td {
+            font-size: 0.9rem;
+        }
+
+        .equipment-name {
+            font-weight: 600;
+            color: var(--theme-primary);
+        }
+
+        .ip-value {
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9rem;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-badge.online {
+            background: rgba(40, 167, 69, 0.15);
+            color: #28a745;
+            border: 1px solid rgba(40, 167, 69, 0.3);
+        }
+
+        .status-badge.offline {
+            background: rgba(220, 53, 69, 0.15);
+            color: #dc3545;
+            border: 1px solid rgba(220, 53, 69, 0.3);
+        }
+
+        .status-badge.unknown {
+            background: rgba(108, 117, 125, 0.15);
+            color: #6c757d;
+            border: 1px solid rgba(108, 117, 125, 0.3);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        .timestamp {
+            font-size: 0.8rem;
+            color: var(--theme-text-muted);
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--theme-text-muted);
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-state-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--theme-text);
+        }
+
+        .empty-state-desc {
+            font-size: 0.9rem;
+        }
+
+        /* Loading state */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--theme-text-muted);
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border: 3px solid var(--theme-border);
+            border-top-color: var(--theme-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 12px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Database path display */
+        .db-path {
+            font-size: 0.8rem;
+            color: var(--theme-text-muted);
+            font-family: 'Consolas', 'Monaco', monospace;
+            background: var(--theme-bg-secondary);
+            padding: 8px 12px;
+            border-radius: var(--radius-sm);
+            margin-top: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .db-path-label {
+            font-weight: 600;
+            color: var(--theme-text);
+        }
+
+        /* Import/Update Controls Panel */
+        .update-panel {
+            background: var(--theme-bg-card);
+            border: 1px solid var(--theme-border);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .update-panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .update-panel-title {
+            font-size: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .update-controls {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .update-status {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            padding: 12px 16px;
+            background: var(--theme-bg-secondary);
+            border-radius: var(--radius-sm);
+            margin-top: 12px;
+        }
+
+        .update-status-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .update-status-label {
+            font-size: 0.75rem;
+            color: var(--theme-text-muted);
+            text-transform: uppercase;
+        }
+
+        .update-status-value {
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        .update-status-value.running {
+            color: #28a745;
+        }
+
+        .update-status-value.stopped {
+            color: #6c757d;
+        }
+
+        .update-status-value.complete {
+            color: var(--theme-primary);
+        }
+
+        .progress-bar-container {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: var(--theme-bg-secondary);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--theme-primary);
+            transition: width 0.3s ease;
+        }
+
+        .btn-success {
+            background: #28a745;
+            border-color: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            border-color: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Copy button in table */
+        .copy-btn {
+            background: transparent;
+            border: 1px solid var(--theme-border);
+            color: var(--theme-text-muted);
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: var(--theme-primary);
+            border-color: var(--theme-primary);
+            color: white;
+        }
+
+        .copy-btn.copied {
+            background: #28a745;
+            border-color: #28a745;
+            color: white;
+        }
+
+        /* Responsive table wrapper */
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .controls-bar {
+                flex-wrap: wrap;
+            }
+
+            .search-input {
+                width: 100%;
+                min-width: 150px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <span class="sidebar-logo-icon">🔧</span>
+                    <div>
+                        <div class="sidebar-logo-text">AutoTech</div>
+                        <div class="sidebar-logo-subtitle">T1 Tools</div>
+                    </div>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <!-- Main Navigation -->
+                <div class="nav-section">
+                    <div class="nav-section-title">Navigation</div>
+                    <a href="/" class="nav-item">
+                        <span class="nav-item-icon">🏠</span>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="/database" class="nav-item active">
+                        <span class="nav-item-icon">🗄️</span>
+                        <span>Equipment Database</span>
+                    </a>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="sidebar-status">
+                    <span class="status-indicator {{ 'online' if online else 'offline' }}"></span>
+                    <span>{{ 'Network Online' if online else 'Offline Mode' }}</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            <div class="content-area">
+                <div class="cache-container">
+                    <h1>Equipment Cache Database</h1>
+                    <p style="color: var(--theme-text-muted); margin-bottom: 24px;">
+                        Cached equipment data from IP Finder lookups. Data is stored locally for offline reference.
+                    </p>
+
+                    <!-- Stats Cards -->
+                    <div class="stats-grid" id="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-value" id="stat-total">-</div>
+                            <div class="stat-label">Total Equipment</div>
+                        </div>
+                        <div class="stat-card online">
+                            <div class="stat-value" id="stat-online">-</div>
+                            <div class="stat-label">Online</div>
+                        </div>
+                        <div class="stat-card offline">
+                            <div class="stat-value" id="stat-offline">-</div>
+                            <div class="stat-label">Offline</div>
+                        </div>
+                        <div class="stat-card unknown">
+                            <div class="stat-value" id="stat-unknown">-</div>
+                            <div class="stat-label">Unknown</div>
+                        </div>
+                    </div>
+
+                    <!-- Live Update Panel -->
+                    {% if online %}
+                    <div class="update-panel">
+                        <div class="update-panel-header">
+                            <div class="update-panel-title">
+                                <span>⚙️</span>
+                                <span>Live Data Updates</span>
+                            </div>
+                            <div style="font-size: 0.85rem; color: var(--theme-text-muted);">
+                                <span style="color: #28a745;">● Online</span> - Updates missing CID, Profile, PTX Model from MMS server
+                            </div>
+                        </div>
+                        <div class="update-controls">
+                            <button class="btn btn-success" id="btn-start-updater" onclick="startUpdater()">
+                                <span>▶️</span> Start Live Updater
+                            </button>
+                            <button class="btn btn-danger" id="btn-stop-updater" onclick="stopUpdater()" style="display: none;">
+                                <span>⏹️</span> Stop Updater
+                            </button>
+                        </div>
+                        <div class="update-status" id="update-status" style="display: none;">
+                            <div class="update-status-item">
+                                <span class="update-status-label">Status</span>
+                                <span class="update-status-value" id="updater-status">Stopped</span>
+                            </div>
+                            <div class="update-status-item">
+                                <span class="update-status-label">Current</span>
+                                <span class="update-status-value" id="updater-current">-</span>
+                            </div>
+                            <div class="update-status-item">
+                                <span class="update-status-label">Processed</span>
+                                <span class="update-status-value" id="updater-processed">0</span>
+                            </div>
+                            <div class="update-status-item">
+                                <span class="update-status-label">Errors</span>
+                                <span class="update-status-value" id="updater-errors">0</span>
+                            </div>
+                            <div class="update-status-item progress-bar-container">
+                                <span class="update-status-label">Progress (<span id="updater-percent">0</span>% complete)</span>
+                                <div class="progress-bar">
+                                    <div class="progress-bar-fill" id="progress-fill" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Search and Controls -->
+                    <div class="controls-bar">
+                        <input type="text" class="search-input" id="search-input" placeholder="Search equipment...">
+                        <button class="btn btn-primary" onclick="searchEquipment()">
+                            <span>🔍</span> Search
+                        </button>
+                        <button class="btn" onclick="loadAllEquipment()">
+                            <span>↻</span> Refresh
+                        </button>
+                        <button class="btn" onclick="exportCSV()">
+                            <span>📥</span> Export CSV
+                        </button>
+                    </div>
+
+                    <!-- Equipment Table -->
+                    <div class="table-container">
+                        <div class="table-header">
+                            <div class="table-title">
+                                <span>🗄️</span>
+                                <span>Cached Equipment</span>
+                                <span class="table-count" id="table-count">(0 records)</span>
+                            </div>
+                        </div>
+                        <div class="table-wrapper">
+                            <table class="equipment-table" id="equipment-table">
+                                <thead>
+                                    <tr>
+                                        <th>Equipment</th>
+                                        <th>CID</th>
+                                        <th>Profile</th>
+                                        <th>Network IP</th>
+                                        <th>AVI IP</th>
+                                        <th>PTX Model</th>
+                                        <th>Status</th>
+                                        <th>Last Updated</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="equipment-tbody">
+                                    <tr>
+                                        <td colspan="8">
+                                            <div class="loading">
+                                                <div class="loading-spinner"></div>
+                                                <div>Loading equipment cache...</div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Database Path -->
+                    <div class="db-path" id="db-path">
+                        <span class="db-path-label">Database:</span>
+                        <span id="db-path-value">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // ========================================
+        // EQUIPMENT CACHE VIEWER
+        // ========================================
+
+        // Load stats on page load
+        function loadStats() {
+            fetch('/api/equipment/cache/stats')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const stats = data.stats;
+                        document.getElementById('stat-total').textContent = stats.total_equipment;
+                        document.getElementById('stat-online').textContent = stats.online_count;
+                        document.getElementById('stat-offline').textContent = stats.offline_count;
+                        document.getElementById('stat-unknown').textContent = stats.unknown_count;
+                        document.getElementById('db-path-value').textContent = stats.database_path || 'Unknown';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading stats:', error);
+                });
+        }
+
+        // Load all equipment
+        function loadAllEquipment() {
+            const tbody = document.getElementById('equipment-tbody');
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="8">
+                        <div class="loading">
+                            <div class="loading-spinner"></div>
+                            <div>Loading equipment cache...</div>
+                        </div>
+                    </td>
+                </tr>
+            `;
+
+            fetch('/api/equipment/cache?limit=200')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        renderEquipmentTable(data.equipment);
+                        document.getElementById('table-count').textContent = `(${data.count} records)`;
+                    } else {
+                        showEmptyState('Error loading data: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading equipment:', error);
+                    showEmptyState('Failed to load equipment cache');
+                });
+
+            // Also refresh stats
+            loadStats();
+        }
+
+        // Search equipment
+        function searchEquipment() {
+            const searchTerm = document.getElementById('search-input').value.trim();
+
+            if (!searchTerm) {
+                loadAllEquipment();
+                return;
+            }
+
+            const tbody = document.getElementById('equipment-tbody');
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="8">
+                        <div class="loading">
+                            <div class="loading-spinner"></div>
+                            <div>Searching...</div>
+                        </div>
+                    </td>
+                </tr>
+            `;
+
+            fetch(`/api/equipment/cache?search=${encodeURIComponent(searchTerm)}&limit=100`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        renderEquipmentTable(data.equipment);
+                        document.getElementById('table-count').textContent = `(${data.count} results)`;
+                    } else {
+                        showEmptyState('Search error: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error searching:', error);
+                    showEmptyState('Search failed');
+                });
+        }
+
+        // Render equipment table
+        function renderEquipmentTable(equipment) {
+            const tbody = document.getElementById('equipment-tbody');
+
+            if (!equipment || equipment.length === 0) {
+                showEmptyState('No equipment found in cache');
+                return;
+            }
+
+            tbody.innerHTML = equipment.map(eq => `
+                <tr>
+                    <td class="equipment-name">${eq.equipment_name || '-'}</td>
+                    <td>${eq.cid || '-'}</td>
+                    <td>${eq.profile || '-'}</td>
+                    <td>
+                        <span class="ip-value">${eq.network_ip || '-'}</span>
+                        ${eq.network_ip ? `<button class="copy-btn" onclick="copyIP(this, '${eq.network_ip}')">Copy</button>` : ''}
+                    </td>
+                    <td>
+                        <span class="ip-value">${eq.avi_ip || '-'}</span>
+                        ${eq.avi_ip ? `<button class="copy-btn" onclick="copyIP(this, '${eq.avi_ip}')">Copy</button>` : ''}
+                    </td>
+                    <td>${eq.ptx_model || '-'}</td>
+                    <td>${renderStatusBadge(eq.last_status)}</td>
+                    <td class="timestamp">${formatTimestamp(eq.last_updated)}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Render status badge
+        function renderStatusBadge(status) {
+            if (!status) {
+                return '<span class="status-badge unknown"><span class="status-dot"></span>Unknown</span>';
+            }
+            const statusLower = status.toLowerCase();
+            if (statusLower === 'online') {
+                return '<span class="status-badge online"><span class="status-dot"></span>Online</span>';
+            } else if (statusLower === 'offline') {
+                return '<span class="status-badge offline"><span class="status-dot"></span>Offline</span>';
+            }
+            return `<span class="status-badge unknown"><span class="status-dot"></span>${status}</span>`;
+        }
+
+        // Format timestamp
+        function formatTimestamp(timestamp) {
+            if (!timestamp) return '-';
+            try {
+                const date = new Date(timestamp);
+                return date.toLocaleString();
+            } catch {
+                return timestamp;
+            }
+        }
+
+        // Show empty state
+        function showEmptyState(message) {
+            const tbody = document.getElementById('equipment-tbody');
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="8">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">🗄️</div>
+                            <div class="empty-state-title">No Equipment Cached</div>
+                            <div class="empty-state-desc">${message || 'Use IP Finder to look up equipment and it will be cached automatically.'}</div>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }
+
+        // Copy IP to clipboard
+        function copyIP(button, ip) {
+            navigator.clipboard.writeText(ip).then(() => {
+                const originalText = button.textContent;
+                button.textContent = 'Copied!';
+                button.classList.add('copied');
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.classList.remove('copied');
+                }, 1500);
+            });
+        }
+
+        // Export to CSV
+        function exportCSV() {
+            fetch('/api/equipment/cache?limit=1000')
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.success || !data.equipment || data.equipment.length === 0) {
+                        alert('No data to export');
+                        return;
+                    }
+
+                    const headers = ['Equipment', 'CID', 'Profile', 'Network IP', 'AVI IP', 'PTX Model', 'Status', 'Last Updated'];
+                    const rows = data.equipment.map(eq => [
+                        eq.equipment_name || '',
+                        eq.cid || '',
+                        eq.profile || '',
+                        eq.network_ip || '',
+                        eq.avi_ip || '',
+                        eq.ptx_model || '',
+                        eq.last_status || '',
+                        eq.last_updated || ''
+                    ]);
+
+                    const csvContent = [
+                        headers.join(','),
+                        ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+                    ].join('\n');
+
+                    const blob = new Blob([csvContent], { type: 'text/csv' });
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `equipment_cache_${new Date().toISOString().split('T')[0]}.csv`;
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                })
+                .catch(error => {
+                    console.error('Export error:', error);
+                    alert('Failed to export data');
+                });
+        }
+
+        // Enter key triggers search
+        document.getElementById('search-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchEquipment();
+            }
+        });
+
+        // ========================================
+        // LIVE UPDATER FUNCTIONS
+        // ========================================
+
+        let updaterPollInterval = null;
+
+        // Start background updater
+        function startUpdater() {
+            const btnStart = document.getElementById('btn-start-updater');
+            const btnStop = document.getElementById('btn-stop-updater');
+            const statusPanel = document.getElementById('update-status');
+
+            btnStart.disabled = true;
+            btnStart.innerHTML = '<span>⏳</span> Starting...';
+
+            fetch('/api/equipment/updater/start', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ delay_seconds: 5 })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    btnStart.style.display = 'none';
+                    btnStop.style.display = 'flex';
+                    statusPanel.style.display = 'flex';
+                    startUpdaterPolling();
+                } else {
+                    btnStart.disabled = false;
+                    btnStart.innerHTML = '<span>▶️</span> Start Live Updater';
+                    alert('Failed to start updater: ' + data.error);
+                }
+            })
+            .catch(error => {
+                btnStart.disabled = false;
+                btnStart.innerHTML = '<span>▶️</span> Start Live Updater';
+                console.error('Start updater error:', error);
+                alert('Failed to start updater: ' + error.message);
+            });
+        }
+
+        // Stop background updater
+        function stopUpdater() {
+            const btnStop = document.getElementById('btn-stop-updater');
+            btnStop.disabled = true;
+            btnStop.innerHTML = '<span>⏳</span> Stopping...';
+
+            fetch('/api/equipment/updater/stop', { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Will be handled by polling
+                } else {
+                    btnStop.disabled = false;
+                    btnStop.innerHTML = '<span>⏹️</span> Stop Updater';
+                    alert('Failed to stop updater: ' + data.error);
+                }
+            })
+            .catch(error => {
+                btnStop.disabled = false;
+                btnStop.innerHTML = '<span>⏹️</span> Stop Updater';
+                console.error('Stop updater error:', error);
+            });
+        }
+
+        // Poll updater status
+        function startUpdaterPolling() {
+            if (updaterPollInterval) {
+                clearInterval(updaterPollInterval);
+            }
+
+            updateUpdaterStatus(); // Initial call
+            updaterPollInterval = setInterval(updateUpdaterStatus, 2000);
+        }
+
+        function updateUpdaterStatus() {
+            fetch('/api/equipment/updater/status')
+            .then(response => response.json())
+            .then(data => {
+                if (!data.success) return;
+
+                const statusEl = document.getElementById('updater-status');
+                const currentEl = document.getElementById('updater-current');
+                const processedEl = document.getElementById('updater-processed');
+                const errorsEl = document.getElementById('updater-errors');
+                const percentEl = document.getElementById('updater-percent');
+                const progressFill = document.getElementById('progress-fill');
+
+                // Update status display
+                statusEl.textContent = data.status.charAt(0).toUpperCase() + data.status.slice(1);
+                statusEl.className = 'update-status-value ' + data.status;
+                currentEl.textContent = data.current_equipment || '-';
+                processedEl.textContent = data.processed_count;
+                errorsEl.textContent = data.error_count;
+
+                // Update progress
+                const percent = data.progress?.percent_complete || 0;
+                percentEl.textContent = percent.toFixed(1);
+                progressFill.style.width = percent + '%';
+
+                // Handle stopped state
+                if (!data.running) {
+                    const btnStart = document.getElementById('btn-start-updater');
+                    const btnStop = document.getElementById('btn-stop-updater');
+
+                    btnStart.style.display = 'flex';
+                    btnStart.disabled = false;
+                    btnStart.innerHTML = '<span>▶️</span> Start Live Updater';
+                    btnStop.style.display = 'none';
+
+                    // Stop polling if not running
+                    if (updaterPollInterval) {
+                        clearInterval(updaterPollInterval);
+                        updaterPollInterval = null;
+                    }
+
+                    // Refresh data
+                    loadStats();
+                    loadAllEquipment();
+                }
+            })
+            .catch(error => {
+                console.error('Status poll error:', error);
+            });
+        }
+
+        // Check initial updater status
+        function checkInitialUpdaterStatus() {
+            fetch('/api/equipment/updater/status')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.running) {
+                    const btnStart = document.getElementById('btn-start-updater');
+                    const btnStop = document.getElementById('btn-stop-updater');
+                    const statusPanel = document.getElementById('update-status');
+
+                    btnStart.style.display = 'none';
+                    btnStop.style.display = 'flex';
+                    statusPanel.style.display = 'flex';
+                    startUpdaterPolling();
+                }
+            })
+            .catch(error => {
+                console.error('Initial status check error:', error);
+            });
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadStats();
+            loadAllEquipment();
+            checkInitialUpdaterStatus();
+        });
+    </script>
+</body>
+</html>

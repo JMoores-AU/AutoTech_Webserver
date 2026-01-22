@@ -1,0 +1,699 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ReceiverOptions>
+	<Group XLATE_Text="Tracking">
+		<Join Id="GPS" XLATE_Text="GPS">
+			<Child Id="GPS1" Type="bool" XLATE_Text="L1"/>
+			<Child Id="GPS2" Type="bool" XLATE_Text="L2"/>
+			<Child Id="GPS5" Type="bool" XLATE_Text="L5"/>
+			<Legacy Id="_GPS"/>
+			<Legacy Id="_L1_"/>
+			<Legacy Id="_L2_"/>
+			<Legacy Id="_L2C"/>
+			<Legacy Id="G_L5"/>
+			<Legacy Id="_CPH"/>
+		</Join>
+		<Join Id="GLONASS" XLATE_Text="GLONASS">
+			<Child Id="GLO1" Type="bool" XLATE_Text="L1"/>
+			<Child Id="GLO2" Type="bool" XLATE_Text="L2"/>
+			<Child Id="GLO3" Type="bool" XLATE_Text="L3"/>
+			<Legacy Id="_GLO"/>
+			<Legacy Id="_L1_"/>
+			<Legacy Id="_L2_"/>
+			<Legacy Id="_L2C"/>
+			<Legacy Id="_CPH"/>
+		</Join>
+		<Join Id="Galileo" XLATE_Text="Galileo">
+			<Child Id="GAL1" Type="bool" XLATE_Text="E1"/>
+			<Child Id="GAL5" Type="bool" XLATE_Text="E5"/>
+			<Child Id="GAL6" Type="bool" XLATE_Text="E6"/>
+			<Legacy Id="_GAL"/>
+			<Legacy Id="GIOV"/>
+			<Legacy Id="_CPH"/>
+		</Join>
+		<Join Id="BeiDou" XLATE_Text="BeiDou">
+			<Child Id="BDS1" Type="bool" XLATE_Text="B1"/>
+			<Child Id="BDS2" Type="bool" XLATE_Text="B2"/>
+			<Child Id="BDS3" Type="bool" XLATE_Text="B3"/>
+			<Legacy Id="BEID"/>
+			<Legacy Id="_CPH"/>
+		</Join>
+		<Join Id="SBAS" XLATE_Text="SBAS">
+			<Child Id="SBA1" Type="bool" XLATE_Text="L1"/>
+			<Child Id="SBA5" Type="bool" XLATE_Text="L5"/>
+			<Legacy Id="SBAS"/>
+			<Legacy Id="WAAS"/>
+		</Join>
+		<Join Id="QZSS" XLATE_Text="QZSS">
+			<Child Id="QZS1" Type="bool" XLATE_Text="L1"/>
+			<Child Id="QZS2" Type="bool" XLATE_Text="L2"/>
+			<Child Id="QZS5" Type="bool" XLATE_Text="L5"/>
+			<Child Id="QZS6" Type="bool" XLATE_Text="L6 Pilot"/>
+			<Child Id="QZSL" Type="bool" XLATE_Text="L6 Data"/>
+			<Legacy Id="QZSS"/>
+		</Join>
+		<ReceiverOption Id="_GPS" XLATE_Text="GPS" Type="Option" ObsoleteSince="5.0">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="GPS1" XLATE_Text="GPS L1 Signals" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="GPS2" XLATE_Text="GPS L2 Signals" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="GPS5" XLATE_Text="GPS L5 Signals" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="_GLO" XLATE_Text="GLONASS" Type="Option" ObsoleteSince="5.0">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="GLO1" XLATE_Text="GLONASS L1 Signals" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="GLO2" XLATE_Text="GLONASS L2 Signals" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="GLO3" XLATE_Text="GLONASS L3 Signals" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="_GAL" XLATE_Text="Galileo" Type="Option" ObsoleteSince="5.0">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="GIOV" XLATE_Text="GIOVE" Type="Option" ObsoleteSince="5.0">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="GAL1" XLATE_Text="Galileo E1 Signals" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="GAL5" XLATE_Text="Galileo E5 Signals" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="GAL6" XLATE_Text="Galileo E6 Signals" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="BEID" XLATE_Text="BeiDou" Type="Option" ObsoleteSince="5.0">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="BDS1" XLATE_Text="BeiDou B1 Signals" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="BDS2" XLATE_Text="BeiDou B2 Signals" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="BDS3" XLATE_Text="BeiDou B3 Signals" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="WAAS" XLATE_Text="SBAS" Type="Option" ObsoleteSince="5.0">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="SBAS" XLATE_Text="SBAS Signals" Type="Option" ObsoleteSince="0.1">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="SBA1" XLATE_Text="SBAS L1 Signals" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="SBA5" XLATE_Text="SBAS L5 Signals" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="QZSS" XLATE_Text="QZSS" Type="Option" ObsoleteSince="5.0">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="QZS1" XLATE_Text="QZSS L1 Signals" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="QZS2" XLATE_Text="QZSS L2 Signals" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="QZS5" XLATE_Text="QZSS L5 Signals" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="QZS6" XLATE_Text="QZSS L6 Pilot" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="QZSL" XLATE_Text="QZSS L6 Data" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="IRNS" XLATE_Text="NavIC" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="OMNI" XLATE_Text="OmniSTAR" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="_L1_" XLATE_Text="L1 Tracking" Type="Option" ObsoleteSince="5.0">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="_L2_" XLATE_Text="L2 Tracking" Type="Option" ObsoleteSince="5.0">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="_L2C" XLATE_Text="L2C Tracking" Type="Option" ObsoleteSince="5.0">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="G_L5" XLATE_Text="L5 Tracking" Type="Option" ObsoleteSince="5.0">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="_CPH" XLATE_Text="Carrier Phase Signals" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="STCC" XLATE_Text="Satellite Tracking Channel Count" Type="Integer" Summand="72"/>
+		<ReceiverOption Id="DANT" XLATE_Text="Dual Antenna Tracking" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="COOP" XLATE_Text="Co-op Tracking" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="_QLL" XLATE_Text="Quartz Locked Loop" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="CQLL" XLATE_Text="Coordinate Quartz Locked Loop" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="APLL" XLATE_Text="Adaptive PLL" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="_WST" XLATE_Text="Weak Signal Tracking" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="_AJM" XLATE_Text="In-Band Int. Rejection" Type="Option">
+			<Option Value="0" XLATE_Text="Disabled"/>
+			<Option Value="1" XLATE_Text="Enabled Outside USA"/>
+			<Option Value="2" XLATE_Text="Enabled for USA Only"/>
+		</ReceiverOption>
+		<ReceiverOption Id="_MPR" XLATE_Text="Multipath Reduction" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="_RAW" XLATE_Text="Raw Measurement Update Rate, Hz" Type="Integer"/>
+	</Group>
+	<Group XLATE_Text="Positioning">
+		<Join Id="DGNSS Mode" XLATE_Text="DGNSS Mode">
+			<Child Id="CDIF" Type="inherit"/>
+			<Legacy Id="CDDB"/>
+			<Legacy Id="CDDR"/>
+		</Join>
+		<Join Id="RTK Positioning, Hz" XLATE_Text="RTK Positioning, Hz">
+			<Child Id="VDIF" Type="inherit"/>
+			<Legacy Id="PDIF"/>
+			<Legacy Id="RTKB"/>
+			<Legacy Id="RTKR"/>
+		</Join>
+		<ReceiverOption Id="CDIF" XLATE_Text="DGNSS Mode" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="CDDB" XLATE_Text="DGNSS Base" Type="Option" ObsoleteSince="2.1">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="CDDR" XLATE_Text="DGNSS Rover" Type="Option" ObsoleteSince="2.1">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="VDIF" XLATE_Text="RTK Positioning, Hz" Type="Integer">
+			<Option Value="0" XLATE_Text="Disabled"/>
+		</ReceiverOption>
+		<ReceiverOption Id="PDIF" XLATE_Text="RTK Mode, Hz" Type="Integer">
+			<Option Value="0" XLATE_Text="Disabled"/>
+		</ReceiverOption>
+		<ReceiverOption Id="RTKB" XLATE_Text="RTK Base" Type="Option" ObsoleteSince="2.1">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="RTKR" XLATE_Text="RTK Rover, Hz" Type="Integer" ObsoleteSince="2.1"/>
+		<ReceiverOption Id="VVAL" XLATE_Text="RTK Vertical Accuracy Level, cm" Type="Integer"/>
+		<ReceiverOption Id="HVAL" XLATE_Text="RTK Horizontal Accuracy Level, cm" Type="Integer"/>
+		<ReceiverOption Id="DIST" XLATE_Text="Maximal Baseline Length, km" Type="Float" Multiplier="0.10" DecimalDigits="1">
+			<Option Value="0" XLATE_Text="Disabled"/>
+			<Option Value="511" XLATE_Text="No restrictions"/>
+		</ReceiverOption>
+		<ReceiverOption Id="OCTO" XLATE_Text="HD2 Mode" Type="Option">
+			<Option Value="0" XLATE_Text="Disabled"/>
+			<Option Value="1" XLATE_Text="Heading and Pitch"/>
+			<Option Value="2" XLATE_Text="Heading, Pitch and Roll"/>
+		</ReceiverOption>
+		<ReceiverOption Id="HEAD" XLATE_Text="VISOR Mode" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="POSM" XLATE_Text="DION Mode" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="SEED" XLATE_Text="AutoSeed Mode" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="OMSV" XLATE_Text="OmniSTAR Service" Type="Flag">
+			<Option Value="0" XLATE_Text="Disabled"/>
+			<Mask Value="1" XLATE_Text="VBS"/>
+			<Mask Value="2" XLATE_Text="XP"/>
+			<Mask Value="4" XLATE_Text="HP"/>
+			<Mask Value="8" XLATE_Text="G2"/>
+		</ReceiverOption>
+		<ReceiverOption Id="VPPP" XLATE_Text="Topnet Live Service" Type="Flag">
+			<Mask Value="1" XLATE_Text="Skybridge, Skybridge Pro"/>
+			<Mask Value="2" XLATE_Text="Global D"/>
+			<Mask Value="4" XLATE_Text="Starpoint2, Starpoint Pro"/>
+			<Mask Value="8" XLATE_Text="VPS"/>
+			<Mask Value="16" XLATE_Text="Starpoint"/>
+			<Option Value="0" XLATE_Text="Disabled"/>
+			<Option Value="9" XLATE_Text="Skybridge, Skybridge Pro"/>
+			<Option Value="10" XLATE_Text="Global D"/>
+			<Option Value="14" XLATE_Text="Starpoint2, Starpoint Pro"/>
+			<Option Value="15" XLATE_Text="Starpoint2, Starpoint Pro, Skybridge, Skybridge Pro"/>
+			<Option Value="24" XLATE_Text="Starpoint"/>
+			<Option Value="31" XLATE_Text="All"/>
+		</ReceiverOption>
+		<ReceiverOption Id="SPPP" XLATE_Text="Topnet Live Source" Type="Flag">
+			<Option Value="0" XLATE_Text="Disabled"/>
+			<Mask Value="1" XLATE_Text="NTRIP"/>
+			<Mask Value="2" XLATE_Text="CLAS"/>
+			<Mask Value="4" XLATE_Text="MADOCA"/>
+		</ReceiverOption>
+		<ReceiverOption Id="_IMU" XLATE_Text="Inertial Integration" Type="Flag">
+			<Option Value="0" XLATE_Text="Disabled"/>
+			<Mask Value="1" XLATE_Text="AntiShading Navbridge"/>
+		</ReceiverOption>
+		<ReceiverOption Id="HIMU" XLATE_Text="Tilt and Inertial Assistance" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="_ANE" XLATE_Text="Advanced Navigation Engine" Type="Flag">
+			<Option Value="0" XLATE_Text="Disabled"/>
+			<Mask Value="1" XLATE_Text="Basic Mode"/>
+		</ReceiverOption>
+		<ReceiverOption Id="ASPF" XLATE_Text="Spoofing Detector" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="_POS" XLATE_Text="Position Update Rate, Hz" Type="Integer"/>
+	</Group>
+	<Group XLATE_Text="Interfaces">
+		<ReceiverOption Id="_MEM" XLATE_Text="Memory, MB" Type="Memory"/>
+		<ReceiverOption Id="_PPS" XLATE_Text="1-PPS Timing Signal" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Single"/>
+			<Option Value="2" XLATE_Text="Double"/>
+		</ReceiverOption>
+		<ReceiverOption Id="EVNT" XLATE_Text="Event Markers" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Single"/>
+			<Option Value="2" XLATE_Text="Double"/>
+		</ReceiverOption>
+		<ReceiverOption Id="RS_A" XLATE_Text="Serial Port A Max Baud Rate" Type="Option">
+			<Option Value="0" XLATE_Text="Disabled"/>
+			<Option Value="9" XLATE_Text="9600"/>
+			<Option Value="19" XLATE_Text="19200"/>
+			<Option Value="38" XLATE_Text="38400"/>
+			<Option Value="56" XLATE_Text="57600"/>
+			<Option Value="115" XLATE_Text="115200"/>
+			<Option Value="230" XLATE_Text="230400"/>
+			<Option Value="460" XLATE_Text="460800"/>
+			<Option Value="921" XLATE_Text="921600"/>
+		</ReceiverOption>
+		<ReceiverOption Id="RS_B" XLATE_Text="Serial Port B Max Baud Rate" Type="Option">
+			<Option Value="0" XLATE_Text="Disabled"/>
+			<Option Value="9" XLATE_Text="9600"/>
+			<Option Value="19" XLATE_Text="19200"/>
+			<Option Value="38" XLATE_Text="38400"/>
+			<Option Value="56" XLATE_Text="57600"/>
+			<Option Value="115" XLATE_Text="115200"/>
+			<Option Value="230" XLATE_Text="230400"/>
+			<Option Value="460" XLATE_Text="460800"/>
+			<Option Value="921" XLATE_Text="921600"/>
+		</ReceiverOption>
+		<ReceiverOption Id="RS_C" XLATE_Text="Serial Port C Max Baud Rate" Type="Option">
+			<Option Value="0" XLATE_Text="Disabled"/>
+			<Option Value="9" XLATE_Text="9600"/>
+			<Option Value="19" XLATE_Text="19200"/>
+			<Option Value="38" XLATE_Text="38400"/>
+			<Option Value="56" XLATE_Text="57600"/>
+			<Option Value="115" XLATE_Text="115200"/>
+			<Option Value="230" XLATE_Text="230400"/>
+			<Option Value="460" XLATE_Text="460800"/>
+			<Option Value="921" XLATE_Text="921600"/>
+		</ReceiverOption>
+		<ReceiverOption Id="RS_D" XLATE_Text="Serial Port D Max Baud Rate" Type="Option">
+			<Option Value="0" XLATE_Text="Disabled"/>
+			<Option Value="9" XLATE_Text="9600"/>
+			<Option Value="19" XLATE_Text="19200"/>
+			<Option Value="38" XLATE_Text="38400"/>
+			<Option Value="56" XLATE_Text="57600"/>
+			<Option Value="115" XLATE_Text="115200"/>
+			<Option Value="230" XLATE_Text="230400"/>
+			<Option Value="460" XLATE_Text="460800"/>
+			<Option Value="921" XLATE_Text="921600"/>
+		</ReceiverOption>
+		<ReceiverOption Id="ETHR" XLATE_Text="Ethernet Port" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="WLAN" XLATE_Text="WLAN" Type="Flag">
+			<Option Value="0" XLATE_Text="Disabled"/>
+			<Mask Value="1" XLATE_Text="Client"/>
+			<Mask Value="2" XLATE_Text="Access Point"/>
+		</ReceiverOption>
+		<ReceiverOption Id="CELL" XLATE_Text="Cell" Type="Flag">
+			<Option Value="0" XLATE_Text="Disabled"/>
+			<Mask Value="1" XLATE_Text="Enabled"/>
+		</ReceiverOption>
+		<ReceiverOption Id="INFR" XLATE_Text="Infrared Port" Type="Option" ObsoleteSince="3.2">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="_PAR" XLATE_Text="Parallel Port" Type="Option" ObsoleteSince="3.2">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="_TCP" XLATE_Text="TCP Connection" Type="Integer">
+			<Option Value="0" XLATE_Text="Disabled"/>
+		</ReceiverOption>
+		<ReceiverOption Id="_FTP" XLATE_Text="FTP Connection" Type="Integer">
+			<Option Value="0" XLATE_Text="Disabled"/>
+		</ReceiverOption>
+		<ReceiverOption Id="_BLT" XLATE_Text="Bluetooth" Type="Option" ObsoleteSince="3.2">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="_USB" XLATE_Text="USB Port" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="USBA" XLATE_Text="USB Host" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="NCAS" XLATE_Text="NTRIP Caster" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="_WEB" XLATE_Text="Web Interface" Type="Flag">
+			<Option Value="0" XLATE_Text="Disabled"/>
+			<Mask Value="1" XLATE_Text="HTTP"/>
+			<Mask Value="2" XLATE_Text="HTTPS"/>
+		</ReceiverOption>
+		<ReceiverOption Id="RCDM" XLATE_Text="LongLINK" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="TEAM" XLATE_Text="Topcon Equipment Access Module (TEAM)" Type="Flag">
+			<Option Value="0" XLATE_Text="No Authentication"/>
+			<Mask Value="1" XLATE_Text="Key 1"/>
+			<Mask Value="2" XLATE_Text="Key 2"/>
+			<Mask Value="4" XLATE_Text="Key 3"/>
+			<Mask Value="8" XLATE_Text="Key 4"/>
+		</ReceiverOption>
+	</Group>
+	<Group XLATE_Text="Input/Output">
+		<ReceiverOption Id="CORI" XLATE_Text="Corrections Inputs" Type="Flag">
+			<Option Value="0" XLATE_Text="Disabled"/>
+			<Mask Value="1" XLATE_Text="A"/>
+			<Mask Value="2" XLATE_Text="B"/>
+			<Mask Value="4" XLATE_Text="C"/>
+			<Mask Value="8" XLATE_Text="D"/>
+			<Mask Value="64" XLATE_Text="LongLink Client A"/>
+		</ReceiverOption>
+		<ReceiverOption Id="CORO" XLATE_Text="Corrections Output" Type="Flag">
+			<Option Value="0" XLATE_Text="Disabled"/>
+			<Mask Value="1" XLATE_Text="A"/>
+			<Mask Value="2" XLATE_Text="B"/>
+			<Mask Value="4" XLATE_Text="C"/>
+			<Mask Value="8" XLATE_Text="D"/>
+			<Mask Value="32" XLATE_Text="NTRIP"/>
+			<Mask Value="64" XLATE_Text="LongLink Client A"/>
+		</ReceiverOption>
+		<ReceiverOption Id="CRYP" XLATE_Text="Corrections Encryption" Type="Flag">
+			<Option Value="0" XLATE_Text="Disabled"/>
+			<Mask Value="1" XLATE_Text="Key 1"/>
+			<Mask Value="2" XLATE_Text="Key 2"/>
+			<Mask Value="4" XLATE_Text="Key 3"/>
+			<Mask Value="16" XLATE_Text="Key 4"/>
+			<Mask Value="32" XLATE_Text="Key 5"/>
+			<Mask Value="64" XLATE_Text="Key 6"/>
+			<Mask Value="128" XLATE_Text="Key 7"/>
+			<Mask Value="256" XLATE_Text="Key 8"/>
+			<Mask Value="512" XLATE_Text="Key 9"/>
+		</ReceiverOption>
+		<ReceiverOption Id="RTMI" XLATE_Text="RTCM Input" Type="Integer">
+			<Option Value="0" XLATE_Text="Disabled"/>
+			<Option Value="1" XLATE_Text="1 Port"/>
+			<Option Value="2" XLATE_Text="2 Ports"/>
+			<Option Value="3" XLATE_Text="3 Ports"/>
+			<Option Value="4" XLATE_Text="4 Ports"/>
+			<Option Value="5" XLATE_Text="5 Ports"/>
+		</ReceiverOption>
+		<ReceiverOption Id="RTMO" XLATE_Text="RTCM Output" Type="Flag">
+			<Option Value="0" XLATE_Text="Disabled"/>
+			<Mask Value="1" XLATE_Text="DGNSS"/>
+			<Mask Value="2" XLATE_Text="RTK"/>
+		</ReceiverOption>
+		<ReceiverOption Id="RM3I" XLATE_Text="RTCM3 Input" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="RM3O" XLATE_Text="RTCM3 Output" Type="Flag">
+			<Option Value="0" XLATE_Text="Disabled"/>
+			<Mask Value="1" XLATE_Text="DGNSS"/>
+			<Mask Value="2" XLATE_Text="RTK"/>
+		</ReceiverOption>
+		<ReceiverOption Id="CMRI" XLATE_Text="CMR Input" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="CMRO" XLATE_Text="CMR Output" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="CMWI" XLATE_Text="CMR-W Input" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="CMXI" XLATE_Text="CMRx Input" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="JPSI" XLATE_Text="TPS Input" Type="Integer">
+			<Option Value="0" XLATE_Text="Disabled"/>
+			<Option Value="1" XLATE_Text="1 Port"/>
+			<Option Value="2" XLATE_Text="2 Ports"/>
+			<Option Value="3" XLATE_Text="3 Ports"/>
+			<Option Value="4" XLATE_Text="4 Ports"/>
+			<Option Value="5" XLATE_Text="5 Ports"/>
+		</ReceiverOption>
+		<ReceiverOption Id="JPSO" XLATE_Text="TPS Output" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="NCTI" XLATE_Text="NCT Input" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="_FRI" XLATE_Text="Frequency Input" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="_FRO" XLATE_Text="Freq. Lock and Output" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="RADR" XLATE_Text="Radar Output" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+	</Group>
+	<Group XLATE_Text="Machine Control">
+		<ReceiverOption Id="_NBM" XLATE_Text="mmGPS" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="OPEN" XLATE_Text="mmGPS Encryption" Type="Option">
+			<Option Value="0" XLATE_Text="Mandatory"/>
+			<Option Value="1" XLATE_Text="Optional"/>
+		</ReceiverOption>
+		<ReceiverOption Id="DNTS" XLATE_Text="Dantotsu" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="DYNA" XLATE_Text="3D-MC2" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="MLBD" XLATE_Text="Mast Less Blade" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+	</Group>
+	<Group XLATE_Text="Agriculture">
+		<ReceiverOption Id="TPBN" XLATE_Text="TruPath BN" Type="Flag">
+			<Option Value="0" XLATE_Text="Disabled"/>
+			<Mask Value="1" XLATE_Text="Job management"/>
+			<Mask Value="2" XLATE_Text="Nudge"/>
+			<Mask Value="4" XLATE_Text="Coverage management"/>
+			<Mask Value="8" XLATE_Text="Implement management"/>
+		</ReceiverOption>
+		<ReceiverOption Id="TPPM" XLATE_Text="TruPath PM" Type="Flag">
+			<Option Value="0" XLATE_Text="Disabled"/>
+			<Mask Value="1" XLATE_Text="Lines"/>
+			<Mask Value="2" XLATE_Text="Contours (curves)"/>
+			<Mask Value="4" XLATE_Text="Center pivot"/>
+		</ReceiverOption>
+		<ReceiverOption Id="TPVC" XLATE_Text="TruPath VC" Type="Flag">
+			<Option Value="0" XLATE_Text="Disabled"/>
+			<Mask Value="1" XLATE_Text="Front steering"/>
+			<Mask Value="2" XLATE_Text="Rear steering"/>
+			<Mask Value="4" XLATE_Text="Track steering"/>
+			<Mask Value="8" XLATE_Text="Articulated steering"/>
+			<Mask Value="16" XLATE_Text="Four-wheel steering"/>
+		</ReceiverOption>
+		<ReceiverOption Id="HPAG" XLATE_Text="HiPer AG Mode" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+	</Group>
+	<Group XLATE_Text="Region Lock">
+		<Join Id="AReg1" XLATE_Text="Authorized Region 1, deg">
+			<Child Id="LAT1" Type="inherit" Prefix="(" Suffix=", "/>
+			<Child Id="LON1" Type="inherit" Suffix="), "/>
+			<Child Id="LAT2" Type="inherit" Prefix="(" Suffix=", "/>
+			<Child Id="LON2" Type="inherit" Suffix=")"/>
+			<Legacy Id="L_CS"/>
+		</Join>
+		<Join Id="AReg2" XLATE_Text="Authorized Region 2, deg">
+			<Child Id="LAT3" Type="inherit" Prefix="(" Suffix=", "/>
+			<Child Id="LON3" Type="inherit" Suffix="), "/>
+			<Child Id="LAT4" Type="inherit" Prefix="(" Suffix=", "/>
+			<Child Id="LON4" Type="inherit" Suffix=")"/>
+			<Legacy Id="LCS2"/>
+		</Join>
+		<Join Id="FReg1" XLATE_Text="Excluded Region 1, deg">
+			<Child Id="LAT5" Type="inherit" Prefix="(" Suffix=", "/>
+			<Child Id="LON5" Type="inherit" Suffix="), "/>
+			<Child Id="LAT6" Type="inherit" Prefix="(" Suffix=", "/>
+			<Child Id="LON6" Type="inherit" Suffix=")"/>
+			<Legacy Id="LCS3"/>
+		</Join>
+		<Join Id="FReg2" XLATE_Text="Excluded Region 2, deg">
+			<Child Id="LAT7" Type="inherit" Prefix="(" Suffix=", "/>
+			<Child Id="LON7" Type="inherit" Suffix="), "/>
+			<Child Id="LAT8" Type="inherit" Prefix="(" Suffix=", "/>
+			<Child Id="LON8" Type="inherit" Suffix=")"/>
+			<Legacy Id="LCS4"/>
+		</Join>
+		<ReceiverOption Id="LAT1" XLATE_Text="Latitude 1" Type="Latitude"/>
+		<ReceiverOption Id="LON1" XLATE_Text="Longitude 1" Type="Integer"/>
+		<ReceiverOption Id="LAT2" XLATE_Text="Latitude 2" Type="Latitude"/>
+		<ReceiverOption Id="LON2" XLATE_Text="Longitude 2" Type="Integer"/>
+		<ReceiverOption Id="LAT3" XLATE_Text="Latitude 3" Type="Latitude"/>
+		<ReceiverOption Id="LON3" XLATE_Text="Longitude 3" Type="Integer"/>
+		<ReceiverOption Id="LAT4" XLATE_Text="Latitude 4" Type="Latitude"/>
+		<ReceiverOption Id="LON4" XLATE_Text="Longitude 4" Type="Integer"/>
+		<ReceiverOption Id="LAT5" XLATE_Text="Latitude 5" Type="Latitude"/>
+		<ReceiverOption Id="LON5" XLATE_Text="Longitude 5" Type="Integer"/>
+		<ReceiverOption Id="LAT6" XLATE_Text="Latitude 6" Type="Latitude"/>
+		<ReceiverOption Id="LON6" XLATE_Text="Longitude 6" Type="Integer"/>
+		<ReceiverOption Id="LAT7" XLATE_Text="Latitude 7" Type="Latitude"/>
+		<ReceiverOption Id="LON7" XLATE_Text="Longitude 7" Type="Integer"/>
+		<ReceiverOption Id="LAT8" XLATE_Text="Latitude 8" Type="Latitude"/>
+		<ReceiverOption Id="LON8" XLATE_Text="Longitude 8" Type="Integer"/>
+		<ReceiverOption Id="L_CS" XLATE_Text="Lat_Lon Checksum 1" Type="Integer">
+			<Option Value="0" XLATE_Text="Disabled"/>
+		</ReceiverOption>
+		<ReceiverOption Id="LCS2" XLATE_Text="Lat_Lon Checksum 2" Type="Integer">
+			<Option Value="0" XLATE_Text="Disabled"/>
+		</ReceiverOption>
+		<ReceiverOption Id="LCS3" XLATE_Text="Lat_Lon Checksum 3" Type="Integer">
+			<Option Value="0" XLATE_Text="Always enabled"/>
+		</ReceiverOption>
+		<ReceiverOption Id="LCS4" XLATE_Text="Lat_Lon Checksum 4" Type="Integer">
+			<Option Value="0" XLATE_Text="Always enabled"/>
+		</ReceiverOption>
+	</Group>
+	<Group XLATE_Text="Other">
+		<ReceiverOption Id="CIND" XLATE_Text="Cinderella" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="RAIM" XLATE_Text="RAIM" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="_DTM" XLATE_Text="Datums Support" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="MAGN" XLATE_Text="Magnetic Azimuth" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="_GEO" XLATE_Text="Geoid Height" Type="Option">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="_WPT" XLATE_Text="Way Point Navigation" Type="Integer"/>
+		<ReceiverOption Id="_FRH" XLATE_Text="Sp.Sp. Freq. Hop." Type="Option" ObsoleteSince="3.2">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="_DSS" XLATE_Text="Sp.Sp. Direct" Type="Option" ObsoleteSince="3.2">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="_LIM" XLATE_Text="COCOM Limits" Type="Option">
+			<Option Value="0" XLATE_Text="Yes"/>
+			<Option Value="1" XLATE_Text="No"/>
+		</ReceiverOption>
+		<ReceiverOption Id="_CDU" XLATE_Text="CDU Support" Type="Option" ObsoleteSince="3.2">
+			<Option Value="0" XLATE_Text="No"/>
+			<Option Value="1" XLATE_Text="Yes"/>
+		</ReceiverOption>
+		<ReceiverOption Id="AUTH" XLATE_Text="Authorization" Type="Flag">
+			<Option Value="0" XLATE_Text="Not authorized"/>
+			<Mask Value="1" XLATE_Text="Pinnacle"/>
+			<Mask Value="2" XLATE_Text="PC-CDU MS"/>
+		</ReceiverOption>
+		<ReceiverOption Id="_RIN" XLATE_Text="RINEX" Type="Flag">
+			<Option Value="0" XLATE_Text="Disabled"/>
+			<Mask Value="1" XLATE_Text="Enabled"/>
+		</ReceiverOption>
+		<ReceiverOption Id="_DEV" XLATE_Text="Developer" Type="Integer">
+		</ReceiverOption>
+	</Group>
+</ReceiverOptions>

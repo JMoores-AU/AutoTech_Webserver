@@ -1,0 +1,48 @@
+
+============================================================
+         T1 TOOLS WEB DASHBOARD - ENHANCED VERSION
+============================================================
+[MODE] ONLINE tcp 10.110.19.107:22
+Network Mode: ONLINE
+Gateway IP: 10.110.19.107
+Starting on: http://localhost:8888
+Password: komatsu
+Python Version: 3.13.7 (tags/v3.13.7:bcee1c3, Aug 14 2025, 14:15:11) [MSC v.1944 64 bit (AMD64)]
+Flask Version: Unknown
+============================================================
+Press Ctrl+C to stop the server
+============================================================
+
+ * Serving Flask app 'main'
+ * Debug mode: on
+INFO:werkzeug:[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:8888
+INFO:werkzeug:[33mPress CTRL+C to quit[0m
+INFO:werkzeug:127.0.0.1 - - [02/Dec/2025 02:31:06] "GET / HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [02/Dec/2025 02:31:07] "GET /static/style.css HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [02/Dec/2025 02:31:07] "GET /api/remote-stats HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [02/Dec/2025 02:31:22] "GET /run/Playback%20Tools HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [02/Dec/2025 02:31:22] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [02/Dec/2025 02:31:22] "GET /api/mode HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [02/Dec/2025 02:31:22] "GET /api/usb/scan/playback HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [02/Dec/2025 02:31:22] "GET /api/usb/scan/camstudio HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [02/Dec/2025 02:31:22] "GET /api/playback/local-files HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [02/Dec/2025 02:31:22] "GET /api/playback/server-check HTTP/1.1" 200 -
+INFO:paramiko.transport:Connected (version 2.0, client OpenSSH_8.2p1)
+INFO:paramiko.transport:Auth banner: b'Welcome to the custom Ubuntu for Komatsu\n'
+INFO:paramiko.transport:Authentication (password) successful!
+INFO:paramiko.transport.sftp:[chan 0] Opened sftp connection (server version 3)
+INFO:paramiko.transport.sftp:[chan 0] sftp session closed.
+INFO:werkzeug:127.0.0.1 - - [02/Dec/2025 02:31:41] "GET /api/playback/find-file?date=2025-10-28&time=02:31 HTTP/1.1" 200 -
+INFO:paramiko.transport:Connected (version 2.0, client OpenSSH_8.2p1)
+INFO:paramiko.transport:Auth banner: b'Welcome to the custom Ubuntu for Komatsu\n'
+INFO:paramiko.transport:Authentication (password) successful!
+INFO:paramiko.transport.sftp:[chan 0] Opened sftp connection (server version 3)
+INFO:paramiko.transport.sftp:[chan 0] sftp session closed.
+INFO:werkzeug:127.0.0.1 - - [02/Dec/2025 02:31:54] "GET /api/playback/find-file?date=2025-10-30&time=02:31 HTTP/1.1" 200 -
+INFO:paramiko.transport:Connected (version 2.0, client OpenSSH_8.2p1)
+INFO:paramiko.transport:Auth banner: b'Welcome to the custom Ubuntu for Komatsu\n'
+INFO:paramiko.transport:Authentication (password) successful!
+INFO:paramiko.transport.sftp:[chan 0] Opened sftp connection (server version 3)
+INFO:paramiko.transport.sftp:[chan 0] sftp session closed.
+INFO:werkzeug:127.0.0.1 - - [02/Dec/2025 02:32:17] "GET /api/playback/find-file?date=2025-10-30&time=05:30 HTTP/1.1" 200 -

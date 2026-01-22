@@ -1,0 +1,16 @@
+============================================================
+
+ * Serving Flask app 'main'
+ * Debug mode: on
+INFO:werkzeug:[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:8888
+INFO:werkzeug:[33mPress CTRL+C to quit[0m
+INFO:werkzeug:127.0.0.1 - - [02/Dec/2025 03:47:57] "GET / HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [02/Dec/2025 03:47:57] "GET /static/style.css HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [02/Dec/2025 03:47:57] "GET /api/remote-stats HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [02/Dec/2025 03:48:12] "GET /api/mode HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [02/Dec/2025 03:48:25] "GET /run/IP%20Finder HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [02/Dec/2025 03:48:26] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+INFO:werkzeug:127.0.0.1 - - [02/Dec/2025 03:48:34] "POST /api/equipment_search HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [02/Dec/2025 03:48:42] "POST /api/equipment_search HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [02/Dec/2025 03:48:46] "POST /api/equipment_search HTTP/1.1" 200 -

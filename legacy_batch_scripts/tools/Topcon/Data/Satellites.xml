@@ -1,0 +1,209 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Constellations>
+	<Constellation XLATE_Name="BeiDou">
+	<!-- Source: http://www.csno-tarc.cn/en/system/constellation -->
+		<Satellite USI="203" XLATE_Name="BDS-2, GEO-8"/>
+		<Satellite USI="204" XLATE_Name="BDS-2, GEO-6"/>
+		<Satellite USI="205" XLATE_Name="BDS-2, GEO-7"/>
+		<Satellite USI="206" XLATE_Name="BDS-2, GEO-4"/>
+		<Satellite USI="207" XLATE_Name="BDS-2, GEO-5"/>
+		<Satellite USI="208" XLATE_Name="BDS-2, IGSO-1"/>
+		<Satellite USI="209" XLATE_Name="BDS-2, IGSO-2"/>
+		<Satellite USI="210" XLATE_Name="BDS-2, IGSO-3"/>
+		<Satellite USI="211" XLATE_Name="BDS-2, IGSO-4"/>
+		<Satellite USI="212" XLATE_Name="BDS-2, IGSO-5"/>
+		<Satellite USI="213" XLATE_Name="BDS-2, MEO-3"/>
+		<Satellite USI="214" XLATE_Name="BDS-2, MEO-4"/>
+		<Satellite USI="215" XLATE_Name="BDS-2, IGSO-6"/>
+		<Satellite USI="216" XLATE_Name="BDS-2, MEO-6"/>
+		<Satellite USI="218" XLATE_Name="BDS-2, IGSO-7"/>
+		<Satellite USI="221" XLATE_Name="BDS-3, MEO-1"/>
+		<Satellite USI="222" XLATE_Name="BDS-3, MEO-2"/>
+		<Satellite USI="223" XLATE_Name="BDS-3, MEO-3"/>
+		<Satellite USI="224" XLATE_Name="BDS-3, MEO-4"/>
+		<Satellite USI="225" XLATE_Name="BDS-3, MEO-5"/>
+		<Satellite USI="226" XLATE_Name="BDS-3, MEO-6"/>
+		<Satellite USI="227" XLATE_Name="BDS-3, MEO-11"/>
+		<Satellite USI="228" XLATE_Name="BDS-3, MEO-12"/>
+		<Satellite USI="229" XLATE_Name="BDS-3, MEO-7"/>
+		<Satellite USI="230" XLATE_Name="BDS-3, MEO-8"/>
+		<Satellite USI="231" XLATE_Name="BDS-3, MEO-9"/>
+		<Satellite USI="232" XLATE_Name="BDS-3, MEO-10"/>
+		<Satellite USI="233" XLATE_Name="BDS-3S, IGSO-1S"/>
+		<Satellite USI="234" XLATE_Name="BDS-3, MEO-13"/>
+		<Satellite USI="235" XLATE_Name="BDS-3, MEO-14"/>
+		<Satellite USI="236" XLATE_Name="BDS-3, MEO-15"/>
+		<Satellite USI="237" XLATE_Name="BDS-3, MEO-16"/>
+		<Satellite USI="238" XLATE_Name="BDS-3, MEO-17"/>
+		<Satellite USI="239" XLATE_Name="BDS-3, MEO-18"/>
+		<Satellite USI="240" XLATE_Name="BDS-3, IGSO-1"/>
+		<Satellite USI="241" XLATE_Name="BDS-3, IGSO-2"/>
+		<Satellite USI="242" XLATE_Name="BDS-3, IGSO-3"/>
+		<Satellite USI="243" XLATE_Name="BDS-3, MEO-19"/>
+		<Satellite USI="244" XLATE_Name="BDS-3, MEO-20"/>
+		<Satellite USI="245" XLATE_Name="BDS-3, MEO-21"/>
+		<Satellite USI="246" XLATE_Name="BDS-3, MEO-22"/>
+		<Satellite USI="247" XLATE_Name="BDS-3, MEO-23"/>
+		<Satellite USI="248" XLATE_Name="BDS-3, MEO-24"/>
+	</Constellation>
+
+	<Constellation Name="SBAS">
+	<!-- Source: https://www.igs.org/mgex/constellations/#sbas -->
+		<Satellite USI="120" XLATE_Name="EGNOS Inmarsat 3-F2">
+			<Location>15.5°W</Location>
+			<XLATE_Region>Atlantic Ocean Region-East</XLATE_Region>
+			<Signals>L1</Signals>
+			<Notes>End of signal transmission</Notes>
+		</Satellite>
+		<Satellite USI="121" XLATE_Name="EGNOS Eutelsat 5W B">
+			<Location>5°W</Location>
+			<Signals></Signals>
+			<Notes>Launched 2019/10/09</Notes>
+		</Satellite>
+		<Satellite USI="122" XLATE_Name="GATBP Inmarsat 4-F1">
+			<Location>143.5°E</Location>
+			<Signals>L1/L5</Signals>
+			<Notes>Transmitting message type 0; not for safety-of-life use. L1 transmissions began May 31, 2017.</Notes>
+		</Satellite>
+		<Satellite USI="123" XLATE_Name="EGNOS Astra-5B">
+			<Location>31.5°E</Location>
+			<Signals>L1/L5</Signals>
+			<Notes>Launched March 22, 2014. Transmission of L1 test signals started Dec. 11, 2014.</Notes>
+		</Satellite>
+		<Satellite USI="124" XLATE_Name="EGNOS Artemis">
+			<Location>21.5°E</Location>
+			<Signals></Signals>
+			<Notes>End of signal transmission</Notes>
+		</Satellite>
+		<Satellite USI="125" XLATE_Name="SDCM Luch-5V">
+			<Location>16°W</Location>
+			<Signals>L1</Signals>
+			<Notes>Launched Nov. 2, 2012, and started transmitting signals on Jan. 17, 2013.</Notes>
+		</Satellite>
+		<Satellite USI="126" XLATE_Name="EGNOS Inmarsat 4-F2">
+			<Location>64°E</Location>
+			<Signals>L1</Signals>
+			<Notes>Launched 2005/11/08. Transferred from 25°E to 64°E in mid-2015</Notes>
+		</Satellite>
+		<Satellite USI="127" XLATE_Name="GAGAN GSAT-8">
+			<Location>55°E</Location>
+			<Signals>L1/L5</Signals>
+			<Notes>Launched May 20, 2011. Certifed horizontal/vertical service since Feb. 2014/April 2015.</Notes>
+		</Satellite>
+		<Satellite USI="128" XLATE_Name="GAGAN GSAT-10">
+			<Location>83°E</Location>
+			<Signals>L1/L5</Signals>
+			<Notes>Launched Sep. 28, 2012. Certifed horizontal/vertical service since Feb. 2014/April 2015.</Notes>
+		</Satellite>
+		<Satellite USI="129" XLATE_Name="MSAS MTSAT-1R">
+			<Location>140°E</Location>
+			<Signals>L1</Signals>
+			<Notes>MSAS commissioned for aviation use on September 27, 2007. Either satellite can transmit both PRN signals if necessary.</Notes>
+		</Satellite>
+		<Satellite USI="130" XLATE_Name="BeiDou GEO-01">
+			<Location>140°E</Location>
+			<Signals>B1C/B2a</Signals>
+			<Notes>Launched 2018/11/01; BDSBAS signal transmission since November 9, 2018</Notes>
+		</Satellite>
+		<Satellite USI="131" XLATE_Name="WAAS Eutelsat 117W B">
+			<Location>117°W</Location>
+			<Signals>L1/L5</Signals>
+			<Notes>Launched March 2018</Notes>
+		</Satellite>
+		<Satellite USI="133" XLATE_Name="WAAS SES 15">
+			<Location>129°W</Location>
+			<Signals>L1/L5</Signals>
+			<Notes>Launched July 15 2019</Notes>
+		</Satellite>
+		<Satellite USI="134" XLATE_Name="WAAS Pacific Ocean Region">
+			<Location>178°E</Location>
+			<Signals>L1/L5</Signals>
+			<Notes>End of signal transmission on July 31, 2017</Notes>
+		</Satellite>
+		<Satellite USI="135" XLATE_Name="WAAS Galaxy 30">
+			<Location>125°W</Location>
+			<Signals>L1/L5</Signals>
+			<Notes>Launched August 15, 2020, slated operational Mid-2022</Notes>
+		</Satellite>
+		<Satellite USI="136" XLATE_Name="EGNOS SES-5 (Sirius-5, Astra-4B)">
+			<Location>5°E</Location>
+			<Signals>L1/L5</Signals>
+			<Notes>Launched 2012/07/10, operational since Sep. 02, 2015.</Notes>
+		</Satellite>
+		<Satellite USI="137" XLATE_Name="MSAS MTSAT-2">
+			<Location>145°E</Location>
+			<Signals>L1</Signals>
+			<Notes>MSAS commissioned for aviation use on September 27, 2007. Either satellite can transmit both PRN signals if necessary.</Notes>
+		</Satellite>
+		<Satellite USI="138" XLATE_Name="WAAS TeleSat Anik F1R">
+			<Location>107.3°W</Location>
+			<Signals>L1/L5</Signals>
+			<Notes>	Anik F1R ranging supports enroute through precision approach modes. The payload, operated by Lockheed Martin for the FAA, is known as LMPRS-2. Planned decommission in Mid-2022</Notes>
+		</Satellite>
+		<Satellite USI="140" XLATE_Name="SDCM Luch-5A">
+			<Location>167°E</Location>
+			<Signals>L1</Signals>
+			<Notes>Launched on December 11, 2011. Initially positioned at 58.5°E, it was shifted to 95°E between about May 30 and June 28, 2012, then shifted 167°E between about Nov. 30 and Dec. 22, 2012. Transmissions as PRN 140 began on July 12, 2012. Transmitted occasional, non-coherent code/carrier test signals.</Notes>
+		</Satellite>
+		<Satellite USI="141" XLATE_Name="SDCM Luch-5B">
+			<Location>16°W</Location>
+			<Signals>L1</Signals>
+			<Notes>Launched April 28, 2014. Testing may have started using PRN 140, not 141.</Notes>
+		</Satellite>
+		<Satellite USI="143" XLATE_Name="BeiDou GEO-03">
+			<Location>110.5°E</Location>
+			<Signals>B1C/B2a</Signals>
+			<Notes>Launched 2020/06/23</Notes>
+		</Satellite>
+		<Satellite USI="144" XLATE_Name="BeiDou GEO-02">
+			<Location>80°E</Location>
+			<Signals>B1C/B2a</Signals>
+			<Notes>Launched 2020/03/09</Notes>
+		</Satellite>
+		<Satellite USI="147" XLATE_Name="NSAS NigComSat-1R">
+			<Location>42°E</Location>
+			<Signals>L1/L5</Signals>
+			<Notes>L1 tests</Notes>
+		</Satellite>
+		<Satellite USI="183" XLATE_Name="QZSS SAIF QZS-1">
+			<Location>137.5°E</Location>
+			<Signals>L1</Signals>
+			<Notes></Notes>
+		</Satellite>
+		<Satellite USI="184" XLATE_Name="QZSS SAIF QZS-2">
+			<Location>136°E</Location>
+			<Signals>L1/L5</Signals>
+			<Notes></Notes>
+		</Satellite>
+		<Satellite USI="185" XLATE_Name="QZSS SAIF QZS-4">
+			<Location>136°E</Location>
+			<Signals>L1/L5</Signals>
+			<Notes></Notes>
+		</Satellite>
+		<Satellite USI="189" XLATE_Name="QZSS SAIF QZS-3">
+			<Location>127°E</Location>
+			<Signals>L1/L5</Signals>
+			<Notes></Notes>
+		</Satellite>
+	</Constellation>
+
+	<Constellation XLATE_Name="QZSS">
+	<!-- Source: https://www.igs.org/mgex/constellations/#qzss -->
+		<Satellite USI="193" XLATE_Name="Michibiki"/>
+		<Satellite USI="194" XLATE_Name="Michibiki-2"/>
+		<Satellite USI="195" XLATE_Name="Michibiki-4"/>
+		<Satellite USI="199" XLATE_Name="Michibiki-3"/>
+	</Constellation>
+
+	<Constellation XLATE_Name="NavIC">
+	<!-- Source: https://www.igs.org/mgex/constellations/#navic -->
+		<Satellite USI="169" XLATE_Name="IRNSS-1A, IGSO"/>
+		<Satellite USI="170" XLATE_Name="IRNSS-1B, IGSO"/>
+		<Satellite USI="171" XLATE_Name="IRNSS-1C, GEO"/>
+		<Satellite USI="172" XLATE_Name="IRNSS-1D, IGSO"/>
+		<Satellite USI="173" XLATE_Name="IRNSS-1E, IGSO"/>
+		<Satellite USI="174" XLATE_Name="IRNSS-1F, GEO"/>
+		<Satellite USI="175" XLATE_Name="IRNSS-1G, GEO"/>
+		<Satellite USI="177" XLATE_Name="IRNSS-1I, IGSO"/>
+	</Constellation>
+</Constellations>

@@ -277,8 +277,16 @@
                         <span class="nav-item-icon">🔍</span>
                         <span>IP Finder</span>
                     </a>
+                    <a href="/autotech" class="nav-item">
+                        <span class="nav-item-icon">🛠️</span>
+                        <span>T1 Legacy Tools</span>
+                    </a>
+                    <a href="/database" class="nav-item">
+                        <span class="nav-item-icon">🗄️</span>
+                        <span>Equipment Cache</span>
+                    </a>
                 </div>
-                
+
                 <div class="nav-section">
                     <div class="nav-section-title">USB Tools</div>
                     <a href="{{ url_for('run_tool', tool_name='CamStudio USB') }}" class="nav-item {{ 'active' if tool_name == 'CamStudio USB' else '' }}">

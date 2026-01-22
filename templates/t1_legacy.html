@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AutoTech</title>
+    <title>T1 Legacy Tools - AutoTech</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <style>
         /* Fix button.nav-item styling to match a.nav-item */
@@ -21,6 +21,288 @@
             padding: 20px;
         }
 
+        /* Two-column layout for Terminal and Scripts */
+        .tools-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            align-items: start;
+        }
+
+        .tools-column {
+            min-width: 0;
+        }
+
+        @media (max-width: 1200px) {
+            .tools-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Section Headers */
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 0 0 16px 0;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--theme-border);
+        }
+
+        .section-header h2 {
+            margin: 0;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--theme-text-bright);
+        }
+
+        .section-icon {
+            font-size: 24px;
+        }
+
+        /* Info Box */
+        .info-box {
+            background: rgba(59, 130, 246, 0.1);
+            border-left: 4px solid var(--theme-primary);
+            padding: 15px 20px;
+            margin-bottom: 25px;
+            border-radius: var(--radius-md);
+            color: var(--theme-text);
+        }
+
+        .info-box strong {
+            color: var(--theme-text-bright);
+        }
+
+        .info-box a {
+            color: var(--theme-primary);
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .info-box a:hover {
+            text-decoration: underline;
+        }
+
+        .download-btn {
+            display: inline-block;
+            padding: 8px 16px;
+            background: var(--theme-primary);
+            color: white !important;
+            border-radius: var(--radius-sm);
+            text-decoration: none !important;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .download-btn:hover {
+            background: var(--theme-primary-hover);
+            transform: translateY(-1px);
+        }
+
+        .download-btn-secondary {
+            background: var(--theme-bg-secondary);
+            color: var(--theme-text) !important;
+            border: 1px solid var(--theme-border);
+        }
+
+        .download-btn-secondary:hover {
+            background: var(--theme-bg-card-hover);
+            border-color: var(--theme-primary);
+        }
+
+        /* Batch Scripts Grid - Auto-scales to fit available space */
+        .scripts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 10px;
+        }
+
+        .script-card {
+            background: var(--theme-bg-card);
+            border: 1px solid var(--theme-border);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .script-card:hover {
+            background: var(--theme-bg-card-hover);
+            border-color: var(--theme-primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .script-icon {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .script-title {
+            font-weight: 600;
+            color: var(--theme-text-bright);
+            margin-bottom: 4px;
+            font-size: 0.95rem;
+        }
+
+        .script-desc {
+            font-size: 0.8rem;
+            color: var(--theme-text-muted);
+        }
+
+        /* IP Finder Results Section */
+        .ip-results {
+            margin-top: 16px;
+            padding: 16px;
+            background: var(--theme-bg-secondary);
+            border: 1px solid var(--theme-border);
+            border-radius: var(--radius-md);
+            display: none;
+        }
+
+        .ip-results.visible {
+            display: block;
+        }
+
+        .ip-results-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--theme-border);
+        }
+
+        .ip-results-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--theme-text-bright);
+        }
+
+        .ip-results-equipment {
+            font-size: 0.85rem;
+            color: var(--theme-primary);
+            font-weight: 500;
+        }
+
+        .ip-data-source {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 10px;
+            text-transform: uppercase;
+        }
+
+        .ip-data-source.live {
+            background: rgba(40, 167, 69, 0.15);
+            color: #28a745;
+            border: 1px solid rgba(40, 167, 69, 0.3);
+        }
+
+        .ip-data-source.cached {
+            background: rgba(255, 193, 7, 0.15);
+            color: #ffc107;
+            border: 1px solid rgba(255, 193, 7, 0.3);
+        }
+
+        .ip-data-source.test {
+            background: rgba(23, 162, 184, 0.15);
+            color: #17a2b8;
+            border: 1px solid rgba(23, 162, 184, 0.3);
+        }
+
+        .ip-data-source.offline {
+            background: rgba(220, 53, 69, 0.15);
+            color: #dc3545;
+            border: 1px solid rgba(220, 53, 69, 0.3);
+        }
+
+        .ip-result-timestamp {
+            font-size: 0.8rem;
+            color: var(--theme-text-muted);
+        }
+
+        .ip-result-footer {
+            background: var(--theme-bg-secondary);
+            border-style: dashed;
+        }
+
+        .ip-result-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 12px;
+            background: var(--theme-bg-card);
+            border: 1px solid var(--theme-border);
+            border-radius: var(--radius-sm);
+            margin-bottom: 8px;
+        }
+
+        .ip-result-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .ip-result-label {
+            font-size: 0.85rem;
+            color: var(--theme-text-muted);
+            min-width: 100px;
+        }
+
+        .ip-result-value {
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.95rem;
+            color: var(--theme-text-bright);
+            font-weight: 500;
+            flex: 1;
+            margin: 0 12px;
+        }
+
+        .ip-copy-btn {
+            background: var(--theme-primary);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s;
+        }
+
+        .ip-copy-btn:hover {
+            background: var(--theme-primary-dark, #0056b3);
+            transform: scale(1.02);
+        }
+
+        .ip-copy-btn.copied {
+            background: #28a745;
+        }
+
+        .ip-status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .ip-status-badge.online {
+            background: rgba(40, 167, 69, 0.15);
+            color: #28a745;
+            border: 1px solid rgba(40, 167, 69, 0.3);
+        }
+
+        .ip-status-badge.offline {
+            background: rgba(220, 53, 69, 0.15);
+            color: #dc3545;
+            border: 1px solid rgba(220, 53, 69, 0.3);
+        }
 
         /* Terminal Section */
         .terminal-section {
@@ -28,9 +310,6 @@
             border: 1px solid var(--theme-border);
             border-radius: var(--radius-lg);
             padding: 20px;
-            height: 600px;
-            display: flex;
-            flex-direction: column;
         }
 
         .terminal-header {
@@ -71,14 +350,12 @@
             border-color: var(--theme-primary);
         }
 
-        .terminal-btn.active {
-            background: var(--theme-primary);
-            color: white;
-            border-color: var(--theme-primary);
+        .terminal-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         .terminal-window {
-            flex: 1;
             background: #0a0a0a;
             border: 1px solid #222;
             border-radius: var(--radius-md);
@@ -88,6 +365,8 @@
             color: #00ff00;
             overflow-y: auto;
             line-height: 1.4;
+            min-height: 300px;
+            max-height: 500px;
         }
 
         .terminal-window::-webkit-scrollbar {
@@ -101,43 +380,6 @@
         .terminal-window::-webkit-scrollbar-thumb {
             background: #333;
             border-radius: 4px;
-        }
-
-        .terminal-input-area {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        .terminal-input {
-            flex: 1;
-            background: #0a0a0a;
-            border: 1px solid #333;
-            border-radius: var(--radius-sm);
-            padding: 10px 12px;
-            color: #00ff00;
-            font-family: 'Consolas', 'Monaco', monospace;
-            font-size: 13px;
-        }
-
-        .terminal-input:focus {
-            outline: none;
-            border-color: var(--theme-primary);
-        }
-
-        .terminal-send-btn {
-            padding: 10px 20px;
-            background: var(--theme-primary);
-            border: none;
-            border-radius: var(--radius-sm);
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .terminal-send-btn:hover {
-            background: var(--theme-primary-hover);
         }
 
         .terminal-line {
@@ -162,113 +404,156 @@
             color: #4499ff;
         }
 
-        /* Tools Grid Section */
-        .tools-section {
-            display: flex;
-            flex-direction: column;
-            gap: 25px;
-        }
-
-        .tool-category {
-            background: var(--theme-bg-card);
-            border: 1px solid var(--theme-border);
-            border-radius: var(--radius-lg);
-            padding: 20px;
-        }
-
-        .category-header {
+        /* Equipment Input Area */
+        .equipment-input-area {
+            padding: 12px;
+            border-bottom: 1px solid var(--theme-border);
+            background: var(--theme-bg-secondary);
             display: flex;
             align-items: center;
-            gap: 12px;
-            margin-bottom: 16px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid var(--theme-border);
-        }
-
-        .category-icon {
-            font-size: 22px;
-        }
-
-        .category-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: var(--theme-text-bright);
-            margin: 0;
-        }
-
-        .tools-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
             gap: 10px;
+            flex-wrap: nowrap;
         }
 
-        .tool-card {
-            background: var(--theme-bg-secondary);
+        .equipment-input-area label {
+            font-weight: 600;
+            color: var(--theme-text);
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        #equipment-input {
+            width: 180px;
+            padding: 8px 12px;
+            background: var(--theme-bg-card);
             border: 1px solid var(--theme-border);
+            border-radius: var(--radius-sm);
+            color: var(--theme-text);
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        /* Equipment Status Badge (next to Find Details button) */
+        .equip-status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-left: auto;
+        }
+
+        .equip-status-badge.online {
+            background: rgba(40, 167, 69, 0.15);
+            color: #28a745;
+            border: 1px solid rgba(40, 167, 69, 0.3);
+        }
+
+        .equip-status-badge.offline {
+            background: rgba(220, 53, 69, 0.15);
+            color: #dc3545;
+            border: 1px solid rgba(220, 53, 69, 0.3);
+        }
+
+        .equip-status-badge .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        /* Installed Badge - Shows when AutoTech Client is installed */
+        .installed-badge {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(40, 167, 69, 0.15);
+            border-left: 4px solid #28a745;
+            padding: 12px 16px;
+            margin-bottom: 25px;
             border-radius: var(--radius-md);
-            padding: 12px;
+            color: var(--theme-text);
+        }
+
+        .installed-badge .badge-icon {
+            font-size: 1.2rem;
+        }
+
+        .installed-badge .badge-reset {
+            margin-left: auto;
+            background: transparent;
+            border: 1px solid var(--theme-border);
+            border-radius: var(--radius-sm);
+            color: var(--theme-text-muted);
             cursor: pointer;
+            padding: 4px 8px;
+            font-size: 0.85rem;
             transition: all 0.2s;
         }
 
-        .tool-card:hover {
-            background: var(--theme-bg-card-hover);
+        .installed-badge .badge-reset:hover {
+            background: var(--theme-bg-secondary);
             border-color: var(--theme-primary);
-            transform: translateY(-2px);
-        }
-
-        .tool-name {
-            font-weight: 600;
-            color: var(--theme-text-bright);
-            margin-bottom: 4px;
-            font-size: 0.9rem;
-        }
-
-        .tool-command {
-            font-family: 'Consolas', monospace;
-            font-size: 0.7rem;
-            color: var(--theme-primary);
-            background: rgba(59, 130, 246, 0.1);
-            padding: 3px 6px;
-            border-radius: 4px;
-        }
-
-        .toast {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: var(--theme-bg-card);
-            border: 1px solid var(--theme-border);
-            border-radius: var(--radius-md);
-            padding: 16px 20px;
-            min-width: 300px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-            z-index: 2000;
-            animation: slideIn 0.3s;
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(400px);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        .toast.success {
-            border-left: 4px solid var(--status-online);
-        }
-
-        .toast.error {
-            border-left: 4px solid var(--status-offline);
-        }
-
-        .toast-message {
             color: var(--theme-text);
+        }
+
+        /* Sidebar Client Status */
+        .sidebar-client-status {
+            padding: 0 16px;
+            margin-bottom: 12px;
+        }
+
+        .sidebar-client-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 12px;
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+        }
+
+        .sidebar-client-badge.installed {
+            background: rgba(40, 167, 69, 0.15);
+            border: 1px solid rgba(40, 167, 69, 0.3);
+            color: #28a745;
+        }
+
+        .sidebar-client-badge.not-installed {
+            background: rgba(255, 193, 7, 0.15);
+            border: 1px solid rgba(255, 193, 7, 0.3);
+            color: #ffc107;
+        }
+
+        .sidebar-client-badge.update-available {
+            background: rgba(0, 123, 255, 0.15);
+            border: 1px solid rgba(0, 123, 255, 0.3);
+            color: #007bff;
+        }
+
+        .sidebar-client-badge .badge-icon {
+            font-size: 1rem;
+        }
+
+        .sidebar-client-badge .badge-text {
+            flex: 1;
             font-weight: 500;
+        }
+
+        .sidebar-client-badge .badge-action {
+            background: transparent;
+            border: none;
+            color: inherit;
+            cursor: pointer;
+            padding: 2px;
+            font-size: 0.9rem;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+
+        .sidebar-client-badge .badge-action:hover {
+            opacity: 1;
         }
     </style>
 </head>
@@ -277,7 +562,13 @@
         <!-- SIDEBAR -->
         <aside class="sidebar">
             <div class="sidebar-header">
-                <h2 class="sidebar-title">AutoTech</h2>
+                <div class="sidebar-logo">
+                    <span class="sidebar-logo-icon">🔧</span>
+                    <div>
+                        <div class="sidebar-logo-text">AutoTech</div>
+                        <div class="sidebar-logo-subtitle">T1 Tools</div>
+                    </div>
+                </div>
             </div>
             <nav class="sidebar-nav">
                 <!-- Main Navigation -->
@@ -289,14 +580,28 @@
                     </a>
                     <a href="/autotech" class="nav-item active">
                         <span class="nav-item-icon">🛠️</span>
-                        <span>T1 Tools</span>
+                        <span>T1 Legacy Tools</span>
                     </a>
-                    <a href="/legacy-batch-tools" class="nav-item">
-                        <span class="nav-item-icon">📟</span>
-                        <span>T1 Legacy Batch Tools</span>
+                    <a href="/t1-tools-help" class="nav-item">
+                        <span class="nav-item-icon">💻</span>
+                        <span>T1 Tools CMD</span>
+                    </a>
+                    <a href="/database" class="nav-item">
+                        <span class="nav-item-icon">🗄️</span>
+                        <span>Equipment Database</span>
                     </a>
                 </div>
             </nav>
+
+            <!-- Client Installation Status -->
+            <div class="sidebar-client-status" id="sidebar-client-status">
+                <div class="sidebar-client-badge not-installed" id="sidebar-client-badge">
+                    <span class="badge-icon">⚠️</span>
+                    <span class="badge-text">Client Not Installed</span>
+                    <button class="badge-action" onclick="resetClientCheck()" title="Re-check">↻</button>
+                </div>
+            </div>
+
             <div class="sidebar-footer">
                 <div class="sidebar-status">
                     <span class="status-indicator {{ 'online' if online else 'offline' }}"></span>
@@ -310,47 +615,178 @@
             <header class="top-header">
                 <h1 class="page-title">
                     <span class="page-title-icon">🛠️</span>
-                    T1 Tools Legacy
+                    T1 Legacy Tools
                 </h1>
             </header>
 
             <div class="content-container">
                 <div class="legacy-container">
 
-                    <!-- GRM Scripts Terminal -->
-                    <div class="terminal-section">
-                            <div class="terminal-header">
-                                <div class="terminal-title">
-                                    <span>⚡</span>
-                                    <span>Scripts Terminal</span>
-                                </div>
-                                <div class="terminal-controls">
-                                    <button class="terminal-btn" id="terminal-clear">🗑 Clear</button>
-                                </div>
+                    <!-- Info Box - Hidden if AutoTech Client is installed -->
+                    <div class="info-box" id="install-info-box">
+                        <strong>ℹ️ Installation Required:</strong> These tools require AutoTech Client to be installed on your PC.
+                        <br><br>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px;">
+                            <a href="/download-client-package" class="download-btn">📦 Download ZIP Package</a>
+                            <a href="/live-install-client" class="download-btn" style="background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);">⚡ Live Install from USB</a>
+                        </div>
+                        <small style="color: var(--theme-text-muted);">
+                            <strong>ZIP:</strong> Download, extract, right-click <strong>Install_AutoTech_Client.bat</strong> → "Run as administrator"
+                            <br>
+                            <strong>Live:</strong> Run installer directly from USB drive (requires file access to USB)
+                        </small>
+                        <br><br>
+                        <strong>MMS Batch Scripts</strong> open in Command Prompt windows.
+                        <strong>GRM Scripts</strong> run through the web terminal below.
+                    </div>
+
+                    <!-- Two-column layout: Web Terminal (left) | MMS Scripts (right) -->
+                    <div class="tools-layout">
+                        <!-- LEFT COLUMN: Web Terminal -->
+                        <div class="tools-column">
+                            <div class="section-header">
+                                <span class="section-icon">⚡</span>
+                                <h2>Web Terminal</h2>
                             </div>
 
-                            <!-- Equipment Input (Always Visible) -->
-                            <div style="padding: 12px; border-bottom: 1px solid var(--theme-border); background: var(--theme-bg-secondary); display: flex; align-items: center; gap: 10px; flex-wrap: nowrap;">
-                                <label for="equipment-input" style="font-weight: 600; color: var(--theme-text); white-space: nowrap; flex-shrink: 0;">
-                                    Equipment:
-                                </label>
-                                <input
-                                    type="text"
-                                    id="equipment-input"
-                                    placeholder="Enter equipment name..."
-                                    style="width: 180px; padding: 8px 12px; background: var(--theme-bg-card); border: 1px solid var(--theme-border); border-radius: var(--radius-sm); color: var(--theme-text); font-size: 0.9rem; flex-shrink: 0;"
-                                >
-                                <span id="equipment-status" style="padding: 4px 12px; border-radius: var(--radius-sm); font-size: 0.85rem; flex-shrink: 0;"></span>
-                                <button class="terminal-btn" data-tool="ip-finder" style="white-space: nowrap; flex-shrink: 0;">
-                                    <span>🔍</span> Find Details
-                                </button>
-                            </div>
+                            <div class="terminal-section">
+                                <div class="terminal-header">
+                                    <div class="terminal-title">
+                                        <span>⚡</span>
+                                        <span>IP Finder</span>
+                                    </div>
+                                    <div class="terminal-controls">
+                                        <button class="terminal-btn" id="terminal-clear">🗑 Clear</button>
+                                    </div>
+                                </div>
 
+                                <!-- Equipment Input (Always Visible) -->
+                                <div class="equipment-input-area">
+                                    <label for="equipment-input">Equipment:</label>
+                                    <input
+                                        type="text"
+                                        id="equipment-input"
+                                        placeholder="Enter equipment name..."
+                                    >
+                                    <button class="terminal-btn" data-tool="ip-finder">
+                                        <span>🔍</span> Find Details
+                                    </button>
+                                    <span class="equip-status-badge" id="equipment-status-badge" style="display: none;">
+                                        <span class="status-dot"></span>
+                                        <span class="status-text">Online</span>
+                                    </span>
+                                </div>
 
-                            <div class="terminal-window" id="terminal-output">
-                                <div class="terminal-line terminal-info">Click a tool in the sidebar to execute a script...</div>
+                                <div class="terminal-window" id="terminal-output">
+                                    <!--<div class="terminal-line terminal-info">Enter equipment name above and click "Find Details" to get started...</div>-->
+                                </div>
+
+                                <!-- IP Finder Results (shown after search) -->
+                                <div class="ip-results" id="ip-results">
+                                    <div class="ip-results-header">
+                                        <span class="ip-results-title">IP Finder Results</span>
+                                        <span class="ip-results-equipment" id="ip-results-equipment">TEST</span>
+                                        <span class="ip-data-source" id="ip-data-source">LIVE</span>
+                                    </div>
+                                    <div class="ip-result-row">
+                                        <span class="ip-result-label">PTX Model</span>
+                                        <span class="ip-result-value" id="ip-result-model">PTXC</span>
+                                        <span></span>
+                                    </div>
+                                    <div class="ip-result-row">
+                                        <span class="ip-result-label">Network IP</span>
+                                        <span class="ip-result-value" id="ip-result-ptx">10.110.99.99</span>
+                                        <button class="ip-copy-btn" onclick="copyToClipboard('ip-result-ptx', this)">
+                                            <span>Copy</span>
+                                        </button>
+                                    </div>
+                                    <div class="ip-result-row">
+                                        <span class="ip-result-label">AVI IP</span>
+                                        <span class="ip-result-value" id="ip-result-avi">10.111.219.99</span>
+                                        <button class="ip-copy-btn" onclick="copyToClipboard('ip-result-avi', this)">
+                                            <span>Copy</span>
+                                        </button>
+                                    </div>
+                                    <div class="ip-result-row ip-result-footer" id="row-last-updated" style="display: none;">
+                                        <span class="ip-result-label">Last Updated</span>
+                                        <span class="ip-result-value ip-result-timestamp" id="ip-result-updated">-</span>
+                                        <span></span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
+
+                        <!-- RIGHT COLUMN: MMS Batch Scripts -->
+                        <div class="tools-column">
+                            <div class="section-header">
+                                <span class="section-icon">📟</span>
+                                <h2>MMS Batch Scripts (Local CMD)</h2>
+                            </div>
+
+                            <div class="scripts-grid">
+                                <div class="script-card" onclick="launchScript('IP_Finder.bat')">
+                                    <div class="script-icon">🔍</div>
+                                    <div class="script-title">IP Finder</div>
+                                    <div class="script-desc">Find equipment IP addresses</div>
+                                </div>
+                                <div class="script-card" onclick="launchScript('PTXC_Health_Check.bat')">
+                                    <div class="script-icon">❤️</div>
+                                    <div class="script-title">PTX Health Check</div>
+                                    <div class="script-desc">Check PTX system health</div>
+                                </div>
+                                <div class="script-card" onclick="launchScript('PTX_Uptime.bat')">
+                                    <div class="script-icon">⏱️</div>
+                                    <div class="script-title">PTX Uptime Report</div>
+                                    <div class="script-desc">Download uptime report</div>
+                                </div>
+                                <div class="script-card" onclick="launchScript('MineView_Session.bat')">
+                                    <div class="script-icon">👥</div>
+                                    <div class="script-title">Mineview Sessions</div>
+                                    <div class="script-desc">Check active sessions</div>
+                                </div>
+                                <div class="script-card" onclick="launchScript('Start_VNC.bat')">
+                                    <div class="script-icon">🖥️</div>
+                                    <div class="script-title">Start PTX VNC</div>
+                                    <div class="script-desc">Remote desktop connection</div>
+                                </div>
+                                <div class="script-card" onclick="launchScript('AVI_MM2_Reboot.bat')">
+                                    <div class="script-icon">🔄</div>
+                                    <div class="script-title">MM2/AVI Reboot</div>
+                                    <div class="script-desc">Reboot radio and MM2</div>
+                                </div>
+                                <div class="script-card" onclick="launchScript('PTX-AVI_Watchdog_SingleDeploy.bat')">
+                                    <div class="script-icon">🐕</div>
+                                    <div class="script-title">Watchdog Deploy</div>
+                                    <div class="script-desc">Deploy PTX-AVI watchdog</div>
+                                </div>
+                                <div class="script-card" onclick="launchScript('LIVE_KOA_DataCheck.bat')">
+                                    <div class="script-icon">📊</div>
+                                    <div class="script-title">Live KOA Data</div>
+                                    <div class="script-desc">Check KOA data</div>
+                                </div>
+                                <div class="script-card" onclick="launchScript('Latest_SpeedLimit_DataCheck.bat')">
+                                    <div class="script-icon">🚦</div>
+                                    <div class="script-title">Speed Limit Data</div>
+                                    <div class="script-desc">Check speed limit data</div>
+                                </div>
+                                <div class="script-card" onclick="launchScript('Linux_Health_Check.bat')">
+                                    <div class="script-icon">💻</div>
+                                    <div class="script-title">Linux Perf Check</div>
+                                    <div class="script-desc">Performance and usage</div>
+                                </div>
+                                <div class="script-card" onclick="launchScript('ComponentTracking.bat')">
+                                    <div class="script-icon">📦</div>
+                                    <div class="script-title">Component Tracking</div>
+                                    <div class="script-desc">Track field components</div>
+                                </div>
+                                <div class="script-card" onclick="launchScript('Log_Downloader.bat')">
+                                    <div class="script-icon">📥</div>
+                                    <div class="script-title">Log Downloader</div>
+                                    <div class="script-desc">Download Linux logs</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                 </div>
             </div>
@@ -358,14 +794,173 @@
     </div>
 
     <script>
+        // ========================================
+        // AUTOTECH CLIENT INSTALLATION CHECK
+        // ========================================
+        function checkClientInstalled() {
+            const installInfoBox = document.getElementById('install-info-box');
+            const sidebarBadge = document.getElementById('sidebar-client-badge');
+
+            // Call API to check if client is installed on the machine
+            fetch('/api/check-client-installed')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.installed) {
+                        // Check if update is available
+                        if (data.update_available) {
+                            // Show update available message
+                            installInfoBox.innerHTML = `
+                                <strong>🔄 Update Available:</strong> A newer version of AutoTech Client is available (v${data.server_version || 'new'}).
+                                <br>Your installed version: v${data.client_version || 'unknown'}
+                                <br><br>
+                                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                    <a href="/download-client-package" class="download-btn">📦 Download Update</a>
+                                    <a href="/live-install-client" class="download-btn" style="background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);">⚡ Live Update from USB</a>
+                                </div>
+                            `;
+                            installInfoBox.style.display = 'block';
+
+                            // Update sidebar badge
+                            sidebarBadge.className = 'sidebar-client-badge update-available';
+                            sidebarBadge.querySelector('.badge-icon').textContent = '🔄';
+                            sidebarBadge.querySelector('.badge-text').textContent = 'Update Available';
+                        } else {
+                            // Hide main content install box (client is up to date)
+                            installInfoBox.style.display = 'none';
+
+                            // Update sidebar badge to show installed
+                            sidebarBadge.className = 'sidebar-client-badge installed';
+                            sidebarBadge.querySelector('.badge-icon').textContent = '✅';
+                            sidebarBadge.querySelector('.badge-text').textContent = 'Client v' + (data.client_version || 'OK');
+                        }
+                    } else {
+                        // Show main content install box
+                        installInfoBox.style.display = 'block';
+
+                        // Update sidebar badge to show not installed
+                        sidebarBadge.className = 'sidebar-client-badge not-installed';
+                        sidebarBadge.querySelector('.badge-icon').textContent = '⚠️';
+                        sidebarBadge.querySelector('.badge-text').textContent = 'Client Not Installed';
+                    }
+                })
+                .catch(error => {
+                    // On error, show the install box by default
+                    console.error('Error checking client installation:', error);
+                    installInfoBox.style.display = 'block';
+
+                    // Update sidebar badge to show not installed
+                    sidebarBadge.className = 'sidebar-client-badge not-installed';
+                    sidebarBadge.querySelector('.badge-icon').textContent = '⚠️';
+                    sidebarBadge.querySelector('.badge-text').textContent = 'Client Not Installed';
+                });
+        }
+
+        function resetClientCheck() {
+            // Re-check installation status from server
+            checkClientInstalled();
+        }
+
+        // Run check on page load
+        checkClientInstalled();
+
+        // ========================================
+        // MMS BATCH SCRIPT LAUNCHER
+        // ========================================
+        function launchScript(scriptName) {
+            // Launch using custom URI handler
+            const uri = `autotech-script://${scriptName}`;
+            window.location.href = uri;
+            console.log(`Launching ${scriptName} via ${uri}`);
+        }
+
+        // ========================================
+        // GRM TERMINAL FUNCTIONALITY
+        // ========================================
         const terminalOutput = document.getElementById('terminal-output');
         const terminalClearBtn = document.getElementById('terminal-clear');
         const equipmentInput = document.getElementById('equipment-input');
-        const equipmentStatus = document.getElementById('equipment-status');
+        const ipResultsSection = document.getElementById('ip-results');
 
         // Track current equipment status
         let currentEquipmentStatus = null;
         let currentEquipmentIP = null;
+
+        // Copy to clipboard function
+        function copyToClipboard(elementId, button) {
+            const element = document.getElementById(elementId);
+            const text = element.textContent;
+
+            navigator.clipboard.writeText(text).then(() => {
+                // Show copied feedback
+                const originalText = button.innerHTML;
+                button.innerHTML = '<span>Copied!</span>';
+                button.classList.add('copied');
+
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.classList.remove('copied');
+                }, 1500);
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+            });
+        }
+
+        // Update equipment status badge (next to Find Details)
+        function updateEquipmentStatusBadge(status) {
+            const badge = document.getElementById('equipment-status-badge');
+            const statusText = badge.querySelector('.status-text');
+
+            if (status === 'online') {
+                badge.className = 'equip-status-badge online';
+                statusText.textContent = 'Online';
+                badge.style.display = 'inline-flex';
+            } else if (status === 'offline') {
+                badge.className = 'equip-status-badge offline';
+                statusText.textContent = 'Offline';
+                badge.style.display = 'inline-flex';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        // Update IP Finder results section
+        function updateIPResults(data) {
+            const resultsSection = document.getElementById('ip-results');
+            const equipmentLabel = document.getElementById('ip-results-equipment');
+            const modelValue = document.getElementById('ip-result-model');
+            const ptxValue = document.getElementById('ip-result-ptx');
+            const aviValue = document.getElementById('ip-result-avi');
+            const dataSourceBadge = document.getElementById('ip-data-source');
+
+            // Additional fields
+            const updatedValue = document.getElementById('ip-result-updated');
+            const rowUpdated = document.getElementById('row-last-updated');
+
+            // Update main values
+            equipmentLabel.textContent = data.equipment || 'Unknown';
+            modelValue.textContent = data.ptx_model || 'Unknown';
+            ptxValue.textContent = data.equipment_ip || 'Not found';
+            aviValue.textContent = data.avi_ip || 'Not found';
+
+            // Update data source badge
+            const source = data.data_source || 'live';
+            dataSourceBadge.textContent = source.toUpperCase();
+            dataSourceBadge.className = 'ip-data-source ' + source;
+
+            // Update Last Updated (show for cached data)
+            if (data.last_updated || source === 'cached') {
+                updatedValue.textContent = data.last_updated || 'Unknown';
+                rowUpdated.style.display = 'flex';
+            } else {
+                rowUpdated.style.display = 'none';
+            }
+
+            // Update equipment status badge
+            updateEquipmentStatusBadge(data.equipment_status);
+
+            // Show the results section
+            resultsSection.classList.add('visible');
+        }
 
         // Terminal Functions
         function appendToTerminal(text, className = 'terminal-output') {
@@ -409,37 +1004,31 @@
             });
         }
 
-        // Equipment input change - show status
+        // Equipment input change - reset status when equipment changes
         equipmentInput.addEventListener('input', function() {
-            const value = this.value.trim().toUpperCase();
-            if (value) {
-                equipmentStatus.textContent = `✓ ${value}`;
-                equipmentStatus.style.background = 'var(--status-online)';
-                equipmentStatus.style.color = 'white';
-                // Reset status when equipment changes
-                currentEquipmentStatus = null;
-                currentEquipmentIP = null;
-            } else {
-                equipmentStatus.textContent = '';
-                equipmentStatus.style.background = 'transparent';
-                currentEquipmentStatus = null;
-                currentEquipmentIP = null;
-            }
+            // Reset status when equipment changes
+            currentEquipmentStatus = null;
+            currentEquipmentIP = null;
+            // Hide status badge until new search
+            document.getElementById('equipment-status-badge').style.display = 'none';
             updateEquipmentButtons();
         });
 
         terminalClearBtn.addEventListener('click', function() {
             terminalOutput.innerHTML = '';
-            appendToTerminal('Terminal cleared. Click a tool to execute a script.', 'terminal-info');
+            appendToTerminal('Terminal cleared. Enter equipment name to get started.', 'terminal-info');
+            // Hide IP results section and status badge
+            document.getElementById('ip-results').classList.remove('visible');
+            document.getElementById('equipment-status-badge').style.display = 'none';
         });
 
-        // Sidebar tool button clicks
+        // Tool button clicks
         const toolButtons = document.querySelectorAll('[data-tool]');
 
         toolButtons.forEach(button => {
             button.addEventListener('click', function() {
                 const toolName = this.dataset.tool;
-                const toolLabel = this.querySelector('span:not(.nav-item-icon)').textContent;
+                const toolLabel = this.textContent.trim();
 
                 executeGRMScript(toolName, toolLabel);
             });
@@ -483,16 +1072,27 @@
                     // Update equipment status and IP if returned
                     if (data.equipment_status) {
                         currentEquipmentStatus = data.equipment_status;
-                        if (data.equipment_status === 'online') {
-                            equipmentStatus.style.background = 'var(--status-online)';
-                        } else if (data.equipment_status === 'offline') {
-                            equipmentStatus.style.background = 'var(--status-offline)';
-                        }
                     }
                     if (data.equipment_ip) {
                         currentEquipmentIP = data.equipment_ip;
                     }
                     updateEquipmentButtons();
+
+                    // Update IP Results section for IP Finder
+                    if (toolName === 'ip-finder' && equipment) {
+                        updateIPResults({
+                            equipment: equipment,
+                            equipment_ip: data.equipment_ip,
+                            avi_ip: data.avi_ip,
+                            ptx_model: data.ptx_model,
+                            equipment_status: data.equipment_status,
+                            oid: data.oid,
+                            cid: data.cid,
+                            profile: data.profile,
+                            data_source: data.data_source,
+                            last_updated: data.last_updated
+                        });
+                    }
 
                     if (data.output) {
                         const lines = data.output.split('\n');
@@ -544,20 +1144,6 @@
                 appendToTerminal(`Connection error: ${error}`, 'terminal-error');
                 console.error('Error:', error);
             });
-        }
-
-        function showToast(message, type) {
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            toast.innerHTML = `<div class="toast-message">${message}</div>`;
-            document.body.appendChild(toast);
-
-            setTimeout(() => {
-                toast.style.animation = 'slideOut 0.3s forwards';
-                setTimeout(() => {
-                    document.body.removeChild(toast);
-                }, 300);
-            }, 3000);
         }
 
         // Initialize button states on page load

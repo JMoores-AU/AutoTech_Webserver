@@ -1,0 +1,142 @@
+Sat 02/12/2023 4:11:50.81 - moorjay5 - import - Found 445 vehicles. 
+Sat 02/12/2023 4:11:56.58 - moorjay5 - import - Saving .dat File 
+Sat 02/12/2023 4:13:12.80 - moorjay5 - import - Found 445 vehicles. 
+Sat 02/12/2023 4:13:18.32 - moorjay5 - import - Saving .dat File 
+Sat 02/12/2023 4:14:47.62 - moorjay5 - import - Found 445 vehicles. 
+Sat 02/12/2023 4:14:53.23 - moorjay5 - import - Saving .dat File 
+Sat 02/12/2023 4:16:59.59 - moorjay5 - import - Found 445 vehicles. 
+Sat 02/12/2023 4:17:05.18 - moorjay5 - import - Saving .dat File 
+Sat 02/12/2023 4:29:21.40 - moorjay5 - tru hg70 - Access GNSS via TRU 
+Sat 02/12/2023 4:29:27.69 - moorjay5 - tru ahg70 - Access GNSS via TRU 
+Sat 02/12/2023 4:32:02.85 - moorjay5 - win ahg70 - Open WinSCP. 
+Sat 02/12/2023 4:32:42.42 - moorjay5 - ptxlogs ahg70 - Access PTX logs via WinSCP. 
+Sat 02/12/2023 4:34:20.64 - moorjay5 - cache ahg70 - Open cache folder via WinSCP. 
+Sat 02/12/2023 4:35:12.49 - moorjay5 - putty ahg70 - Open PuTTY 
+Sat 02/12/2023 4:35:36.02 - moorjay5 - vnc ahg70 - Open VNC Viewer 
+Sat 02/12/2023 4:37:19.28 - moorjay5 - delcache ahg70 - Delete cache folder and reboot PTX. 
+Sat 02/12/2023 5:01:09.62 - moorjay5 - delcache ahg70 - Delete cache folder and reboot PTX. 
+Sat 02/12/2023 5:03:43.39 - moorjay5 - delcache ahg70 - Delete cache folder and reboot PTX. 
+Sat 02/12/2023 5:06:58.78 - moorjay5 - delcache ahg69 - Delete cache folder and reboot PTX. 
+Sat 02/12/2023 5:07:25.64 - moorjay5 - delcache ahg70 - Delete cache folder and reboot PTX. 
+Sat 12/02/202318:11:05.56 - LILLG5 - vnc trd32 - Open VNC Viewer 
+Sat 12/02/202318:22:11.39 - LILLG5 - vnc dz32npe - Open VNC Viewer 
+Sat 02/12/202318:47:00.68 - moorjay5 - avi l12 - Login to AVI Radio 
+Sat 02/12/202321:02:11.96 - moorjay5 - delcache ahg70 - Delete cache folder and reboot PTX. 
+Sat 02/12/202321:16:13.22 - moorjay5 - delcache ahg70 - Delete cache folder and reboot PTX. 
+Sat 02/12/202323:30:33.23 - moorjay5 - delcache ahg70 - Delete cache folder and reboot PTX. 
+Sat 02/12/202323:43:38.90 - moorjay5 - delcache ahg70 - Delete cache folder and reboot PTX. 
+Sat 02/12/202323:53:48.62 - moorjay5 - delcache ahg70 - Delete cache folder and reboot PTX. 
+Sat 02/12/202323:55:57.43 - moorjay5 - delcache ahg69 - Delete cache folder and reboot PTX. 
+Sat 02/12/202323:58:45.28 - moorjay5 - delcache ahg69 - Delete cache folder and reboot PTX. 
+Sun 03/12/2023 0:01:30.71 - moorjay5 - delcache ahg70 - Delete cache folder and reboot PTX. 
+Sun 03/12/2023 0:02:39.18 - moorjay5 - delcache ahg69 - Delete cache folder and reboot PTX. 
+Sun 03/12/2023 0:03:49.72 - moorjay5 - delcache ahg69 - Delete cache folder and reboot PTX. 
+Sun 03/12/2023 0:06:03.25 - moorjay5 - delcache ahg70 - Delete cache folder and reboot PTX. 
+Sun 03/12/2023 0:08:21.41 - moorjay5 - delcache ahg69 - Delete cache folder and reboot PTX. 
+Sun 03/12/2023 0:08:55.29 - moorjay5 - delcache ahg70 - Delete cache folder and reboot PTX. 
+Sun 03/12/2023 0:13:05.46 - moorjay5 - delcache rd398 - Delete cache folder and reboot PTX. 
+Sun 03/12/2023 0:15:23.06 - moorjay5 - delcache rd398 - Delete cache folder and reboot PTX. 
+Sun 03/12/2023 0:21:15.69 - moorjay5 - delcache rd398 - Delete cache folder and reboot PTX. 
+Sun 03/12/2023 0:21:36.92 - moorjay5 - vnc rd398 - Open VNC Viewer 
+Sun 03/12/2023 0:23:59.57 - moorjay5 - delcache rd398 - Delete cache folder and reboot PTX. 
+Sun 03/12/2023 0:25:58.94 - moorjay5 - delcache rd398 - Delete cache folder and reboot PTX. 
+Sun 03/12/2023 0:27:22.77 - moorjay5 - delcache rd398 - Delete cache folder and reboot PTX. 
+Sun 03/12/2023 0:29:51.65 - moorjay5 - delcache rd398 - Delete cache folder and reboot PTX. 
+Sun 03/12/2023 0:33:41.99 - moorjay5 - putty rd398 - Open PuTTY 
+Sun 03/12/2023 0:34:10.34 - moorjay5 - putty rd398 - Open PuTTY 
+Sun 03/12/2023 0:34:30.18 - moorjay5 - vnc rd398 - Open VNC Viewer 
+Sun 03/12/2023 0:36:13.63 - moorjay5 - delcache rd398 - Delete cache folder and reboot PTX. 
+Mon 04/12/2023 4:15:54.01 - moorjay5 - avi trd496 - Login to AVI Radio 
+Mon 04/12/2023 4:16:18.80 - moorjay5 - avi trd496 - Login to AVI Radio 
+Mon 04/12/2023 4:21:05.83 - moorjay5 - tru trd496 - Access GNSS via TRU 
+Mon 04/12/2023 4:31:42.67 - moorjay5 - vnc trd496 - Open VNC Viewer 
+Mon 04/12/2023 4:33:10.86 - moorjay5 - vnc trd496 - Open VNC Viewer 
+Mon 12/04/202319:01:11.76 - collnatha5 - tru rd25 - Access GNSS via TRU 
+Mon 12/04/202319:03:22.24 - collnatha5 - tru rd25 - Access GNSS via TRU 
+Mon 12/04/202319:03:39.25 - collnatha5 - tru rd25 - Access GNSS via TRU 
+Mon 12/04/202319:04:05.60 - collnatha5 - tru rd25 - Access GNSS via TRU 
+Mon 12/04/202319:53:15.27 - collnatha5 - avi rd168 - Login to AVI Radio 
+Mon 12/04/202321:06:53.26 - collnatha5 - avi ahg80 - Login to AVI Radio 
+Mon 12/04/202322:59:27.18 - collnatha5 - vnc rd664 - Open VNC Viewer 
+Tue 12/05/2023 0:08:51.79 - collnatha5 - vnc trd502 - Open VNC Viewer 
+Tue 12/05/2023 0:09:36.78 - collnatha5 - tru trd502 - Access GNSS via TRU 
+Tue 12/05/2023 4:05:07.03 - collnatha5 - vnc ahg59 - Open VNC Viewer 
+Tue 12/05/2023 4:05:57.83 - collnatha5 - avi ahg59 - Login to AVI Radio 
+Tue 12/05/2023 4:06:22.55 - collnatha5 - vnc ahg59 - Open VNC Viewer 
+Tue 12/05/2023 4:07:40.54 - moorjay5 - ptxreboot ahg70 - Reboot PTX via PuTTY. 
+Tue 12/05/2023 4:13:04.75 - moorjay5 - ptxr ahg70 - Reboot PTX via PuTTY. 
+Tue 12/05/2023 4:14:58.01 - moorjay5 - ptxr ahg70 - Reboot PTX via PuTTY. 
+Tue 12/05/2023 4:16:53.26 - moorjay5 - ptxr ahg70 - Reboot PTX via PuTTY. 
+Tue 12/05/202317:52:43.89 - collnatha5 - atmon rd20 - Load ATMonitor remotley. 
+Tue 12/05/202320:42:14.53 - venejare - avi rd667 - Login to AVI Radio 
+Tue 12/05/202320:42:35.91 - venejare - avilogs rd667 - Access AVI Log Files 
+Tue 12/05/202320:42:59.35 - venejare - vnc rd667 - Open VNC Viewer 
+Tue 12/05/202320:45:35.51 - venejare - vnc rd667 - Open VNC Viewer 
+Tue 12/05/202320:46:34.19 - venejare - vnc rd667 - Open VNC Viewer 
+Tue 12/05/202323:28:14.52 - venejare - vnc rd667 - Open VNC Viewer 
+Tue 12/05/202323:28:52.51 - venejare - putty rd667 - Open PuTTY 
+Tue 12/05/202323:29:23.00 - venejare - delcache rd667 - Delete cache folder and reboot PTX. 
+Tue 12/05/202323:30:29.76 - venejare - vnc rd667 - Open VNC Viewer 
+Wed 12/06/2023 2:19:58.07 - venejare - delcache rd668 - Delete cache folder and reboot PTX. 
+Wed 12/06/2023 2:23:49.58 - venejare - ping rd668 - Run embedded pings. 
+Wed 12/06/2023 2:27:02.75 - venejare - ping rd668 - Run embedded pings. 
+Wed 12/06/2023 2:30:50.83 - venejare - ping rd666 - Run embedded pings. 
+Wed 12/06/2023 2:32:06.49 - venejare - ping rd668 - Run embedded pings. 
+Wed 12/06/2023 2:32:32.13 - venejare - ping rd667 - Run embedded pings. 
+Wed 12/06/2023 2:33:23.72 - venejare - ping rd667 - Run embedded pings. 
+Wed 12/06/2023 2:34:13.57 - venejare - ping rd667 - Run embedded pings. 
+Wed 12/06/2023 2:34:39.68 - venejare - ping rd668 - Run embedded pings. 
+Wed 12/06/2023 2:35:56.03 - venejare - ping rd668 - Run embedded pings. 
+Wed 12/06/2023 2:36:18.12 - venejare - ping rd605 - Run embedded pings. 
+Wed 12/06/2023 2:37:05.60 - venejare - ping rd605 - Run embedded pings. 
+Wed 12/06/2023 2:38:01.31 - venejare - ping rd605 - Run embedded pings. 
+Wed 12/06/2023 2:38:50.43 - venejare - ping rd605 - Run embedded pings. 
+Wed 12/06/2023 2:40:28.71 - venejare - ping rd605 - Run embedded pings. 
+Wed 12/06/2023 2:42:20.58 - venejare - ping rd605 - Run embedded pings. 
+Wed 12/06/2023 2:43:24.07 - venejare - ping rd668 - Run embedded pings. 
+Wed 12/06/2023 2:44:53.61 - venejare - ping rd668 - Run embedded pings. 
+Wed 12/06/2023 2:45:04.76 - venejare - ping rd667 - Run embedded pings. 
+Wed 12/06/2023 2:45:32.13 - venejare - ping rd668 - Run embedded pings. 
+Wed 12/06/2023 2:56:16.75 - venejare - ping ahg70 - Run embedded pings. 
+Wed 12/06/2023 2:56:40.73 - venejare - ping ahg70 - Run embedded pings. 
+Wed 12/06/2023 2:59:49.32 - venejare - ping ahg70 - Run embedded pings. 
+Wed 12/06/2023 3:00:15.71 - venejare - config ahg70 - Run PTX config. 
+Wed 12/06/2023 3:00:15.94 - venejare - config ahg70 - Opening terminal to AHG70 on 10.110.21.88 
+Wed 12/06/2023 3:01:50.68 - venejare - config ahg70 - Run PTX config. 
+Wed 12/06/2023 3:01:50.89 - venejare - config ahg70 - Opening terminal to AHG70 on 10.110.21.88 
+Wed 12/06/2023 3:04:53.82 - venejare - config ahg70 - Run PTX config. 
+Wed 12/06/2023 3:04:54.02 - venejare - config ahg70 - Opening terminal to AHG70 on 10.110.21.88 
+Wed 12/06/2023 3:08:51.27 - venejare - config ahg70 - Run PTX config. 
+Wed 12/06/2023 3:08:51.54 - venejare - config ahg70 - Opening terminal to AHG70 on 10.110.21.88 
+Wed 12/06/2023 3:11:24.36 - venejare - config ahg70 - Run PTX config. 
+Wed 12/06/2023 3:11:24.56 - venejare - config ahg70 - Opening terminal to AHG70 on 10.110.21.88 
+Wed 12/06/2023 3:12:03.54 - venejare - config ahg70 - Run PTX config. 
+Wed 12/06/2023 3:12:03.76 - venejare - config ahg70 - Opening terminal to AHG70 on 10.110.21.88 
+Wed 12/06/2023 3:12:26.55 - venejare - config rd605 - Run PTX config. 
+Wed 12/06/2023 3:12:27.02 - venejare - config rd605 - Opening terminal to RD605 on 10.110.22.144 
+Wed 12/06/2023 3:13:02.90 - venejare - config rd605 - Run PTX config. 
+Wed 12/06/2023 3:13:03.13 - venejare - config rd605 - Opening terminal to RD605 on 10.110.22.144 
+Wed 12/06/2023 3:14:04.00 - venejare - config rd605 - Run PTX config. 
+Wed 12/06/2023 3:14:04.20 - venejare - config rd605 - Opening terminal to RD605 on 10.110.22.144 
+Wed 12/06/2023 3:20:19.83 - venejare - help - Accesed help commands. 
+Wed 12/06/2023 3:21:30.33 - venejare - help - Accesed help commands. 
+Wed 12/06/2023 3:22:12.85 - venejare - help - Accesed help commands. 
+Wed 12/06/2023 3:22:26.91 - venejare - help - Accesed help commands. 
+Wed 12/06/2023 3:23:05.17 - venejare - help - Accesed help commands. 
+Wed 12/06/2023 3:23:27.09 - venejare - help - Accesed help commands. 
+Wed 12/06/2023 3:24:27.98 - venejare - help - Accesed help commands. 
+Wed 12/06/2023 3:29:01.55 - venejare - atmon rd26 - Load ATMonitor remotley. 
+Wed 12/06/2023 3:29:27.53 - venejare - atmon rd26 - Load ATMonitor remotley. 
+Wed 12/06/2023 3:31:20.25 - venejare - tru rd664 - Access GNSS via TRU 
+Wed 12/06/2023 3:32:40.47 - venejare - tru rd664 - Access GNSS via TRU 
+Wed 12/06/2023 3:33:45.17 - venejare - tru ahg69 - Access GNSS via TRU 
+Wed 12/06/2023 3:34:25.76 - venejare - tru rd664 - Access GNSS via TRU 
+Wed 12/06/2023 3:36:16.61 - venejare - tru rd664 - Access GNSS via TRU 
+Wed 12/06/2023 3:38:28.78 - venejare - gnss1logs ahg70 - Access GNSS 1 logs 
+Wed 12/06/2023 3:48:02.46 - venejare - gnss1logs ahg69 - Access GNSS 1 logs 
+Wed 12/06/2023 3:54:57.68 - venejare - gnsslogs ahg69 - Access GNSS 1 logs 
+Thu 12/07/2023 4:34:55.43 - ashfko - ptxlogs trd496 - Access PTX logs via WinSCP. 
+Thu 12/07/2023 4:39:47.54 - ashfko - avilogs trd496 - Access AVI Log Files 
+Thu 12/07/2023 4:42:32.69 - ashfko - tru trd496 - Access GNSS via TRU 
+Tue 12/12/2023 0:25:22.27 - boyddan - vnc RD664 - Open VNC Viewer 
+Wed 12/13/2023 8:30:43.22 - moorjay5 - vnc rd664 - Open VNC Viewer 

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" lang="ru-RU" xml:lang="ru-RU" data-mc-search-type="Stem" data-mc-help-system-file-name="Default.xml" data-mc-path-to-help-system="../../../" data-mc-target-type="WebHelp2" data-mc-runtime-file-type="Topic" data-mc-preload-images="false" data-mc-in-preview-mode="false" data-mc-medium="non-print" data-mc-toc-path="Receiver Managing|Status">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" /><title>Position</title>
+        <link href="../../../Skins/Default/Stylesheets/Slideshow.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/TextEffects.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/Topic.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/Components/Styles.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/Components/Tablet.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/Components/Mobile.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../Resources/Stylesheets/TRU.css" rel="stylesheet" />
+        <style>/*&lt;meta /&gt;*/
+
+.button.previous-topic-button
+{
+	-pie-background: url('../../../Skins/Default/Stylesheets/Images/navigate-previous.png') no-repeat center center, linear-gradient(#ffffff, #ececec);
+}
+
+.button.current-topic-index-button
+{
+	-pie-background: linear-gradient(#ffffff, #ececec);
+}
+
+.button.next-topic-button
+{
+	-pie-background: url('../../../Skins/Default/Stylesheets/Images/navigate-next.png') no-repeat center center, linear-gradient(#ffffff, #ececec);
+}
+
+.needs-pie
+{
+	behavior: url('../../../Resources/Scripts/PIE-no-motw.htc');
+}
+
+</style>
+        <script src="../../../Resources/Scripts/custom.modernizr.js">
+        </script>
+        <script src="../../../Resources/Scripts/jquery.min.js">
+        </script>
+        <script src="../../../Resources/Scripts/require.min.js">
+        </script>
+        <script src="../../../Resources/Scripts/require.config.js">
+        </script>
+        <script src="../../../Resources/Scripts/foundation.min.js">
+        </script>
+        <script src="../../../Resources/Scripts/plugins.min.js">
+        </script>
+        <script src="../../../Resources/Scripts/MadCapAll.js">
+        </script>
+    </head>
+    <body class="test">
+        <p class="MCWebHelpFramesetLink MCWebHelpFramesetLinkTop"><a href="../../../Default.htm#Topics/ReceiverManaging/Position.htm">Open topic with navigation</a>
+        </p>
+        <div class="MCBreadcrumbsBox_0"><span class="MCBreadcrumbsPrefix">You are here: </span><span class="MCBreadcrumbsSelf">Receiver Managing</span><span class="MCBreadcrumbsDivider"> &gt; </span><a class="MCBreadcrumbsLink" href="Status.htm">Status</a><span class="MCBreadcrumbsDivider"> &gt; </span><span class="MCBreadcrumbs">Position</span>
+        </div>
+        <h1 class="Heading1">Position</h1>
+        <p class="Body">The <i>Position</i> tab displays the following information:</p>
+        <ul>
+            <li value="1">The current receiver date and time synchronized to GPS system time.</li>
+            <li value="2">Solution type:</li>
+            <ul>
+                <li value="1">Empty field – receiver cannot produce a solution (not enough satellites);</li>
+                <li value="2"><b style="font-style: italic; font-weight: normal;">Standalone</b> – autonomous positions are computed using only the pseudo-range measurements. Differential corrections from a base station are not available;</li>
+                <li value="3"><b style="font-style: italic; font-weight: normal;">GNSS</b> (Code-differential) – positions are acquired using only the pseudo-range measurements from base and rover receivers.</li>
+                <li value="4"><b style="font-style: italic; font-weight: normal;">RTK Float</b> – positions are computed by RTK engine using the carrier phase and  the pseudo-range measurements from base and rover receivers. Integer ambiguities, however, are NOT fixed (their float estimates were used instead).</li>
+                <li value="5"><b style="font-style: italic; font-weight: normal;">RTK Fixed</b> –  positions are computed by RTK engine using the carrier phase and the pseudo-range measurements  from base and rover receivers. Integer ambiguities are fixed.</li>
+                <li value="6"><i>Variable RTK Float</i> – positions are computed by RTK engine using the carrier phase and  the pseudo-range measurements from base and rover receivers. Integer ambiguities, however, were NOT fixed (their float estimates were used instead). The final accuracy of the solution is not better than the accuracy range of the Option Authorization File (OAF) for the rover receiver. </li>
+                <li value="7"><i>Variable RTK Fixed</i> –  positions are computed by RTK engine using the carrier phase and the pseudo-range measurements  from base and rover receivers. Integer ambiguities were fixed. The final accuracy of the solution is not better than the accuracy range of the Option Authorization File (OAF) for the rover receiver. </li>
+                <li value="8"><i style="font-style: italic; font-weight: normal;">Dion (Local)</i> –  positions are computed using the carrier phase increments of a single receiver. In this case the integer ambiguities are not fixed. High accuracy of the positioning is acquired in relation to a start point during short time interval.</li>
+                <li value="9"><i style="font-weight: bold; font-style: normal;"><i style="font-weight: normal;">PPP Convergence</i></i> – a convergence stage of calculation of autonomous coordinates of a single receiver, when using dual frequency code and carrier phase measurements and also the data on precise orbits and clocks of navigation satellites.</li>
+                <li value="10"><i style="font-weight: bold; font-style: normal;"><i style="font-weight: normal;">PPP Float</i></i>  – positions are calculated using dual frequency code and carrier phase measurements of a single GNSS receiver and also the data on precise orbits and clocks of navigation satellites.</li>
+                <li value="11"><b style="font-style: italic; font-weight: normal;">OmniSTAR VBS</b> – positions are calculated using L1 frequency code measurements of a single GNSS receiver and pseudo - range correction data from OmniSTAR's regional reference sites.  </li>
+                <li value="12"><b style="font-style: italic; font-weight: normal;">OmniSTAR XP</b> – positions are calculated using dual frequency code and carrier phase measurements of a single GNSS receiver and also the data on precise orbits and clocks of navigation satellites. </li>
+                <li value="13"><b style="font-style: italic; font-weight: normal;">OmniSTAR&#160;HP</b> – positions are calculated using dual frequency code and carrier phase measurements of a single GNSS receiver and OmniSTAR High Performance corrections. These corrections are modeled on a worldwide network of reference stations using carrier phase measurement to improve accuracy.</li>
+                <p class="Body">Also, the following information can be added to a solution type:</p>
+                <li value="14"><b style="font-style: italic; font-weight: normal;">Smooth</b> - The mode uses smoothing of some measurements by precise carrier phase measurements. This mode allows to eliminate jumps and sharp changes in positioning. There are the following combinations: <b style="font-style: italic; font-weight: normal;">Standalone (Smooth)</b>; <b style="font-style: italic; font-weight: normal;">DGNSS (Smooth)</b>;<i>Variable RTK Float (Smooth)</i>; <i>Variable RTK Fixed (Smooth)</i>; <b style="font-style: italic; font-weight: normal;">RTK Float (Smooth)</b>; <b style="font-style: italic; font-weight: normal;">RTK Fix (Smooth)</b> and  <b style="font-style: italic; font-weight: normal;">PPP float (Smooth)</b>;</li>
+                <li value="15"><b style="font-style: italic; font-weight: normal;">I-F</b> (Iono - free combinations) - In this mode, dual frequency code and carrier phase measurements are used to form ionofree combinations in order to eliminate ionospheric error. By default, the mode is automatically activated if the baseline length is greater or equal to 10000 meters. You can update this value in the <a href="AdvancedRTK.htm">Adv. RTK dialog</a>. There are the following combinations: <i>Variable RTK Float (I-F)</i>; <i>Variable RTK Fixed (I-F)</i>;  <b style="font-style: italic; font-weight: normal;">RTK Float (I-F)</b> and <b style="font-style: italic; font-weight: normal;">RTK Fix (I-F)</b>;</li>
+                <li value="16"><b style="font-style: italic; font-weight: normal;">W-L</b> (Wide Lane combination) - In this mode Wide Lane carrier phase combinations (L1 minus L2) are formed and used in ambiguity resolution and positioning. By default, the mode is automatically activated in  network RTK if the distance to the nearest physical reference station is greater than or equal to 40000 meters. There are the following combinations: <i>Variable RTK Float (W-L)</i>; <i>Variable RTK Fixed (W-L)</i>; <b style="font-style: italic; font-weight: normal;">RTK Float (W-L)</b> and <b style="font-style: italic; font-weight: normal;">RTK Fix (W-L)</b>;</li>
+                <li value="17"><b style="font-style: italic; font-weight: normal;">mmGPS</b> - In this mode a mmGPS+ system is connected to a rover. The RTK&#160;engine calculates the plane coordinates of the rover, and vertical coordinate is calculated by the mmGPS+ system. There are the following combinations: <i>Variable RTK Float (mmGPS)</i>; <i>Variable RTK Fixed (mmGPS)</i>; <b style="font-style: italic; font-weight: normal;">RTK Float (mmGPS)</b> and <b style="font-style: italic; font-weight: normal;">RTK Fix (mmGPS)</b>;</li>
+                <li value="18"><i>Network </i> - this information is displayed if a GNSS rover receiver uses MAC corrections. </li>
+            </ul>
+            <li value="3">WGS84 measured position of the antenna L1 phase center.</li>
+            <li value="4">PDOP value, a factor that depends solely upon satellite geometry, and is proportional to the estimated position uncertainty.</li>
+            <li value="5">HRMS and VRMS values, the RMS (the square root of the trace of position error covariance matrix) values of the horizontal and vertical coordinates, respectively.</li>
+            <li value="6">A distance between the rover and the base estimated by the RTK engine. The distance is shown in RTK positioning only.</li>
+            <li value="7">The number of satellites is used in the position computation. These satellites have the ‘wings’  on the satellite icon.  </li>
+            <li value="8">The numbers of tracked satellites. These satellites do not have the ‘wings’  on the satellite icon.</li>
+            <p class="Body">Each satellite system is marked in a certain color.</p>
+        </ul>
+        <table style="width: 90%; margin-left: 0; margin-right: auto;">
+            <col style="width: 180px;" />
+            <col />
+            <col />
+            <tbody>
+                <tr>
+                    <td style="text-align: center;">Satellite system </td>
+                    <td style="text-align: center;">
+                        <p>Satellites are used</p>
+                        <p> in position calculation</p>
+                    </td>
+                    <td style="text-align: center;">Tracked Satellites</td>
+                </tr>
+                <tr>
+                    <td style="text-align: left;">GPS</td>
+                    <td style="text-align: center;">
+                        <img src="../../Resources/Images/GPS_use.jpg" />
+                    </td>
+                    <td style="text-align: center;">
+                        <img src="../../Resources/Images/GPS_tr.jpg" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>GLONASS</td>
+                    <td style="text-align: center;">
+                        <img src="../../Resources/Images/GLONASS_use.jpg" />
+                    </td>
+                    <td style="text-align: center;">
+                        <img src="../../Resources/Images/GLONASS_tr.jpg" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>Galileo</td>
+                    <td style="text-align: center;">
+                        <img src="../../Resources/Images/Galileo_use.jpg" />
+                    </td>
+                    <td style="text-align: center;">
+                        <img src="../../Resources/Images/Galileo_tr.jpg" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>BeiDou</td>
+                    <td style="text-align: center;">
+                        <img src="../../Resources/Images/BeiDou_use.jpg" />
+                    </td>
+                    <td style="text-align: center;">
+                        <img src="../../Resources/Images/BeiDou_tr.jpg" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>SBAS</td>
+                    <td style="text-align: center;">
+                        <img src="../../Resources/Images/SBAS_use.jpg" />
+                    </td>
+                    <td style="text-align: center;">
+                        <img src="../../Resources/Images/SBAS_tr.jpg" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>QZSS</td>
+                    <td style="text-align: center;">
+                        <img src="../../Resources/Images/QZSS_use.jpg" />
+                    </td>
+                    <td style="text-align: center;">
+                        <img src="../../Resources/Images/QZSS_tr.jpg" />
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <p>&#160;</p>
+        <div class="buttons clearfix topicToolbarProxy" style="mc-topic-toolbar-items: ;">
+            <div class="button-group-container-left">
+                <button class="button needs-pie previous-topic-button" type="button" title="Navigate previous">
+                    <img src="../../../Skins/Default/Stylesheets/Images/transparent.gif" alt="previous topic" />
+                </button>
+                <div class="button current-topic-index-button disabled"><span class="sequence-index"></span> of <span class="sequence-total"></span></div>
+                <button class="button needs-pie next-topic-button" type="button" title="Navigate next">
+                    <img src="../../../Skins/Default/Stylesheets/Images/transparent.gif" alt="next topic" />
+                </button>
+            </div>
+        </div>
+        <p>&#160;</p>
+    </body>
+</html>

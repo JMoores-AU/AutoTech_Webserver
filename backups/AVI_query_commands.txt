@@ -1,0 +1,135 @@
+# Check for modem manager commands
+mmcli --version
+mmcli -L
+mmcli -m 0
+
+# Check for Sierra Wireless modem commands  
+swi_setusbcomp --help
+swi_setusbcomp -g
+at!gstatus?
+
+# Check for QMI commands
+qmicli --help
+qmicli -d /dev/cdc-wdm0 --nas-get-signal-info
+qmicli -d /dev/cdc-wdm0 --nas-get-signal-strength
+
+# Check for AT commands via serial
+ls /dev/tty* | grep -i usb
+ls /dev/tty* | grep -i modem
+cat /dev/ttyUSB* 2>/dev/null
+
+# Check if there's a modem status file
+ls /tmp/ | grep -i modem
+ls /var/run/ | grep -i modem
+cat /tmp/modem* 2>/dev/null
+cat /var/run/modem* 2>/dev/null
+
+# Check for cellular network info
+ip link show | grep -i wwan
+ifconfig | grep -i wwan
+
+# Check UCI config (AVIOS uses OpenWrt/LEDE)
+uci show network
+uci show modem
+uci show mobile
+
+# Check if there's custom AVI commands
+which avi-modem
+which avi-status
+ls /usr/sbin/avi* 2>/dev/null
+ls /usr/bin/avi* 2>/dev/null
+
+# Check for mobile stats in procfs
+cat /proc/net/dev | grep -i mob
+cat /sys/class/net/*/statistics/* 2>/dev/null | head -20
+/mnt/bulk Usage
+bash# Get /mnt/bulk disk usage specifically
+df -h /mnt/bulk
+du -sh /mnt/bulk
+du -h /mnt/bulk | tail -1
+Device Group
+bash# Check for device group config
+cat /etc/config/system
+cat /etc/config/avios
+uci show system
+uci show avios
+
+# Check hostname file
+cat /etc/hostname
+
+# Check for group/site info
+cat /etc/site 2>/dev/null
+cat /etc/group 2>/dev/null
+cat /etc/device_info 2>/dev/null
+
+Check for Web UI Source
+bash# The GUI gets data from somewhere - let's find it
+ps aux | grep http
+ls /www/cgi-bin/
+cat /www/index.html | head -50
+
+# Check for API endpoints
+ls /www/api/ 2>/dev/null
+ls /usr/lib/lua/ 2>/dev/null
+ls /usr/lib/lua/luci/ 2>/dev/null
+Check Log Files
+bash# Mobile connection logs
+logread | grep -i modem | tail -20
+logread | grep -i mobile | tail -20
+logread | grep -i lte | tail -20
+logread | grep -i signal | tail -20
+
+# System logs that might show stats
+dmesg | grep -i modem
+dmesg | grep -i wwan
+
+# Check if mmcli is available
+mmcli --version
+
+# If mmcli exists, get modem list
+mmcli -L
+
+# Get modem 0 details (most likely command)
+mmcli -m 0
+
+# Try QMI commands (the modem uses QMI)
+qmicli -d /dev/cdc-wdm0 --nas-get-signal-strength
+qmicli -d /dev/cdc-wdm0 --nas-get-signal-info
+qmicli -d /dev/cdc-wdm0 --nas-get-serving-system
+qmicli -d /dev/cdc-wdm0 --nas-get-home-network
+qmicli -d /dev/cdc-wdm0 --dms-get-manufacturer
+qmicli -d /dev/cdc-wdm0 --dms-get-model
+
+# Check for ubus (OpenWrt's message bus - this is VERY likely)
+ubus list
+ubus list mobile*
+ubus call mobile status
+ubus call mobile.mob1p1 status
+
+# Check UCI network config for mobile interface
+uci show network.mob1p1
+uci show network | grep mob
+
+# Check if there's a mobile status file
+cat /var/run/mobile* 2>/dev/null
+ls /var/run/ | grep mob
+cat /tmp/mobile* 2>/dev/null
+
+# Check for custom status commands
+which mobile
+ls /usr/sbin/mobile*
+ls /usr/bin/mobile*
+Priority Commands (Try These First!)
+Based on what I saw, UBUS is almost certainly how the web UI gets the data:
+bash# Most likely to work:
+ubus list
+ubus call mobile status
+ubus call mobile.mob1p1 status
+Also try looking for the actual modem status:
+bash# Get full modem info
+cat /sys/class/net/mob1p1/statistics/*
+ip -s link show mob1p1
+
+# Check modem control files
+ls /sys/class/usbmisc/
+cat /sys/class/usbmisc/cdc-wdm0/* 2>/dev/null

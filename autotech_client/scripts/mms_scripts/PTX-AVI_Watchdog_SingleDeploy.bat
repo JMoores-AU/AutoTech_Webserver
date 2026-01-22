@@ -1,12 +1,20 @@
 @echo off
+title MMS Scripts - AVI Watchdog Deploy
 echo AVI-PTX Watchdog Deployment Process
 echo:
 echo:
-set /p password="Enter Password: "
+REM Check if password is already set (from launcher)
+if not defined password (
+    title MMS Scripts - AVI Watchdog Deploy - Enter Password
+    set /p password="Enter Password: "
+) else (
+    echo Password auto-filled from AutoTech launcher
+)
 cls
 echo AVI-PTX Watchdog Deployment Process...
 
 :menu
+title MMS Scripts - AVI Watchdog Deploy - Select Option
 echo:
 echo Please choose an option:
 echo 1. PTXC
@@ -27,15 +35,21 @@ if "%choice%"=="1" (
 exit /b
 
 :callCurrentScript
-set /p ip_address=Enter PTXC IP Address: 
-C:AutoTech_Clientplink.exe -t mms@10.110.19.107 -pw %password% "echo $(date): Initiated from %COMPUTERNAME% by %USERNAME% for %ip_address%. >> /home/mms/bin/remote_check/AVI_Watchdog/Report.txt; /home/mms/bin/remote_check/AVI_Watchdog/watchdog_setup_single.sh %ip_address%"
+title MMS Scripts - AVI Watchdog Deploy - Enter PTXC IP
+set /p ip_address=Enter PTXC IP Address:
+title MMS Scripts - AVI Watchdog Deploy - Deploying...
+C:\AutoTech_Client\plink.exe -t mms@10.110.19.107 -pw %password% "echo $(date): Initiated from %COMPUTERNAME% by %USERNAME% for %ip_address%. >> /home/mms/bin/remote_check/AVI_Watchdog/Report.txt; /home/mms/bin/remote_check/AVI_Watchdog/watchdog_setup_single.sh %ip_address%"
+title MMS Scripts - AVI Watchdog Deploy - Complete
 echo:
 echo:
 goto menu
 
 :callDifferentScript
-set /p ip_address=Enter PTX10 IP Address: 
-C:AutoTech_Clientplink.exe -t mms@10.110.19.107 -pw %password% "echo $(date): Initiated from %COMPUTERNAME% by %USERNAME% for %ip_address%. >> /home/mms/bin/remote_check/AVI_Watchdog/Report.txt; /home/mms/bin/remote_check/AVI_Watchdog/watchdog_setup_single_PTX10.sh %ip_address%"
+title MMS Scripts - AVI Watchdog Deploy - Enter PTX10 IP
+set /p ip_address=Enter PTX10 IP Address:
+title MMS Scripts - AVI Watchdog Deploy - Deploying...
+C:\AutoTech_Client\plink.exe -t mms@10.110.19.107 -pw %password% "echo $(date): Initiated from %COMPUTERNAME% by %USERNAME% for %ip_address%. >> /home/mms/bin/remote_check/AVI_Watchdog/Report.txt; /home/mms/bin/remote_check/AVI_Watchdog/watchdog_setup_single_PTX10.sh %ip_address%"
+title MMS Scripts - AVI Watchdog Deploy - Complete
 echo:
 echo:
 goto menu

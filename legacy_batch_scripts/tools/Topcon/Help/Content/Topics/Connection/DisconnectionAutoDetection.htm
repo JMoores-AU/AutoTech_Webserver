@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" lang="ru-RU" xml:lang="ru-RU" data-mc-search-type="Stem" data-mc-help-system-file-name="Default.xml" data-mc-path-to-help-system="../../../" data-mc-target-type="WebHelp2" data-mc-runtime-file-type="Topic" data-mc-preload-images="false" data-mc-in-preview-mode="false" data-mc-medium="non-print" data-mc-toc-path="Connection">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" /><title>Disconnection Auto Detection</title>
+        <link href="../../../Skins/Default/Stylesheets/Slideshow.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/TextEffects.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/Topic.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/Components/Styles.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/Components/Tablet.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/Components/Mobile.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../Resources/Stylesheets/TRU.css" rel="stylesheet" />
+        <style>/*&lt;meta /&gt;*/
+
+.button.previous-topic-button
+{
+	-pie-background: url('../../../Skins/Default/Stylesheets/Images/navigate-previous.png') no-repeat center center, linear-gradient(#ffffff, #ececec);
+}
+
+.button.current-topic-index-button
+{
+	-pie-background: linear-gradient(#ffffff, #ececec);
+}
+
+.button.next-topic-button
+{
+	-pie-background: url('../../../Skins/Default/Stylesheets/Images/navigate-next.png') no-repeat center center, linear-gradient(#ffffff, #ececec);
+}
+
+.needs-pie
+{
+	behavior: url('../../../Resources/Scripts/PIE-no-motw.htc');
+}
+
+</style>
+        <script src="../../../Resources/Scripts/custom.modernizr.js">
+        </script>
+        <script src="../../../Resources/Scripts/jquery.min.js">
+        </script>
+        <script src="../../../Resources/Scripts/require.min.js">
+        </script>
+        <script src="../../../Resources/Scripts/require.config.js">
+        </script>
+        <script src="../../../Resources/Scripts/foundation.min.js">
+        </script>
+        <script src="../../../Resources/Scripts/plugins.min.js">
+        </script>
+        <script src="../../../Resources/Scripts/MadCapAll.js">
+        </script>
+    </head>
+    <body class="test">
+        <p class="MCWebHelpFramesetLink MCWebHelpFramesetLinkTop"><a href="../../../Default.htm#Topics/Connection/DisconnectionAutoDetection.htm">Open topic with navigation</a>
+        </p>
+        <div class="MCBreadcrumbsBox_0"><span class="MCBreadcrumbsPrefix">You are here: </span><span class="MCBreadcrumbsSelf">Connection</span><span class="MCBreadcrumbsDivider"> &gt; </span><span class="MCBreadcrumbs">Disconnection Auto Detection</span>
+        </div>
+        <h1 class="Heading1">Disconnection Auto Detection</h1>
+        <p class="Body"><span class="MCExpanding MCExpanding_Open expanding"><a href="javascript:void(0);" class="MCExpandingHead MCExpandingHotSpot expandingHead MCExpandingHotSpot_">When in Receiver Managing or Modem Managing mode, the Application periodically checks if the device is still connected by obtaining the receiver ID. If connection to the device is lost, an error message displays <img class="MCExpanding_Image_Icon" src="../../../Skins/Default/Stylesheets/Images/transparent.gif" height="11" width="16" alt="Closed" data-mc-alt2="Open" /></a><span class="MCExpandingBody expandingBody">A connection to the receiver was lost.</span></span>
+        </p>
+        <p class="Body">The Application then closes the established connection and makes the tool area inactive. The Application will not try to reconnect to the device.</p>
+        <p class="Body">You must choose an appropriate application mode and transport, then initialize a new connection by selecting <b>Device &gt; Connect</b> from the main menu.</p>
+        <table style="border-top-style: solid;border-top-width: 1px;border-top-color: #696969;border-bottom-style: solid;border-bottom-width: 1px;border-bottom-color: #696969;">
+            <col />
+            <col style="width: 585px;" />
+            <tbody>
+                <tr>
+                    <td>
+                        <img src="../../Resources/Images/Note_Icon.gif" />
+                    </td>
+                    <td style="font-size: 11pt;">
+                        <p class="Body">Disconnection auto detection does not work when in:</p>
+                        <table class="AutoNumber_p_Bulleted" style="width: 100%; margin-left: 0;" cellspacing="0" cellpadding="0">
+                            <col style="width: 12px;" />
+                            <col style="width: 12px;" />
+                            <col style="width: auto;" />
+                            <tr>
+                                <td valign="top" />
+                                <td class="AutoNumber_p_Bulleted" valign="top"><span>• </span>
+                                </td>
+                                <td class="AutoNumber_p_Bulleted" valign="top" data-mc-autonum="• ">Simple Terminal mode while using any tool.</td>
+                            </tr>
+                        </table>
+                        <table class="AutoNumber_p_Bulleted" style="width: 100%; margin-left: 0;" cellspacing="0" cellpadding="0">
+                            <col style="width: 12px;" />
+                            <col style="width: 12px;" />
+                            <col style="width: auto;" />
+                            <tr>
+                                <td valign="top" />
+                                <td class="AutoNumber_p_Bulleted" valign="top"><span>• </span>
+                                </td>
+                                <td class="AutoNumber_p_Bulleted" valign="top" data-mc-autonum="• ">Receiver Managing mode while in the Terminal window or downloading/uploading files.</td>
+                            </tr>
+                        </table>
+                        <table class="AutoNumber_p_Bulleted" style="width: 100%; margin-left: 0;" cellspacing="0" cellpadding="0">
+                            <col style="width: 12px;" />
+                            <col style="width: 12px;" />
+                            <col style="width: auto;" />
+                            <tr>
+                                <td valign="top" />
+                                <td class="AutoNumber_p_Bulleted" valign="top"><span>• </span>
+                                </td>
+                                <td class="AutoNumber_p_Bulleted" valign="top" data-mc-autonum="• ">Modem Managing mode while using any tool.</td>
+                            </tr>
+                        </table>
+                        <table class="AutoNumber_p_Bulleted" style="width: 100%; margin-left: 0;" cellspacing="0" cellpadding="0">
+                            <col style="width: 12px;" />
+                            <col style="width: 12px;" />
+                            <col style="width: auto;" />
+                            <tr>
+                                <td valign="top" />
+                                <td class="AutoNumber_p_Bulleted" valign="top"><span>• </span>
+                                </td>
+                                <td class="AutoNumber_p_Bulleted" valign="top" data-mc-autonum="• ">Firmware Loading mode while using any tool.</td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <p class="Body">&#160;</p>
+        <table style="border-top-style: solid;border-top-width: 1px;border-top-color: #696969;border-bottom-style: solid;border-bottom-width: 1px;border-bottom-color: #696969;">
+            <col />
+            <col />
+            <tbody>
+                <tr>
+                    <td>
+                        <img src="../../Resources/Images/Note_Icon.gif" />
+                    </td>
+                    <td style="font-size: 11pt;">
+                        <p class="Body">When using a Bluetooth or USB connection the OS notifies the Application that the connection has physically been broken (e.g., the remote device was switched off). In that case, the Application also closes the established connection irrespective of the current application mode or active tool.</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="buttons clearfix topicToolbarProxy" style="mc-topic-toolbar-items: ;">
+            <div class="button-group-container-left">
+                <button class="button needs-pie previous-topic-button" type="button" title="Navigate previous">
+                    <img src="../../../Skins/Default/Stylesheets/Images/transparent.gif" alt="previous topic" />
+                </button>
+                <div class="button current-topic-index-button disabled"><span class="sequence-index"></span> of <span class="sequence-total"></span></div>
+                <button class="button needs-pie next-topic-button" type="button" title="Navigate next">
+                    <img src="../../../Skins/Default/Stylesheets/Images/transparent.gif" alt="next topic" />
+                </button>
+            </div>
+        </div>
+        <p>&#160;</p>
+    </body>
+</html>

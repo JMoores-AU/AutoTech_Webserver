@@ -1,0 +1,26 @@
+Enter Equipment Name (CAPS) or PTXC IP Address: WT66
++-------+-------------+----------------+--------------+
+| _OID_ | _CID_       | _profile       | network_ip   |
++-------+-------------+----------------+--------------+
+| WT66  | eqmt_grader | Medium Vehicle | 10.110.22.47 |
++-------+-------------+----------------+--------------+
+
+PTX IP is: 10.110.22.47
+Vehicle is Offline.
+
+
+
+
+Enter Equipment Name (CAPS) or PTXC IP Address: grd155
++--------+-------------+----------+--------------+
+| _OID_  | _CID_       | _profile | network_ip   |
++--------+-------------+----------+--------------+
+| GRD155 | eqmt_grader | CAT 24M  | 10.110.21.36 |
++--------+-------------+----------+--------------+
+
+PTX IP is: 10.110.21.36
+Vehicle is Online.
+
+PTXC Found.
+
+AVI IP is : 10.111.218.82

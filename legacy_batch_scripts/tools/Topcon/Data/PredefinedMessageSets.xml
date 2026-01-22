@@ -1,0 +1,178 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<PredefinedMessageSets>
+	<Set Name="DGNSS RTCM 2.x (Partial)" Obsolete="">
+		<Message Name="rtcm/9" MandatoryGroup="0"/>
+		<Message Name="rtcm/34" MandatoryGroup="0"/>
+		<Message Name="rtcm/3" Period="10.0"/>
+	</Set>
+	<Set Name="DGNSS RTCM 2.x">
+		<Message Name="rtcm/1" MandatoryGroup="0"/>
+		<Message Name="rtcm/31" MandatoryGroup="0"/>
+		<Message Name="rtcm/3" Period="10.0"/>
+	</Set>
+	<Set Name="RTK RTCM 2.1">
+		<Message Name="rtcm/18" MandatoryGroup="0"/>
+		<Message Name="rtcm/19" MandatoryGroup="1"/>
+		<Message Name="rtcm/22" Period="10.0"/>
+		<Message Name="rtcm/3" MandatoryGroup="2" Period="10.0"/>
+		<Message Name="rtcm/16" Period="5.0"/>
+		<Message Name="rtcm/59t" Period="10.0"/>
+	</Set>
+	<Set Name="RTK RTCM 2.3">
+		<Message Name="rtcm/18" MandatoryGroup="0"/>
+		<Message Name="rtcm/19" MandatoryGroup="1"/>
+		<Message Name="rtcm/23" Period="10.0"/>
+		<Message Name="rtcm/24" MandatoryGroup="2" Period="10.0"/>
+		<Message Name="rtcm/16" Period="5.0"/>
+		<Message Name="rtcm/59t" Period="10.0"/>
+	</Set>
+	<Set Name="RTK RTCM 3.1">
+		<Message Name="rtcm3/1004" MandatoryGroup="0"/>
+		<Message Name="rtcm3/1012" MandatoryGroup="0"/>
+		<Message Name="rtcm3/1006" MandatoryGroup="1" Period="10.0"/>
+		<Message Name="rtcm3/1008" MandatoryGroup="2" Period="10.0"/>
+		<Message Name="rtcm3/4091t" Period="10.0"/>
+		<Message Name="rtcm3/1033" Period="10.0"/>
+	</Set>
+	<Set Name="RTK RTCM 3.1 (MF)" Obsolete="">
+		<Message Name="rtcm3/1033" Period="10.0"/>
+		<Message Name="rtcm3/1004" MandatoryGroup="0"/>
+		<Message Name="rtcm3/1012" MandatoryGroup="0"/>
+		<Message Name="rtcm3/1006" MandatoryGroup="1" Period="10.0"/>
+		<Message Name="rtcm3/1008" MandatoryGroup="2" Period="10.0"/>
+		<Message Name="rtcm3/4091t" Period="10.0"/>
+	</Set>
+	<Set Name="RTK RTCM 3.2 MSM3 (Legacy)" Obsolete="">
+		<Message Name="rtcm3/1073" MandatoryGroup="0"/>
+		<Message Name="rtcm3/1083" MandatoryGroup="0"/>
+		<Message Name="rtcm3/1093" MandatoryGroup="0"/>
+		<Message Name="rtcm3/1103"/>
+		<Message Name="rtcm3/1113"/>
+		<Message Name="rtcm3/1123" MandatoryGroup="0"/>
+		<Message Name="rtcm3/1133"/>
+		<Message Name="rtcm3/1006" MandatoryGroup="1" Period="10.0"/>
+		<Message Name="rtcm3/1008" MandatoryGroup="2" Period="10.0"/>
+		<Message Name="rtcm3/4091t" Period="10.0"/>
+		<Message Name="rtcm3/1033" Period="10.0"/>
+	</Set>
+	<Set Name="RTK RTCM 3.2 MSM3 (MF)" Obsolete="">
+		<Message Name="rtcm3/1073" MandatoryGroup="0"/>
+		<Message Name="rtcm3/1083" MandatoryGroup="0"/>
+		<Message Name="rtcm3/1093" MandatoryGroup="0"/>
+		<Message Name="rtcm3/1103"/>
+		<Message Name="rtcm3/1113"/>
+		<Message Name="rtcm3/1123" MandatoryGroup="0"/>
+		<Message Name="rtcm3/1133"/>
+		<Message Name="rtcm3/1006" MandatoryGroup="1" Period="10.0" Phase="0.8"/>
+		<Message Name="rtcm3/1008" MandatoryGroup="2" Period="10.0" Phase="1.8"/>
+		<Message Name="rtcm3/4091t" Period="10.0" Phase="2.8"/>
+		<Message Name="rtcm3/1033" Period="10.0" Phase="3.8"/>
+	</Set>
+	<Set Name="RTK RTCM 3.2 MSM3">
+		<Message Name="rtcm3/1073" MandatoryGroup="0"/>
+		<Message Name="rtcm3/1083" MandatoryGroup="0"/>
+		<Message Name="rtcm3/1093" MandatoryGroup="0"/>
+		<Message Name="rtcm3/1123" MandatoryGroup="0"/>
+		<Message Name="rtcm3/1103"/>
+		<Message Name="rtcm3/1113"/>
+		<Message Name="rtcm3/1133"/>
+		<Message Name="rtcm3/1006" MandatoryGroup="1" Period="10.0" Phase="0.8"/>
+		<Message Name="rtcm3/1008" MandatoryGroup="2" Period="10.0" Phase="1.8"/>
+		<Message Name="rtcm3/4091t" Period="10.0" Phase="2.8"/>
+		<Message Name="rtcm3/1033" Period="10.0" Phase="3.8"/>
+	</Set>
+	<Set Name="RTK RTCM 3.2 MSM4 (Legacy)" Obsolete="">
+		<Message Name="rtcm3/1074" MandatoryGroup="0"/>
+		<Message Name="rtcm3/1084" MandatoryGroup="0"/>
+		<Message Name="rtcm3/1094" MandatoryGroup="0"/>
+		<Message Name="rtcm3/1104"/>
+		<Message Name="rtcm3/1114"/>
+		<Message Name="rtcm3/1124" MandatoryGroup="0"/>
+		<Message Name="rtcm3/1134"/>
+		<Message Name="rtcm3/1006" MandatoryGroup="1" Period="10.0"/>
+		<Message Name="rtcm3/1008" MandatoryGroup="2" Period="10.0"/>
+		<Message Name="rtcm3/4091t" Period="10.0"/>
+		<Message Name="rtcm3/1033" Period="10.0"/>
+	</Set>
+	<Set Name="RTK RTCM 3.2 MSM4">
+		<Message Name="rtcm3/1074" MandatoryGroup="0"/>
+		<Message Name="rtcm3/1084" MandatoryGroup="0"/>
+		<Message Name="rtcm3/1094" MandatoryGroup="0"/>
+		<Message Name="rtcm3/1124" MandatoryGroup="0"/>
+		<Message Name="rtcm3/1104"/>
+		<Message Name="rtcm3/1114"/>
+		<Message Name="rtcm3/1134"/>
+		<Message Name="rtcm3/1006" MandatoryGroup="1" Period="10.0" Phase="0.8"/>
+		<Message Name="rtcm3/1008" MandatoryGroup="2" Period="10.0" Phase="1.8"/>
+		<Message Name="rtcm3/4091t" Period="10.0" Phase="2.8"/>
+		<Message Name="rtcm3/1033" Period="10.0" Phase="3.8"/>
+	</Set>
+	<Set Name="RTK RTCM 3.2 MSM5 (Legacy)" Obsolete="">
+		<Message Name="rtcm3/1075" MandatoryGroup="0"/>
+		<Message Name="rtcm3/1085" MandatoryGroup="0"/>
+		<Message Name="rtcm3/1095" MandatoryGroup="0"/>
+		<Message Name="rtcm3/1125" MandatoryGroup="0"/>
+		<Message Name="rtcm3/1105"/>
+		<Message Name="rtcm3/1115"/>
+		<Message Name="rtcm3/1135"/>
+		<Message Name="rtcm3/1006" MandatoryGroup="1" Period="10.0"/>
+		<Message Name="rtcm3/1008" MandatoryGroup="2" Period="10.0"/>
+		<Message Name="rtcm3/4091t" Period="10.0"/>
+		<Message Name="rtcm3/1033" Period="10.0"/>
+	</Set>
+	<Set Name="RTK RTCM 3.2 MSM5">
+		<Message Name="rtcm3/1075" MandatoryGroup="0"/>
+		<Message Name="rtcm3/1085" MandatoryGroup="0"/>
+		<Message Name="rtcm3/1095" MandatoryGroup="0"/>
+		<Message Name="rtcm3/1105"/>
+		<Message Name="rtcm3/1115"/>
+		<Message Name="rtcm3/1125" MandatoryGroup="0"/>
+		<Message Name="rtcm3/1135"/>
+		<Message Name="rtcm3/1006" MandatoryGroup="1" Period="10.0" Phase="0.8"/>
+		<Message Name="rtcm3/1008" MandatoryGroup="2" Period="10.0" Phase="1.8"/>
+		<Message Name="rtcm3/4091t" Period="10.0" Phase="2.8"/>
+		<Message Name="rtcm3/1033" Period="10.0" Phase="3.8"/>
+	</Set>
+	<Set Name="RTK CMR">
+		<Message Name="cmr/10" MandatoryGroup="0"/>
+		<Message Name="cmr/0" MandatoryGroup="0"/>
+		<Message Name="cmr/1" MandatoryGroup="1" Period="10.0"/>
+		<Message Name="cmr/2" Period="10.0"/>
+		<Message Name="cmr/5" Period="10.0"/>
+	</Set>
+	<Set Name="RTK CMR+">
+		<Message Name="cmr/10" MandatoryGroup="0"/>
+		<Message Name="cmr/0" MandatoryGroup="0"/>
+		<Message Name="cmr/9" MandatoryGroup="1"/>
+	</Set>
+	<Set Name="HD2 TPS">
+		<Message Name="jps/RT" MandatoryGroup="0"/>
+		<Message Name="jps/SI" MandatoryGroup="1"/>
+		<Message Name="jps/rc" MandatoryGroup="2"/>
+		<Message Name="jps/2r"/>
+		<Message Name="jps/cp" MandatoryGroup="3"/>
+		<Message Name="jps/2p"/>
+		<Message Name="jps/PO" MandatoryGroup="4"/>
+		<Message Name="jps/ET" MandatoryGroup="5"/>
+	</Set>
+	<Set Name="HD2 RTCM 3">
+		<Message Name="rtcm3/1008" MandatoryGroup="0" Period="10.0"/>
+		<Message Name="rtcm3/4091h" MandatoryGroup="1"/>
+		<Message Name="rtcm3/1073" MandatoryGroup="2"/>
+		<Message Name="rtcm3/1083" MandatoryGroup="2"/>
+		<Message Name="rtcm3/1093" MandatoryGroup="2"/>
+		<Message Name="rtcm3/1123" MandatoryGroup="2"/>
+		<Message Name="rtcm3/1103"/>
+		<Message Name="rtcm3/1113"/>
+		<Message Name="rtcm3/1133"/>
+	</Set>
+	<Set Name="NMEA">
+		<Message Name="nmea/GGA" MandatoryGroup="0"/>
+		<Message Name="nmea/GSA"/>
+		<Message Name="nmea/ZDA"/>
+		<Message Name="nmea/VTG"/>
+	</Set>
+	<Set Name="NMEA GGA">
+		<Message Name="nmea/GGA"/>
+	</Set>
+</PredefinedMessageSets>

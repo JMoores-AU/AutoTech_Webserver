@@ -1,0 +1,64 @@
+============================================
+  AUTOTECH CLIENT - DEPLOYMENT NOTES
+============================================
+
+DEPLOYMENT FLOW:
+----------------
+1. Development Environment (C:\AutoTech_WebApps\T1_Tools_Web-1\)
+       |
+       | BUILD_WEBSERVER.bat (option 11 or 13)
+       v
+2. USB Drive (E:\AutoTech\)
+       |
+       | User runs Install_AutoTech_Client.bat
+       v
+3. Remote Client PC (C:\AutoTech\)
+
+
+WHAT GETS DEPLOYED TO USB:
+--------------------------
+From BUILD_WEBSERVER.bat:
+  - AutoTech.exe              -> E:\AutoTech.exe
+  - autotech_client\          -> E:\AutoTech\autotech_client\
+    - Install_AutoTech_Client.bat
+    - VERSION
+    - tools\*.exe
+    - scripts\*.bat
+  - tools\equipment_db.py     -> E:\AutoTech\tools\
+  - tools\ptx_uptime_db.py    -> E:\AutoTech\tools\
+  - database\ folder          -> E:\AutoTech\database\
+
+
+WHAT GETS INSTALLED ON CLIENT:
+------------------------------
+From Install_AutoTech_Client.bat:
+  - tools\*.exe               -> C:\AutoTech\
+  - VERSION                   -> C:\AutoTech\
+  - scripts\*.bat             -> C:\AutoTech\scripts\
+  - mms_scripts\*.bat         -> C:\AutoTech\mms_scripts\
+  - URI handlers registered in Windows Registry
+
+
+IMPORTANT NOTES:
+----------------
+1. USB must be connected during build to deploy changes
+
+2. Changes to client tools/scripts are NOT automatically
+   pushed to remote clients. Users must:
+   - Run Install_AutoTech_Client.bat from USB again
+   - OR manually copy updated files
+
+3. VERSION file is used to track updates:
+   - Server checks autotech_client\VERSION
+   - Client has C:\AutoTech\VERSION
+   - Mismatch shows "Update Available" in dashboard
+
+4. To update client version:
+   - Edit autotech_client\VERSION (e.g., change 1.1.1 to 1.1.2)
+   - Run build to deploy to USB
+   - Users re-run installer to get update
+
+
+VERSION HISTORY:
+----------------
+1.1.1 - Initial version tracking

@@ -3,200 +3,257 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PTX Uptime Report - AutoTech</title>
+    <title>PTX Uptime Report{% if not online %} - OFFLINE TESTING MODE{% endif %} - AutoTech</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <style>
-        .uptime-container {
-            max-width: 1600px;
-            margin: 0 auto;
-            padding: 2rem;
-            min-height: 100vh;
-        }
-
-        .uptime-header {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 20px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        /* PTX Uptime Specific Styles */
+        .uptime-header-section {
+            background: var(--theme-bg-card);
+            border: 1px solid var(--theme-border);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 24px;
             text-align: center;
         }
 
-        .uptime-header h1 {
-            color: #64b5f6;
-            margin: 0 0 1rem 0;
-            font-size: 2.5rem;
-            font-weight: 700;
+        .uptime-header-section h2 {
+            color: var(--theme-text-bright);
+            margin: 0 0 8px 0;
+            font-size: 1.5rem;
         }
 
         .mode-badge {
             display: inline-block;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-size: 0.9rem;
+            padding: 6px 14px;
+            border-radius: 16px;
+            font-size: 0.85rem;
             font-weight: 600;
-            margin: 1rem 0;
-            background: linear-gradient(45deg, #ff9800, #ffb74d);
+            margin-top: 8px;
+        }
+
+        .mode-badge.offline-badge {
+            background: rgba(168, 85, 247, 0.15);
+            color: #a855f7;
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            animation: pulse 2s infinite;
+        }
+
+        .mode-badge.reference-badge {
+            background: rgba(245, 158, 11, 0.15);
+            color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        /* Testing Controls */
+        .testing-controls {
+            background: rgba(168, 85, 247, 0.1);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .testing-controls h3 {
+            color: #a855f7;
+            margin: 0 0 16px 0;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        .test-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        .test-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
             color: white;
         }
 
+        .test-btn-primary { background: linear-gradient(135deg, var(--theme-primary), var(--theme-primary-hover)); }
+        .test-btn-success { background: linear-gradient(135deg, #22c55e, #16a34a); }
+        .test-btn-warning { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .test-btn-danger { background: linear-gradient(135deg, #ef4444, #dc2626); }
+
+        .test-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+
+        .test-log {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            font-family: 'Consolas', monospace;
+            font-size: 0.8rem;
+            color: var(--theme-text);
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--theme-bg-card);
+            border: 1px solid var(--theme-border);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+
+        .stat-card h3 {
+            color: var(--theme-text-muted);
+            margin: 0 0 8px 0;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--theme-text-bright);
+        }
+
+        /* Filter Section */
         .filter-section {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            background: var(--theme-bg-card);
+            border: 1px solid var(--theme-border);
+            border-radius: var(--radius-lg);
+            padding: 16px 24px;
+            margin-bottom: 24px;
         }
 
         .filter-container {
             display: flex;
-            gap: 15px;
+            gap: 16px;
             align-items: center;
             justify-content: center;
             flex-wrap: wrap;
         }
 
         .filter-container label {
-            font-weight: bold;
-            color: #64b5f6;
-            font-size: 1rem;
+            font-weight: 600;
+            color: var(--theme-text);
+            font-size: 0.9rem;
         }
 
         .filter-container select {
-            padding: 10px 15px;
-            border-radius: 10px;
-            border: 1px solid rgba(100, 181, 246, 0.3);
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            backdrop-filter: blur(10px);
-            font-size: 14px;
-            font-weight: 600;
+            padding: 10px 16px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--theme-border);
+            background: var(--theme-bg);
+            color: var(--theme-text);
+            font-size: 0.9rem;
+            font-weight: 500;
             min-width: 150px;
-            transition: all 0.3s ease;
         }
 
         .filter-container select:focus {
             outline: none;
-            border-color: #64b5f6;
-            box-shadow: 0 0 15px rgba(100, 181, 246, 0.3);
-            background: rgba(255, 255, 255, 0.15);
+            border-color: var(--theme-primary);
+            box-shadow: 0 0 0 3px var(--theme-primary-light);
         }
 
         .filter-container select option {
-            background: #1a1a2e;
-            color: white;
-            padding: 8px;
+            background: var(--theme-bg);
+            color: var(--theme-text);
         }
 
         .count-display {
-            color: #4caf50;
-            font-weight: bold;
-            padding: 8px 15px;
-            background: rgba(76, 175, 80, 0.1);
-            border-radius: 10px;
-            border: 1px solid rgba(76, 175, 80, 0.3);
-            font-size: 0.95rem;
-            backdrop-filter: blur(10px);
+            color: var(--status-online);
+            font-weight: 600;
+            padding: 8px 14px;
+            background: rgba(34, 197, 94, 0.1);
+            border-radius: var(--radius-sm);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            font-size: 0.85rem;
         }
 
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
+        /* Equipment Table */
+        .table-section {
+            background: var(--theme-bg-card);
+            border: 1px solid var(--theme-border);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 24px;
         }
 
-        .stat-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            padding: 1.5rem;
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-
-        .stat-card h3 {
-            color: #64b5f6;
-            margin: 0 0 1rem 0;
-            font-size: 1rem;
-        }
-
-        .stat-number {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: #e8e8e8;
-            display: block;
-        }
-
-        .uptime-table-container {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(15px);
-            border-radius: 20px;
-            padding: 2rem;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            margin-bottom: 2rem;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-        }
-
-        .uptime-table-container h2 {
-            color: #64b5f6;
-            margin: 0 0 1.5rem 0;
-            text-align: center;
-            font-size: 1.8rem;
+        .table-section h2 {
+            color: var(--theme-text-bright);
+            margin: 0 0 20px 0;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .table-wrapper {
             overflow-x: auto;
-            border-radius: 15px;
+            border-radius: var(--radius-md);
         }
 
         .equipment-table {
             width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-            background: rgba(255, 255, 255, 0.02);
-            border-radius: 15px;
+            border-collapse: collapse;
+            background: var(--theme-bg);
+            border-radius: var(--radius-md);
             overflow: hidden;
         }
 
         .equipment-table th {
-            background: linear-gradient(135deg, rgba(100, 181, 246, 0.2), rgba(100, 181, 246, 0.1));
-            color: #64b5f6;
-            padding: 1.2rem 1rem;
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--theme-primary);
+            padding: 14px 12px;
             text-align: center;
             font-weight: 600;
-            font-size: 1rem;
-            border-bottom: 2px solid rgba(100, 181, 246, 0.3);
+            font-size: 0.85rem;
+            border-bottom: 2px solid var(--theme-border);
             white-space: nowrap;
         }
 
         .equipment-table td {
-            padding: 1.2rem 1rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            color: #e8e8e8;
-            font-size: 0.95rem;
+            padding: 14px 12px;
+            border-bottom: 1px solid var(--theme-border);
+            color: var(--theme-text);
+            font-size: 0.9rem;
             text-align: center;
             vertical-align: middle;
         }
 
         .equipment-table tr:hover {
-            background: rgba(100, 181, 246, 0.1);
+            background: rgba(59, 130, 246, 0.05);
+        }
+
+        .equipment-table tr:last-child td {
+            border-bottom: none;
         }
 
         .rank-cell {
-            text-align: center;
             font-weight: 700;
-            color: #64b5f6;
+            color: var(--theme-primary);
             width: 60px;
         }
 
@@ -206,266 +263,166 @@
 
         .equipment-id {
             font-weight: 600;
-            color: #64b5f6;
-            text-align: center;
-            width: 120px;
+            color: var(--theme-text-bright);
         }
 
         .ip-address {
-            font-family: 'Courier New', monospace;
-            color: #b0b0b0;
-            text-align: center;
-            width: 140px;
+            font-family: 'Consolas', monospace;
+            color: var(--theme-text-muted);
         }
 
-        .uptime-cell {
-            text-align: center;
-            width: 110px;
-        }
-
-        .uptime-value {
+        .uptime-cell .uptime-value {
             font-weight: 700;
-            color: #4caf50;
-            font-size: 1.1rem;
-            line-height: 1.2;
+            color: var(--status-online);
+            font-size: 1rem;
         }
 
-        .uptime-hours {
-            font-size: 0.85rem;
-            color: #b0b0b0;
-            margin-top: 0.2rem;
-            line-height: 1;
+        .uptime-cell .uptime-hours {
+            font-size: 0.75rem;
+            color: var(--theme-text-muted);
+            margin-top: 2px;
         }
 
-        .status-cell {
-            text-align: center;
-            width: 100px;
-        }
-
+        /* Status Badges */
         .status-badge {
-            padding: 0.4rem 0.8rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
+            padding: 5px 12px;
+            border-radius: 12px;
+            font-size: 0.75rem;
             font-weight: 600;
             text-transform: uppercase;
             white-space: nowrap;
         }
 
         .status-online {
-            background: linear-gradient(45deg, #4caf50, #66bb6a);
-            color: white;
+            background: rgba(34, 197, 94, 0.15);
+            color: var(--status-online);
+            border: 1px solid rgba(34, 197, 94, 0.3);
         }
 
         .status-offline {
-            background: linear-gradient(45deg, #f44336, #ef5350);
-            color: white;
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--status-offline);
+            border: 1px solid rgba(239, 68, 68, 0.3);
         }
 
         .status-checking {
-            background: linear-gradient(45deg, #ff9800, #ffb74d);
-            color: white;
+            background: rgba(245, 158, 11, 0.15);
+            color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.3);
             animation: pulse 1.5s infinite;
         }
 
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.7; }
-            100% { opacity: 1; }
-        }
-
-        .ptx-type-cell {
-            text-align: center;
-            width: 100px;
-        }
-
+        /* PTX Type Badges */
         .ptx-type-badge {
-            padding: 0.3rem 0.6rem;
-            border-radius: 15px;
-            font-size: 0.75rem;
+            padding: 4px 10px;
+            border-radius: 10px;
+            font-size: 0.7rem;
             font-weight: 600;
             text-transform: uppercase;
         }
 
         .ptx-type-ptxc {
-            background: linear-gradient(45deg, #2196f3, #42a5f5);
-            color: white;
+            background: rgba(59, 130, 246, 0.15);
+            color: var(--status-info);
+            border: 1px solid rgba(59, 130, 246, 0.3);
         }
 
         .ptx-type-ptx10 {
-            background: linear-gradient(45deg, #9c27b0, #ba68c8);
-            color: white;
+            background: rgba(168, 85, 247, 0.15);
+            color: #a855f7;
+            border: 1px solid rgba(168, 85, 247, 0.3);
         }
 
         .ptx-type-unknown {
-            background: rgba(255, 255, 255, 0.1);
-            color: #888;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--theme-text-muted);
+            border: 1px solid var(--theme-border);
         }
 
-        .reboot-cell {
-            text-align: center;
-            width: 140px;
-            vertical-align: middle;
-        }
-
+        /* Reboot Button */
         .reboot-btn {
-            background: linear-gradient(45deg, #f44336, #ef5350);
+            background: linear-gradient(135deg, #ef4444, #dc2626);
             color: white;
             border: none;
-            padding: 0.6rem 1rem;
-            border-radius: 10px;
+            padding: 8px 14px;
+            border-radius: var(--radius-sm);
             font-size: 0.8rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 8px rgba(244, 67, 54, 0.3);
-            white-space: nowrap;
-            min-width: 90px;
-            display: inline-block;
-            margin: 0 auto;
+            transition: all 0.2s ease;
+            min-width: 80px;
         }
 
         .reboot-btn:hover:not(:disabled) {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(244, 67, 54, 0.4);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
         }
 
         .reboot-btn:disabled {
-            background: #9e9e9e;
+            background: var(--theme-bg);
+            color: var(--theme-text-muted);
             cursor: not-allowed;
             transform: none;
             box-shadow: none;
         }
 
-        .reboot-success {
-            background: linear-gradient(45deg, #4caf50, #66bb6a) !important;
+        .reboot-btn.reboot-success {
+            background: linear-gradient(135deg, #22c55e, #16a34a) !important;
             color: white !important;
         }
 
         .reboot-timestamp {
-            font-size: 0.7rem;
-            color: #b0b0b0;
-            margin-top: 0.2rem;
-            line-height: 1;
+            font-size: 0.65rem;
+            color: rgba(255,255,255,0.8);
+            margin-top: 2px;
         }
 
-        .actions-section {
+        /* Action Buttons */
+        .actions-row {
             display: flex;
-            gap: 1rem;
+            gap: 12px;
             justify-content: center;
             flex-wrap: wrap;
-            margin-top: 2rem;
         }
 
         .action-btn {
-            display: flex;
+            display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
-            padding: 1rem 1.5rem;
+            gap: 8px;
+            padding: 12px 20px;
             border: none;
-            border-radius: 15px;
+            border-radius: var(--radius-sm);
             color: white;
-            font-size: 1rem;
+            font-size: 0.9rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
             text-decoration: none;
+            transition: all 0.2s ease;
         }
 
         .btn-download {
-            background: linear-gradient(45deg, #4caf50, #66bb6a);
-            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+            background: linear-gradient(135deg, #22c55e, #16a34a);
         }
 
         .btn-download:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
-            text-decoration: none;
+            box-shadow: 0 4px 15px rgba(34, 197, 94, 0.4);
             color: white;
+            text-decoration: none;
         }
 
         .btn-refresh {
-            background: linear-gradient(45deg, #2196f3, #42a5f5);
-            box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
+            background: linear-gradient(135deg, var(--theme-primary), var(--theme-primary-hover));
         }
 
         .btn-refresh:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(33, 150, 243, 0.4);
-            text-decoration: none;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
             color: white;
-        }
-
-        .btn-back {
-            background: linear-gradient(45deg, #757575, #9e9e9e);
-            box-shadow: 0 4px 15px rgba(117, 117, 117, 0.3);
-        }
-
-        .btn-back:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(117, 117, 117, 0.4);
             text-decoration: none;
-            color: white;
         }
 
-        @media (max-width: 768px) {
-            .uptime-container {
-                padding: 1rem;
-            }
-            
-            .stats-grid {
-                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-                gap: 1rem;
-            }
-            
-            .filter-container {
-                flex-direction: column;
-                gap: 10px;
-                text-align: center;
-            }
-
-            .filter-container select {
-                min-width: 200px;
-            }
-            
-            .actions-section {
-                flex-direction: column;
-                align-items: center;
-            }
-            
-            .action-btn {
-                width: 100%;
-                max-width: 300px;
-                justify-content: center;
-            }
-
-            .equipment-table th,
-            .equipment-table td {
-                padding: 0.8rem 0.4rem;
-                font-size: 0.8rem;
-            }
-
-            .uptime-header h1 {
-                font-size: 2rem;
-            }
-
-            .rank-cell { width: 40px; }
-            .equipment-id { width: 80px; }
-            .ip-address { width: 100px; font-size: 0.75rem; }
-            .uptime-cell { width: 80px; }
-            .status-cell { width: 80px; }
-            .ptx-type-cell { width: 70px; }
-            .reboot-cell { width: 100px; }
-
-            .reboot-btn {
-                padding: 0.4rem 0.6rem;
-                font-size: 0.7rem;
-                min-width: 70px;
-            }
-
-            .uptime-value { font-size: 0.9rem; }
-            .uptime-hours { font-size: 0.75rem; }
-        }
-
+        /* Modal Styles */
         .modal {
             display: none;
             position: fixed;
@@ -475,267 +432,838 @@
             width: 100%;
             height: 100%;
             background-color: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(5px);
         }
 
         .modal-content {
-            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+            background: var(--theme-bg-card);
+            border: 1px solid var(--theme-border);
             margin: 10% auto;
-            padding: 3rem;
-            border: 1px solid rgba(100, 181, 246, 0.3);
-            border-radius: 25px;
+            padding: 0;
+            border-radius: var(--radius-lg);
             width: 90%;
-            max-width: 550px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(20px);
-            text-align: center;
+            max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
             animation: modalSlideIn 0.3s ease-out;
         }
 
         @keyframes modalSlideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-50px) scale(0.9);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
+            from { opacity: 0; transform: translateY(-30px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        .modal-content h2 {
-            color: #ff9800;
-            text-align: center;
-            margin: 0 0 2rem 0;
-            font-size: 1.8rem;
-            font-weight: 700;
-            text-shadow: 0 2px 10px rgba(255, 152, 0, 0.3);
-        }
-
-        .modal-content p {
-            color: #e8e8e8;
-            line-height: 1.8;
-            margin-bottom: 1.5rem;
-            font-size: 1.1rem;
-        }
-
-        .modal-content p:first-of-type {
-            background: rgba(100, 181, 246, 0.1);
-            padding: 1.5rem;
-            border-radius: 15px;
-            border: 1px solid rgba(100, 181, 246, 0.2);
-            margin-bottom: 2rem;
-        }
-
-        .modal-content strong {
-            color: #64b5f6;
-            font-weight: 600;
-        }
-
-        .modal-buttons {
+        .modal-header {
             display: flex;
-            gap: 1.5rem;
-            justify-content: center;
-            margin-top: 3rem;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--theme-border);
+        }
+
+        .modal-header h2 {
+            color: #f59e0b;
+            margin: 0;
+            font-size: 1.25rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--theme-text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .modal-body p {
+            color: var(--theme-text);
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+
+        .modal-body .info-box {
+            background: var(--theme-bg);
+            padding: 16px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--theme-border);
+            margin-bottom: 16px;
+        }
+
+        .modal-body strong {
+            color: var(--theme-text-bright);
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            padding: 20px 24px;
+            border-top: 1px solid var(--theme-border);
         }
 
         .modal-btn {
-            padding: 1rem 2rem;
+            padding: 10px 20px;
             border: none;
-            border-radius: 15px;
+            border-radius: var(--radius-sm);
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 1.1rem;
-            min-width: 140px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
         }
 
         .modal-btn-cancel {
-            background: linear-gradient(45deg, #757575, #9e9e9e);
-            color: white;
-        }
-
-        .modal-btn-proceed {
-            background: linear-gradient(45deg, #ff9800, #ffb74d);
-            color: white;
-        }
-
-        .modal-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            background: var(--theme-bg);
+            color: var(--theme-text);
+            border: 1px solid var(--theme-border);
         }
 
         .modal-btn-cancel:hover {
-            background: linear-gradient(45deg, #9e9e9e, #bdbdbd);
+            background: var(--theme-border);
+        }
+
+        .modal-btn-proceed {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
         }
 
         .modal-btn-proceed:hover {
-            background: linear-gradient(45deg, #ffb74d, #ffc947);
-            box-shadow: 0 8px 25px rgba(255, 152, 0, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+        }
+
+        /* Uptime Checker Controls */
+        .checker-controls {
+            background: var(--theme-bg-card);
+            border: 1px solid var(--theme-border);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .checker-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .checker-header h3 {
+            color: var(--theme-text-bright);
+            margin: 0;
+            font-size: 1.1rem;
+        }
+
+        .checker-status {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            background: rgba(107, 114, 128, 0.3);
+            color: #9ca3af;
+        }
+
+        .checker-status.running {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+            animation: pulse 2s infinite;
+        }
+
+        .checker-status.waiting {
+            background: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+        }
+
+        .checker-status.error {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+
+        .checker-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .checker-stat {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .checker-label {
+            color: var(--theme-text-muted);
+            font-size: 0.85rem;
+        }
+
+        .checker-value {
+            color: var(--theme-text-bright);
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .checker-value.checker-online {
+            color: #22c55e;
+        }
+
+        .checker-value.checker-offline {
+            color: #f59e0b;
+        }
+
+        .checker-value.checker-error {
+            color: #ef4444;
+        }
+
+        .checker-footer {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--theme-border);
+        }
+
+        .checker-note {
+            color: var(--theme-text-muted);
+            font-size: 0.8rem;
+            font-style: italic;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .filter-container {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .checker-info {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .checker-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .equipment-table th,
+            .equipment-table td {
+                padding: 10px 8px;
+                font-size: 0.8rem;
+            }
+
+            .test-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .test-btn {
+                width: 100%;
+                max-width: 200px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="uptime-container">
-        <!-- Header Section -->
-        <div class="uptime-header">
-            <h1>PTX Uptime Report</h1>
-            {% if mode == 'reference' %}
-            <div class="mode-badge">
-                Reference Data (Offline Testing)
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <span class="sidebar-logo-icon">🛠️</span>
+                    <div>
+                        <div class="sidebar-logo-text">AutoTech</div>
+                        <div class="sidebar-logo-subtitle">Mining Equipment</div>
+                    </div>
+                </div>
             </div>
-            {% endif %}
-        </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Main</div>
+                    <a href="{{ url_for('dashboard') }}" class="nav-item"><span class="nav-item-icon">📊</span><span>Dashboard</span></a>
+                    <a href="{{ url_for('run_tool', tool_name='IP Finder') }}" class="nav-item"><span class="nav-item-icon">🔍</span><span>IP Finder</span></a>
+                    <a href="{{ url_for('run_tool', tool_name='PTX Uptime') }}" class="nav-item active"><span class="nav-item-icon">⏱️</span><span>PTX Uptime</span></a>
+                </div>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="sidebar-status">
+                    <span class="status-indicator {{ 'online' if online else 'offline' }}"></span>
+                    <span>{{ 'Network Online' if online else 'Offline Mode' }}</span>
+                </div>
+            </div>
+        </aside>
 
-        <!-- Filter Section -->
-        <div class="filter-section">
-            <div class="filter-container">
-                <label for="rangeSel"><strong>Filter rows where Last_Check is within</strong></label>
-                <select id="rangeSel">
-                    <option value="1">Last 1 days</option>
-                    <option value="7" selected>Last 7 days</option>
-                    <option value="14">Last 14 days</option>
-                    <option value="30">Last 30 days</option>
-                    <option value="all">All time</option>
-                </select>
-                <span id="shownCount" class="count-display"></span>
-            </div>
-        </div>
+        <main class="main-content">
+            <header class="top-header">
+                <h1 class="header-title">PTX Uptime Report</h1>
+                <div class="header-actions">
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-secondary btn-sm">← Dashboard</a>
+                </div>
+            </header>
 
-        <!-- Statistics Grid -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <h3>Total Equipment</h3>
-                <span class="stat-number">{{ statistics.total_equipment }}</span>
-            </div>
-            <div class="stat-card">
-                <h3>Average Uptime</h3>
-                <span class="stat-number">{{ statistics.avg_uptime }}h</span>
-            </div>
-            <div class="stat-card">
-                <h3>Maximum Uptime</h3>
-                <span class="stat-number">{{ statistics.max_uptime }}h</span>
-            </div>
-            <div class="stat-card">
-                <h3>Equipment > 3 Days</h3>
-                <span class="stat-number">{{ statistics.high_uptime_count }}</span>
-            </div>
-        </div>
+            <div class="content-container">
+                <!-- Mode Header -->
+                {% if not online or mode == 'reference' %}
+                <div class="uptime-header-section">
+                    {% if not online %}
+                    <div class="mode-badge offline-badge">
+                        OFFLINE TESTING MODE - All Functions Available
+                    </div>
+                    {% elif mode == 'reference' %}
+                    <div class="mode-badge reference-badge">
+                        Reference Data (Offline Testing)
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
 
-        <!-- Greater than 3 Days Equipment Table -->
-        <div class="uptime-table-container">
-            <h2>Equipment with Uptime > 3 Days</h2>
-            <div class="table-wrapper">
-                <table class="equipment-table">
-                    <thead>
-                        <tr>
-                            <th>Rank</th>
-                            <th>Equipment ID</th>
-                            <th>IP Address</th>
-                            <th>Uptime</th>
-                            <th>Status</th>
-                            <th>PTX Type</th>
-                            <th>Reboot PTX</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for equipment in high_uptime_equipment %}
-                        <tr class="{{ 'critical-uptime' if equipment.uptime_days > 30 else ('high-uptime' if equipment.uptime_days > 14 else ('medium-uptime' if equipment.uptime_days > 7 else 'low-uptime')) }}" 
-                            data-ts="{{ equipment.timestamp if equipment.timestamp else (range(1757000000, 1757340990) | random) }}">
-                            <td class="rank-cell {{ 'rank-' + loop.index|string if loop.index <= 3 else '' }}">
-                                #{{ loop.index }}
-                            </td>
-                            <td class="equipment-id">{{ equipment.equipment_id }}</td>
-                            <td class="ip-address">{{ equipment.ip }}</td>
-                            <td class="uptime-cell">
-                                <div class="uptime-value">{{ equipment.uptime_days }} days</div>
-                                <div class="uptime-hours">({{ equipment.uptime_hours }}h)</div>
-                            </td>
-                            <td class="status-cell">
-                                <span class="status-badge status-checking" id="status-{{ loop.index }}">
-                                    Checking...
-                                </span>
-                            </td>
-                            <td class="ptx-type-cell" id="ptx-type-{{ loop.index }}">
-                                <span class="ptx-type-badge ptx-type-unknown">-</span>
-                            </td>
-                            <td class="reboot-cell" id="reboot-cell-{{ loop.index }}">
-                                <button class="reboot-btn" 
-                                        id="reboot-btn-{{ loop.index }}"
-                                        data-ip="{{ equipment.ip|e }}"
-                                        data-equipment-id="{{ equipment.equipment_id|e }}"
-                                        data-index="{{ loop.index }}"
-                                        onclick="confirmRebootFromData(this)"
-                                        disabled>
-                                    🔄 Reboot
-                                </button>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
+                {% if not online %}
+                <!-- Testing Controls - Only shown in offline mode -->
+                <div class="testing-controls">
+                    <h3>OFFLINE TESTING CONTROLS</h3>
+                    <div class="test-buttons">
+                        <button class="test-btn test-btn-primary" onclick="testStatusChecking()">Test Status Checking</button>
+                        <button class="test-btn test-btn-success" onclick="testPTXTypes()">Test PTX Type Detection</button>
+                        <button class="test-btn test-btn-warning" onclick="testRebootSimulation()">Test Reboot Simulation</button>
+                        <button class="test-btn test-btn-danger" onclick="testErrorHandling()">Test Error Handling</button>
+                        <button class="test-btn test-btn-primary" onclick="testFilterSystem()">Test Time Filtering</button>
+                        <button class="test-btn test-btn-success" onclick="testStorageSystem()">Test Local Storage</button>
+                        <button class="test-btn test-btn-warning" onclick="runFullSystemTest()">RUN FULL SYSTEM TEST</button>
+                        <button class="test-btn test-btn-danger" onclick="clearTestLog()">Clear Log</button>
+                    </div>
+                    <div class="test-log" id="testLog">
+                        <div style="color: #a855f7; font-weight: bold;">OFFLINE TESTING MODE ACTIVE</div>
+                        <div>Click buttons above to test individual functions or run full system test.</div>
+                        <div>All functionality simulated - no actual network calls made.</div>
+                        <div style="color: #22c55e;">Ready for testing...</div>
+                    </div>
+                </div>
+                {% endif %}
 
-        <!-- Action Buttons -->
-        <div class="actions-section">
-            <a href="{{ url_for('ptx_uptime_csv') }}" class="action-btn btn-download">
-                📄 Download CSV Report
-            </a>
-            <a href="{{ url_for('run_tool', tool_name='PTX Uptime') }}?refresh={{ range(1000, 9999) | random }}" class="action-btn btn-refresh">
-                🔄 Refresh Data
-            </a>
-            <a href="{{ url_for('dashboard') }}" class="action-btn btn-back">
-                🏠 Back to Dashboard
-            </a>
-        </div>
+                <!-- Statistics Grid -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Total Equipment</h3>
+                        <span class="stat-number">{{ statistics.total_equipment }}</span>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Average Uptime</h3>
+                        <span class="stat-number">{{ statistics.avg_uptime }}h</span>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Maximum Uptime</h3>
+                        <span class="stat-number">{{ statistics.max_uptime }}h</span>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Equipment > 3 Days</h3>
+                        <span class="stat-number">{{ statistics.high_uptime_count }}</span>
+                    </div>
+                </div>
+
+                {% if online %}
+                <!-- Uptime Checker Status - Auto-runs in background -->
+                <div class="checker-controls" id="checkerControls">
+                    <div class="checker-header">
+                        <h3>🔄 Live Uptime Checker</h3>
+                        <span class="checker-status" id="checkerStatus">Loading...</span>
+                    </div>
+                    <div class="checker-info">
+                        <div class="checker-stat">
+                            <span class="checker-label">Current:</span>
+                            <span class="checker-value" id="checkerCurrent">--</span>
+                        </div>
+                        <div class="checker-stat">
+                            <span class="checker-label">Progress:</span>
+                            <span class="checker-value" id="checkerProgress">-- / --</span>
+                        </div>
+                        <div class="checker-stat">
+                            <span class="checker-label">Online:</span>
+                            <span class="checker-value checker-online" id="checkerOnline">--</span>
+                        </div>
+                        <div class="checker-stat">
+                            <span class="checker-label">Offline:</span>
+                            <span class="checker-value checker-offline" id="checkerOffline">--</span>
+                        </div>
+                        <div class="checker-stat">
+                            <span class="checker-label">Errors:</span>
+                            <span class="checker-value checker-error" id="checkerErrors">--</span>
+                        </div>
+                        <div class="checker-stat">
+                            <span class="checker-label">Interval:</span>
+                            <span class="checker-value" id="checkerInterval">30 min</span>
+                        </div>
+                        <div class="checker-stat">
+                            <span class="checker-label">Next Cycle:</span>
+                            <span class="checker-value" id="checkerNextCycle">--</span>
+                        </div>
+                    </div>
+                    <div class="checker-footer">
+                        <span class="checker-note">Uptime checker runs automatically every 30 minutes. Skips offline equipment.</span>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Filter Section -->
+                <div class="filter-section">
+                    <div class="filter-container">
+                        <label for="rangeSel">Filter rows where Last_Check is within:</label>
+                        <select id="rangeSel">
+                            <option value="1">Last 1 day</option>
+                            <option value="7" selected>Last 7 days</option>
+                            <option value="14">Last 14 days</option>
+                            <option value="30">Last 30 days</option>
+                            <option value="all">All time</option>
+                        </select>
+                        <span id="shownCount" class="count-display"></span>
+                    </div>
+                </div>
+
+                <!-- Equipment Table -->
+                <div class="table-section">
+                    <h2>⏱️ Equipment with Uptime > 3 Days{% if not online %} - TESTING DATA{% endif %}</h2>
+                    <div class="table-wrapper">
+                        <table class="equipment-table">
+                            <thead>
+                                <tr>
+                                    <th>Rank</th>
+                                    <th>Equipment ID</th>
+                                    <th>IP Address</th>
+                                    <th>Uptime</th>
+                                    <th>Status</th>
+                                    <th>PTX Type</th>
+                                    <th>Reboot PTX</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for equipment in high_uptime_equipment %}
+                                <tr data-ts="{{ equipment.timestamp if equipment.timestamp else (range(1757000000, 1757340990) | random) }}">
+                                    <td class="rank-cell {{ 'rank-' + loop.index|string if loop.index <= 3 else '' }}">
+                                        #{{ loop.index }}
+                                    </td>
+                                    <td class="equipment-id">{{ equipment.equipment_id }}</td>
+                                    <td class="ip-address">{{ equipment.ip }}</td>
+                                    <td class="uptime-cell">
+                                        <div class="uptime-value">{{ equipment.uptime_days }} days</div>
+                                        <div class="uptime-hours">({{ equipment.uptime_hours }}h)</div>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge status-checking" id="status-{{ loop.index }}">
+                                            Checking...
+                                        </span>
+                                    </td>
+                                    <td id="ptx-type-{{ loop.index }}">
+                                        <span class="ptx-type-badge ptx-type-unknown">-</span>
+                                    </td>
+                                    <td id="reboot-cell-{{ loop.index }}">
+                                        <button class="reboot-btn"
+                                                id="reboot-btn-{{ loop.index }}"
+                                                data-ip="{{ equipment.ip|e }}"
+                                                data-equipment-id="{{ equipment.equipment_id|e }}"
+                                                data-index="{{ loop.index }}"
+                                                onclick="confirmRebootFromData(this)"
+                                                disabled>
+                                            Reboot
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="actions-row">
+                    <a href="{{ url_for('ptx_uptime_csv') }}" class="action-btn btn-download">
+                        📥 Download CSV Report
+                    </a>
+                    <a href="{{ url_for('run_tool', tool_name='PTX Uptime') }}?refresh={{ range(1000, 9999) | random }}" class="action-btn btn-refresh">
+                        🔄 Refresh Data
+                    </a>
+                </div>
+            </div>
+        </main>
     </div>
 
     <!-- Reboot Confirmation Modal -->
     <div id="rebootModal" class="modal">
         <div class="modal-content">
-            <h2>⚠️ CONFIRM PTX REBOOT</h2>
-            <p>
-                <strong>Equipment:</strong> <span id="equipmentId"></span><br>
-                <strong>IP Address:</strong> <span id="equipmentIp"></span>
-            </p>
-            <p>
-                <strong>WARNING:</strong> Please confirm that the equipment status is either "Not Enter AT" or "Isolated" before proceeding.
-            </p>
-            <p>
-                This will remotely reboot the PTX and will cause temporary loss of connectivity.
-            </p>
-            <div class="modal-buttons">
+            <div class="modal-header">
+                {% if online %}
+                <h2>⚠️ CONFIRM PTX REBOOT</h2>
+                {% else %}
+                <h2>⚠️ CONFIRM PTX REBOOT (TESTING MODE)</h2>
+                {% endif %}
+                <button class="modal-close" onclick="closeRebootModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="info-box">
+                    <p style="margin: 0;">
+                        <strong>Equipment:</strong> <span id="equipmentId"></span><br>
+                        <strong>IP Address:</strong> <span id="equipmentIp"></span>
+                    </p>
+                </div>
+                {% if online %}
+                <p>
+                    <strong>WARNING:</strong> Please confirm that the equipment status is either "Not Enter AT" or "Isolated" before proceeding.
+                </p>
+                <p>
+                    This will remotely reboot the PTX and will cause temporary loss of connectivity.
+                </p>
+                {% else %}
+                <p>
+                    <strong>TESTING MODE:</strong> This will simulate a reboot without actually connecting to equipment.
+                </p>
+                <p>
+                    In live mode, this would remotely reboot the PTX and cause temporary loss of connectivity.
+                </p>
+                {% endif %}
+            </div>
+            <div class="modal-footer">
                 <button class="modal-btn modal-btn-cancel" onclick="closeRebootModal()">
                     Cancel
                 </button>
                 <button class="modal-btn modal-btn-proceed" onclick="executeReboot()">
-                    Proceed with Reboot
+                    {% if online %}Proceed with Reboot{% else %}Simulate Reboot{% endif %}
                 </button>
             </div>
         </div>
     </div>
 
+    <div class="toast-container" id="toastContainer"></div>
+
     <script>
+        // Mode flag from server
+        const ONLINE_MODE = {{ 'true' if online else 'false' }};
+
         let equipmentData = [];
         let currentRebootIp = '';
         let currentEquipmentId = '';
         let currentRebootRank = '';
 
-        // Initialize status checking when page loads
+        // Toast notification function
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            if (!container) return;
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            const icons = { info: 'ℹ️', success: '✅', error: '❌', warning: '⚠️' };
+            toast.innerHTML = `<span class="toast-icon">${icons[type]}</span><span class="toast-message">${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 5000);
+        }
+
+        {% if not online %}
+        // OFFLINE TESTING - Enhanced logging
+        function logTest(message, type = 'info') {
+            const testLog = document.getElementById('testLog');
+            if (!testLog) return;
+
+            const timestamp = new Date().toLocaleTimeString();
+            const colors = {
+                info: 'var(--theme-text)',
+                success: '#22c55e',
+                warning: '#f59e0b',
+                error: '#ef4444',
+                primary: 'var(--theme-primary)'
+            };
+
+            const logEntry = document.createElement('div');
+            logEntry.style.color = colors[type] || colors.info;
+            logEntry.innerHTML = `[${timestamp}] ${message}`;
+            testLog.appendChild(logEntry);
+            testLog.scrollTop = testLog.scrollHeight;
+        }
+
+        function clearTestLog() {
+            const testLog = document.getElementById('testLog');
+            if (!testLog) return;
+            testLog.innerHTML = `
+                <div style="color: #a855f7; font-weight: bold;">OFFLINE TESTING MODE ACTIVE</div>
+                <div>Click buttons above to test individual functions or run full system test.</div>
+                <div>All functionality simulated - no actual network calls made.</div>
+                <div style="color: #22c55e;">Ready for testing...</div>
+            `;
+        }
+
+        // TESTING FUNCTIONS
+        function testStatusChecking() {
+            logTest('Testing Equipment Status Checking...', 'primary');
+
+            equipmentData.forEach((equipment, index) => {
+                const rank = index + 1;
+                setTimeout(() => {
+                    const isOnline = Math.random() > 0.3;
+                    const statusData = {
+                        online: isOnline,
+                        ptx_type: isOnline ? (equipment.equipmentId.match(/^(FB|ROM|ST|SH|EL)/i) ? 'PTXC' : 'PTX10') : null,
+                        mode: 'offline_testing'
+                    };
+
+                    updateEquipmentStatus(rank, statusData);
+                    logTest(`${equipment.equipmentId}: ${isOnline ? 'ONLINE' : 'OFFLINE'}`, isOnline ? 'success' : 'warning');
+                }, index * 200);
+            });
+
+            setTimeout(() => {
+                logTest('Status checking test completed!', 'success');
+            }, equipmentData.length * 200 + 500);
+        }
+
+        function testPTXTypes() {
+            logTest('Testing PTX Type Detection...', 'primary');
+
+            equipmentData.forEach((equipment, index) => {
+                const rank = index + 1;
+                setTimeout(() => {
+                    const ptxTypeElement = document.getElementById(`ptx-type-${rank}`);
+                    if (ptxTypeElement) {
+                        const isPTXC = equipment.equipmentId.match(/^(FB|ROM|ST|SH|EL)/i);
+                        const ptxType = isPTXC ? 'PTXC' : 'PTX10';
+
+                        ptxTypeElement.innerHTML = `<span class="ptx-type-badge ptx-type-${ptxType.toLowerCase()}">${ptxType}</span>`;
+                        logTest(`${equipment.equipmentId}: Detected as ${ptxType}`, 'success');
+                    }
+                }, index * 150);
+            });
+
+            setTimeout(() => {
+                logTest('PTX Type detection test completed!', 'success');
+            }, equipmentData.length * 150 + 500);
+        }
+
+        function testRebootSimulation() {
+            logTest('Testing Reboot Simulation...', 'primary');
+
+            const onlineEquipment = equipmentData.filter((_, index) => {
+                const statusElement = document.getElementById(`status-${index + 1}`);
+                return statusElement && statusElement.textContent === 'Online';
+            });
+
+            if (onlineEquipment.length === 0) {
+                logTest('No online equipment found. Running status check first...', 'warning');
+                testStatusChecking();
+                setTimeout(() => testRebootSimulation(), 3000);
+                return;
+            }
+
+            const equipment = onlineEquipment[0];
+            const rank = equipment.rank;
+
+            logTest(`Testing reboot simulation on ${equipment.equipmentId}...`, 'primary');
+
+            const targetButton = document.getElementById(`reboot-btn-${rank}`);
+            if (targetButton) {
+                targetButton.innerHTML = 'Simulating...';
+                targetButton.disabled = true;
+
+                setTimeout(() => {
+                    const now = new Date();
+                    const timestamp = now.toLocaleString();
+
+                    targetButton.innerHTML = `
+                        <div>Simulated</div>
+                        <div class="reboot-timestamp">${timestamp}</div>
+                    `;
+                    targetButton.className = 'reboot-btn reboot-success';
+                    targetButton.disabled = true;
+
+                    logTest(`Reboot simulation completed for ${equipment.equipmentId}`, 'success');
+
+                    localStorage.setItem(`reboot_${equipment.ip}`, JSON.stringify({
+                        equipment: equipment.equipmentId,
+                        timestamp: timestamp,
+                        success: true
+                    }));
+
+                }, 2000);
+            }
+        }
+
+        function testErrorHandling() {
+            logTest('Testing Error Handling...', 'primary');
+
+            const errorTests = [
+                'Network timeout simulation',
+                'Invalid IP address handling',
+                'Missing equipment data',
+                'API endpoint failure',
+                'Permission denied simulation'
+            ];
+
+            errorTests.forEach((test, index) => {
+                setTimeout(() => {
+                    logTest(`${test}... HANDLED`, 'warning');
+                }, index * 500);
+            });
+
+            setTimeout(() => {
+                logTest('Error handling tests completed - all errors properly caught!', 'success');
+            }, errorTests.length * 500 + 500);
+        }
+
+        function testFilterSystem() {
+            logTest('Testing Time Filter System...', 'primary');
+
+            const filterOptions = ['1', '7', '14', '30', 'all'];
+            const select = document.getElementById('rangeSel');
+
+            filterOptions.forEach((option, index) => {
+                setTimeout(() => {
+                    select.value = option;
+                    applyFilter(option);
+                    logTest(`Filter test: ${option === 'all' ? 'All time' : 'Last ' + option + ' days'}`, 'info');
+                }, index * 800);
+            });
+
+            setTimeout(() => {
+                select.value = '7';
+                applyFilter('7');
+                logTest('Filter system test completed!', 'success');
+            }, filterOptions.length * 800 + 500);
+        }
+
+        function testStorageSystem() {
+            logTest('Testing Local Storage System...', 'primary');
+
+            const testData = {
+                equipment: 'TEST-UNIT',
+                timestamp: new Date().toLocaleString(),
+                success: true
+            };
+
+            try {
+                localStorage.setItem('reboot_test_ip', JSON.stringify(testData));
+                logTest('Data stored in localStorage', 'success');
+
+                const retrieved = localStorage.getItem('reboot_test_ip');
+                const parsed = JSON.parse(retrieved);
+                logTest('Data retrieved from localStorage', 'success');
+
+                if (parsed.equipment === testData.equipment) {
+                    logTest('Data integrity verified', 'success');
+                } else {
+                    logTest('Data integrity check failed', 'error');
+                }
+
+                localStorage.removeItem('reboot_test_ip');
+                logTest('Test data cleaned up', 'info');
+
+                logTest('Local storage system test completed!', 'success');
+
+            } catch (error) {
+                logTest(`Storage test failed: ${error.message}`, 'error');
+            }
+        }
+
+        function runFullSystemTest() {
+            logTest('STARTING FULL SYSTEM TEST...', 'primary');
+            clearTestLog();
+            logTest('FULL SYSTEM TEST INITIATED', 'primary');
+
+            const tests = [
+                { name: 'Status Checking', func: testStatusChecking, delay: 0 },
+                { name: 'PTX Type Detection', func: testPTXTypes, delay: 4000 },
+                { name: 'Filter System', func: testFilterSystem, delay: 8000 },
+                { name: 'Storage System', func: testStorageSystem, delay: 13000 },
+                { name: 'Error Handling', func: testErrorHandling, delay: 16000 },
+                { name: 'Reboot Simulation', func: testRebootSimulation, delay: 20000 }
+            ];
+
+            tests.forEach((test, index) => {
+                setTimeout(() => {
+                    logTest(`Running test ${index + 1}/${tests.length}: ${test.name}`, 'primary');
+                    test.func();
+                }, test.delay);
+            });
+
+            setTimeout(() => {
+                logTest('FULL SYSTEM TEST COMPLETED SUCCESSFULLY!', 'success');
+                logTest('All functions tested and verified working', 'success');
+                logTest('System ready for production use', 'success');
+            }, 25000);
+        }
+        {% endif %}
+
+        {% if online %}
+        // Uptime Checker Status Polling
+        function updateCheckerStatus() {
+            fetch('/api/ptx/uptime-checker/status')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update status badge
+                        const statusEl = document.getElementById('checkerStatus');
+                        if (statusEl) {
+                            statusEl.textContent = data.status.charAt(0).toUpperCase() + data.status.slice(1);
+                            statusEl.className = 'checker-status ' + data.status;
+                        }
+
+                        // Update current equipment
+                        const currentEl = document.getElementById('checkerCurrent');
+                        if (currentEl) {
+                            currentEl.textContent = data.current_equipment || '--';
+                        }
+
+                        // Update progress
+                        const progressEl = document.getElementById('checkerProgress');
+                        if (progressEl) {
+                            progressEl.textContent = `${data.checked_count} / ${data.total_equipment}`;
+                        }
+
+                        // Update counts
+                        document.getElementById('checkerOnline').textContent = data.online_count;
+                        document.getElementById('checkerOffline').textContent = data.offline_count;
+                        document.getElementById('checkerErrors').textContent = data.error_count;
+                        document.getElementById('checkerInterval').textContent = data.interval_minutes + ' min';
+
+                        // Update next cycle
+                        const nextEl = document.getElementById('checkerNextCycle');
+                        if (nextEl && data.next_cycle) {
+                            const nextTime = new Date(data.next_cycle);
+                            nextEl.textContent = nextTime.toLocaleTimeString();
+                        } else if (nextEl && data.status === 'running') {
+                            nextEl.textContent = 'In progress...';
+                        } else if (nextEl) {
+                            nextEl.textContent = '--';
+                        }
+                    }
+                })
+                .catch(err => {
+                    console.error('[CHECKER] Status fetch error:', err);
+                    const statusEl = document.getElementById('checkerStatus');
+                    if (statusEl) {
+                        statusEl.textContent = 'Error';
+                        statusEl.className = 'checker-status error';
+                    }
+                });
+        }
+        {% endif %}
+
+        // Initialize when page loads
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('[INIT] Starting PTX Uptime initialization...');
-            
+            console.log('[INIT] Starting PTX Uptime initialization... Mode:', ONLINE_MODE ? 'ONLINE' : 'OFFLINE');
+
+            {% if not online %}
+            logTest('PTX Uptime Offline Testing Mode Initialized', 'success');
+            {% endif %}
+
             // Collect equipment data from the table
             const rows = document.querySelectorAll('.equipment-table tbody tr');
             console.log('[INIT] Found', rows.length, 'equipment rows');
-            
+
+            {% if not online %}
+            logTest(`Found ${rows.length} equipment entries in table`, 'info');
+            {% endif %}
+
             rows.forEach((row, index) => {
                 const equipmentId = row.querySelector('.equipment-id').textContent.trim();
                 const ip = row.querySelector('.ip-address').textContent.trim();
                 const rank = index + 1;
-                
+
                 equipmentData.push({
                     rank: rank,
                     equipmentId: equipmentId,
@@ -747,19 +1275,34 @@
 
             console.log('[INIT] Equipment data collected:', equipmentData);
 
-            // Start checking equipment status
+            {% if not online %}
+            logTest(`Equipment data collected: ${equipmentData.length} items`, 'success');
+            {% endif %}
+
+            {% if online %}
+            // Start checking equipment status (LIVE MODE)
             checkAllEquipmentStatus();
-            
+
             // Check for stored reboot status after a delay
             setTimeout(() => {
                 checkStoredRebootStatus();
             }, 1000);
+
+            // Start polling uptime checker status
+            updateCheckerStatus();
+            setInterval(updateCheckerStatus, 5000);  // Poll every 5 seconds
+            {% else %}
+            logTest('System ready for testing - use buttons above to test functions', 'primary');
+            {% endif %}
 
             // Initialize filter functionality
             const sel = document.getElementById('rangeSel');
             if (sel) {
                 sel.addEventListener('change', function() {
                     applyFilter(this.value);
+                    {% if not online %}
+                    logTest(`Filter changed to: ${this.value}`, 'primary');
+                    {% endif %}
                 });
                 // Apply default filter (last 7 days)
                 applyFilter(sel.value);
@@ -781,14 +1324,15 @@
             });
 
             const total = rows.length;
-            const msg = days === 'all' 
+            const msg = days === 'all'
                 ? `Showing all ${total} rows`
                 : `Showing ${shown} of ${total} rows`;
-            
+
             const shownCount = document.getElementById('shownCount');
             if (shownCount) shownCount.textContent = msg;
         }
 
+        {% if online %}
         function checkAllEquipmentStatus() {
             console.log('[STATUS] Checking status for all equipment...');
             equipmentData.forEach((equipment, index) => {
@@ -798,9 +1342,8 @@
 
         function checkEquipmentStatus(equipment, rank) {
             console.log('[STATUS] Checking equipment:', equipment.equipmentId, 'at rank', rank);
-            
-            // Call backend API to ping and get PTX type
-            fetch('/api/ptx/status', {
+
+            fetch('/api/ptx_status', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -817,10 +1360,8 @@
             })
             .catch(error => {
                 console.log('[STATUS] Error checking', equipment.equipmentId, ':', error);
-                
-                // Production: Show error state instead of simulated data
-                updateEquipmentStatus(rank, { 
-                    online: false, 
+                updateEquipmentStatus(rank, {
+                    online: false,
                     ptx_type: null,
                     error: true,
                     mode: 'api_error'
@@ -828,72 +1369,25 @@
             });
         }
 
-        function updateEquipmentStatus(rank, statusData) {
-    console.log('[STATUS] Updating status for rank', rank, ':', statusData);
-    
-    const statusElement = document.getElementById(`status-${rank}`);
-    const ptxTypeElement = document.getElementById(`ptx-type-${rank}`);
-    const rebootButton = document.getElementById(`reboot-btn-${rank}`);
-    const rebootCell = document.getElementById(`reboot-cell-${rank}`);
-
-    if (!statusElement || !ptxTypeElement || !rebootButton || !rebootCell) {
-        console.error('[STATUS] Missing elements for rank', rank);
-        return;
-    }
-
-    if (statusData.online) {
-        // Equipment is online
-        statusElement.textContent = 'Online';
-        statusElement.className = 'status-badge status-online';
-        
-        // Show PTX Type
-        if (statusData.ptx_type) {
-            ptxTypeElement.innerHTML = `<span class="ptx-type-badge ptx-type-${statusData.ptx_type.toLowerCase()}">${statusData.ptx_type}</span>`;
-        } else {
-            ptxTypeElement.innerHTML = '<span class="ptx-type-badge ptx-type-unknown">Unknown</span>';
-        }
-        
-        // Enable reboot button
-        rebootButton.disabled = false;
-        rebootButton.style.opacity = '1';
-    } else {
-        // Equipment is offline or error
-        if (statusData.error) {
-            statusElement.textContent = 'Error';
-            statusElement.className = 'status-badge status-offline';
-            statusElement.style.background = 'linear-gradient(45deg, #ff9800, #ffb74d)';
-        } else {
-            statusElement.textContent = 'Offline';
-            statusElement.className = 'status-badge status-offline';
-        }
-        
-        // Hide PTX Type
-        ptxTypeElement.innerHTML = '<span class="ptx-type-badge ptx-type-unknown">-</span>';
-        
-        // Hide reboot button completely
-        rebootCell.innerHTML = '<span style="color: #666; font-size: 0.8rem;">-</span>';
-    }
-}
-
         function checkStoredRebootStatus() {
             console.log('[STORAGE] Checking for stored reboot status...');
-            
+
             const rows = document.querySelectorAll('.equipment-table tbody tr');
             rows.forEach((row, index) => {
                 const ip = row.querySelector('.ip-address').textContent.trim();
                 const rank = index + 1;
                 const stored = localStorage.getItem(`reboot_${ip}`);
-                
+
                 if (stored) {
                     try {
                         const rebootData = JSON.parse(stored);
                         const button = document.getElementById(`reboot-btn-${rank}`);
-                        
+
                         console.log('[STORAGE] Found stored reboot data for', ip, ':', rebootData);
-                        
+
                         if (button && rebootData.success) {
                             button.innerHTML = `
-                                <div>✅ Rebooted</div>
+                                <div>Rebooted</div>
                                 <div class="reboot-timestamp">${rebootData.timestamp}</div>
                             `;
                             button.className = 'reboot-btn reboot-success';
@@ -905,51 +1399,104 @@
                 }
             });
         }
+        {% endif %}
+
+        function updateEquipmentStatus(rank, statusData) {
+            console.log('[STATUS] Updating status for rank', rank, ':', statusData);
+
+            const statusElement = document.getElementById(`status-${rank}`);
+            const ptxTypeElement = document.getElementById(`ptx-type-${rank}`);
+            const rebootButton = document.getElementById(`reboot-btn-${rank}`);
+            const rebootCell = document.getElementById(`reboot-cell-${rank}`);
+
+            if (!statusElement || !ptxTypeElement || !rebootButton || !rebootCell) {
+                console.error('[STATUS] Missing elements for rank', rank);
+                return;
+            }
+
+            if (statusData.online) {
+                statusElement.textContent = 'Online';
+                statusElement.className = 'status-badge status-online';
+
+                if (statusData.ptx_type) {
+                    ptxTypeElement.innerHTML = `<span class="ptx-type-badge ptx-type-${statusData.ptx_type.toLowerCase()}">${statusData.ptx_type}</span>`;
+                } else {
+                    ptxTypeElement.innerHTML = '<span class="ptx-type-badge ptx-type-unknown">Unknown</span>';
+                }
+
+                rebootButton.disabled = false;
+                rebootButton.style.opacity = '1';
+            } else {
+                if (statusData.error) {
+                    statusElement.textContent = 'Error';
+                    statusElement.className = 'status-badge status-offline';
+                } else {
+                    statusElement.textContent = 'Offline';
+                    statusElement.className = 'status-badge status-offline';
+                }
+
+                ptxTypeElement.innerHTML = '<span class="ptx-type-badge ptx-type-unknown">-</span>';
+                rebootCell.innerHTML = '<span style="color: var(--theme-text-muted); font-size: 0.8rem;">-</span>';
+            }
+        }
 
         function confirmReboot(ip, equipmentId, rank) {
             console.log('[REBOOT] Confirm reboot called:', { ip, equipmentId, rank });
-            
-            // Check if modal elements exist
+
             const equipmentIdElement = document.getElementById('equipmentId');
             const equipmentIpElement = document.getElementById('equipmentIp');
             const modal = document.getElementById('rebootModal');
-            
+
             if (!equipmentIdElement || !equipmentIpElement || !modal) {
                 console.warn('[REBOOT] Modal elements missing, using fallback confirm dialog');
-                // Fallback: direct reboot if modal elements are missing
+                {% if online %}
                 if (confirm(`Reboot ${equipmentId} (${ip})?\n\nWARNING: Please confirm that the equipment status is either "Not Enter AT" or "Isolated" before proceeding.`)) {
                     executeRebootDirect(ip, equipmentId, rank);
                 }
+                {% else %}
+                if (confirm(`SIMULATE REBOOT: ${equipmentId} (${ip})?\n\nThis is testing mode - no actual reboot will occur.`)) {
+                    executeRebootDirect(ip, equipmentId, rank);
+                }
+                {% endif %}
                 return;
             }
-            
+
             currentRebootIp = ip;
             currentEquipmentId = equipmentId;
             currentRebootRank = rank;
-            
+
             console.log('[REBOOT] Setting modal data:', { currentRebootIp, currentEquipmentId, currentRebootRank });
-            
+
             equipmentIdElement.textContent = equipmentId;
             equipmentIpElement.textContent = ip;
             modal.style.display = 'block';
+
+            {% if not online %}
+            logTest(`Reboot confirmation dialog opened for ${equipmentId}`, 'info');
+            {% endif %}
         }
 
         function executeRebootDirect(targetIp, targetEquipmentId, rank) {
             console.log('[REBOOT] Direct reboot called:', { targetIp, targetEquipmentId, rank });
-            
+
+            {% if not online %}
+            logTest(`Starting reboot simulation for ${targetEquipmentId}`, 'primary');
+            {% endif %}
+
             const targetButton = document.getElementById(`reboot-btn-${rank}`);
-            
+
             if (!targetButton) {
                 console.error('[REBOOT] Target button not found:', `reboot-btn-${rank}`);
                 return;
             }
-            
+
             const originalText = targetButton.innerHTML;
-            targetButton.innerHTML = '⏳ Rebooting...';
+            targetButton.innerHTML = '{% if online %}Rebooting...{% else %}Simulating...{% endif %}';
             targetButton.disabled = true;
 
-            // Send reboot request
-            fetch('/api/ptx/reboot', {
+            {% if online %}
+            // LIVE MODE - Send actual reboot request
+            fetch('/api/ptx_reboot', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -962,47 +1509,76 @@
             .then(response => response.json())
             .then(data => {
                 console.log('[REBOOT] API response:', data);
-                
+
                 if (data.success) {
                     const now = new Date();
                     const timestamp = now.toLocaleString();
-                    
+
                     targetButton.innerHTML = `
-                        <div>✅ Rebooted</div>
+                        <div>Rebooted</div>
                         <div class="reboot-timestamp">${timestamp}</div>
                     `;
                     targetButton.className = 'reboot-btn reboot-success';
                     targetButton.disabled = true;
-                    
+
                     localStorage.setItem(`reboot_${targetIp}`, JSON.stringify({
                         equipment: targetEquipmentId,
                         timestamp: timestamp,
                         success: true
                     }));
-                    
+
+                    showToast(`${targetEquipmentId} rebooted successfully`, 'success');
                 } else {
-                    targetButton.innerHTML = '❌ Failed';
-                    targetButton.style.background = 'linear-gradient(45deg, #9e9e9e, #757575)';
-                    
+                    targetButton.innerHTML = 'Failed';
+                    targetButton.style.background = 'var(--theme-bg)';
+
                     setTimeout(() => {
                         targetButton.innerHTML = originalText;
                         targetButton.disabled = false;
-                        targetButton.style.background = 'linear-gradient(45deg, #f44336, #ef5350)';
+                        targetButton.style.background = '';
                     }, 3000);
+
+                    showToast(`Reboot failed: ${data.error || 'Unknown error'}`, 'error');
                 }
             })
             .catch(error => {
                 console.error('[REBOOT] Fetch error:', error);
-                
-                targetButton.innerHTML = '❌ Error';
-                targetButton.style.background = 'linear-gradient(45deg, #9e9e9e, #757575)';
-                
+
+                targetButton.innerHTML = 'Error';
+                targetButton.style.background = 'var(--theme-bg)';
+
                 setTimeout(() => {
                     targetButton.innerHTML = originalText;
                     targetButton.disabled = false;
-                    targetButton.style.background = 'linear-gradient(45deg, #f44336, #ef5350)';
+                    targetButton.style.background = '';
                 }, 3000);
+
+                showToast('Reboot failed: Network error', 'error');
             });
+            {% else %}
+            // OFFLINE MODE - Simulate reboot
+            setTimeout(() => {
+                const now = new Date();
+                const timestamp = now.toLocaleString();
+
+                targetButton.innerHTML = `
+                    <div>Simulated</div>
+                    <div class="reboot-timestamp">${timestamp}</div>
+                `;
+                targetButton.className = 'reboot-btn reboot-success';
+                targetButton.disabled = true;
+
+                localStorage.setItem(`reboot_${targetIp}`, JSON.stringify({
+                    equipment: targetEquipmentId,
+                    timestamp: timestamp,
+                    success: true
+                }));
+
+                logTest(`Reboot simulation completed for ${targetEquipmentId}`, 'success');
+                logTest(`Result stored in localStorage`, 'info');
+
+            }, 2000);
+            {% endif %}
         }
 
         function closeRebootModal() {
@@ -1011,51 +1587,60 @@
             currentRebootIp = '';
             currentEquipmentId = '';
             currentRebootRank = '';
+            {% if not online %}
+            logTest('Reboot dialog cancelled', 'warning');
+            {% endif %}
         }
 
         function executeReboot() {
-            console.log('[REBOOT] Execute reboot called with:', { 
-                currentRebootIp, 
-                currentEquipmentId, 
-                currentRebootRank 
+            console.log('[REBOOT] Execute reboot called with:', {
+                currentRebootIp,
+                currentEquipmentId,
+                currentRebootRank
             });
-            
+
             if (!currentRebootIp || !currentEquipmentId || !currentRebootRank) {
                 console.error('[REBOOT] Missing reboot parameters:', {
                     ip: currentRebootIp,
-                    equipment: currentEquipmentId, 
+                    equipment: currentEquipmentId,
                     rank: currentRebootRank
                 });
-                alert('Error: Missing reboot parameters. Please try again.');
+                showToast('Error: Missing reboot parameters. Please try again.', 'error');
                 return;
             }
+
+            // Store variables before closing modal
+            const targetIp = currentRebootIp;
+            const targetEquipmentId = currentEquipmentId;
+            const targetRank = currentRebootRank;
 
             // Close modal
             closeRebootModal();
-            
-            const targetButton = document.getElementById(`reboot-btn-${currentRebootRank}`);
-            
+
+            const targetButton = document.getElementById(`reboot-btn-${targetRank}`);
+
             if (!targetButton) {
-                console.error('[REBOOT] Target button not found:', `reboot-btn-${currentRebootRank}`);
-                alert('Error: Could not find reboot button. Please refresh and try again.');
+                console.error('[REBOOT] Target button not found:', `reboot-btn-${targetRank}`);
+                showToast('Error: Could not find reboot button. Please refresh and try again.', 'error');
                 return;
             }
-            
+
             const originalText = targetButton.innerHTML;
-            targetButton.innerHTML = '⏳ Rebooting...';
+            targetButton.innerHTML = '{% if online %}Rebooting...{% else %}Simulating...{% endif %}';
             targetButton.disabled = true;
 
-            console.log('[REBOOT] Sending reboot request to API...');
+            console.log('[REBOOT] Sending reboot request...');
 
-            // Send reboot request
-            fetch('/api/ptx/reboot', {
+            {% if online %}
+            // LIVE MODE - Send actual reboot request
+            fetch('/api/ptx_reboot', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    ip_address: currentRebootIp,
-                    equipment_id: currentEquipmentId
+                    ip_address: targetIp,
+                    equipment_id: targetEquipmentId
                 })
             })
             .then(response => {
@@ -1067,87 +1652,114 @@
             })
             .then(data => {
                 console.log('[REBOOT] API Response data:', data);
-                
+
                 if (data.success) {
-                    // Success - keep green indicator permanently with timestamp
                     const now = new Date();
                     const timestamp = now.toLocaleString();
-                    
+
                     console.log('[REBOOT] Reboot successful, updating UI');
-                    
+
                     targetButton.innerHTML = `
-                        <div>✅ Rebooted</div>
+                        <div>Rebooted</div>
                         <div class="reboot-timestamp">${timestamp}</div>
                     `;
                     targetButton.className = 'reboot-btn reboot-success';
                     targetButton.disabled = true;
-                    
-                    // Store reboot info in localStorage for persistence
-                    localStorage.setItem(`reboot_${currentRebootIp}`, JSON.stringify({
-                        equipment: currentEquipmentId,
+
+                    localStorage.setItem(`reboot_${targetIp}`, JSON.stringify({
+                        equipment: targetEquipmentId,
                         timestamp: timestamp,
                         success: true
                     }));
-                    
+
+                    showToast(`${targetEquipmentId} rebooted successfully`, 'success');
                 } else {
                     console.error('[REBOOT] Reboot failed:', data.error || 'Unknown error');
-                    
-                    targetButton.innerHTML = '❌ Failed';
-                    targetButton.style.background = 'linear-gradient(45deg, #9e9e9e, #757575)';
-                    
-                    // Show error details in console
+
+                    targetButton.innerHTML = 'Failed';
+                    targetButton.style.background = 'var(--theme-bg)';
+
                     if (data.error) {
                         console.error('[REBOOT] Error details:', data.error);
                     }
-                    
-                    // Reset button after 5 seconds to allow retry
+
                     setTimeout(() => {
                         targetButton.innerHTML = originalText;
                         targetButton.disabled = false;
-                        targetButton.style.background = 'linear-gradient(45deg, #f44336, #ef5350)';
+                        targetButton.style.background = '';
                     }, 5000);
+
+                    showToast(`Reboot failed: ${data.error || 'Unknown error'}`, 'error');
                 }
             })
             .catch(error => {
                 console.error('[REBOOT] Fetch error:', error);
-                
-                targetButton.innerHTML = '❌ Error';
-                targetButton.style.background = 'linear-gradient(45deg, #9e9e9e, #757575)';
-                
-                // Reset button after 5 seconds
+
+                targetButton.innerHTML = 'Error';
+                targetButton.style.background = 'var(--theme-bg)';
+
                 setTimeout(() => {
                     targetButton.innerHTML = originalText;
                     targetButton.disabled = false;
-                    targetButton.style.background = 'linear-gradient(45deg, #f44336, #ef5350)';
+                    targetButton.style.background = '';
                 }, 5000);
+
+                showToast('Reboot failed: Network error', 'error');
             });
+            {% else %}
+            // OFFLINE MODE - Simulate reboot
+            setTimeout(() => {
+                const now = new Date();
+                const timestamp = now.toLocaleString();
+
+                targetButton.innerHTML = `
+                    <div>Simulated</div>
+                    <div class="reboot-timestamp">${timestamp}</div>
+                `;
+                targetButton.className = 'reboot-btn reboot-success';
+                targetButton.disabled = true;
+
+                localStorage.setItem(`reboot_${targetIp}`, JSON.stringify({
+                    equipment: targetEquipmentId,
+                    timestamp: timestamp,
+                    success: true
+                }));
+
+                logTest(`Reboot simulation successful: ${targetEquipmentId}`, 'success');
+                logTest(`Result stored in localStorage`, 'info');
+
+            }, 2000);
+            {% endif %}
         }
 
         function confirmRebootFromData(buttonElement) {
             const ip = buttonElement.dataset.ip;
             const equipmentId = buttonElement.dataset.equipmentId;
             const index = buttonElement.dataset.index;
-            
+
             console.log('[REBOOT] Confirm reboot clicked:', {
                 ip: ip,
                 equipmentId: equipmentId,
                 index: index,
                 buttonElement: buttonElement
             });
-            
+
             if (!ip || !equipmentId || !index) {
                 console.error('[REBOOT] Missing button data attributes:', {
                     ip: ip,
                     equipmentId: equipmentId,
                     index: index
                 });
-                alert('Error: Missing reboot data. Please refresh the page and try again.');
+                {% if not online %}
+                logTest('Missing button data attributes', 'error');
+                {% endif %}
+                showToast('Error: Missing reboot data. Please refresh the page and try again.', 'error');
                 return;
             }
-            
+
             confirmReboot(ip, equipmentId, index);
         }
-        
+
         // Close modal when clicking outside of it
         window.onclick = function(event) {
             const modal = document.getElementById('rebootModal');

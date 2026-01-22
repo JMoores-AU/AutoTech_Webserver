@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" lang="ru-RU" xml:lang="ru-RU" data-mc-search-type="Stem" data-mc-help-system-file-name="Default.xml" data-mc-path-to-help-system="../../../" data-mc-target-type="WebHelp2" data-mc-runtime-file-type="Topic" data-mc-preload-images="false" data-mc-in-preview-mode="false" data-mc-medium="non-print" data-mc-toc-path="Receiver Managing|Receiver Settings|Tracking &amp; Positioning">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" /><title>VISOR Parameters</title>
+        <link href="../../../Skins/Default/Stylesheets/Slideshow.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/TextEffects.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/Topic.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/Components/Styles.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/Components/Tablet.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/Components/Mobile.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../Resources/Stylesheets/TRU.css" rel="stylesheet" />
+        <style>/*&lt;meta /&gt;*/
+
+.button.previous-topic-button
+{
+	-pie-background: url('../../../Skins/Default/Stylesheets/Images/navigate-previous.png') no-repeat center center, linear-gradient(#ffffff, #ececec);
+}
+
+.button.current-topic-index-button
+{
+	-pie-background: linear-gradient(#ffffff, #ececec);
+}
+
+.button.next-topic-button
+{
+	-pie-background: url('../../../Skins/Default/Stylesheets/Images/navigate-next.png') no-repeat center center, linear-gradient(#ffffff, #ececec);
+}
+
+.needs-pie
+{
+	behavior: url('../../../Resources/Scripts/PIE-no-motw.htc');
+}
+
+</style>
+        <script src="../../../Resources/Scripts/custom.modernizr.js">
+        </script>
+        <script src="../../../Resources/Scripts/jquery.min.js">
+        </script>
+        <script src="../../../Resources/Scripts/require.min.js">
+        </script>
+        <script src="../../../Resources/Scripts/require.config.js">
+        </script>
+        <script src="../../../Resources/Scripts/foundation.min.js">
+        </script>
+        <script src="../../../Resources/Scripts/plugins.min.js">
+        </script>
+        <script src="../../../Resources/Scripts/MadCapAll.js">
+        </script>
+    </head>
+    <body class="test">
+        <p class="MCWebHelpFramesetLink MCWebHelpFramesetLinkTop"><a href="../../../Default.htm#Topics/ReceiverManaging/VISOR.htm">Open topic with navigation</a>
+        </p>
+        <div class="MCBreadcrumbsBox_0"><span class="MCBreadcrumbsPrefix">You are here: </span><span class="MCBreadcrumbsSelf">Receiver Managing</span><span class="MCBreadcrumbsDivider"> &gt; </span><a class="MCBreadcrumbsLink" href="ReceiverSettings.htm">Receiver Settings</a><span class="MCBreadcrumbsDivider"> &gt; </span><span class="MCBreadcrumbsSelf">Tracking &amp; Positioning</span><span class="MCBreadcrumbsDivider"> &gt; </span><span class="MCBreadcrumbs">VISOR Parameters</span>
+        </div>
+        <h1 class="Heading1">VISOR Parameters</h1>
+        <p class="Body">The <i>VISOR</i> tab allows you to configure the MR-1 receiver / OEM-1 and B 210 board  for 2-D attitude determination (heading and inclination).</p>
+        <table style="width: 100%;border-top-style: solid;border-top-width: 1px;border-top-color: #696969;border-bottom-style: solid;border-bottom-width: 1px;border-bottom-color: #696969;">
+            <col style="width: 76px;" />
+            <col />
+            <tbody>
+                <tr>
+                    <td>
+                        <img src="../../Resources/Images/Note_Icon.gif" />
+                    </td>
+                    <td style="font-size: 11pt;">
+                        <p class="Body"> Prior to configuring, make sure that the&#160;<i>Activate Twin Antenna System</i>&#160;check box&#160;on the&#160;<a href="Antenna.htm">Antenna</a>&#160;tab is selected.</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <table class="AutoNumber_p_Bulleted" style="width: 100%; margin-left: 0;" cellspacing="0" cellpadding="0">
+            <col style="width: 12px;" />
+            <col style="width: 12px;" />
+            <col style="width: auto;" />
+            <tr>
+                <td valign="top" />
+                <td class="AutoNumber_p_Bulleted" valign="top"><span>• </span>
+                </td>
+                <td class="AutoNumber_p_Bulleted" valign="top" data-mc-autonum="• "><i>Enable VISOR</i> – if it is selected, the receiver computes 2-D attitude parameters. In this case the user can select  the initialization type. </td>
+            </tr>
+        </table>
+        <table class="AutoNumber_p_Bulleted" style="width: 100%; margin-left: 0;" cellspacing="0" cellpadding="0">
+            <col style="width: 12px;" />
+            <col style="width: 12px;" />
+            <col style="width: auto;" />
+            <tr>
+                <td valign="top" />
+                <td class="AutoNumber_p_Bulleted" valign="top"><span>• </span>
+                </td>
+                <td class="AutoNumber_p_Bulleted" valign="top" data-mc-autonum="• "><i>Use L2 for VHD</i> - if it is selected, the VHD&#160;engine uses L2 measurements to  compute 2-D attitude parameters. This option is available for B210 OEM board only.</td>
+            </tr>
+        </table>
+        <p style="font-size: 11pt;">The following types of VISOR initializations are available:</p>
+        <ul style="list-style-type: square;">
+            <li value="1"><i>Velocity Vector</i> – initializes VISOR by moving the platform with rigidly mounted antennas.</li>
+            <li value="2"><i>Twin Antenna Rotation</i> – initializes VISOR by rotating a platform with rigidly mounted antennas in a plane parallel to horizon.</li>
+            <li value="3"><i>Manual</i> – enters initial heading and inclination with the GRIL command.</li>
+            <li value="4"><i>Auto</i> – initializes using initial heading and inclination computed by the auxiliary RTK engine running in the background.</li>
+        </ul>
+        <table class="AutoNumber_p_Bulleted" style="width: 100%; margin-left: 0;" cellspacing="0" cellpadding="0">
+            <col style="width: 12px;" />
+            <col style="width: 12px;" />
+            <col style="width: auto;" />
+            <tr>
+                <td valign="top" />
+                <td class="AutoNumber_p_Bulleted" valign="top"><span>• </span>
+                </td>
+                <td class="AutoNumber_p_Bulleted" valign="top" data-mc-autonum="• ">Antenna Separation – specify the inter-antenna distance in <b>Manual Value</b>. The <b>Computed Value</b> field displays the automatically computed distance. Check the <b>Save Computed Value</b> setting to instruct the auxiliary RTK engine to compute and use the inter-antenna distance.</td>
+            </tr>
+        </table>
+        <table class="AutoNumber_p_Bulleted" style="width: 100%; margin-left: 0;" cellspacing="0" cellpadding="0">
+            <col style="width: 12px;" />
+            <col style="width: 12px;" />
+            <col style="width: auto;" />
+            <tr>
+                <td valign="top" />
+                <td class="AutoNumber_p_Bulleted" valign="top"><span>• </span>
+                </td>
+                <td class="AutoNumber_p_Bulleted" valign="top" data-mc-autonum="• ">Advanced – specify some <a href="AdvVISOR.htm">advanced VISOR settings</a>.</td>
+            </tr>
+        </table>
+        <p class="Body">You can view computed 2-D attitude parameters on the <i><a href="Heading.htm">Attitude</a></i> tab.</p>
+        <p class="Body">For more information about VISOR configuration, limitations, and guidelines, see the <i>OEM-1 Integrator's Guide</i>, <i>Enabling VISOR and Understanding Results</i>.</p>
+        <div class="buttons clearfix topicToolbarProxy" style="mc-topic-toolbar-items: ;">
+            <div class="button-group-container-left">
+                <button class="button needs-pie previous-topic-button" type="button" title="Navigate previous">
+                    <img src="../../../Skins/Default/Stylesheets/Images/transparent.gif" alt="previous topic" />
+                </button>
+                <div class="button current-topic-index-button disabled"><span class="sequence-index"></span> of <span class="sequence-total"></span></div>
+                <button class="button needs-pie next-topic-button" type="button" title="Navigate next">
+                    <img src="../../../Skins/Default/Stylesheets/Images/transparent.gif" alt="next topic" />
+                </button>
+            </div>
+        </div>
+        <p>&#160;</p>
+    </body>
+</html>

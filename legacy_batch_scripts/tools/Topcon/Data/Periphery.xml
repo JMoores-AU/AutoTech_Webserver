@@ -1,0 +1,101 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Periphery>
+	<Receivers>
+		<Receiver Name="HIPER">
+			<Ports>
+				<Port Name="dev/ser/c"/>
+			</Ports>
+		</Receiver>
+		<Receiver Name="GR3">
+			<Ports>
+				<Port Name="dev/ser/c"/>
+			</Ports>
+		</Receiver>
+		<Receiver Name="GR5">
+			<Ports>
+				<Port Name="dev/ser/c"/>
+			</Ports>
+		</Receiver>
+		<Receiver Name="GR-5">
+			<Ports>
+				<Port Name="dev/ser/c"/>
+			</Ports>
+		</Receiver>
+		<Receiver Name="GR5+">
+			<Ports>
+				<Port Name="dev/ser/c"/>
+			</Ports>
+		</Receiver>
+		<Receiver Name="GRX1/?">
+			<Ports>
+				<Port Name="dev/ser/c"/>
+			</Ports>
+		</Receiver>
+		<Receiver Name="HiPerII/?">
+			<Ports>
+				<Port Name="dev/ser/c"/>
+			</Ports>
+		</Receiver>
+		<Receiver Name="HIPER_SR">
+			<Ports>
+				<!--Port Name="dev/ser/a"/-->
+				<Port Name="dev/ser/d"/>
+			</Ports>
+		</Receiver>
+		<Receiver Name="GSX2">
+			<Ports>
+				<!--Port Name="dev/ser/a"/-->
+				<Port Name="dev/ser/d"/>
+			</Ports>
+		</Receiver>
+		<Receiver Name="MC-R3">
+			<Ports>
+				<Port Name="dev/ser/b"/>
+			</Ports>
+		</Receiver>
+		<Receiver Name="MC-i3">
+			<Ports>
+				<Port Name="dev/ser/b"/>
+			</Ports>
+		</Receiver>
+		<Receiver Name="MC-i4">
+			<Ports>
+				<Port Name="dev/ser/b"/>
+			</Ports>
+		</Receiver>
+		<Receiver Name="EGGDT">
+			<Ports>
+				<Port Name="dev/ser/b"/>
+			</Ports>
+		</Receiver>
+		<Receiver Name="TRUPATH">
+			<Ports>
+				<Port Name="dev/ser/b"/>
+			</Ports>
+		</Receiver>
+	</Receivers>
+
+	<AdvComm>
+		<Profile Name="internet">
+			<Variable XLATE_FriendlyName="PIN" Name="cell.pin"/>
+			<Variable XLATE_FriendlyName="APN" Name="cell.gprs.apn"/>
+			<Variable XLATE_FriendlyName="Login" Name="ppp.name"/>
+			<Variable XLATE_FriendlyName="Password" Name="ppp.password"/>
+			<Variable XLATE_FriendlyName="Dial Number" Name="cell.csd.dial"/>
+			<Variable XLATE_FriendlyName="Operator" Name="cell.op.name" Attr="ReadOnly"/>
+			<Variable XLATE_FriendlyName="RSSI" Name="cell.sq" Attr="ReadOnly"/>
+			<Variable XLATE_FriendlyName="IP Address" Name="ppp.addr" Attr="ReadOnly"/>
+		</Profile>
+		<Profile Name="c-master">
+			<Variable XLATE_FriendlyName="PIN" Name="cell.pin"/>
+			<Variable XLATE_FriendlyName="Dial Number" Name="cell.csd.dial"/>
+			<Variable XLATE_FriendlyName="Operator" Name="cell.op.name" Attr="ReadOnly"/>
+			<Variable XLATE_FriendlyName="RSSI" Name="cell.sq" Attr="ReadOnly"/>
+		</Profile>
+		<Profile Name="c-slave">
+			<Variable XLATE_FriendlyName="PIN" Name="cell.pin"/>
+			<Variable XLATE_FriendlyName="Operator" Name="cell.op.name" Attr="ReadOnly"/>
+			<Variable XLATE_FriendlyName="RSSI" Name="cell.sq" Attr="ReadOnly"/>
+		</Profile>
+	</AdvComm>
+</Periphery>
