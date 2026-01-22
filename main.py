@@ -5563,7 +5563,7 @@ class AutoTechTrayMode:
 
     def create_icon_image(self, color='green'):
         """Create a simple icon for the system tray"""
-        if not TRAY_AVAILABLE:
+        if not TRAY_AVAILABLE or Image is None or ImageDraw is None:
             return None
 
         # Create 64x64 icon with wrench/tool symbol
@@ -5616,13 +5616,15 @@ class AutoTechTrayMode:
 
         # Flask running in thread can't be easily stopped, so just exit
         self.show_notification("Stopping AutoTech...")
-        self.icon.stop()
+        if self.icon is not None:
+            self.icon.stop()
         sys.exit(0)
 
     def restart_server(self):
         """Restart server (exit and let user restart manually)"""
         self.show_notification("Please restart AutoTech manually")
-        self.icon.stop()
+        if self.icon is not None:
+            self.icon.stop()
         sys.exit(0)
 
     def open_browser(self):
@@ -5660,6 +5662,8 @@ class AutoTechTrayMode:
 
     def create_menu(self):
         """Create system tray menu"""
+        if pystray is None:
+            return None
         return pystray.Menu(
             pystray.MenuItem("Open Dashboard", self.action_open, default=True),
             pystray.Menu.SEPARATOR,
@@ -5683,18 +5687,20 @@ class AutoTechTrayMode:
 
         # Create system tray icon
         icon_image = self.create_icon_image('green' if self.server_running else 'red')
-        self.icon = pystray.Icon(
-            "AutoTech",
-            icon_image,
-            "AutoTech Dashboard",
-            menu=self.create_menu()
-        )
+        if pystray is not None:
+            self.icon = pystray.Icon(
+                "AutoTech",
+                icon_image,
+                "AutoTech Dashboard",
+                menu=self.create_menu()
+            )
 
         # Show startup notification
-        self.icon.notify(start_msg, "AutoTech")
+        if self.icon is not None:
+            self.icon.notify(start_msg, "AutoTech")
 
-        # Run the icon (blocking)
-        self.icon.run()
+            # Run the icon (blocking)
+            self.icon.run()
 
 
 if __name__ == '__main__':
