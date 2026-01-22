@@ -16,6 +16,11 @@ python main.py
 E:\AutoTech.exe
 ```
 
+**As Windows Service (runs 24/7, no user login needed):**
+```batch
+Install_AutoTech_Service.bat   # Run as admin
+```
+
 Access at: `http://localhost:8888`
 Password: `komatsu`
 
@@ -44,8 +49,11 @@ After building with USB connected:
 ```
 E:\ (AUTOTECH USB)
 ├── AutoTech.exe                  <- Web server executable
-└── AutoTech\                     <- Tools and client folder
-    ├── tools\                    <- Server-side tools (plink, vnc, etc.)
+└── AutoTech\                     <- Tools and installers
+    ├── Install_AutoTech_Service.bat      <- Windows service installer
+    ├── Uninstall_AutoTech_Service.bat    <- Windows service uninstaller
+    ├── tools\                    <- Server-side Python modules
+    ├── database\                 <- SQLite databases
     └── autotech_client\          <- Client installer package
         ├── Install_AutoTech_Client.bat
         ├── tools\
@@ -64,20 +72,34 @@ E:\ (AUTOTECH USB)
 
 ---
 
-## AutoTech Client Installation
+## AutoTech Client Installation (REQUIRED FOR REMOTE PCs)
 
-Users on remote PCs can install the client tools via:
+**IMPORTANT:** Without the client installed, VNC/SSH/SFTP tools will open **on the server** instead of your local PC!
 
-1. **Web Download:** Go to T1 Legacy Tools page, click "Download Full Package (ZIP)"
-2. **Extract ZIP** to any folder
-3. **Right-click `Install_AutoTech_Client.bat`** and select "Run as administrator"
+### Remote PC Setup
 
-The installer:
-- Copies tools to `C:\AutoTech_Client\`
-- Registers custom URI handlers (autotech-ssh://, autotech-sftp://, autotech-vnc://, autotech-script://)
-- Creates Start Menu shortcuts
+Users on remote PCs **MUST** install the client tools:
+
+1. Copy `E:\AutoTech\autotech_client` folder from USB to remote PC
+2. Right-click `Install_AutoTech_Client.bat` and select "Run as administrator"
+3. Installer copies tools to `C:\AutoTech_Client\`
+4. Registers custom URI handlers (autotech-ssh://, autotech-sftp://, autotech-vnc://, autotech-script://)
 
 **No Python or dependencies required** - pure batch file installer works on any Windows PC.
+
+### How It Works
+
+**Without client:**
+- Server at 10.110.19.105:8888
+- Remote PC at 10.110.19.100 opens browser
+- Click VNC → Opens on **SERVER** (10.110.19.105) ❌
+
+**With client installed:**
+- Server at 10.110.19.105:8888
+- Remote PC at 10.110.19.100 opens browser + has client installed
+- Click VNC → Opens on **REMOTE PC** (10.110.19.100) ✅
+
+The client installer registers Windows URI handlers that intercept `autotech-vnc://`, `autotech-ssh://`, etc. links and launch tools locally.
 
 ---
 
@@ -123,6 +145,30 @@ T1_Tools_Web-1/
 **Production:**
 - Windows PC with AutoTech Client installed
 - Network access to mining equipment
+
+---
+
+## Windows Service Installation
+
+To run AutoTech 24/7 as a Windows service (survives reboots, no user login required):
+
+1. Build and deploy to USB via `BUILD_WEBSERVER.bat`
+2. On server PC, right-click `Install_AutoTech_Service.bat` → Run as administrator
+3. Installer will:
+   - Find `AutoTech.exe` (searches E:\, C:\AutoTech\, or asks for path)
+   - Create Windows service named "AutoTech"
+   - Set to auto-start on boot
+   - Configure auto-restart on failure
+
+**Management:**
+```batch
+sc start AutoTech    # Start service
+sc stop AutoTech     # Stop service
+sc query AutoTech    # Check status
+Uninstall_AutoTech_Service.bat  # Remove service
+```
+
+**Security:** Uses built-in Windows `sc.exe` command (no external tools, no security warnings).
 
 ---
 

@@ -480,12 +480,20 @@ if exist "check_main.py" (
 )
 
 echo Building with PyInstaller...
+echo [1/2] Building AutoTech.exe...
 python -m PyInstaller AutoTech.spec --noconfirm
+echo.
+
+echo [2/2] Building AutoTech_Tray.exe...
+python -m PyInstaller AutoTech_Tray.spec --noconfirm
 echo.
 
 if exist "dist\AutoTech.exe" (
     echo [SUCCESS] Build complete!
     echo Location: dist\AutoTech.exe
+    if exist "dist\AutoTech_Tray.exe" (
+        echo           dist\AutoTech_Tray.exe
+    )
     echo.
 
     :: Copy to USB if detected
@@ -518,6 +526,14 @@ if exist "dist\AutoTech.exe" (
             )
         ) else (
             echo [USB] AutoTech.exe is up-to-date, skipping
+        )
+
+        :: Copy AutoTech_Tray.exe if it exists
+        if exist "dist\AutoTech_Tray.exe" (
+            copy /Y "dist\AutoTech_Tray.exe" "!USB_DRIVE!\" >nul
+            if exist "!USB_DRIVE!\AutoTech_Tray.exe" (
+                echo   [OK] Copied to !USB_DRIVE!\AutoTech_Tray.exe
+            )
         )
         echo.
 
@@ -629,6 +645,19 @@ if exist "dist\AutoTech.exe" (
         if exist "tools\__init__.py" (
             copy /Y "tools\__init__.py" "!TOOLS_DST!\" >nul
         )
+
+        :: Deploy Windows Service installers to E:\AutoTech
+        echo.
+        echo [USB] Checking service installers...
+        if exist "Install_AutoTech_Service.bat" (
+            copy /Y "Install_AutoTech_Service.bat" "!USB_DRIVE!\AutoTech\" >nul
+            echo   [OK] Install_AutoTech_Service.bat synced
+        )
+        if exist "Uninstall_AutoTech_Service.bat" (
+            copy /Y "Uninstall_AutoTech_Service.bat" "!USB_DRIVE!\AutoTech\" >nul
+            echo   [OK] Uninstall_AutoTech_Service.bat synced
+        )
+
         echo.
         echo [USB] Deployment complete!
         echo.
@@ -970,6 +999,8 @@ if defined USB_DRIVE (
     echo  USB DEPLOYMENT STATUS:
     echo    Drive: !USB_DRIVE!
     echo    - AutoTech.exe
+    echo    - AutoTech\Install_AutoTech_Service.bat
+    echo    - AutoTech\Uninstall_AutoTech_Service.bat
     echo    - autotech_client\Install_AutoTech_Client.bat
     echo    - autotech_client\VERSION
     echo    - autotech_client\tools\

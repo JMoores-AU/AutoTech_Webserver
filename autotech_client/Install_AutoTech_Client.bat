@@ -93,9 +93,12 @@ echo [3/5] Copying scripts...
 mkdir "%INSTALL_PATH%\scripts" 2>nul
 mkdir "%INSTALL_PATH%\mms_scripts" 2>nul
 
-if exist "%INSTALLER_DIR%scripts\*.bat" (
-    copy /Y "%INSTALLER_DIR%scripts\*.bat" "%INSTALL_PATH%\scripts\" >nul 2>&1
+:: Copy launcher scripts from scripts folder to install\scripts
+if exist "%INSTALLER_DIR%scripts\launch_*.bat" (
+    copy /Y "%INSTALLER_DIR%scripts\launch_*.bat" "%INSTALL_PATH%\scripts\" >nul 2>&1
 )
+
+:: Copy MMS scripts to mms_scripts folder
 if exist "%INSTALLER_DIR%scripts\mms_scripts\*.bat" (
     copy /Y "%INSTALLER_DIR%scripts\mms_scripts\*.bat" "%INSTALL_PATH%\mms_scripts\" >nul 2>&1
 )

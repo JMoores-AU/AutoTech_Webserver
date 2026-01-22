@@ -1381,6 +1381,46 @@ def network_status():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/api/system/status')
+def system_status():
+    """System status API - service status, connected clients, uptime"""
+    # Check if running as Windows service
+    running_as_service = False
+    try:
+        result = subprocess.run(
+            ['sc', 'query', 'AutoTech'],
+            capture_output=True,
+            text=True,
+            timeout=2,
+            creationflags=subprocess.CREATE_NO_WINDOW if platform.system() == 'Windows' else 0
+        )
+        running_as_service = 'RUNNING' in result.stdout
+    except:
+        pass  # Not running as service or sc command failed
+
+    # Get active connections count using netstat (Windows built-in)
+    active_connections = 0
+    try:
+        result = subprocess.run(
+            ['netstat', '-an'],
+            capture_output=True,
+            text=True,
+            timeout=2,
+            creationflags=subprocess.CREATE_NO_WINDOW if platform.system() == 'Windows' else 0
+        )
+        # Count ESTABLISHED connections on port 8888
+        for line in result.stdout.splitlines():
+            if ':8888' in line and 'ESTABLISHED' in line:
+                active_connections += 1
+    except:
+        active_connections = 0  # Fallback if netstat fails
+
+    return jsonify({
+        'running_as_service': running_as_service,
+        'active_connections': active_connections,
+        'timestamp': datetime.now().isoformat()
+    })
+
 @app.route('/api/equipment_profiles')
 def equipment_profiles():
     """Equipment profiles API"""

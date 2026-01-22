@@ -38,6 +38,22 @@ pyinstaller AutoTech.spec
 BUILD_WEBSERVER.bat
 ```
 
+## Running as Windows Service
+To run AutoTech 24/7 (even when no user logged in):
+```batch
+# Install service (run as admin)
+Install_AutoTech_Service.bat
+
+# Uninstall service (run as admin)
+Uninstall_AutoTech_Service.bat
+
+# Manual commands
+sc start AutoTech
+sc stop AutoTech
+sc query AutoTech
+```
+Uses built-in Windows `sc.exe` (no external tools, no security warnings).
+
 ## Server Credentials
 Stored in `main.py` as MMS_PASSWORD constant. SSH user: `mms`
 

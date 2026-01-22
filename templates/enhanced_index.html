@@ -70,6 +70,46 @@
         }
         .legacy-btn:hover { background: linear-gradient(135deg, #d97706, #b45309); transform: translateY(-1px); }
         .legacy-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        /* System Status Panel */
+        .system-status-panel {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-sm);
+            padding: 12px;
+            margin-bottom: 12px;
+            font-size: 0.8rem;
+        }
+        .system-status-header {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            opacity: 0.7;
+        }
+        .system-status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 0;
+        }
+        .status-label {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+        }
+        .status-value {
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+        .status-value.service-running {
+            color: #10b981;
+        }
+        .status-value.service-stopped {
+            color: #ef4444;
+        }
     </style>
 </head>
 <body>
@@ -153,7 +193,24 @@
                     <span>📦</span>
                     <span>T1 Tools Legacy</span>
                 </button>
-                
+
+                <!-- System Status Panel -->
+                <div class="system-status-panel">
+                    <div class="system-status-header">System Status</div>
+                    <div class="system-status-item">
+                        <span class="status-label">Service:</span>
+                        <span class="status-value" id="serviceStatus">Checking...</span>
+                    </div>
+                    <div class="system-status-item">
+                        <span class="status-label">Clients:</span>
+                        <span class="status-value" id="clientCount">0</span>
+                    </div>
+                    <div class="system-status-item">
+                        <span class="status-label">Uptime:</span>
+                        <span class="status-value" id="serverUptime">--</span>
+                    </div>
+                </div>
+
                 <div class="sidebar-status">
                     <span class="status-indicator {{ 'online' if online else 'offline' }}" id="statusIndicator"></span>
                     <span id="networkStatus">{{ 'Network Online' if online else 'Offline Mode' }}</span>
@@ -389,7 +446,48 @@
         function launchLegacyTools() {
             window.location.href = '/legacy';
         }
-        
+
+        // ========================================
+        // SYSTEM STATUS UPDATES
+        // ========================================
+        let serverStartTime = Date.now();
+
+        async function updateSystemStatus() {
+            try {
+                const response = await fetch('/api/system/status');
+                const data = await response.json();
+
+                // Update service status
+                const serviceEl = document.getElementById('serviceStatus');
+                if (data.running_as_service) {
+                    serviceEl.textContent = 'Running';
+                    serviceEl.className = 'status-value service-running';
+                } else {
+                    serviceEl.textContent = 'Standalone';
+                    serviceEl.className = 'status-value';
+                }
+
+                // Update client count
+                document.getElementById('clientCount').textContent = data.active_connections || 0;
+
+                // Update uptime
+                const uptimeSeconds = Math.floor((Date.now() - serverStartTime) / 1000);
+                const hours = Math.floor(uptimeSeconds / 3600);
+                const minutes = Math.floor((uptimeSeconds % 3600) / 60);
+                if (hours > 0) {
+                    document.getElementById('serverUptime').textContent = `${hours}h ${minutes}m`;
+                } else {
+                    document.getElementById('serverUptime').textContent = `${minutes}m`;
+                }
+            } catch (error) {
+                console.error('Failed to update system status:', error);
+            }
+        }
+
+        // Update status every 5 seconds
+        updateSystemStatus();
+        setInterval(updateSystemStatus, 5000);
+
         // ========================================
         // LOGIN MODAL FUNCTIONS
         // ========================================
