@@ -45,3 +45,48 @@ Stored in `main.py` as MMS_PASSWORD constant. SSH user: `mms`
 - Tool routes: `/tool-name` (kebab-case)
 - API endpoints: `/api/tool-name/action`
 - Templates: `tool_name.html` (snake_case)
+
+---
+
+## Token Usage Optimization (IMPORTANT)
+
+### Model Usage
+- **Default: Sonnet** (set in `.claude/settings.local.json`)
+- Use Haiku for sub-agents when appropriate
+- Opus only for critical/complex problems
+
+### Efficient Prompting (for non-coders)
+
+**GOOD prompts (specific, single action):**
+- "Add a button to ptx_uptime.html that clears the results table"
+- "Fix the IP Finder search to also search by equipment name"
+- "Build the exe with BUILD_WEBSERVER.bat"
+- "Change the page title from 'PTX Uptime' to 'Controller Uptime'"
+
+**BAD prompts (vague, causes exploration):**
+- "Make the page better"
+- "Fix the bugs"
+- "Update the tool"
+- "Look into the performance issues"
+
+### Guidelines to Reduce Tokens
+1. **Be specific** - Name exact files, routes, or buttons
+2. **One task at a time** - Don't bundle 5 requests in one prompt
+3. **Trust CLAUDE.md** - Don't ask "how does X work?" unless needed
+4. **Use exact text** - Copy/paste button text or error messages
+5. **Avoid exploration** - If you know the file, say it: "in templates/ptx_uptime.html line 42"
+
+### Common Tasks (Quick Reference)
+```
+Add a button → "Add [button name] to [template file] that does [action]"
+Fix a bug → "In [file], [specific issue], should be [expected behavior]"
+Build exe → "Run BUILD_WEBSERVER.bat"
+Commit → "Commit changes with message: [your message]"
+Change text → "In [file], change '[old text]' to '[new text]'"
+```
+
+### When Token Usage Spikes
+- Long exploration sessions (asking vague questions)
+- Back-and-forth clarifications (be specific upfront)
+- Reading many files unnecessarily (name the file if you know it)
+- Large git status (keep it clean with regular commits)
