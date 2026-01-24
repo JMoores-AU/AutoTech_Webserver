@@ -317,7 +317,8 @@ class FrontRunnerMonitor:
         while self.running:
             try:
                 # Connect if not connected
-                if not self.ssh or not self.ssh.get_transport() or not self.ssh.get_transport().is_active():
+                transport = self.ssh.get_transport() if self.ssh else None
+                if not self.ssh or not transport or not transport.is_active():
                     if not self._connect_ssh():
                         print("Waiting 30 seconds before retry...")
                         time.sleep(30)
