@@ -3910,7 +3910,7 @@ def autotech_tools():
 @login_required
 def equipment_cache_page():
     """Equipment Cache database viewer page"""
-    return render_template('equipment_cache.html',
+    return render_template('equip_db.html',
                          online=is_online_network())
 
 
