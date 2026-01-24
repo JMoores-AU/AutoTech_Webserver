@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Playback Tools - AutoTech</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='AutoTech_Dark.ico') }}" id="favicon">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <style>
         .tools-overview {
@@ -174,16 +175,18 @@
         .found-file-item {
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            gap: 12px;
             padding: 10px 12px;
             background: rgba(34, 197, 94, 0.1);
             border: 1px solid rgba(34, 197, 94, 0.3);
             border-radius: var(--radius-sm);
             margin-bottom: 8px;
         }
-        .found-file-info { display: flex; flex-direction: column; gap: 2px; }
+        .found-file-checkbox { width: 18px; height: 18px; cursor: pointer; }
+        .found-file-info { display: flex; flex-direction: column; gap: 2px; flex: 1; }
         .found-file-name { font-family: 'Consolas', monospace; color: var(--theme-text-bright); font-size: 0.85rem; }
         .found-file-details { font-size: 0.75rem; color: var(--theme-text-muted); }
+        .found-file-actions { display: flex; gap: 8px; }
         
         .btn-download-sm {
             background: linear-gradient(135deg, var(--status-online), #16a34a);
@@ -194,13 +197,12 @@
             border: none;
             cursor: pointer;
         }
-        .btn-download-sm:disabled { background: var(--theme-bg-card); color: var(--theme-text-muted); }
+        .btn-download-sm:disabled { background: var(--theme-bg-card); color: var(--theme-text-muted); cursor: not-allowed; }
         .btn-download-sm.downloaded { background: var(--theme-bg-card); color: var(--status-online); }
         
         .download-destination { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--theme-text-muted); margin-top: 12px; }
-        .download-destination code { background: var(--theme-bg-card); padding: 4px 8px; border-radius: 4px; font-family: 'Consolas', monospace; }
-        
-        /* Files Section */
+
+        /* Instructions Section */
         .files-section {
             background: var(--theme-bg-card);
             border: 1px solid var(--theme-border);
@@ -217,56 +219,9 @@
             border-bottom: 1px solid var(--theme-border);
         }
         .files-section-title { display: flex; align-items: center; gap: 10px; font-size: 1rem; font-weight: 600; color: var(--theme-text-bright); }
-        .files-count { font-size: 0.8rem; color: var(--theme-text-muted); background: var(--theme-bg); padding: 4px 10px; border-radius: 12px; }
-        .files-list { max-height: 350px; overflow-y: auto; }
-        
-        .file-item {
-            display: grid;
-            grid-template-columns: 1fr auto auto auto;
-            gap: 12px;
-            align-items: center;
-            padding: 10px 12px;
-            background: var(--theme-bg);
-            border-radius: var(--radius-sm);
-            margin-bottom: 8px;
-        }
-        .file-name { font-family: 'Consolas', monospace; color: var(--theme-text); font-size: 0.8rem; overflow: hidden; text-overflow: ellipsis; }
-        .file-date { color: var(--theme-primary); font-weight: 500; white-space: nowrap; }
-        .file-size { color: var(--theme-text-muted); font-size: 0.75rem; }
-        
-        .btn-delete {
-            background: transparent;
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            color: var(--status-offline);
-            padding: 4px 8px;
-            font-size: 0.75rem;
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-        }
-        .btn-delete:hover { background: rgba(239, 68, 68, 0.15); }
-        
-        .no-files { text-align: center; padding: 30px; color: var(--theme-text-muted); }
-        
-        /* USB Drives */
-        .usb-drives-section { margin-bottom: 32px; }
-        .usb-drives-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
-        .usb-drive-item { background: var(--theme-bg-card); border: 1px solid var(--theme-border); border-radius: var(--radius-md); padding: 14px; display: flex; align-items: center; gap: 10px; }
-        .usb-drive-letter { font-weight: 600; color: var(--theme-text-bright); }
-        .usb-drive-label { font-size: 0.75rem; color: var(--theme-text-muted); }
-        .usb-drive-space { font-size: 0.7rem; color: var(--theme-text-muted); font-family: 'Consolas', monospace; }
-        .no-drives { text-align: center; padding: 20px; color: var(--theme-text-muted); background: var(--theme-bg-card); border-radius: var(--radius-md); }
-        
+
         .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: currentColor; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
-        
-        /* Delete Modal */
-        .delete-confirm { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-        .delete-confirm-box { background: var(--theme-bg-card); border: 1px solid var(--theme-border); border-radius: var(--radius-lg); padding: 24px; max-width: 400px; text-align: center; }
-        .delete-confirm-title { font-size: 1.1rem; font-weight: 600; color: var(--theme-text-bright); margin-bottom: 12px; }
-        .delete-confirm-file { font-family: 'Consolas', monospace; font-size: 0.85rem; color: var(--theme-text-muted); margin-bottom: 20px; }
-        .delete-confirm-actions { display: flex; gap: 12px; justify-content: center; }
-        .btn-cancel { background: var(--theme-bg); border: 1px solid var(--theme-border); color: var(--theme-text); padding: 10px 20px; border-radius: var(--radius-sm); cursor: pointer; }
-        .btn-confirm-delete { background: linear-gradient(135deg, #ef4444, #dc2626); color: white; padding: 10px 20px; border-radius: var(--radius-sm); border: none; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -275,10 +230,6 @@
             <div class="sidebar-header">
                 <div class="sidebar-logo">
                     <img src="{{ url_for('static', filename='autotech_logo.png') }}" alt="AutoTech Logo" class="sidebar-logo-img">
-                    <div>
-                        <div class="sidebar-logo-text">AutoTech</div>
-                        <div class="sidebar-logo-subtitle">Mining Equipment</div>
-                    </div>
                 </div>
             </div>
             <nav class="sidebar-nav">
@@ -335,7 +286,7 @@
                             <button class="btn btn-rescan" onclick="scanTool('playback')">🔄</button>
                         </div>
                     </div>
-                    
+
                     <div class="tool-card">
                         <div class="tool-card-header">
                             <div class="tool-card-title-section">
@@ -362,14 +313,14 @@
                             <button class="btn btn-rescan" onclick="scanTool('camstudio')">🔄</button>
                         </div>
                     </div>
-                    
+
                     <div class="tool-card">
                         <div class="tool-card-header">
                             <div class="tool-card-title-section">
                                 <span class="tool-card-icon">📁</span>
                                 <div>
                                     <div class="tool-card-title">Playback Server</div>
-                                    <div class="tool-card-subtitle">SFTP Access</div>
+                                    <div class="tool-card-subtitle">FrontRunner Data Server</div>
                                 </div>
                             </div>
                             <span class="status-badge checking" id="serverStatus"><span class="spinner"></span> Checking</span>
@@ -378,8 +329,8 @@
                             <div class="tool-info-grid">
                                 <span class="tool-info-label">Server:</span>
                                 <span class="tool-info-value">10.110.19.16</span>
-                                <span class="tool-info-label">User:</span>
-                                <span class="tool-info-value">komatsu</span>
+                                <span class="tool-info-label">Path:</span>
+                                <span class="tool-info-value">/var/log/frontrunner/</span>
                             </div>
                         </div>
                         <div class="tool-card-actions">
@@ -387,8 +338,49 @@
                             <button class="btn btn-rescan" onclick="checkServer()">🔄</button>
                         </div>
                     </div>
+
+                    <div class="tool-card" style="grid-column: span 3;">
+                        <div class="tool-card-header">
+                            <div class="tool-card-title-section">
+                                <span class="tool-card-icon">🔮</span>
+                                <div>
+                                    <div class="tool-card-title">Next File Prediction</div>
+                                    <div class="tool-card-subtitle">Based on server file patterns</div>
+                                </div>
+                            </div>
+                            <span class="status-badge checking" id="predictionStatus"><span class="spinner"></span> Checking</span>
+                        </div>
+                        <div class="tool-card-body" id="predictionBody" style="display:none;">
+                            <div style="display: grid; grid-template-columns: 1fr auto 1fr; gap: 24px; align-items: center;">
+                                <div class="tool-info-grid">
+                                    <span class="tool-info-label">Last File:</span>
+                                    <span class="tool-info-value" id="lastFileTime">-</span>
+                                    <span class="tool-info-label">Interval:</span>
+                                    <span class="tool-info-value" id="avgInterval">-</span>
+                                    <span class="tool-info-label">Files Analyzed:</span>
+                                    <span class="tool-info-value" id="filesAnalyzed">-</span>
+                                </div>
+                                <div style="text-align: center; padding: 0 20px;">
+                                    <div style="font-size: 2.5rem; font-weight: 700; color: var(--theme-primary);" id="countdownDisplay">--:--</div>
+                                    <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--theme-text-muted); margin-top: 4px;">Until Next File</div>
+                                </div>
+                                <div class="tool-info-grid">
+                                    <span class="tool-info-label">Next File:</span>
+                                    <span class="tool-info-value" id="nextFileTime">-</span>
+                                    <span class="tool-info-label">Confidence:</span>
+                                    <span class="tool-info-value" id="confidenceLevel">-</span>
+                                    <span class="tool-info-label">Status:</span>
+                                    <span class="tool-info-value" id="predictionStatusText">-</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="predictionError" style="display:none; padding: 16px; text-align: center; color: var(--theme-text-muted); font-size: 0.9rem;"></div>
+                        <div class="tool-card-actions" id="predictionActions" style="display:none;">
+                            <button type="button" class="btn btn-launch" id="downloadLatestBtn" onclick="downloadLatestFile()">⬇️ Download Latest File</button>
+                        </div>
+                    </div>
                 </div>
-                
+
                 <!-- Download Section -->
                 <div class="auto-download-section">
                     <div class="auto-download-header">
@@ -433,8 +425,15 @@
                     <div id="searchResultContainer" style="display:none;">
                         <div class="search-result">
                             <div class="search-result-header">
-                                <span class="search-result-title">📄 Files Found</span>
-                                <span class="search-result-info" id="searchInfo"></span>
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll()" style="width: 18px; height: 18px; cursor: pointer;">
+                                    <span class="search-result-title">📄 Files Found</span>
+                                    <span class="search-result-info" id="searchInfo"></span>
+                                </div>
+                                <div style="display: flex; gap: 8px;">
+                                    <button class="btn-download-sm" id="downloadSelectedBtn" onclick="downloadSelected()" style="display:none;">⬇️ Download Selected</button>
+                                    <button class="btn-download-sm" id="deleteSelectedBtn" onclick="deleteSelected()" style="display:none; background: linear-gradient(135deg, var(--status-offline), #dc2626);">🗑️ Delete Selected</button>
+                                </div>
                             </div>
                             <div class="found-files-list" id="foundFilesList"></div>
                             <div class="download-destination">
@@ -451,57 +450,68 @@
                     </div>
                 </div>
                 
-                <!-- Local Files -->
+                <!-- USB Warning / Instructions -->
                 <div class="files-section">
                     <div class="files-section-header">
                         <div class="files-section-title">
-                            <span>💾</span>
-                            Local Playback Files (USB)
-                        </div>
-                        <div style="display:flex;align-items:center;gap:12px;">
-                            <span class="files-count" id="localFilesCount">-</span>
-                            <button class="btn btn-rescan" onclick="loadLocalFiles()">🔄</button>
+                            <span>⚠️</span>
+                            USB Drive Required
                         </div>
                     </div>
-                    <div class="files-list" id="localFilesList">
-                        <div class="no-files">Scanning...</div>
+                    <div style="padding: 16px; line-height: 1.8;">
+                        <div style="margin-bottom: 16px; padding: 12px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px;">
+                            <strong style="color: #ef4444;">⚠️ Important:</strong>
+                            <div style="color: var(--theme-text); font-size: 0.9rem; margin-top: 8px;">
+                                This tool requires a USB drive containing the FrontRunner tools to be plugged into <strong>your local PC</strong>. The web page will scan your PC for the USB drive, not the server.
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 16px;">
+                            <strong style="color: var(--theme-text-bright);">1. Insert USB Drive</strong>
+                            <div style="color: var(--theme-text-muted); font-size: 0.9rem; margin-top: 4px;">
+                                Plug in a USB drive containing:
+                                <ul style="margin: 8px 0 0 20px;">
+                                    <li><code style="background: var(--theme-bg); padding: 2px 6px; border-radius: 4px;">frontrunnerV3-3.7.0-076-full</code> folder</li>
+                                    <li><code style="background: var(--theme-bg); padding: 2px 6px; border-radius: 4px;">CamStudio_USB</code> folder (optional)</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 16px;">
+                            <strong style="color: var(--theme-text-bright);">2. Scan for Tools</strong>
+                            <div style="color: var(--theme-text-muted); font-size: 0.9rem; margin-top: 4px;">
+                                Click the <span style="color: var(--theme-text);">🔄 Refresh All</span> button or individual refresh buttons to detect USB tools
+                            </div>
+                        </div>
+                        <div>
+                            <strong style="color: var(--theme-text-bright);">3. Download & Launch</strong>
+                            <div style="color: var(--theme-text-muted); font-size: 0.9rem; margin-top: 4px;">
+                                Search for playback files, download them to the USB drive, then launch the playback tool
+                            </div>
+                        </div>
                     </div>
                 </div>
-                
-                <!-- USB Drives -->
-                <section class="usb-drives-section">
-                    <div class="section-header">
-                        <h2 class="section-title"><span>💾</span> Detected USB Drives</h2>
-                        <span class="text-muted" id="driveCount">Scanning...</span>
-                    </div>
-                    <div id="usbDrivesContainer">
-                        <div class="no-drives">Scanning for USB drives...</div>
-                    </div>
-                </section>
             </div>
         </main>
-    </div>
-    
-    <!-- Delete Modal -->
-    <div class="delete-confirm" id="deleteModal" style="display:none;">
-        <div class="delete-confirm-box">
-            <div class="delete-confirm-title">🗑️ Delete File?</div>
-            <div class="delete-confirm-file" id="deleteFileName"></div>
-            <div class="delete-confirm-actions">
-                <button class="btn-cancel" onclick="closeDeleteModal()">Cancel</button>
-                <button class="btn-confirm-delete" onclick="confirmDelete()">Delete</button>
-            </div>
-        </div>
     </div>
     
     <div class="toast-container" id="toastContainer"></div>
     
     <script>
+        // Auto-apply theme from localStorage
+        (function() {
+            const savedTheme = localStorage.getItem('autotech_theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            const favicon = document.getElementById('favicon');
+            if (favicon) {
+                favicon.href = savedTheme === 'light'
+                    ? "{{ url_for('static', filename='AutoTech_Light.ico') }}"
+                    : "{{ url_for('static', filename='AutoTech_Dark.ico') }}";
+            }
+        })();
+
         let usbDrives = [];
         let playbackDrivePath = null;
         let foundFiles = [];
         let searchMode = 'single';
-        let fileToDelete = null;
         
         function showToast(message, type = 'info') {
             const container = document.getElementById('toastContainer');
@@ -543,20 +553,20 @@
             document.getElementById('clearBtnWrapper').style.display = 'none';
             foundFiles = [];
         }
-        
+
         async function scanTool(toolId) {
             const statusEl = document.getElementById(`${toolId}Status`);
             const launchBtn = document.getElementById(`${toolId}LaunchBtn`);
             const locationEl = document.getElementById(`${toolId}Location`);
-            
+
             statusEl.className = 'status-badge checking';
             statusEl.innerHTML = '<span class="spinner"></span> Checking';
             launchBtn.disabled = true;
-            
+
             try {
                 const response = await fetch(`/api/usb/scan/${toolId}`);
                 const data = await response.json();
-                if (data.drives) { usbDrives = data.drives; updateDrivesDisplay(); }
+                if (data.drives) { usbDrives = data.drives; }
                 if (data.found) {
                     statusEl.className = 'status-badge found';
                     statusEl.textContent = '✓ FOUND';
@@ -564,20 +574,21 @@
                     locationEl.textContent = data.details.drive.letter + ':\\';
                     if (toolId === 'playback') {
                         playbackDrivePath = data.details.drive.letter + ':\\frontrunnerV3-3.7.0-076-full\\playback';
-                        document.getElementById('downloadDestination').textContent = playbackDrivePath;
                     }
                 } else {
                     statusEl.className = 'status-badge not-found';
                     statusEl.textContent = '✗ NOT FOUND';
                     locationEl.textContent = '-';
                     if (toolId === 'playback') playbackDrivePath = null;
+                    showToast(`${toolId === 'playback' ? 'Playback Tool' : 'CamStudio'} not found on USB drives`, 'warning');
                 }
             } catch (e) {
                 statusEl.className = 'status-badge not-found';
                 statusEl.textContent = '✗ ERROR';
+                showToast('Error scanning USB drives', 'error');
             }
         }
-        
+
         async function launchTool(toolId) {
             const btn = document.getElementById(`${toolId}LaunchBtn`);
             btn.disabled = true;
@@ -589,7 +600,7 @@
                 btn.innerHTML = data.success ? '✅ Launched!' : '🚀 Launch';
                 setTimeout(() => { btn.innerHTML = '🚀 Launch'; btn.disabled = false; }, 3000);
             } catch (e) {
-                showToast('Error', 'error');
+                showToast('Launch error', 'error');
                 btn.innerHTML = '🚀 Launch';
                 btn.disabled = false;
             }
@@ -661,16 +672,27 @@
                     document.getElementById('foundFilesList').innerHTML = data.files.map((file, i) => {
                         const parsed = parsePlaybackFilename(file.name);
                         return `<div class="found-file-item">
+                            <input type="checkbox" class="found-file-checkbox file-checkbox" data-index="${i}" onchange="updateSelectionButtons()">
                             <div class="found-file-info">
                                 <div class="found-file-name">${file.name}</div>
                                 <div class="found-file-details">${parsed ? parsed.displayStr : ''} • ${formatFileSize(file.size)}</div>
                             </div>
-                            <button class="btn-download-sm" id="dlBtn${i}" onclick="downloadSingleFile(${i})" ${!playbackDrivePath ? 'disabled' : ''}>⬇️ Download</button>
+                            <div class="found-file-actions">
+                                <button type="button" class="btn-download-sm" id="dlBtn${i}" onclick="downloadSingleFile(${i})" ${!playbackDrivePath ? 'disabled' : ''}>⬇️ Download</button>
+                                <button type="button" class="btn-download-sm" style="background: linear-gradient(135deg, var(--status-offline), #dc2626);" onclick="deleteSingleFile(${i})">🗑️</button>
+                            </div>
                         </div>`;
                     }).join('');
                     document.getElementById('searchResultContainer').style.display = 'block';
                     document.getElementById('clearBtnWrapper').style.display = 'flex';
-                    showToast(`Found ${data.files.length} file(s)`, 'success');
+                    document.getElementById('selectAllCheckbox').checked = false;
+                    updateSelectionButtons();
+
+                    if (!playbackDrivePath) {
+                        showToast('⚠️ USB drive not found! Insert USB drive and click Refresh.', 'warning');
+                    } else {
+                        showToast(`Found ${data.files.length} file(s)`, 'success');
+                    }
                 } else {
                     document.getElementById('noFileMessage').textContent = data.error || '❌ No files found';
                     document.getElementById('noFileFound').style.display = 'block';
@@ -683,10 +705,173 @@
             btn.disabled = false;
             btn.innerHTML = '🔍 Find Files';
         }
-        
+
+        function toggleSelectAll() {
+            const checkboxes = document.querySelectorAll('.file-checkbox');
+            const selectAll = document.getElementById('selectAllCheckbox').checked;
+            checkboxes.forEach(cb => cb.checked = selectAll);
+            updateSelectionButtons();
+        }
+
+        function updateSelectionButtons() {
+            const checkboxes = document.querySelectorAll('.file-checkbox');
+            const checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
+            const downloadBtn = document.getElementById('downloadSelectedBtn');
+            const deleteBtn = document.getElementById('deleteSelectedBtn');
+
+            if (checkedCount > 0) {
+                downloadBtn.style.display = 'inline-flex';
+                deleteBtn.style.display = 'inline-flex';
+                downloadBtn.textContent = `⬇️ Download (${checkedCount})`;
+                deleteBtn.textContent = `🗑️ Delete (${checkedCount})`;
+            } else {
+                downloadBtn.style.display = 'none';
+                deleteBtn.style.display = 'none';
+            }
+        }
+
+        async function downloadSelected() {
+            const checkboxes = document.querySelectorAll('.file-checkbox:checked');
+            if (checkboxes.length === 0) return;
+
+            if (!playbackDrivePath) {
+                showToast('⚠️ USB drive not detected! Insert USB and click Refresh.', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('downloadSelectedBtn');
+            btn.disabled = true;
+            const originalText = btn.textContent;
+
+            let success = 0;
+            let failed = 0;
+
+            for (const checkbox of checkboxes) {
+                const index = parseInt(checkbox.dataset.index);
+                btn.innerHTML = `<span class="spinner"></span> ${success + failed + 1}/${checkboxes.length}`;
+
+                const file = foundFiles[index];
+                try {
+                    const response = await fetch('/api/playback/download-file', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ filename: file.name, size: file.size })
+                    });
+                    const data = await response.json();
+                    if (data.success) {
+                        success++;
+                        const dlBtn = document.getElementById(`dlBtn${index}`);
+                        if (dlBtn) {
+                            dlBtn.innerHTML = '✅';
+                            dlBtn.classList.add('downloaded');
+                            dlBtn.disabled = true;
+                        }
+                    } else {
+                        failed++;
+                    }
+                } catch (e) {
+                    failed++;
+                }
+            }
+
+            btn.disabled = false;
+            btn.textContent = originalText;
+
+            if (failed === 0) {
+                showToast(`✅ Downloaded ${success} file(s)`, 'success');
+            } else {
+                showToast(`⚠️ Downloaded ${success}, Failed ${failed}`, 'warning');
+            }
+
+            // Uncheck all
+            document.getElementById('selectAllCheckbox').checked = false;
+            checkboxes.forEach(cb => cb.checked = false);
+            updateSelectionButtons();
+        }
+
+        async function deleteSelected() {
+            const checkboxes = document.querySelectorAll('.file-checkbox:checked');
+            if (checkboxes.length === 0) return;
+
+            if (!confirm(`Delete ${checkboxes.length} file(s) from USB drive?`)) return;
+
+            const btn = document.getElementById('deleteSelectedBtn');
+            btn.disabled = true;
+            const originalText = btn.textContent;
+
+            let success = 0;
+            let failed = 0;
+
+            for (const checkbox of checkboxes) {
+                const index = parseInt(checkbox.dataset.index);
+                btn.innerHTML = `<span class="spinner"></span> ${success + failed + 1}/${checkboxes.length}`;
+
+                const file = foundFiles[index];
+                try {
+                    const response = await fetch('/api/playback/delete-file', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ filename: file.name })
+                    });
+                    const data = await response.json();
+                    if (data.success) {
+                        success++;
+                        // Remove from display
+                        checkbox.closest('.found-file-item').remove();
+                    } else {
+                        failed++;
+                    }
+                } catch (e) {
+                    failed++;
+                }
+            }
+
+            btn.disabled = false;
+            btn.textContent = originalText;
+
+            if (failed === 0) {
+                showToast(`✅ Deleted ${success} file(s)`, 'success');
+            } else {
+                showToast(`⚠️ Deleted ${success}, Failed ${failed}`, 'warning');
+            }
+
+            document.getElementById('selectAllCheckbox').checked = false;
+            updateSelectionButtons();
+        }
+
+        async function deleteSingleFile(index) {
+            const file = foundFiles[index];
+            if (!file) return;
+
+            if (!confirm(`Delete ${file.name} from USB drive?`)) return;
+
+            try {
+                const response = await fetch('/api/playback/delete-file', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ filename: file.name })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    showToast(`Deleted: ${file.name}`, 'success');
+                    // Remove from display
+                    const fileItem = document.querySelector(`.file-checkbox[data-index="${index}"]`).closest('.found-file-item');
+                    fileItem.remove();
+                    updateSelectionButtons();
+                } else {
+                    showToast(data.message || 'Delete failed', 'error');
+                }
+            } catch (e) {
+                showToast('Delete error', 'error');
+            }
+        }
+
         async function downloadSingleFile(index) {
             const file = foundFiles[index];
-            if (!file || !playbackDrivePath) { showToast('USB not ready', 'error'); return; }
+            if (!file || !playbackDrivePath) {
+                showToast('⚠️ USB drive not detected! Insert USB and click Refresh.', 'error');
+                return;
+            }
             const btn = document.getElementById(`dlBtn${index}`);
             btn.disabled = true;
             btn.innerHTML = '<span class="spinner"></span>';
@@ -701,7 +886,6 @@
                     btn.innerHTML = '✅';
                     btn.classList.add('downloaded');
                     showToast(`Downloaded: ${file.name}`, 'success');
-                    loadLocalFiles();
                 } else {
                     btn.innerHTML = '⬇️ Retry';
                     btn.disabled = false;
@@ -710,111 +894,170 @@
             } catch (e) {
                 btn.innerHTML = '⬇️ Retry';
                 btn.disabled = false;
-                showToast('Error', 'error');
+                showToast('Download error', 'error');
             }
-        }
-        
-        async function loadLocalFiles() {
-            const container = document.getElementById('localFilesList');
-            const countEl = document.getElementById('localFilesCount');
-            container.innerHTML = '<div class="no-files"><span class="spinner"></span> Scanning...</div>';
-            try {
-                const response = await fetch('/api/playback/local-files');
-                const data = await response.json();
-                if (data.error) {
-                    container.innerHTML = `<div class="no-files">💾 ${data.error}</div>`;
-                    countEl.textContent = '-';
-                    return;
-                }
-                if (!data.files || data.files.length === 0) {
-                    container.innerHTML = '<div class="no-files">📂 No files yet</div>';
-                    countEl.textContent = '0 files';
-                    return;
-                }
-                if (data.path) {
-                    playbackDrivePath = data.path;
-                    document.getElementById('downloadDestination').textContent = playbackDrivePath;
-                }
-                countEl.textContent = `${data.files.length} files`;
-                container.innerHTML = data.files.map(file => {
-                    const parsed = parsePlaybackFilename(file.name);
-                    return `<div class="file-item">
-                        <span class="file-name">${file.name}</span>
-                        <span class="file-date">${parsed ? parsed.displayStr : '-'}</span>
-                        <span class="file-size">${formatFileSize(file.size)}</span>
-                        <button class="btn-delete" onclick="showDeleteModal('${file.name}')">🗑️</button>
-                    </div>`;
-                }).join('');
-            } catch (e) {
-                container.innerHTML = '<div class="no-files">⚠️ Error</div>';
-                countEl.textContent = '-';
-            }
-        }
-        
-        function showDeleteModal(filename) {
-            fileToDelete = filename;
-            document.getElementById('deleteFileName').textContent = filename;
-            document.getElementById('deleteModal').style.display = 'flex';
-        }
-        
-        function closeDeleteModal() {
-            fileToDelete = null;
-            document.getElementById('deleteModal').style.display = 'none';
-        }
-        
-        async function confirmDelete() {
-            if (!fileToDelete) return;
-            try {
-                const response = await fetch('/api/playback/delete-file', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ filename: fileToDelete })
-                });
-                const data = await response.json();
-                showToast(data.success ? `Deleted: ${fileToDelete}` : data.message, data.success ? 'success' : 'error');
-                if (data.success) loadLocalFiles();
-            } catch (e) {
-                showToast('Error', 'error');
-            }
-            closeDeleteModal();
-        }
-        
-        function updateDrivesDisplay() {
-            const container = document.getElementById('usbDrivesContainer');
-            const countEl = document.getElementById('driveCount');
-            if (!usbDrives || usbDrives.length === 0) {
-                container.innerHTML = '<div class="no-drives">💾 No USB drives</div>';
-                countEl.textContent = '0 drives';
-                return;
-            }
-            countEl.textContent = `${usbDrives.length} drive(s)`;
-            container.innerHTML = `<div class="usb-drives-grid">${usbDrives.map(d => `
-                <div class="usb-drive-item">
-                    <span style="font-size:1.25rem;">💾</span>
-                    <div>
-                        <div class="usb-drive-letter">${d.letter}:\\</div>
-                        <div class="usb-drive-label">${d.label}</div>
-                        <div class="usb-drive-space">${d.free_space ? d.free_space + ' GB' : ''}</div>
-                    </div>
-                </div>
-            `).join('')}</div>`;
         }
         
         async function refreshAll() {
             showToast('Refreshing...', 'info');
-            await Promise.all([scanTool('playback'), scanTool('camstudio'), checkServer(), loadLocalFiles()]);
+            await Promise.all([scanTool('playback'), scanTool('camstudio'), checkServer(), updatePrediction()]);
             showToast('Done', 'success');
         }
-        
+
+        let predictionData = null;
+        let countdownInterval = null;
+
+        async function updatePrediction() {
+            const statusEl = document.getElementById('predictionStatus');
+            const bodyEl = document.getElementById('predictionBody');
+            const errorEl = document.getElementById('predictionError');
+
+            statusEl.className = 'status-badge checking';
+            statusEl.innerHTML = '<span class="spinner"></span> Checking';
+            bodyEl.style.display = 'none';
+            errorEl.style.display = 'none';
+
+            try {
+                const response = await fetch('/api/playback/predict-next-file');
+                const data = await response.json();
+
+                if (data.success && data.has_prediction) {
+                    predictionData = data;
+                    statusEl.className = 'status-badge found';
+                    statusEl.textContent = '✓ ACTIVE';
+                    bodyEl.style.display = 'block';
+                    document.getElementById('predictionActions').style.display = 'flex';
+
+                    // Update info fields
+                    document.getElementById('lastFileTime').textContent = new Date(data.last_file_time).toLocaleString();
+                    document.getElementById('nextFileTime').textContent = new Date(data.next_file_time).toLocaleString();
+                    document.getElementById('avgInterval').textContent = data.average_interval_minutes + ' min';
+                    document.getElementById('filesAnalyzed').textContent = data.files_analyzed;
+
+                    const confEmoji = data.confidence === 'high' ? '🟢' : data.confidence === 'medium' ? '🟡' : '🔴';
+                    document.getElementById('confidenceLevel').textContent = confEmoji + ' ' + data.confidence.toUpperCase();
+
+                    // Start countdown
+                    if (countdownInterval) clearInterval(countdownInterval);
+                    updateCountdown();
+                    countdownInterval = setInterval(updateCountdown, 1000);
+                } else {
+                    statusEl.className = 'status-badge not-found';
+                    statusEl.textContent = '✗ NO DATA';
+                    errorEl.textContent = data.error || 'Not enough files to predict pattern';
+                    errorEl.style.display = 'block';
+                }
+            } catch (e) {
+                statusEl.className = 'status-badge not-found';
+                statusEl.textContent = '✗ ERROR';
+                errorEl.textContent = 'Failed to fetch prediction';
+                errorEl.style.display = 'block';
+            }
+        }
+
+        function updateCountdown() {
+            if (!predictionData) return;
+
+            const now = new Date();
+            const nextTime = new Date(predictionData.next_file_time);
+            const diff = Math.floor((nextTime - now) / 1000); // seconds
+
+            const display = document.getElementById('countdownDisplay');
+            const statusText = document.getElementById('predictionStatusText');
+
+            if (diff <= 0) {
+                // Overdue
+                const overdue = Math.abs(diff);
+                const mins = Math.floor(overdue / 60);
+                const secs = overdue % 60;
+                display.textContent = `+${mins}:${secs.toString().padStart(2, '0')}`;
+                display.style.color = 'var(--status-offline)';
+                statusText.textContent = '⚠️ OVERDUE';
+                statusText.style.color = 'var(--status-offline)';
+            } else if (diff < 60) {
+                // Less than 1 minute
+                display.textContent = `0:${diff.toString().padStart(2, '0')}`;
+                display.style.color = 'var(--status-warning)';
+                statusText.textContent = '🔄 ARRIVING SOON';
+                statusText.style.color = 'var(--status-warning)';
+            } else {
+                // Normal countdown
+                const mins = Math.floor(diff / 60);
+                const secs = diff % 60;
+                display.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+                display.style.color = 'var(--theme-primary)';
+                statusText.textContent = '⏳ WAITING';
+                statusText.style.color = 'var(--theme-text)';
+            }
+        }
+
+        async function downloadLatestFile() {
+            if (!predictionData || !predictionData.last_file_time) {
+                showToast('No file information available', 'error');
+                return;
+            }
+
+            if (!playbackDrivePath) {
+                showToast('⚠️ USB drive not detected! Insert USB and click Refresh.', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('downloadLatestBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span> Downloading...';
+
+            try {
+                // Parse last file time to construct filename
+                const lastTime = new Date(predictionData.last_file_time);
+                const year = lastTime.getFullYear();
+                const month = String(lastTime.getMonth() + 1).padStart(2, '0');
+                const day = String(lastTime.getDate()).padStart(2, '0');
+                const hour = String(lastTime.getHours()).padStart(2, '0');
+                const minute = String(lastTime.getMinutes()).padStart(2, '0');
+                const second = String(lastTime.getSeconds()).padStart(2, '0');
+
+                const filename = `AHS_LOG_${year}${month}${day}_${hour}${minute}${second}_AEST.dat`;
+
+                const response = await fetch('/api/playback/download-file', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ filename: filename, size: 0 })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    btn.innerHTML = '✅ Downloaded!';
+                    showToast(`Downloaded latest file: ${filename}`, 'success');
+                    setTimeout(() => {
+                        btn.innerHTML = '⬇️ Download Latest File';
+                        btn.disabled = false;
+                    }, 3000);
+                } else {
+                    btn.innerHTML = '⬇️ Retry';
+                    btn.disabled = false;
+                    showToast(data.message || 'Download failed', 'error');
+                }
+            } catch (e) {
+                btn.innerHTML = '⬇️ Download Latest File';
+                btn.disabled = false;
+                showToast('Download error', 'error');
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('downloadDate').value = new Date().toISOString().split('T')[0];
             document.getElementById('downloadTime').value = new Date().toTimeString().slice(0,5);
             document.getElementById('downloadTimeFrom').value = '00:00';
             document.getElementById('downloadTimeTo').value = new Date().toTimeString().slice(0,5);
+
+            // Scan for tools on page load
             scanTool('playback');
             scanTool('camstudio');
             checkServer();
-            loadLocalFiles();
+            updatePrediction();
+
+            // Auto-refresh prediction every 5 minutes
+            setInterval(updatePrediction, 5 * 60 * 1000);
         });
     </script>
 </body>

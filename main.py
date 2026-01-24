@@ -3287,6 +3287,140 @@ def api_playback_download_file():
         return jsonify({'success': False, 'message': str(e)})
 
 
+@app.route("/api/playback/predict-next-file")
+@login_required
+def api_playback_predict_next_file():
+    """
+    Analyze recent playback files and predict when the next file will be available.
+    Returns prediction based on file timestamp patterns.
+    """
+    try:
+        if not is_online_network():
+            # Offline mode - return mock prediction
+            from datetime import datetime, timedelta
+            now = datetime.now()
+            next_time = now + timedelta(minutes=15 - (now.minute % 15), seconds=-now.second)
+            return jsonify({
+                'success': True,
+                'has_prediction': True,
+                'next_file_time': next_time.strftime('%Y-%m-%d %H:%M:%S'),
+                'countdown_seconds': int((next_time - now).total_seconds()),
+                'average_interval_minutes': 15,
+                'files_analyzed': 10,
+                'confidence': 'high',
+                'offline_mode': True
+            })
+
+        if not paramiko:
+            return jsonify({'success': False, 'error': 'SSH library not available'})
+
+        # Connect to server
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+        try:
+            ssh.connect(
+                PLAYBACK_SERVER['ip'],
+                port=PLAYBACK_SERVER['port'],
+                username=PLAYBACK_SERVER['user'],
+                password=PLAYBACK_SERVER['password'],
+                timeout=10
+            )
+        except Exception as e:
+            return jsonify({'success': False, 'error': f'Connection failed: {str(e)}'})
+
+        sftp = ssh.open_sftp()
+
+        try:
+            file_list = sftp.listdir_attr(PLAYBACK_SERVER['path'])
+        except Exception as e:
+            sftp.close()
+            ssh.close()
+            return jsonify({'success': False, 'error': f'Cannot read directory: {str(e)}'})
+
+        sftp.close()
+        ssh.close()
+
+        # Parse timestamps from recent files
+        from datetime import datetime, timedelta
+        file_timestamps = []
+
+        for f in file_list:
+            if f.filename.startswith('AHS_LOG_') and f.filename.endswith('.dat'):
+                try:
+                    # Parse filename: AHS_LOG_YYYYMMDD_HHMMSS_AEST.dat
+                    parts = f.filename.split('_')
+                    date_part = parts[2]  # YYYYMMDD
+                    time_part = parts[3]  # HHMMSS
+
+                    year = int(date_part[0:4])
+                    month = int(date_part[4:6])
+                    day = int(date_part[6:8])
+                    hour = int(time_part[0:2])
+                    minute = int(time_part[2:4])
+                    second = int(time_part[4:6])
+
+                    dt = datetime(year, month, day, hour, minute, second)
+                    file_timestamps.append(dt)
+                except:
+                    continue
+
+        if len(file_timestamps) < 2:
+            return jsonify({
+                'success': True,
+                'has_prediction': False,
+                'error': 'Not enough files to predict pattern (need at least 2)'
+            })
+
+        # Sort timestamps
+        file_timestamps.sort()
+
+        # Calculate intervals between consecutive files
+        intervals = []
+        for i in range(1, len(file_timestamps)):
+            interval = (file_timestamps[i] - file_timestamps[i-1]).total_seconds() / 60.0  # in minutes
+            intervals.append(interval)
+
+        # Calculate average interval (use recent 20 files for better accuracy)
+        recent_intervals = intervals[-20:] if len(intervals) > 20 else intervals
+        avg_interval = sum(recent_intervals) / len(recent_intervals)
+
+        # Get most recent file time
+        last_file_time = file_timestamps[-1]
+
+        # Predict next file time
+        predicted_next = last_file_time + timedelta(minutes=avg_interval)
+
+        # Calculate countdown
+        now = datetime.now()
+        countdown_seconds = int((predicted_next - now).total_seconds())
+
+        # Determine confidence based on interval consistency
+        interval_variance = sum((i - avg_interval) ** 2 for i in recent_intervals) / len(recent_intervals)
+        if interval_variance < 1:
+            confidence = 'high'
+        elif interval_variance < 5:
+            confidence = 'medium'
+        else:
+            confidence = 'low'
+
+        return jsonify({
+            'success': True,
+            'has_prediction': True,
+            'next_file_time': predicted_next.strftime('%Y-%m-%d %H:%M:%S'),
+            'last_file_time': last_file_time.strftime('%Y-%m-%d %H:%M:%S'),
+            'countdown_seconds': countdown_seconds if countdown_seconds > 0 else 0,
+            'average_interval_minutes': round(avg_interval, 1),
+            'files_analyzed': len(file_timestamps),
+            'confidence': confidence,
+            'is_overdue': countdown_seconds < 0
+        })
+
+    except Exception as e:
+        logger.error(f"Predict next file error: {e}")
+        return jsonify({'success': False, 'error': str(e)})
+
+
 @app.route("/api/playback/find-files")
 @login_required
 def api_playback_find_files():
