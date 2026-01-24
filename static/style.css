@@ -184,15 +184,15 @@ a:hover {
 }
 
 .sidebar-logo-img {
-    width: 100%;
+    width: 60%;
     height: auto;
     object-fit: contain;
     display: block;
-    content: url('../static/AutoTech_logo_dark.png');
+    content: url('../static/AutoTech_Dark.png');
 }
 
 [data-theme="light"] .sidebar-logo-img {
-    content: url('../static/AutoTech_logo_light.png');
+    content: url('../static/AutoTech_Light.png');
 }
 
 .sidebar-logo-icon {
