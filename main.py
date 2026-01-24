@@ -40,6 +40,15 @@ from tools.ptx_uptime_db import (
     get_database_path as get_ptx_db_path,
     PTXUptimeDB
 )
+try:
+    from tools import ptx_uptime as ptx_uptime_tool
+except ImportError:
+    ptx_uptime_tool = None
+
+try:
+    from tools import frontrunner_status as frontrunner_status_tool
+except ImportError:
+    frontrunner_status_tool = None
 
 
 # Third-Party Imports
@@ -105,9 +114,27 @@ if not os.path.exists(CLIENT_TOOLS_DIR):
     CLIENT_TOOLS_DIR = os.path.join(BASE_DIR, 'autotech_client', 'tools')
 CLIENT_PLINK_PATH = os.path.join(CLIENT_TOOLS_DIR, 'plink.exe')
 
+AUTO_TECH_CLIENT_DIR = os.environ.get('AUTOTECH_CLIENT_DIR', r"C:\AutoTech_Client")
+AUTO_TECH_CLIENT_PLINK = os.path.join(AUTO_TECH_CLIENT_DIR, 'plink.exe')
+
+PLINK_CANDIDATES = [
+    AUTO_TECH_CLIENT_PLINK,
+    CLIENT_PLINK_PATH,
+    PLINK_PATH,
+]
+
+def resolve_plink_path():
+    """Return the first plink.exe that exists from the preferred locations."""
+    for candidate in PLINK_CANDIDATES:
+        if candidate and os.path.exists(candidate):
+            logger.debug(f"Using plink from: {candidate}")
+            return candidate
+    return None
+
 logger.info(f"Application Base Directory: {BASE_DIR}")
 logger.info(f"Tools Directory: {TOOLS_DIR}")
 logger.info(f"Client Tools Directory: {CLIENT_TOOLS_DIR}")
+logger.info(f"AutoTech Client Directory: {AUTO_TECH_CLIENT_DIR}")
 logger.info(f"Template Folder: {template_folder}")
 logger.info(f"Static Folder: {static_folder}")
 
@@ -191,10 +218,11 @@ CORS(app)
 
 # Extended tool list with all functionality
 TOOL_LIST = [
-    "IP Finder", 
+    "IP Finder",
     "Playback Tools",
-    "PTX Uptime", 
-    "Mineview Sessions", 
+    "PTX Uptime",
+    "FrontRunner Status",
+    "Mineview Sessions",
     "KOA Data Check",
     "Speed Limit Data",
     "Component Tracking",
@@ -256,6 +284,42 @@ MOCK_EQUIPMENT_DB = {
         'vehicle_status': 'Online',
         'ptxc_found': False,
         'ssh_status': 'Connected'
+    },
+    'TEST1': {
+        'OID': 'TEST1',
+        'profile': 'K830E',
+        'ptx_model': 'PTXC',
+        'ptx_ip': '10.110.20.201',
+        'avi_ip': '10.111.20.202',
+        'flight_recorder_ip': '10.110.20.202',
+        'vehicle_status': 'Online',
+        'ptxc_found': True,
+        'ssh_status': 'Connected',
+        'health': {
+            'cpu_usage': '85.30%',
+            'memory_usage': '78.45%',
+            'uptime': '45 days, 12 hours',
+            'disk_usage': '/dev/mmcblk0p3  5.6G  4.2G  1.1G  79% /media/realroot/home',
+            'disk_percent': '79%'
+        }
+    },
+    'TEST2': {
+        'OID': 'TEST2',
+        'profile': 'K930E',
+        'ptx_model': 'PTX10',
+        'ptx_ip': '10.110.21.150',
+        'avi_ip': '10.111.21.151',
+        'flight_recorder_ip': '10.110.21.151',
+        'vehicle_status': 'Degraded',
+        'ptxc_found': False,
+        'ssh_status': 'Connected',
+        'health': {
+            'cpu_usage': '22.10%',
+            'memory_usage': '65.20%',
+            'uptime': '2 hours, 15 minutes',
+            'disk_usage': '/dev/sda1  20G  8.5G  10G  46% /home',
+            'disk_percent': '46%'
+        }
     }
 }
 
@@ -563,8 +627,8 @@ def parse_ip_finder_output(query, output):
             result['ptxc_found'] = True
             result['ptx_model'] = 'PTXC'
         
-        # AVI IP
-        if line.lower().startswith('avi ip'):
+        # AVI IP (handles "AVI IP is : 10.111.219.27" or "AVI IP is: 10.111.219.27")
+        if 'avi ip' in line.lower() and 'is' in line.lower():
             ip_match = re.search(r'(\d+\.\d+\.\d+\.\d+)', line)
             if ip_match:
                 result['avi_ip'] = ip_match.group(1)
@@ -586,7 +650,7 @@ def parse_ip_finder_output(query, output):
     if result['profile'] in ['K830E', 'K930E'] and result['ptx_ip']:
         parts = result['ptx_ip'].split('.')
         if len(parts) == 4:
-            result['flight_recorder_ip'] = f"{parts[0]}.{parts[1]}.{parts[2]}.{int(parts[3]) + 1}"
+            result['flight_recorder_IP'] = f"{parts[0]}.{parts[1]}.{parts[2]}.{int(parts[3]) + 1}"
 
     return result
 
@@ -1444,15 +1508,71 @@ def api_equipment_search():
     try:
         data = request.get_json()
         query = data.get('query', '').strip()
-        
+
         if not query:
             return jsonify({'error': 'Search query required'}), 400
-        
+
         result = search_equipment(query)
         return jsonify(result)
-        
+
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@app.route('/equipment_monitor/<equipment_id>')
+@login_required
+def equipment_monitor(equipment_id):
+    """
+    Popout page for monitoring specific equipment
+    No search functionality - equipment-specific monitoring only
+    """
+    return render_template('ip_finder_popout.html',
+                         equipment_id=equipment_id,
+                         online=is_online_network(),
+                         gateway_ip=GATEWAY_IP,
+                         timestamp=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+
+
+@app.route('/api/linux_health_check', methods=['POST'])
+@login_required
+def api_linux_health_check():
+    """
+    Linux Health Check API - Gets CPU, Memory, Uptime, and Disk usage via SSH
+    """
+    try:
+        # Import the health check function
+        from tools.ip_finder import check_linux_health
+
+        data = request.get_json()
+        ptx_ip = data.get('ptx_ip', '').strip()
+        ptx_model = data.get('ptx_model', 'PTX10').strip().upper()
+
+        if not ptx_ip:
+            return jsonify({'success': False, 'error': 'PTX IP required'}), 400
+
+        # Check if this is mock equipment with predefined health data
+        for equipment_id, equipment_data in MOCK_EQUIPMENT_DB.items():
+            if equipment_data.get('ptx_ip') == ptx_ip and 'health' in equipment_data:
+                # Return the mock health data
+                mock_health = equipment_data['health'].copy()
+                mock_health['success'] = True
+                return jsonify(mock_health)
+
+        # Determine SSH credentials based on PTX model
+        if ptx_model == 'PTXC':
+            ssh_user = 'dlog'
+            ssh_password = 'gold'
+        else:
+            ssh_user = 'mms'
+            ssh_password = 'modular'
+
+        # Run health check
+        result = check_linux_health(ptx_ip, ssh_user, ssh_password)
+
+        return jsonify(result)
+
+    except Exception as e:
+        logger.error(f"Linux health check error: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/api/flight_recorder_ip/<equipment_type>')
 def api_get_flight_recorder_ip(equipment_type):
@@ -1559,12 +1679,11 @@ def api_vnc_start():
         
         logger.info(f"VNC: Starting session for {equipment_name} ({ptx_ip})")
         
-        # Find plink.exe (on USB drive in tools folder)
-        plink_path = PLINK_PATH
-        if not os.path.exists(plink_path):
+        plink_path = resolve_plink_path()
+        if not plink_path:
             return jsonify({
                 'success': False,
-                'message': f'plink.exe not found at: {PLINK_PATH}'
+                'message': 'plink.exe not found in any configured tool directory'
             })
         
         # MMS server details
@@ -1781,12 +1900,11 @@ def api_vnc_workstation():
                 'simulated': True
             })
         
-        # Find plink.exe on USB
-        plink_path = PLINK_PATH
-        if not os.path.exists(plink_path):
+        plink_path = resolve_plink_path()
+        if not plink_path:
             return jsonify({
                 'success': False,
-                'message': f'plink.exe not found at: {PLINK_PATH}'
+                'message': 'plink.exe not found in any configured tool directory'
             })
         
         # MMS server details
@@ -1964,15 +2082,19 @@ def run_tool(tool_name):
     try:
         # CRITICAL: IP Finder gets its own dedicated page
         if tool_name == "IP Finder":
-            return render_template('ip_finder.html', 
+            return render_template('ip_finder.html',
                                  online=is_online_network(),
                                  gateway_ip=GATEWAY_IP,
                                  timestamp=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-        
+
         # Handle PTX Uptime with enhanced functionality
         if tool_name == "PTX Uptime":
             return handle_ptx_uptime()
-        
+
+        # Handle FrontRunner Status
+        if tool_name == "FrontRunner Status":
+            return handle_frontrunner_status()
+
         # Handle CamStudio USB
         if tool_name == "CamStudio USB":
             return render_template('usb_tool.html',
@@ -2028,13 +2150,52 @@ def handle_ptx_uptime():
     """Handle PTX Uptime tool with enhanced functionality"""
     try:
         online = is_online_network()
-        force_sync = request.args.get('sync', 'false').lower() == 'true'
+        force_sync = request.args.get('sync', 'false').lower() == 'true' or 'refresh' in request.args
 
         # Check if database needs initial sync from HTML report
         db_count = ptx_uptime_db.get_record_count()
         report_path = os.path.join(os.path.dirname(__file__), 'backups', 'PTX_Uptime_Report.html')
 
-        if (db_count == 0 or force_sync) and os.path.exists(report_path):
+        last_live_sync = ptx_uptime_db.get_sync_metadata('last_live_sync')
+        needs_live_sync = online and (force_sync or db_count == 0)
+        if online and last_live_sync and not force_sync:
+            try:
+                last_sync_dt = datetime.fromisoformat(last_live_sync)
+                needs_live_sync = needs_live_sync or (datetime.now() - last_sync_dt) > timedelta(minutes=10)
+            except ValueError:
+                needs_live_sync = True
+
+        if needs_live_sync and ptx_uptime_tool:
+            logger.info("Syncing PTX uptime database from live report")
+            result = ptx_uptime_tool.run(password=MMS_SERVER['password'], offline_mode=False)
+            if result.get('success'):
+                existing_ids = {row['equipment_id'] for row in ptx_uptime_db.get_all_uptime(min_hours=0)}
+                added = 0
+                updated = 0
+                for equipment in result.get('equipment_list', []):
+                    equipment_id = equipment.get('equipment_id')
+                    ip_address = equipment.get('ip')
+                    if not equipment_id or not ip_address:
+                        continue
+                    if equipment_id in existing_ids:
+                        updated += 1
+                    else:
+                        added += 1
+                        existing_ids.add(equipment_id)
+                    ptx_uptime_db.upsert_uptime(
+                        equipment_id=equipment_id,
+                        ip_address=ip_address,
+                        uptime_hours=equipment.get('uptime_hours', 0),
+                        last_check=equipment.get('last_check'),
+                        last_check_timestamp=None
+                    )
+                ptx_uptime_db.set_sync_metadata('last_live_sync', datetime.now().isoformat())
+                ptx_uptime_db.set_sync_metadata('last_live_path', result.get('file_path', ''))
+                if force_sync:
+                    flash(f"Database synced: {added} added, {updated} updated", "success")
+            else:
+                logger.warning(f"Live PTX uptime sync failed: {result.get('error')}")
+        elif (db_count == 0 or force_sync) and os.path.exists(report_path):
             logger.info(f"Syncing PTX uptime database from HTML report (force={force_sync}, count={db_count})")
             updated, added = ptx_uptime_db.sync_from_html_report(report_path)
             if force_sync:
@@ -2084,6 +2245,100 @@ def handle_ptx_uptime():
         logger.error(f"PTX Uptime error: {e}")
         flash(f"PTX Uptime failed: {e}", "error")
         return redirect(url_for('dashboard'))
+
+
+def handle_frontrunner_status():
+    """Handle FrontRunner Status tool"""
+    try:
+        # FrontRunner server credentials
+        FR_PASSWORD = "M0dul1r@GRM2"
+
+        # Check if we're in online mode
+        online = is_online_network()
+
+        # Run the frontrunner_status tool
+        if frontrunner_status_tool:
+            result = frontrunner_status_tool.run(password=FR_PASSWORD, offline_mode=not online)
+            if online and not result.get('success'):
+                logger.warning("FrontRunner live status failed (%s); falling back to offline snapshot", result.get('error'))
+                fallback = frontrunner_status_tool.run(password=FR_PASSWORD, offline_mode=True)
+                fallback['mode'] = 'offline_fallback'
+                fallback['fallback_reason'] = result.get('error')
+                result = fallback
+        else:
+            result = {
+                'success': False,
+                'error': 'FrontRunner Status tool not available',
+                'report_time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                'mode': 'error'
+            }
+
+        return render_template('frontrunner_status.html', result=result, online=online)
+
+    except Exception as e:
+        logger.error(f"FrontRunner Status error: {e}")
+        flash(f"FrontRunner Status failed: {e}", "error")
+        return redirect(url_for('dashboard'))
+
+
+@app.route('/api/frontrunner/events')
+@login_required
+def api_frontrunner_events():
+    """API endpoint to get FrontRunner event logs (process failures and disk warnings)"""
+    try:
+        from tools import frontrunner_event_db
+
+        # Get database path
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        db_path = frontrunner_event_db.get_database_path(base_dir)
+
+        # Get event history
+        history = frontrunner_event_db.get_event_history(db_path, limit=100)
+
+        return jsonify({
+            'success': True,
+            'process_events': history['process_events'],
+            'disk_events': history['disk_events']
+        })
+
+    except Exception as e:
+        logger.error(f"Error fetching FrontRunner events: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'process_events': [],
+            'disk_events': []
+        }), 500
+
+
+@app.route('/api/frontrunner/active-events')
+@login_required
+def api_frontrunner_active_events():
+    """API endpoint to get currently active FrontRunner events"""
+    try:
+        from tools import frontrunner_event_db
+
+        # Get database path
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        db_path = frontrunner_event_db.get_database_path(base_dir)
+
+        # Get active events
+        active = frontrunner_event_db.get_active_events(db_path)
+
+        return jsonify({
+            'success': True,
+            'process_events': active['process_events'],
+            'disk_events': active['disk_events']
+        })
+
+    except Exception as e:
+        logger.error(f"Error fetching active FrontRunner events: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'process_events': [],
+            'disk_events': []
+        }), 500
 
 
 @app.route('/ptx-uptime-csv')
@@ -2146,16 +2401,42 @@ def ptx_uptime_csv():
 def api_ptx_db_sync():
     """Sync PTX uptime database from HTML report"""
     try:
-        report_path = os.path.join(os.path.dirname(__file__), 'backups', 'PTX_Uptime_Report.html')
+        if is_online_network() and ptx_uptime_tool:
+            result = ptx_uptime_tool.run(password=MMS_SERVER['password'], offline_mode=False)
+            if not result.get('success'):
+                return jsonify({'success': False, 'error': result.get('error', 'Live sync failed')}), 500
 
-        if not os.path.exists(report_path):
-            return jsonify({
-                'success': False,
-                'error': 'PTX Uptime Report HTML not found',
-                'path': report_path
-            }), 404
-
-        updated, added = ptx_uptime_db.sync_from_html_report(report_path)
+            existing_ids = {row['equipment_id'] for row in ptx_uptime_db.get_all_uptime(min_hours=0)}
+            added = 0
+            updated = 0
+            for equipment in result.get('equipment_list', []):
+                equipment_id = equipment.get('equipment_id')
+                ip_address = equipment.get('ip')
+                if not equipment_id or not ip_address:
+                    continue
+                if equipment_id in existing_ids:
+                    updated += 1
+                else:
+                    added += 1
+                    existing_ids.add(equipment_id)
+                ptx_uptime_db.upsert_uptime(
+                    equipment_id=equipment_id,
+                    ip_address=ip_address,
+                    uptime_hours=equipment.get('uptime_hours', 0),
+                    last_check=equipment.get('last_check'),
+                    last_check_timestamp=None
+                )
+            ptx_uptime_db.set_sync_metadata('last_live_sync', datetime.now().isoformat())
+            ptx_uptime_db.set_sync_metadata('last_live_path', result.get('file_path', ''))
+        else:
+            report_path = os.path.join(os.path.dirname(__file__), 'backups', 'PTX_Uptime_Report.html')
+            if not os.path.exists(report_path):
+                return jsonify({
+                    'success': False,
+                    'error': 'PTX Uptime Report HTML not found',
+                    'path': report_path
+                }), 404
+            updated, added = ptx_uptime_db.sync_from_html_report(report_path)
 
         return jsonify({
             'success': True,
@@ -3175,6 +3456,188 @@ def api_playback_delete_file():
     except Exception as e:
         logger.error(f"Delete file error: {e}")
         return jsonify({'success': False, 'message': str(e)})
+
+
+# ========================================
+# PLAYBACK DIRECT DOWNLOAD (for remote PCs)
+# ========================================
+# These routes stream files directly to the user's browser for download.
+# Remote PCs download files to their local PC, not to USB on the server.
+# This replaces the old USB-based workflow where files were stored on server USB.
+
+@app.route("/download/playback/<filename>")
+@login_required
+def download_playback_file(filename):
+    """
+    Stream playback file directly to remote PC browser.
+    Downloads from server via SFTP and streams to user.
+    """
+    try:
+        # Validate filename to prevent path traversal
+        if '..' in filename or '/' in filename or '\\' in filename:
+            return "Invalid filename", 400
+
+        # Validate it's a playback file
+        if not filename.startswith('AHS_LOG_') or not filename.endswith('.dat'):
+            return "Invalid playback file", 400
+
+        # OFFLINE MODE: Return dummy file
+        if not is_online_network():
+            from io import BytesIO
+            dummy_data = b'OFFLINE MODE - Test playback file data\n' * 100
+            return send_file(
+                BytesIO(dummy_data),
+                as_attachment=True,
+                download_name=filename,
+                mimetype='application/octet-stream'
+            )
+
+        if not paramiko:
+            return "SSH library not available", 500
+
+        # Connect to server
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+        try:
+            ssh.connect(
+                PLAYBACK_SERVER['ip'],
+                port=PLAYBACK_SERVER['port'],
+                username=PLAYBACK_SERVER['user'],
+                password=PLAYBACK_SERVER['password'],
+                timeout=10
+            )
+        except Exception as e:
+            logger.error(f"SSH connection failed: {e}")
+            return f"Server connection failed: {str(e)}", 500
+
+        sftp = ssh.open_sftp()
+        remote_path = PLAYBACK_SERVER['path'] + filename
+
+        # Check if file exists
+        try:
+            file_attr = sftp.stat(remote_path)
+            file_size = file_attr.st_size
+        except:
+            sftp.close()
+            ssh.close()
+            return "File not found on server", 404
+
+        # Use a temporary file to stream
+        import tempfile
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.dat') as tmp_file:
+            temp_path = tmp_file.name
+
+            try:
+                # Download to temp file
+                sftp.get(remote_path, temp_path)
+                sftp.close()
+                ssh.close()
+
+                # Send file to user and delete temp file after
+                return send_file(
+                    temp_path,
+                    as_attachment=True,
+                    download_name=filename,
+                    mimetype='application/octet-stream'
+                )
+            except Exception as e:
+                sftp.close()
+                ssh.close()
+                # Clean up temp file
+                if os.path.exists(temp_path):
+                    os.unlink(temp_path)
+                logger.error(f"File download error: {e}")
+                return f"Download failed: {str(e)}", 500
+
+    except Exception as e:
+        logger.error(f"Playback download error: {e}")
+        return str(e), 500
+
+
+@app.route("/download/camstudio")
+@login_required
+def download_camstudio():
+    """
+    Provide CamStudio portable as a downloadable zip.
+    """
+    try:
+        # Look for CamStudio on USB drive
+        from tools.usb_tools import find_tool_on_usb
+        result = find_tool_on_usb("CamStudio_USB", "CamStudioPortable.exe")
+
+        if not result:
+            return "CamStudio not found on server USB", 404
+
+        # Zip the folder
+        import tempfile
+        import zipfile
+
+        camstudio_folder = Path(result['folder_path'])
+
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.zip') as tmp_file:
+            zip_path = tmp_file.name
+
+            with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+                for file in camstudio_folder.rglob('*'):
+                    if file.is_file():
+                        arcname = file.relative_to(camstudio_folder.parent)
+                        zipf.write(file, arcname)
+
+            return send_file(
+                zip_path,
+                as_attachment=True,
+                download_name='CamStudio_Portable.zip',
+                mimetype='application/zip'
+            )
+
+    except Exception as e:
+        logger.error(f"CamStudio download error: {e}")
+        return str(e), 500
+
+
+@app.route("/download/frontrunner")
+@login_required
+def download_frontrunner():
+    """
+    Provide FrontRunner V3.7.0 portable package as zip.
+    """
+    try:
+        # Look for FrontRunner folder on USB drive
+        from tools.usb_tools import find_tool_on_usb
+        result = find_tool_on_usb("frontrunnerV3-3.7.0-076-full", "V3.7.0 Playback Tool.bat")
+
+        if not result:
+            return "FrontRunner package not found on server USB", 404
+
+        # Zip the folder (excluding playback subfolder to reduce size)
+        import tempfile
+        import zipfile
+
+        frontrunner_folder = Path(result['folder_path'])
+
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.zip') as tmp_file:
+            zip_path = tmp_file.name
+
+            with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+                for file in frontrunner_folder.rglob('*'):
+                    if file.is_file():
+                        # Skip playback folder (too large, users download .dat files separately)
+                        if 'playback' in file.parts:
+                            continue
+                        arcname = file.relative_to(frontrunner_folder.parent)
+                        zipf.write(file, arcname)
+
+            return send_file(
+                zip_path,
+                as_attachment=True,
+                download_name='FrontRunner_V3.7.0_Portable.zip',
+                mimetype='application/zip'
+            )
+
+    except Exception as e:
+        logger.error(f"FrontRunner download error: {e}")
+        return str(e), 500
 
 
 # ========================================
@@ -4846,12 +5309,11 @@ def api_legacy_grm_script():
             })
 
         # ONLINE MODE: Execute via plink
-        # Check if plink exists
-        plink_path = PLINK_PATH
-        if not os.path.exists(plink_path):
+        plink_path = resolve_plink_path()
+        if not plink_path:
             return jsonify({
                 'success': False,
-                'message': f'plink.exe not found at: {plink_path}'
+                'message': 'plink.exe not found in any configured tool directory'
             })
 
         # MMS server connection details
@@ -5002,10 +5464,10 @@ def api_legacy_grm_script():
                 # Also parse OID, CID, profile from output
                 for line in ip_result.stdout.split('\n'):
                     # Parse direct field outputs
-                    if 'PTX IP is:' in line:
-                        equipment_ip = line.split('PTX IP is:')[1].strip()
-                    elif 'AVI IP is:' in line:
-                        avi_ip = line.split('AVI IP is:')[1].strip()
+                    if 'PTX IP is' in line:
+                        equipment_ip = line.split('PTX IP is', 1)[1].replace(':', '').strip()
+                    elif 'AVI IP is' in line:
+                        avi_ip = line.split('AVI IP is', 1)[1].replace(':', '').strip()
                     elif 'OID:' in line or 'Object ID:' in line:
                         oid = line.split(':')[1].strip() if ':' in line else None
                     elif 'CID:' in line or 'Component ID:' in line:
@@ -5351,9 +5813,9 @@ def api_legacy_execute():
         # PTX REBOOT
         elif command == 'ptxr':
             try:
-                plink_path = PLINK_PATH
-                if not os.path.exists(plink_path):
-                    return jsonify({'success': False, 'message': f'plink.exe not found'})
+                plink_path = resolve_plink_path()
+                if not plink_path:
+                    return jsonify({'success': False, 'message': 'plink.exe not found in any configured tool directory'})
                 
                 result = subprocess.run(
                     [plink_path, '-batch', '-pw', 'gold', f'dlog@{ptx_ip}', 'sudo reboot'],
