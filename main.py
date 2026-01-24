@@ -216,6 +216,10 @@ app = Flask(__name__, template_folder=template_folder, static_folder=static_fold
 app.secret_key = "komatsu-t1-tools-secret-key-change-in-production"
 CORS(app)
 
+# Global download progress tracking
+# Format: {filename: {'status': 'downloading'|'complete'|'error', 'progress': 0-100, 'local_path': str, 'total_size': int, 'error': str}}
+download_progress = {}
+
 # Extended tool list with all functionality
 TOOL_LIST = [
     "IP Finder",
@@ -3186,12 +3190,77 @@ def api_playback_find_file():
         return jsonify({'found': False, 'error': str(e)})
 
 
+def _download_file_thread(filename, file_size, local_path, remote_path):
+    """Background thread for file download with progress tracking"""
+    global download_progress
+
+    try:
+        # Initialize progress
+        download_progress[filename] = {
+            'status': 'downloading',
+            'progress': 0,
+            'total_size': file_size,
+            'local_path': str(local_path),
+            'error': None
+        }
+
+        if not paramiko:
+            download_progress[filename]['status'] = 'error'
+            download_progress[filename]['error'] = 'SSH library not available'
+            return
+
+        # Connect to server
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        ssh.connect(
+            PLAYBACK_SERVER['ip'],
+            port=PLAYBACK_SERVER['port'],
+            username=PLAYBACK_SERVER['user'],
+            password=PLAYBACK_SERVER['password'],
+            timeout=10
+        )
+
+        sftp = ssh.open_sftp()
+
+        # Get actual file size if not provided
+        if not file_size:
+            try:
+                file_attr = sftp.stat(remote_path)
+                file_size = file_attr.st_size
+                download_progress[filename]['total_size'] = file_size
+            except:
+                pass
+
+        # Download with callback
+        def progress_callback(transferred, total):
+            if total > 0:
+                percent = int((transferred / total) * 100)
+                download_progress[filename]['progress'] = percent
+
+        sftp.get(remote_path, str(local_path), callback=progress_callback)
+
+        sftp.close()
+        ssh.close()
+
+        # Mark as complete
+        if local_path.exists():
+            download_progress[filename]['status'] = 'complete'
+            download_progress[filename]['progress'] = 100
+        else:
+            download_progress[filename]['status'] = 'error'
+            download_progress[filename]['error'] = 'File not found after download'
+
+    except Exception as e:
+        download_progress[filename]['status'] = 'error'
+        download_progress[filename]['error'] = str(e)
+
+
 @app.route("/api/playback/download-file", methods=["POST"])
 @login_required
 def api_playback_download_file():
     """
-    Download a file from the server to the local USB playback folder.
-    Uses progress tracking via global dict.
+    Start a file download from the server to the local USB playback folder.
+    Returns immediately with download ID. Use /api/playback/download-progress to check status.
     """
     try:
         data = request.get_json()
@@ -3203,10 +3272,19 @@ def api_playback_download_file():
 
         # OFFLINE MODE: Simulate successful download
         if not is_online_network():
+            # Simulate with progress tracking
+            global download_progress
+            download_progress[filename] = {
+                'status': 'complete',
+                'progress': 100,
+                'total_size': 15728640,
+                'local_path': f'USB:/playback/{filename}',
+                'error': None
+            }
             return jsonify({
                 'success': True,
                 'message': f'[OFFLINE MODE] Simulated download of {filename}',
-                'local_path': f'USB:/playback/{filename}',
+                'download_id': filename,
                 'offline_mode': True
             })
 
@@ -3226,65 +3304,45 @@ def api_playback_download_file():
         if not paramiko:
             return jsonify({'success': False, 'message': 'SSH library not available'})
 
-        # Connect and download
-        ssh = paramiko.SSHClient()
-        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        
-        try:
-            ssh.connect(
-                PLAYBACK_SERVER['ip'],
-                port=PLAYBACK_SERVER['port'],
-                username=PLAYBACK_SERVER['user'],
-                password=PLAYBACK_SERVER['password'],
-                timeout=10
-            )
-        except Exception as e:
-            return jsonify({'success': False, 'message': f'Connection failed: {str(e)}'})
-        
-        sftp = ssh.open_sftp()
-        
-        # Get file size if not provided
-        if not file_size:
-            try:
-                file_attr = sftp.stat(remote_path)
-                file_size = file_attr.st_size
-            except:
-                file_size = 0
-        
-        # Progress tracking
-        progress_data = {'transferred': 0, 'total': file_size, 'percent': 0}
-        
-        def progress_callback(transferred, total):
-            progress_data['transferred'] = transferred
-            progress_data['total'] = total
-            if total > 0:
-                progress_data['percent'] = int((transferred / total) * 100)
-        
-        try:
-            sftp.get(remote_path, str(local_path), callback=progress_callback)
-        except Exception as e:
-            sftp.close()
-            ssh.close()
-            return jsonify({'success': False, 'message': f'Download failed: {str(e)}'})
-        
-        sftp.close()
-        ssh.close()
-        
-        # Verify file was downloaded
-        if local_path.exists():
-            final_size = local_path.stat().st_size
+        # Check if already downloading
+        if filename in download_progress and download_progress[filename]['status'] == 'downloading':
             return jsonify({
                 'success': True,
-                'message': f'Downloaded {filename}',
-                'local_path': str(local_path),
-                'size': final_size
+                'message': 'Download already in progress',
+                'download_id': filename
             })
-        else:
-            return jsonify({'success': False, 'message': 'File not found after download'})
-        
+
+        # Start download in background thread
+        thread = threading.Thread(
+            target=_download_file_thread,
+            args=(filename, file_size, local_path, remote_path),
+            daemon=True
+        )
+        thread.start()
+
+        return jsonify({
+            'success': True,
+            'message': 'Download started',
+            'download_id': filename
+        })
+
     except Exception as e:
         logger.error(f"Download file error: {e}")
         return jsonify({'success': False, 'message': str(e)})
+
+
+@app.route("/api/playback/download-progress/<filename>")
+@login_required
+def api_playback_download_progress(filename):
+    """Get download progress for a specific file"""
+    if filename in download_progress:
+        return jsonify(download_progress[filename])
+    else:
+        return jsonify({
+            'status': 'not_found',
+            'progress': 0,
+            'error': 'Download not found'
+        })
 
 
 @app.route("/api/playback/predict-next-file")

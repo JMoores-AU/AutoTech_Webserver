@@ -199,6 +199,22 @@
         }
         .btn-download-sm:disabled { background: var(--theme-bg-card); color: var(--theme-text-muted); cursor: not-allowed; }
         .btn-download-sm.downloaded { background: var(--theme-bg-card); color: var(--status-online); }
+
+        .download-progress {
+            position: relative;
+            width: 100%;
+            height: 4px;
+            background: var(--theme-bg);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+        .download-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--status-online), #16a34a);
+            transition: width 0.3s ease;
+            border-radius: 2px;
+        }
         
         .download-destination { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--theme-text-muted); margin-top: 12px; }
 
@@ -751,26 +767,58 @@
                 btn.innerHTML = `<span class="spinner"></span> ${success + failed + 1}/${checkboxes.length}`;
 
                 const file = foundFiles[index];
+                const dlBtn = document.getElementById(`dlBtn${index}`);
+                const fileItem = checkbox.closest('.found-file-item');
+
+                // Add progress bar
+                let progressContainer = document.getElementById(`progress${index}`);
+                if (!progressContainer) {
+                    progressContainer = document.createElement('div');
+                    progressContainer.id = `progress${index}`;
+                    progressContainer.className = 'download-progress';
+                    progressContainer.innerHTML = '<div class="download-progress-bar" style="width: 0%"></div>';
+                    fileItem.appendChild(progressContainer);
+                }
+
                 try {
+                    // Start download
                     const response = await fetch('/api/playback/download-file', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ filename: file.name, size: file.size })
                     });
                     const data = await response.json();
+
                     if (data.success) {
-                        success++;
-                        const dlBtn = document.getElementById(`dlBtn${index}`);
-                        if (dlBtn) {
-                            dlBtn.innerHTML = '✅';
-                            dlBtn.classList.add('downloaded');
-                            dlBtn.disabled = true;
+                        // Poll for progress
+                        const result = await pollDownloadProgress(file.name, index);
+
+                        if (result.success) {
+                            success++;
+                            if (dlBtn) {
+                                dlBtn.innerHTML = '✅';
+                                dlBtn.classList.add('downloaded');
+                                dlBtn.disabled = true;
+                            }
+                        } else {
+                            failed++;
+                        }
+
+                        // Remove progress bar
+                        if (progressContainer && progressContainer.parentNode) {
+                            progressContainer.remove();
                         }
                     } else {
                         failed++;
+                        if (progressContainer && progressContainer.parentNode) {
+                            progressContainer.remove();
+                        }
                     }
                 } catch (e) {
                     failed++;
+                    if (progressContainer && progressContainer.parentNode) {
+                        progressContainer.remove();
+                    }
                 }
             }
 
@@ -866,6 +914,40 @@
             }
         }
 
+        async function pollDownloadProgress(filename, index) {
+            const maxAttempts = 300; // 5 minutes at 1 second intervals
+            let attempts = 0;
+
+            while (attempts < maxAttempts) {
+                try {
+                    const response = await fetch(`/api/playback/download-progress/${encodeURIComponent(filename)}`);
+                    const progress = await response.json();
+
+                    if (progress.status === 'complete') {
+                        return { success: true };
+                    } else if (progress.status === 'error') {
+                        return { success: false, error: progress.error };
+                    } else if (progress.status === 'downloading') {
+                        // Update progress display
+                        const progressContainer = document.getElementById(`progress${index}`);
+                        if (progressContainer) {
+                            const progressBar = progressContainer.querySelector('.download-progress-bar');
+                            if (progressBar) {
+                                progressBar.style.width = progress.progress + '%';
+                            }
+                        }
+                    }
+                } catch (e) {
+                    console.error('Progress poll error:', e);
+                }
+
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Poll every second
+                attempts++;
+            }
+
+            return { success: false, error: 'Download timeout' };
+        }
+
         async function downloadSingleFile(index) {
             const file = foundFiles[index];
             if (!file || !playbackDrivePath) {
@@ -873,27 +955,64 @@
                 return;
             }
             const btn = document.getElementById(`dlBtn${index}`);
+            const fileItem = btn.closest('.found-file-item');
+
             btn.disabled = true;
             btn.innerHTML = '<span class="spinner"></span>';
+
+            // Add progress bar
+            let progressContainer = document.getElementById(`progress${index}`);
+            if (!progressContainer) {
+                progressContainer = document.createElement('div');
+                progressContainer.id = `progress${index}`;
+                progressContainer.className = 'download-progress';
+                progressContainer.innerHTML = '<div class="download-progress-bar" style="width: 0%"></div>';
+                fileItem.appendChild(progressContainer);
+            }
+
             try {
+                // Start download
                 const response = await fetch('/api/playback/download-file', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ filename: file.name, size: file.size })
                 });
                 const data = await response.json();
-                if (data.success) {
+
+                if (!data.success) {
+                    btn.innerHTML = '⬇️ Retry';
+                    btn.disabled = false;
+                    progressContainer.remove();
+                    showToast(data.message || 'Failed to start download', 'error');
+                    return;
+                }
+
+                // Poll for progress
+                const result = await pollDownloadProgress(file.name, index);
+
+                if (result.success) {
                     btn.innerHTML = '✅';
                     btn.classList.add('downloaded');
                     showToast(`Downloaded: ${file.name}`, 'success');
                 } else {
                     btn.innerHTML = '⬇️ Retry';
                     btn.disabled = false;
-                    showToast(data.message || 'Failed', 'error');
+                    showToast(result.error || 'Download failed', 'error');
                 }
+
+                // Remove progress bar after completion
+                setTimeout(() => {
+                    if (progressContainer && progressContainer.parentNode) {
+                        progressContainer.remove();
+                    }
+                }, 2000);
+
             } catch (e) {
                 btn.innerHTML = '⬇️ Retry';
                 btn.disabled = false;
+                if (progressContainer && progressContainer.parentNode) {
+                    progressContainer.remove();
+                }
                 showToast('Download error', 'error');
             }
         }
@@ -1018,6 +1137,7 @@
 
                 const filename = `AHS_LOG_${year}${month}${day}_${hour}${minute}${second}_AEST.dat`;
 
+                // Start download
                 const response = await fetch('/api/playback/download-file', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -1025,7 +1145,41 @@
                 });
 
                 const data = await response.json();
-                if (data.success) {
+                if (!data.success) {
+                    btn.innerHTML = '⬇️ Retry';
+                    btn.disabled = false;
+                    showToast(data.message || 'Download failed', 'error');
+                    return;
+                }
+
+                // Poll for progress with simpler display (no progress bar for this button)
+                const maxAttempts = 300;
+                let attempts = 0;
+                let success = false;
+
+                while (attempts < maxAttempts) {
+                    try {
+                        const progressResp = await fetch(`/api/playback/download-progress/${encodeURIComponent(filename)}`);
+                        const progress = await progressResp.json();
+
+                        if (progress.status === 'complete') {
+                            success = true;
+                            break;
+                        } else if (progress.status === 'error') {
+                            showToast(progress.error || 'Download failed', 'error');
+                            break;
+                        } else if (progress.status === 'downloading') {
+                            btn.innerHTML = `<span class="spinner"></span> ${progress.progress}%`;
+                        }
+                    } catch (e) {
+                        console.error('Progress poll error:', e);
+                    }
+
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    attempts++;
+                }
+
+                if (success) {
                     btn.innerHTML = '✅ Downloaded!';
                     showToast(`Downloaded latest file: ${filename}`, 'success');
                     setTimeout(() => {
@@ -1035,7 +1189,7 @@
                 } else {
                     btn.innerHTML = '⬇️ Retry';
                     btn.disabled = false;
-                    showToast(data.message || 'Download failed', 'error');
+                    showToast('Download timeout or failed', 'error');
                 }
             } catch (e) {
                 btn.innerHTML = '⬇️ Download Latest File';
