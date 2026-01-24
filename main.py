@@ -2187,7 +2187,7 @@ def handle_ptx_uptime():
                         ip_address=ip_address,
                         uptime_hours=equipment.get('uptime_hours', 0),
                         last_check=equipment.get('last_check'),
-                        last_check_timestamp=None
+                        last_check_timestamp=0
                     )
                 ptx_uptime_db.set_sync_metadata('last_live_sync', datetime.now().isoformat())
                 ptx_uptime_db.set_sync_metadata('last_live_path', result.get('file_path', ''))
@@ -2439,7 +2439,7 @@ def api_ptx_db_sync():
                     ip_address=ip_address,
                     uptime_hours=equipment.get('uptime_hours', 0),
                     last_check=equipment.get('last_check'),
-                    last_check_timestamp=None
+                    last_check_timestamp=0
                 )
             ptx_uptime_db.set_sync_metadata('last_live_sync', datetime.now().isoformat())
             ptx_uptime_db.set_sync_metadata('last_live_path', result.get('file_path', ''))

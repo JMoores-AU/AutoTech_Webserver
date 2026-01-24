@@ -32,9 +32,9 @@ class FrontRunnerMonitor:
         self.password = password
         self.cache_path = os.path.join(cache_dir, CACHE_FILE)
         self.running = False
-        self.thread = None
-        self.ssh = None
-        self.db_path = None
+        self.thread: Optional[threading.Thread] = None
+        self.ssh: Optional[paramiko.SSHClient] = None
+        self.db_path: Optional[str] = None
 
         # Initialize event database
         try:
@@ -115,6 +115,10 @@ class FrontRunnerMonitor:
     def _get_status_snapshot(self) -> Dict[str, Any]:
         """Get a single status snapshot from the server"""
         try:
+            # Check SSH connection exists
+            if not self.ssh:
+                raise Exception("SSH connection not established")
+
             # Get uptime
             stdin, stdout, stderr = self.ssh.exec_command("uptime -p")
             uptime_pretty = stdout.read().decode('utf-8').strip()
