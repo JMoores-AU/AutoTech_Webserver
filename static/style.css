@@ -44,7 +44,7 @@
     --btn-danger: #ef4444;
     
     /* Spacing */
-    --sidebar-width: 260px;
+    --sidebar-width: 320px;
     --sidebar-collapsed-width: 70px;
     --header-height: 60px;
     
@@ -63,6 +63,32 @@
     --transition-fast: 150ms ease;
     --transition-normal: 250ms ease;
     --transition-slow: 350ms ease;
+}
+
+/* ========================================
+   LIGHT MODE THEME
+   ======================================== */
+[data-theme="light"] {
+    /* Background Colors */
+    --theme-bg: #f5f5f5;
+    --theme-bg-secondary: #ffffff;
+    --theme-bg-card: #ffffff;
+    --theme-bg-card-hover: #f9f9f9;
+    --theme-bg-sidebar: #fafafa;
+
+    /* Text Colors */
+    --theme-text: #333333;
+    --theme-text-muted: #666666;
+    --theme-text-bright: #000000;
+
+    /* Border Colors */
+    --theme-border: #e0e0e0;
+    --theme-border-light: #d0d0d0;
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
 /* ========================================
@@ -146,21 +172,27 @@ a:hover {
 }
 
 .sidebar-header {
-    padding: 20px;
+    padding: 8px 6px;
     border-bottom: 1px solid var(--theme-border);
 }
 
 .sidebar-logo {
     display: flex;
     align-items: center;
-    gap: 12px;
+    justify-content: center;
+    margin: -6px 0;
 }
 
 .sidebar-logo-img {
-    width: 42px;
-    height: 42px;
+    width: 100%;
+    height: auto;
     object-fit: contain;
-    border-radius: var(--radius-sm);
+    display: block;
+    content: url('../static/AutoTech_logo_dark.png');
+}
+
+[data-theme="light"] .sidebar-logo-img {
+    content: url('../static/AutoTech_logo_light.png');
 }
 
 .sidebar-logo-icon {
