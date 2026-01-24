@@ -186,8 +186,22 @@ def run(password: Optional[str] = None, offline_mode: bool = False, enable_loggi
                 continue
 
         # Get process status via statusFRserver command
+        # Note: If statusFRserver is a continuous monitoring command, we read with a timeout
+        # to get the first/latest status update without blocking indefinitely
         stdin, stdout, stderr = ssh.exec_command("statusFRserver")
-        status_output = stdout.read().decode('utf-8')
+
+        # Set channel timeout to avoid blocking if it's a streaming command
+        channel = stdout.channel
+        channel.settimeout(5.0)  # 5 second timeout
+
+        try:
+            status_output = stdout.read().decode('utf-8')
+        except Exception as timeout_err:
+            # If timeout, try to read whatever is available
+            print(f"statusFRserver read timeout (may be streaming): {timeout_err}")
+            status_output = ""
+            if channel.recv_ready():
+                status_output = channel.recv(4096).decode('utf-8')
 
         # Parse statusFRserver output using more resilient patterns
         services = []

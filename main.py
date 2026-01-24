@@ -2250,28 +2250,43 @@ def handle_ptx_uptime():
 def handle_frontrunner_status():
     """Handle FrontRunner Status tool"""
     try:
-        # FrontRunner server credentials
-        FR_PASSWORD = "M0dul1r@GRM2"
-
         # Check if we're in online mode
         online = is_online_network()
 
-        # Run the frontrunner_status tool
-        if frontrunner_status_tool:
-            result = frontrunner_status_tool.run(password=FR_PASSWORD, offline_mode=not online)
-            if online and not result.get('success'):
-                logger.warning("FrontRunner live status failed (%s); falling back to offline snapshot", result.get('error'))
-                fallback = frontrunner_status_tool.run(password=FR_PASSWORD, offline_mode=True)
-                fallback['mode'] = 'offline_fallback'
-                fallback['fallback_reason'] = result.get('error')
-                result = fallback
-        else:
-            result = {
-                'success': False,
-                'error': 'FrontRunner Status tool not available',
-                'report_time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                'mode': 'error'
-            }
+        # Try to get cached status from background monitor first
+        result = None
+        if online:
+            try:
+                from tools import frontrunner_monitor
+                base_dir = os.path.dirname(os.path.abspath(__file__))
+                result = frontrunner_monitor.get_status(base_dir)
+
+                # If cache is stale or monitor not running, fall back to direct call
+                if not result or not result.get('success'):
+                    logger.warning("Background monitor cache unavailable, using direct connection")
+                    result = None
+            except Exception as e:
+                logger.warning(f"Could not read monitor cache: {e}")
+                result = None
+
+        # Fallback: Use direct SSH connection if monitor cache unavailable
+        if result is None:
+            FR_PASSWORD = "M0dul1r@GRM2"
+            if frontrunner_status_tool:
+                result = frontrunner_status_tool.run(password=FR_PASSWORD, offline_mode=not online, enable_logging=False)
+                if online and not result.get('success'):
+                    logger.warning("FrontRunner live status failed (%s); falling back to offline snapshot", result.get('error'))
+                    fallback = frontrunner_status_tool.run(password=FR_PASSWORD, offline_mode=True, enable_logging=False)
+                    fallback['mode'] = 'offline_fallback'
+                    fallback['fallback_reason'] = result.get('error')
+                    result = fallback
+            else:
+                result = {
+                    'success': False,
+                    'error': 'FrontRunner Status tool not available',
+                    'report_time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                    'mode': 'error'
+                }
 
         return render_template('frontrunner_status.html', result=result, online=online)
 
@@ -6196,6 +6211,20 @@ if __name__ == '__main__':
         # Display startup banner
         print_startup_banner()
 
+        # Start FrontRunner background monitor
+        try:
+            from tools import frontrunner_monitor
+            base_dir = os.path.dirname(os.path.abspath(__file__))
+            frontrunner_monitor.start_monitor(
+                hostname="10.110.19.16",
+                username="komatsu",
+                password="M0dul1r@GRM2",
+                cache_dir=base_dir
+            )
+            print("[MONITOR] FrontRunner background monitor started")
+        except Exception as e:
+            print(f"[WARNING] Could not start FrontRunner monitor: {e}")
+
         # Start browser in separate thread
         browser_thread = threading.Thread(target=open_browser, daemon=True)
         browser_thread.start()
@@ -6211,6 +6240,11 @@ if __name__ == '__main__':
             )
         except KeyboardInterrupt:
             print("\n\n[SHUTDOWN] AutoTech Web Dashboard stopped by user.")
+            # Stop background monitor
+            try:
+                frontrunner_monitor.stop_monitor()
+            except:
+                pass
             sys.exit(0)
         except Exception as e:
             print(f"\n[ERROR] Startup Error: {e}")
