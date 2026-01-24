@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AutoTech Dashboard</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='AutoTech_Dark.ico') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <style>
         /* VNC Button Styles */
@@ -110,6 +111,28 @@
         .status-value.service-stopped {
             color: #ef4444;
         }
+
+        /* Theme Toggle Button */
+        .theme-toggle-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border: 1px solid var(--theme-border);
+            border-radius: var(--radius-md);
+            background: var(--theme-bg-card);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .theme-toggle-btn:hover {
+            background: var(--theme-bg-card-hover);
+            border-color: var(--theme-border-light);
+            transform: scale(1.05);
+        }
+        .theme-icon {
+            font-size: 1.2rem;
+        }
     </style>
 </head>
 <body>
@@ -124,10 +147,6 @@
             <div class="sidebar-header">
                 <div class="sidebar-logo">
                     <img src="{{ url_for('static', filename='autotech_logo.png') }}" alt="AutoTech Logo" class="sidebar-logo-img">
-                    <div>
-                        <div class="sidebar-logo-text">AutoTech</div>
-                        <div class="sidebar-logo-subtitle">Built by AHS Specialists, for AHS Systems</div>
-                    </div>
                 </div>
             </div>
             
@@ -156,6 +175,10 @@
                         <span class="nav-item-icon">⏱️</span>
                         <span>PTX Uptime</span>
                     </a>
+                    <a href="{{ url_for('run_tool', tool_name='FrontRunner Status') }}" class="nav-item">
+                        <span class="nav-item-icon">🖥️</span>
+                        <span>FrontRunner Status</span>
+                    </a>
                     <a href="/database" class="nav-item">
                         <span class="nav-item-icon">🗄️</span>
                         <span>Equipment Database</span>
@@ -177,6 +200,11 @@
                         <span class="nav-item-badge">🔒</span>
                     </div>
                     <div class="nav-item disabled">
+                        <span class="nav-item-icon">🖥️</span>
+                        <span>FrontRunner Status</span>
+                        <span class="nav-item-badge">🔒</span>
+                    </div>
+                    <div class="nav-item disabled">
                         <span class="nav-item-icon">🗄️</span>
                         <span>Equipment Database</span>
                         <span class="nav-item-badge">🔒</span>
@@ -190,26 +218,9 @@
             <div class="sidebar-footer">
                 <!-- Legacy T1 Tools Button -->
                 <button class="legacy-btn" onclick="launchLegacyTools()" id="legacyBtn">
-                    <span>📦</span>
+                    <span>🛠️</span>
                     <span>T1 Tools Legacy</span>
                 </button>
-
-                <!-- System Status Panel -->
-                <div class="system-status-panel">
-                    <div class="system-status-header">System Status</div>
-                    <div class="system-status-item">
-                        <span class="status-label">Service:</span>
-                        <span class="status-value" id="serviceStatus">Checking...</span>
-                    </div>
-                    <div class="system-status-item">
-                        <span class="status-label">Clients:</span>
-                        <span class="status-value" id="clientCount">0</span>
-                    </div>
-                    <div class="system-status-item">
-                        <span class="status-label">Uptime:</span>
-                        <span class="status-value" id="serverUptime">--</span>
-                    </div>
-                </div>
 
                 <div class="sidebar-status">
                     <span class="status-indicator {{ 'online' if online else 'offline' }}" id="statusIndicator"></span>
@@ -236,13 +247,22 @@
                 <div class="header-actions">
                     {% if logged_in %}
                         <span class="text-success" style="display: flex; align-items: center; gap: 6px;">
-                            <span>✅</span> Tools Unlocked
+                            <span>✅</span>
                         </span>
-                        <a href="{{ url_for('logout') }}" class="btn btn-secondary btn-sm">Logout</a>
                     {% else %}
                         <span class="text-warning" style="display: flex; align-items: center; gap: 6px;">
                             <span>🔒</span> Login Required
                         </span>
+                    {% endif %}
+
+                    <!-- Theme Toggle -->
+                    <button id="themeToggle" class="theme-toggle-btn" title="Toggle Light/Dark Mode">
+                        <span class="theme-icon" id="themeIcon">🌙</span>
+                    </button>
+
+                    {% if logged_in %}
+                        <a href="{{ url_for('logout') }}" class="btn btn-secondary btn-sm">Logout</a>
+                    {% else %}
                         <button class="btn btn-primary btn-sm" onclick="openLoginModal()">Login</button>
                     {% endif %}
                 </div>
@@ -301,32 +321,8 @@
                         </div>
                     </div>
                 </section>
-                
-                <!-- ========================================
-                     SECTION: FrontRunner (BareMetal Status)
-                     ======================================== -->
-                <section class="mb-5">
-                    <div class="section-header">
-                        <h2 class="section-title">
-                            <span class="section-title-icon">🌐</span>
-                            FrontRunner (BareMetal Status)
-                        </h2>
-                        <button class="btn btn-ghost btn-sm" onclick="refreshServerHealth()">
-                            🔄 Refresh
-                        </button>
-                    </div>
-                    
-                    <div class="server-grid" id="serverGrid">
-                        <!-- Server tiles populated by JavaScript -->
-                        <div class="loading-card">
-                            <div class="loading-spinner"></div>
-                            <span>Loading server status...</span>
-                        </div>
-                    </div>
-                </section>
-                
-                
-                
+
+
                 <!-- ========================================
                      SECTION: System Information
                      ======================================== -->
@@ -414,6 +410,47 @@
          JAVASCRIPT
          ======================================== -->
     <script>
+        // ========================================
+        // THEME TOGGLE
+        // ========================================
+        function initTheme() {
+            const savedTheme = localStorage.getItem('autotech_theme') || 'dark';
+            applyTheme(savedTheme);
+        }
+
+        function applyTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            const icon = document.getElementById('themeIcon');
+            const favicon = document.querySelector('link[rel="icon"]');
+
+            if (theme === 'light') {
+                icon.textContent = '☀️';
+                if (favicon) favicon.href = "{{ url_for('static', filename='AutoTech_Light.ico') }}";
+            } else {
+                icon.textContent = '🌙';
+                if (favicon) favicon.href = "{{ url_for('static', filename='AutoTech_Dark.ico') }}";
+            }
+
+            localStorage.setItem('autotech_theme', theme);
+        }
+
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme') || 'dark';
+            const newTheme = current === 'dark' ? 'light' : 'dark';
+            applyTheme(newTheme);
+        }
+
+        // Initialize theme on page load
+        initTheme();
+
+        // Add event listener to toggle button
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggleBtn = document.getElementById('themeToggle');
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', toggleTheme);
+            }
+        });
+
         // ========================================
         // TOAST NOTIFICATIONS
         // ========================================
@@ -724,77 +761,6 @@
         });
         
         // ========================================
-        // SERVER HEALTH FUNCTIONS
-        // ========================================
-        async function loadServerHealth() {
-            const grid = document.getElementById('serverGrid');
-            
-            try {
-                const response = await fetch('/api/remote-stats');
-                const servers = await response.json();
-                
-                if (servers.length === 0) {
-                    grid.innerHTML = `
-                        <div class="empty-state" style="grid-column: 1 / -1;">
-                            <div class="empty-state-icon">🌐</div>
-                            <div class="empty-state-title">No Servers Configured</div>
-                            <div class="empty-state-description">Server health monitoring is not available.</div>
-                        </div>
-                    `;
-                    return;
-                }
-                
-                grid.innerHTML = servers.map(server => `
-                    <div class="server-tile ${server.status === 'online' ? 'online' : 'offline'}">
-                        <div class="server-tile-header">
-                            <span class="server-name">${server.name}</span>
-                            <span class="server-status-dot ${server.status === 'online' ? 'online' : 'offline'}"></span>
-                        </div>
-                        <div class="server-details">
-                            <div class="server-detail-row">
-                                <span class="server-detail-label">IP Address</span>
-                                <span class="server-detail-value">${server.ip}</span>
-                            </div>
-                            <div class="server-detail-row">
-                                <span class="server-detail-label">Status</span>
-                                <span class="server-detail-value ${server.status === 'online' ? 'text-success' : 'text-danger'}">
-                                    ${server.status.toUpperCase()}
-                                </span>
-                            </div>
-                            <div class="server-detail-row">
-                                <span class="server-detail-label">Latency</span>
-                                <span class="server-detail-value">
-                                    ${server.latency !== null ? server.latency + ' ms' : '—'}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                `).join('');
-                
-            } catch (error) {
-                console.error('Failed to load server health:', error);
-                grid.innerHTML = `
-                    <div class="empty-state" style="grid-column: 1 / -1;">
-                        <div class="empty-state-icon">⚠️</div>
-                        <div class="empty-state-title">Connection Error</div>
-                        <div class="empty-state-description">Failed to fetch server status. Please try again.</div>
-                    </div>
-                `;
-            }
-        }
-        
-        function refreshServerHealth() {
-            const grid = document.getElementById('serverGrid');
-            grid.innerHTML = `
-                <div class="loading-card" style="grid-column: 1 / -1;">
-                    <div class="loading-spinner"></div>
-                    <span>Refreshing server status...</span>
-                </div>
-            `;
-            loadServerHealth();
-        }
-        
-        // ========================================
         // NETWORK MODE REFRESH
         // ========================================
         async function refreshNetworkMode() {
@@ -859,7 +825,6 @@
         // ========================================
         document.addEventListener('DOMContentLoaded', function() {
             // Load initial data
-            loadServerHealth();
             removeFlashMessages();
             
             // Set up auto-refresh intervals

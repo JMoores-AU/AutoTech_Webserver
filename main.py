@@ -1421,8 +1421,8 @@ def dashboard():
         'equipment_count': len(EQUIPMENT_PROFILES)
     }
     
-    # CRITICAL: Always use enhanced_index.html, never index.html
-    return render_template("enhanced_index.html", **dashboard_data)
+    # CRITICAL: Always use main_dashboard.html, never index.html
+    return render_template("main_dashboard.html", **dashboard_data)
 
 # ========================================
 # API ROUTES
