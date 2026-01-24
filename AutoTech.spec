@@ -67,5 +67,5 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=None,  # Add icon path here if you have one: icon='static/icon.ico'
+    icon='static/AutoTech_Dark.ico',
 )
