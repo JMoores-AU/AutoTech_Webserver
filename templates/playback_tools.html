@@ -238,6 +238,23 @@
 
         .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: currentColor; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Sidebar Monitor Adjustments */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        .sidebar-nav {
+            flex-shrink: 0;
+        }
+        #sidebarMonitor {
+            min-height: 0; /* Allow flex shrink */
+        }
+        .sidebar-footer {
+            flex-shrink: 0;
+            margin-top: auto;
+        }
     </style>
 </head>
 <body>
@@ -252,10 +269,59 @@
                 <div class="nav-section">
                     <div class="nav-section-title">Main</div>
                     <a href="{{ url_for('dashboard') }}" class="nav-item"><span class="nav-item-icon">📊</span><span>Dashboard</span></a>
-                    <a href="{{ url_for('run_tool', tool_name='IP Finder') }}" class="nav-item"><span class="nav-item-icon">🔍</span><span>IP Finder</span></a>
                     <a href="{{ url_for('run_tool', tool_name='Playback Tools') }}" class="nav-item active"><span class="nav-item-icon">▶️</span><span>Playback Tools</span></a>
                 </div>
             </nav>
+
+            <!-- Next File Prediction Monitor -->
+            <div id="sidebarMonitor" style="padding: 16px; border-top: 1px solid var(--theme-border); flex: 1; display: flex; flex-direction: column; overflow-y: auto;">
+                <!-- Header with Status Badge -->
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 1.5rem;">🔴</span>
+                        <span style="font-size: 0.9rem; font-weight: 600; color: var(--theme-text);">Next File Prediction</span>
+                    </div>
+                    <span id="sidebarStatusBadge" style="padding: 4px 8px; border-radius: 12px; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; background: rgba(34, 197, 94, 0.15); color: var(--status-online); border: 1px solid rgba(34, 197, 94, 0.3);">ACTIVE</span>
+                </div>
+
+                <!-- Subtitle -->
+                <div style="font-size: 0.7rem; color: var(--theme-text-muted); margin-bottom: 16px;">Based on server file patterns</div>
+
+                <!-- Metadata (Right-aligned) -->
+                <div style="margin-bottom: 16px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                        <span style="font-size: 0.7rem; color: var(--theme-text-muted);">Next File:</span>
+                        <span id="sidebarNextFileTime" style="font-size: 0.7rem; color: var(--theme-text); font-family: monospace;">--</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                        <span style="font-size: 0.7rem; color: var(--theme-text-muted);">Next Filename:</span>
+                    </div>
+                    <div id="sidebarNextFileName" style="font-size: 0.65rem; color: var(--theme-text); font-family: monospace; word-break: break-all; text-align: right; margin-bottom: 8px;">--</div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                        <span style="font-size: 0.7rem; color: var(--theme-text-muted);">Confidence:</span>
+                        <span id="sidebarConfidence" style="font-size: 0.7rem; color: var(--theme-text);">--</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="font-size: 0.7rem; color: var(--theme-text-muted);">Status:</span>
+                        <span id="sidebarStatus" style="font-size: 0.7rem; color: var(--theme-text);">--</span>
+                    </div>
+                </div>
+
+                <!-- Big Countdown -->
+                <div style="text-align: center; margin: 24px 0;">
+                    <div id="sidebarCountdown" style="font-size: 3rem; font-weight: 700; color: var(--theme-primary); line-height: 1;">--:--</div>
+                    <div style="font-size: 0.7rem; text-transform: uppercase; color: var(--theme-text-muted); margin-top: 4px; letter-spacing: 0.5px;">UNTIL NEXT FILE</div>
+                </div>
+
+                <!-- Download Button -->
+                <button type="button" id="sidebarDownloadBtn" onclick="downloadFromSidebar()" style="width: 100%; background: linear-gradient(135deg, var(--theme-primary), var(--theme-primary-hover)); color: white; border: none; padding: 12px 16px; border-radius: 6px; font-weight: 700; font-size: 0.85rem; cursor: pointer; margin-top: auto; display: none;">
+                    ⬇️ Download Latest File
+                </button>
+
+                <!-- Status Text -->
+                <div id="sidebarStatusText" style="font-size: 0.7rem; color: var(--theme-text-muted); text-align: center; margin-top: 12px;">Connecting...</div>
+            </div>
+
             <div class="sidebar-footer">
                 <div class="sidebar-status">
                     <span class="status-indicator {{ 'online' if online else 'offline' }}"></span>
@@ -355,46 +421,6 @@
                         </div>
                     </div>
 
-                    <div class="tool-card" style="grid-column: span 3;">
-                        <div class="tool-card-header">
-                            <div class="tool-card-title-section">
-                                <span class="tool-card-icon">🔮</span>
-                                <div>
-                                    <div class="tool-card-title">Next File Prediction</div>
-                                    <div class="tool-card-subtitle">Based on server file patterns</div>
-                                </div>
-                            </div>
-                            <span class="status-badge checking" id="predictionStatus"><span class="spinner"></span> Checking</span>
-                        </div>
-                        <div class="tool-card-body" id="predictionBody" style="display:none;">
-                            <div style="display: grid; grid-template-columns: 1fr auto 1fr; gap: 24px; align-items: center;">
-                                <div class="tool-info-grid">
-                                    <span class="tool-info-label">Last File:</span>
-                                    <span class="tool-info-value" id="lastFileTime">-</span>
-                                    <span class="tool-info-label">Interval:</span>
-                                    <span class="tool-info-value" id="avgInterval">-</span>
-                                    <span class="tool-info-label">Files Analyzed:</span>
-                                    <span class="tool-info-value" id="filesAnalyzed">-</span>
-                                </div>
-                                <div style="text-align: center; padding: 0 20px;">
-                                    <div style="font-size: 2.5rem; font-weight: 700; color: var(--theme-primary);" id="countdownDisplay">--:--</div>
-                                    <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--theme-text-muted); margin-top: 4px;">Until Next File</div>
-                                </div>
-                                <div class="tool-info-grid">
-                                    <span class="tool-info-label">Next File:</span>
-                                    <span class="tool-info-value" id="nextFileTime">-</span>
-                                    <span class="tool-info-label">Confidence:</span>
-                                    <span class="tool-info-value" id="confidenceLevel">-</span>
-                                    <span class="tool-info-label">Status:</span>
-                                    <span class="tool-info-value" id="predictionStatusText">-</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div id="predictionError" style="display:none; padding: 16px; text-align: center; color: var(--theme-text-muted); font-size: 0.9rem;"></div>
-                        <div class="tool-card-actions" id="predictionActions" style="display:none;">
-                            <button type="button" class="btn btn-launch" id="downloadLatestBtn" onclick="downloadLatestFile()">⬇️ Download Latest File</button>
-                        </div>
-                    </div>
                 </div>
 
                 <!-- Download Section -->
@@ -467,7 +493,7 @@
                 </div>
                 
                 <!-- USB Warning / Instructions -->
-                <div class="files-section">
+                <div class="files-section" id="usbWarningSection">
                     <div class="files-section-header">
                         <div class="files-section-title">
                             <span>⚠️</span>
@@ -505,22 +531,49 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Local USB Files Section -->
+                <div class="files-section" id="localFilesSection" style="display: none;">
+                    <div class="files-section-header">
+                        <div class="files-section-title">
+                            <span>💾</span>
+                            Local USB Files
+                        </div>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <span id="localFilesCount" style="font-size: 0.85rem; color: var(--theme-text-muted);"></span>
+                            <button class="btn-rescan" onclick="refreshLocalFiles()" id="refreshLocalBtn">
+                                🔄 Refresh
+                            </button>
+                            <button class="btn-download-sm" id="deleteAllLocalBtn" onclick="deleteAllLocalFiles()" style="display:none; background: linear-gradient(135deg, var(--status-offline), #dc2626);">
+                                🗑️ Delete All
+                            </button>
+                        </div>
+                    </div>
+                    <div id="localFilesList" style="display: flex; flex-direction: column; gap: 8px;">
+                        <!-- Files will be populated here -->
+                    </div>
+                </div>
             </div>
         </main>
     </div>
-    
+
     <div class="toast-container" id="toastContainer"></div>
     
     <script>
+
+    console.log("PLAYBACK_TOOLS_VERSION", "2026-01-26 01:37 AEST");
+
         // Auto-apply theme from localStorage
         (function() {
             const savedTheme = localStorage.getItem('autotech_theme') || 'dark';
             document.documentElement.setAttribute('data-theme', savedTheme);
             const favicon = document.getElementById('favicon');
             if (favicon) {
-                favicon.href = savedTheme === 'light'
-                    ? "{{ url_for('static', filename='AutoTech_Light.ico') }}"
-                    : "{{ url_for('static', filename='AutoTech_Dark.ico') }}";
+                if (savedTheme === 'light') {
+                    favicon.href = "{{ url_for('static', filename='AutoTech_Light.ico') }}";
+                } else {
+                    favicon.href = "{{ url_for('static', filename='AutoTech_Dark.ico') }}";
+                }
             }
         })();
 
@@ -580,8 +633,7 @@
             launchBtn.disabled = true;
 
             try {
-                const response = await fetch(`/api/usb/scan/${toolId}`);
-                const data = await response.json();
+                const data = await fetchJson(`/api/usb/scan/${toolId}`);
                 if (data.drives) { usbDrives = data.drives; }
                 if (data.found) {
                     statusEl.className = 'status-badge found';
@@ -590,33 +642,74 @@
                     locationEl.textContent = data.details.drive.letter + ':\\';
                     if (toolId === 'playback') {
                         playbackDrivePath = data.details.drive.letter + ':\\frontrunnerV3-3.7.0-076-full\\playback';
+                        // Update download destination display
+                        document.getElementById('downloadDestination').textContent = playbackDrivePath;
+                        // Hide USB warning when playback tool is found
+                        document.getElementById('usbWarningSection').style.display = 'none';
                     }
                 } else {
                     statusEl.className = 'status-badge not-found';
                     statusEl.textContent = '✗ NOT FOUND';
                     locationEl.textContent = '-';
-                    if (toolId === 'playback') playbackDrivePath = null;
+                    if (toolId === 'playback') {
+                        playbackDrivePath = null;
+                        if (usbDrives && usbDrives.length) {
+                        const letters = usbDrives.map(d => `${d.letter}:`).join(', ');
+                        document.getElementById('downloadDestination').textContent =
+                            `⚠️ USB detected (${letters}) but Playback Tool not found. Expected: \\frontrunnerV3-3.7.0-076-full\\`;
+                    } else {
+                        document.getElementById('downloadDestination').textContent =
+                            '⚠️ No USB detected - Please insert USB and click Refresh';
+                    }
+                        // Show USB warning when playback tool is not found
+                        document.getElementById('usbWarningSection').style.display = 'block';
+                    }
                     showToast(`${toolId === 'playback' ? 'Playback Tool' : 'CamStudio'} not found on USB drives`, 'warning');
                 }
             } catch (e) {
                 statusEl.className = 'status-badge not-found';
                 statusEl.textContent = '✗ ERROR';
-                showToast('Error scanning USB drives', 'error');
+                launchBtn.disabled = true;
+                locationEl.textContent = '-';
+                if (toolId === 'playback') {
+                    playbackDrivePath = null;
+                    document.getElementById('downloadDestination').textContent = '⚠️ USB not detected - Please insert USB and click Refresh';
+                    document.getElementById('usbWarningSection').style.display = 'block';
+                }
+                if (e && e.message === 'LOGIN_REQUIRED') {
+                    showToast('Login required (session expired)', 'error');
+                } else {
+                    showToast('Error scanning USB drives', 'error');
+                }
             }
+        }
+
+        function openProtocolUri(uri) {
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            iframe.src = uri;
+            document.body.appendChild(iframe);
+            setTimeout(() => iframe.remove(), 1500);
         }
 
         async function launchTool(toolId) {
             const btn = document.getElementById(`${toolId}LaunchBtn`);
             btn.disabled = true;
             btn.innerHTML = '<span class="spinner"></span> Launching...';
+
+            // USB tools MUST be launched via server API which scans USB drives
+            // Cannot use protocol handlers because tools are in USB root folders, not MMS scripts folder
             try {
-                const response = await fetch(`/api/usb/launch/${toolId}`, { method: 'POST' });
-                const data = await response.json();
+                const data = await fetchJson(`/api/usb/launch/${toolId}`, { method: 'POST' });
                 showToast(data.message, data.success ? 'success' : 'error');
                 btn.innerHTML = data.success ? '✅ Launched!' : '🚀 Launch';
                 setTimeout(() => { btn.innerHTML = '🚀 Launch'; btn.disabled = false; }, 3000);
             } catch (e) {
-                showToast('Launch error', 'error');
+                if (e && e.message === 'LOGIN_REQUIRED') {
+                    showToast('Login required (session expired)', 'error');
+                } else {
+                    showToast('Launch error', 'error');
+                }
                 btn.innerHTML = '🚀 Launch';
                 btn.disabled = false;
             }
@@ -629,8 +722,7 @@
             statusEl.innerHTML = '<span class="spinner"></span> Checking';
             launchBtn.disabled = true;
             try {
-                const response = await fetch('/api/playback/server-check');
-                const data = await response.json();
+                const data = await fetchJson('/api/playback/server-check');
                 statusEl.className = data.connected ? 'status-badge connected' : 'status-badge disconnected';
                 statusEl.textContent = data.connected ? '✓ CONNECTED' : '✗ OFFLINE';
                 launchBtn.disabled = false;
@@ -645,18 +737,22 @@
             const btn = document.getElementById('serverLaunchBtn');
             btn.disabled = true;
             btn.innerHTML = '<span class="spinner"></span> Opening...';
+
             try {
-                const response = await fetch('/api/playback/open-winscp', { method: 'POST' });
-                const data = await response.json();
-                showToast(data.success ? 'WinSCP opened' : data.message, data.success ? 'success' : 'error');
-                setTimeout(() => { btn.innerHTML = '📂 Open in WinSCP'; btn.disabled = false; }, 2000);
+                const data = await fetchJson('/api/playback/open-winscp', { method: 'POST' });
+                showToast(data.message || (data.success ? 'WinSCP opened' : 'WinSCP error'), data.success ? 'success' : 'error');
             } catch (e) {
-                showToast('Error', 'error');
+                if (e && e.message === 'LOGIN_REQUIRED') {
+                    showToast('Login required (session expired)', 'error');
+                } else {
+                    showToast('Failed to open WinSCP', 'error');
+                }
+            } finally {
                 btn.innerHTML = '📂 Open in WinSCP';
                 btn.disabled = false;
             }
         }
-        
+    
         async function findPlaybackFiles() {
             const dateInput = document.getElementById('downloadDate').value;
             if (!dateInput) { showToast('Select a date', 'warning'); return; }
@@ -679,8 +775,7 @@
             document.getElementById('noFileFound').style.display = 'none';
             
             try {
-                const response = await fetch(`/api/playback/find-files?date=${dateInput}&time_from=${timeFrom}&time_to=${timeTo}&mode=${searchMode}`);
-                const data = await response.json();
+                const data = await fetchJson(`/api/playback/find-files?date=${dateInput}&time_from=${timeFrom}&time_to=${timeTo}&mode=${searchMode}`);
                 
                 if (data.files && data.files.length > 0) {
                     foundFiles = data.files;
@@ -782,12 +877,11 @@
 
                 try {
                     // Start download
-                    const response = await fetch('/api/playback/download-file', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ filename: file.name, size: file.size })
-                    });
-                    const data = await response.json();
+                    const data = await fetchJson('/api/playback/download-file', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ filename: file.name, size: file.size })
+                });
 
                     if (data.success) {
                         // Poll for progress
@@ -856,12 +950,11 @@
 
                 const file = foundFiles[index];
                 try {
-                    const response = await fetch('/api/playback/delete-file', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ filename: file.name })
-                    });
-                    const data = await response.json();
+                    const data = await fetchJson('/api/playback/delete-file', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ filename: file.name })
+                });
                     if (data.success) {
                         success++;
                         // Remove from display
@@ -894,12 +987,11 @@
             if (!confirm(`Delete ${file.name} from USB drive?`)) return;
 
             try {
-                const response = await fetch('/api/playback/delete-file', {
+                const data = await fetchJson('/api/playback/delete-file', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ filename: file.name })
                 });
-                const data = await response.json();
                 if (data.success) {
                     showToast(`Deleted: ${file.name}`, 'success');
                     // Remove from display
@@ -972,12 +1064,11 @@
 
             try {
                 // Start download
-                const response = await fetch('/api/playback/download-file', {
+                const data = await fetchJson('/api/playback/download-file', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ filename: file.name, size: file.size })
                 });
-                const data = await response.json();
 
                 if (!data.success) {
                     btn.innerHTML = '⬇️ Retry';
@@ -1019,183 +1110,137 @@
         
         async function refreshAll() {
             showToast('Refreshing...', 'info');
-            await Promise.all([scanTool('playback'), scanTool('camstudio'), checkServer(), updatePrediction()]);
+            await Promise.all([scanTool('playback'), scanTool('camstudio'), checkServer(), refreshLocalFiles()]);
             showToast('Done', 'success');
         }
 
-        let predictionData = null;
-        let countdownInterval = null;
+        // Local USB files management
+        let localFiles = [];
 
-        async function updatePrediction() {
-            const statusEl = document.getElementById('predictionStatus');
-            const bodyEl = document.getElementById('predictionBody');
-            const errorEl = document.getElementById('predictionError');
-
-            statusEl.className = 'status-badge checking';
-            statusEl.innerHTML = '<span class="spinner"></span> Checking';
-            bodyEl.style.display = 'none';
-            errorEl.style.display = 'none';
-
+        async function refreshLocalFiles() {
+            console.log('refreshLocalFiles() called');
             try {
-                const response = await fetch('/api/playback/predict-next-file');
-                const data = await response.json();
+                const data = await fetchJson('/api/playback/local-files');
+                console.log('Local files API response:', data);
 
-                if (data.success && data.has_prediction) {
-                    predictionData = data;
-                    statusEl.className = 'status-badge found';
-                    statusEl.textContent = '✓ ACTIVE';
-                    bodyEl.style.display = 'block';
-                    document.getElementById('predictionActions').style.display = 'flex';
+                const section = document.getElementById('localFilesSection');
+                const listContainer = document.getElementById('localFilesList');
+                const countSpan = document.getElementById('localFilesCount');
+                const deleteAllBtn = document.getElementById('deleteAllLocalBtn');
 
-                    // Update info fields
-                    document.getElementById('lastFileTime').textContent = new Date(data.last_file_time).toLocaleString();
-                    document.getElementById('nextFileTime').textContent = new Date(data.next_file_time).toLocaleString();
-                    document.getElementById('avgInterval').textContent = data.average_interval_minutes + ' min';
-                    document.getElementById('filesAnalyzed').textContent = data.files_analyzed;
-
-                    const confEmoji = data.confidence === 'high' ? '🟢' : data.confidence === 'medium' ? '🟡' : '🔴';
-                    document.getElementById('confidenceLevel').textContent = confEmoji + ' ' + data.confidence.toUpperCase();
-
-                    // Start countdown
-                    if (countdownInterval) clearInterval(countdownInterval);
-                    updateCountdown();
-                    countdownInterval = setInterval(updateCountdown, 1000);
-                } else {
-                    statusEl.className = 'status-badge not-found';
-                    statusEl.textContent = '✗ NO DATA';
-                    errorEl.textContent = data.error || 'Not enough files to predict pattern';
-                    errorEl.style.display = 'block';
-                }
-            } catch (e) {
-                statusEl.className = 'status-badge not-found';
-                statusEl.textContent = '✗ ERROR';
-                errorEl.textContent = 'Failed to fetch prediction';
-                errorEl.style.display = 'block';
-            }
-        }
-
-        function updateCountdown() {
-            if (!predictionData) return;
-
-            const now = new Date();
-            const nextTime = new Date(predictionData.next_file_time);
-            const diff = Math.floor((nextTime - now) / 1000); // seconds
-
-            const display = document.getElementById('countdownDisplay');
-            const statusText = document.getElementById('predictionStatusText');
-
-            if (diff <= 0) {
-                // Overdue
-                const overdue = Math.abs(diff);
-                const mins = Math.floor(overdue / 60);
-                const secs = overdue % 60;
-                display.textContent = `+${mins}:${secs.toString().padStart(2, '0')}`;
-                display.style.color = 'var(--status-offline)';
-                statusText.textContent = '⚠️ OVERDUE';
-                statusText.style.color = 'var(--status-offline)';
-            } else if (diff < 60) {
-                // Less than 1 minute
-                display.textContent = `0:${diff.toString().padStart(2, '0')}`;
-                display.style.color = 'var(--status-warning)';
-                statusText.textContent = '🔄 ARRIVING SOON';
-                statusText.style.color = 'var(--status-warning)';
-            } else {
-                // Normal countdown
-                const mins = Math.floor(diff / 60);
-                const secs = diff % 60;
-                display.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
-                display.style.color = 'var(--theme-primary)';
-                statusText.textContent = '⏳ WAITING';
-                statusText.style.color = 'var(--theme-text)';
-            }
-        }
-
-        async function downloadLatestFile() {
-            if (!predictionData || !predictionData.last_file_time) {
-                showToast('No file information available', 'error');
-                return;
-            }
-
-            if (!playbackDrivePath) {
-                showToast('⚠️ USB drive not detected! Insert USB and click Refresh.', 'error');
-                return;
-            }
-
-            const btn = document.getElementById('downloadLatestBtn');
-            btn.disabled = true;
-            btn.innerHTML = '<span class="spinner"></span> Downloading...';
-
-            try {
-                // Parse last file time to construct filename
-                const lastTime = new Date(predictionData.last_file_time);
-                const year = lastTime.getFullYear();
-                const month = String(lastTime.getMonth() + 1).padStart(2, '0');
-                const day = String(lastTime.getDate()).padStart(2, '0');
-                const hour = String(lastTime.getHours()).padStart(2, '0');
-                const minute = String(lastTime.getMinutes()).padStart(2, '0');
-                const second = String(lastTime.getSeconds()).padStart(2, '0');
-
-                const filename = `AHS_LOG_${year}${month}${day}_${hour}${minute}${second}_AEST.dat`;
-
-                // Start download
-                const response = await fetch('/api/playback/download-file', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ filename: filename, size: 0 })
-                });
-
-                const data = await response.json();
-                if (!data.success) {
-                    btn.innerHTML = '⬇️ Retry';
-                    btn.disabled = false;
-                    showToast(data.message || 'Download failed', 'error');
+                if (data.error) {
+                    console.log('API returned error:', data.error);
+                    section.style.display = 'none';
                     return;
                 }
 
-                // Poll for progress with simpler display (no progress bar for this button)
-                const maxAttempts = 300;
-                let attempts = 0;
-                let success = false;
+                localFiles = data.files || [];
+                console.log(`Found ${localFiles.length} local files`);
 
-                while (attempts < maxAttempts) {
-                    try {
-                        const progressResp = await fetch(`/api/playback/download-progress/${encodeURIComponent(filename)}`);
-                        const progress = await progressResp.json();
-
-                        if (progress.status === 'complete') {
-                            success = true;
-                            break;
-                        } else if (progress.status === 'error') {
-                            showToast(progress.error || 'Download failed', 'error');
-                            break;
-                        } else if (progress.status === 'downloading') {
-                            btn.innerHTML = `<span class="spinner"></span> ${progress.progress}%`;
-                        }
-                    } catch (e) {
-                        console.error('Progress poll error:', e);
-                    }
-
-                    await new Promise(resolve => setTimeout(resolve, 1000));
-                    attempts++;
+                if (localFiles.length === 0) {
+                    section.style.display = 'none';
+                    return;
                 }
 
-                if (success) {
-                    btn.innerHTML = '✅ Downloaded!';
-                    showToast(`Downloaded latest file: ${filename}`, 'success');
-                    setTimeout(() => {
-                        btn.innerHTML = '⬇️ Download Latest File';
-                        btn.disabled = false;
-                    }, 3000);
-                } else {
-                    btn.innerHTML = '⬇️ Retry';
-                    btn.disabled = false;
-                    showToast('Download timeout or failed', 'error');
-                }
-            } catch (e) {
-                btn.innerHTML = '⬇️ Download Latest File';
-                btn.disabled = false;
-                showToast('Download error', 'error');
+                section.style.display = 'block';
+                countSpan.textContent = `${localFiles.length} file(s) - ${data.path}`;
+                deleteAllBtn.style.display = localFiles.length > 0 ? 'inline-flex' : 'none';
+
+                // Render files
+                listContainer.innerHTML = localFiles.map((file, i) => {
+                    const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
+                    const date = new Date(file.modified * 1000).toLocaleString();
+
+                    return `<div class="found-file-item" id="localFile${i}">
+                        <div class="found-file-info">
+                            <div class="found-file-name">📄 ${file.name}</div>
+                            <div class="found-file-meta">${sizeMB} MB • ${date}</div>
+                        </div>
+                        <div class="found-file-actions">
+                            <button type="button" class="btn-download-sm" style="background: linear-gradient(135deg, var(--status-offline), #dc2626);" onclick="deleteLocalFile(${i})">
+                                🗑️ Delete
+                            </button>
+                        </div>
+                    </div>`;
+                }).join('');
+
+                console.log('Local files rendered successfully');
+
+            } catch (error) {
+                console.error('Error refreshing local files:', error);
+                document.getElementById('localFilesSection').style.display = 'none';
             }
+        }
+
+        async function deleteLocalFile(index) {
+            const file = localFiles[index];
+            if (!file) return;
+
+            if (!confirm(`Delete ${file.name} from USB drive?`)) return;
+
+            try {
+                const data = await fetchJson('/api/playback/delete-file', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ filename: file.name })
+                });
+
+                if (data.success) {
+                    showToast(`Deleted ${file.name}`, 'success');
+                    // Remove from display
+                    const fileItem = document.getElementById(`localFile${index}`);
+                    if (fileItem) fileItem.remove();
+
+                    // Refresh the list
+                    await refreshLocalFiles();
+                } else {
+                    showToast(data.message || 'Failed to delete file', 'error');
+                }
+            } catch (error) {
+                showToast('Error deleting file', 'error');
+                console.error(error);
+            }
+        }
+
+        async function deleteAllLocalFiles() {
+            if (localFiles.length === 0) return;
+
+            if (!confirm(`Delete all ${localFiles.length} file(s) from USB drive?`)) return;
+
+            const btn = document.getElementById('deleteAllLocalBtn');
+            btn.disabled = true;
+            const originalText = btn.textContent;
+
+            let success = 0;
+            let failed = 0;
+
+            for (let i = 0; i < localFiles.length; i++) {
+                btn.textContent = `🗑️ Deleting ${i + 1}/${localFiles.length}`;
+
+                try {
+                    const data = await fetchJson('/api/playback/delete-file', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ filename: localFiles[i].name })
+                    });
+
+                    if (data.success) {
+                        success++;
+                    } else {
+                        failed++;
+                    }
+                } catch (error) {
+                    failed++;
+                }
+            }
+
+            btn.textContent = originalText;
+            btn.disabled = false;
+
+            showToast(`Deleted ${success} file(s)` + (failed > 0 ? `, ${failed} failed` : ''), success > 0 ? 'success' : 'error');
+
+            // Refresh the list
+            await refreshLocalFiles();
         }
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -1208,11 +1253,295 @@
             scanTool('playback');
             scanTool('camstudio');
             checkServer();
-            updatePrediction();
+            refreshLocalFiles();
 
-            // Auto-refresh prediction every 5 minutes
-            setInterval(updatePrediction, 5 * 60 * 1000);
+            // Start real-time monitor
+            startRealtimeMonitor();
         });
+
+        // ========================================
+        // REAL-TIME PLAYBACK MONITOR
+        // ========================================
+        let monitorInterval = null;
+        let monitorCountdownInterval = null;
+        let currentPendingFile = null;
+
+        async function startRealtimeMonitor() {
+            console.log('🔴 Starting real-time playback monitor...');
+
+            // Show initial "connecting" state
+            document.getElementById('sidebarStatusText').textContent = 'Starting monitor...';
+            document.getElementById('sidebarNoActivity').style.display = 'block';
+
+            // Start the background monitor
+            try {
+                const data = await fetchJson('/api/playback/monitor/start', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ scan_interval_seconds: 10 })
+                });
+
+                console.log('📡 Monitor start response:', data);
+
+                if (data.success || (data.error && data.error.includes('already running'))) {
+                    console.log('✅ Playback monitor started - sidebar will update every 2s');
+
+                    // Poll monitor status every 2 seconds
+                    monitorInterval = setInterval(updateMonitorStatus, 2000);
+                    updateMonitorStatus(); // Initial update
+                } else {
+                    console.error('❌ Could not start monitor:', data.error);
+                    document.getElementById('sidebarStatusText').textContent = data.error || 'Failed to start';
+                }
+            } catch (err) {
+                console.error('❌ Error starting monitor:', err);
+                document.getElementById('sidebarStatusText').textContent = 'Connection error';
+            }
+        }
+
+        async function updateMonitorStatus() {
+            try {
+                // Fetch both monitor status AND prediction data
+                const [monitorData, predictionData] = await Promise.all([
+                    fetchJson('/api/playback/monitor/status'),
+                    fetchJson('/api/playback/predict-next-file')
+                ]);
+
+                console.log('📊 Monitor:', monitorData, 'Prediction:', predictionData);
+
+                // Update status badge
+                const statusBadge = document.getElementById('sidebarStatusBadge');
+                const statusText = document.getElementById('sidebarStatusText');
+
+                if (monitorData.connected && monitorData.status === 'monitoring') {
+                    statusBadge.textContent = 'ACTIVE';
+                    statusBadge.style.background = 'rgba(34, 197, 94, 0.15)';
+                    statusBadge.style.color = 'var(--status-online)';
+                    statusBadge.style.borderColor = 'rgba(34, 197, 94, 0.3)';
+
+                    if (monitorData.last_scan) {
+                        const scanTime = new Date(monitorData.last_scan);
+                        const now = new Date();
+                        const secondsAgo = Math.floor((now - scanTime) / 1000);
+                        statusText.textContent = `Updated ${secondsAgo}s ago`;
+                    } else {
+                        statusText.textContent = 'Monitoring...';
+                    }
+                } else if (monitorData.status === 'error') {
+                    statusBadge.textContent = 'ERROR';
+                    statusBadge.style.background = 'rgba(239, 68, 68, 0.15)';
+                    statusBadge.style.color = 'var(--status-offline)';
+                    statusBadge.style.borderColor = 'rgba(239, 68, 68, 0.3)';
+                    statusText.textContent = monitorData.last_error || 'Connection Error';
+                } else {
+                    statusBadge.textContent = 'OFFLINE';
+                    statusBadge.style.background = 'rgba(107, 114, 128, 0.15)';
+                    statusBadge.style.color = 'var(--theme-text-muted)';
+                    statusBadge.style.borderColor = 'rgba(107, 114, 128, 0.3)';
+                    statusText.textContent = 'Offline Mode';
+                }
+
+                // Determine which data source to use
+                let useMonitor = monitorData.success && monitorData.pending_file;
+                let usePrediction = predictionData.success && predictionData.has_prediction;
+
+                if (useMonitor) {
+                    // Use real-time .log file data
+                    currentPendingFile = monitorData.pending_file;
+
+                    // Update metadata
+                    const timestamp = monitorData.pending_file.timestamp; // YYYYMMDD_HHMMSS
+                    const [datePart, timePart] = timestamp.split('_');
+                    const formattedTime = `${timePart.slice(0,2)}:${timePart.slice(2,4)}:${timePart.slice(4,6)}`;
+
+                    document.getElementById('sidebarNextFileTime').textContent = formattedTime;
+                    document.getElementById('sidebarNextFileName').textContent = monitorData.pending_file.predicted_dat;
+                    document.getElementById('sidebarConfidence').textContent = 'HIGH';
+                    document.getElementById('sidebarStatus').textContent = monitorData.pending_file.dat_ready ? 'READY' : 'WAITING';
+
+                    // Update countdown
+                    if (!monitorCountdownInterval) {
+                        monitorCountdownInterval = setInterval(updateMonitorCountdown, 1000);
+                    }
+
+                    // Show/hide download button
+                    const downloadBtn = document.getElementById('sidebarDownloadBtn');
+                    if (monitorData.pending_file.dat_ready) {
+                        downloadBtn.style.display = 'block';
+                        downloadBtn.disabled = false;
+                    } else {
+                        downloadBtn.style.display = 'none';
+                    }
+
+                } else if (usePrediction) {
+                    // Use prediction data
+                    currentPendingFile = {
+                        predicted_dat: predictionData.next_file_name,
+                        countdown_seconds: predictionData.countdown_seconds,
+                        dat_ready: predictionData.countdown_seconds <= 0
+                    };
+
+                    // Update metadata
+                    const nextTime = new Date(predictionData.next_file_time);
+                    const formattedTime = nextTime.toLocaleTimeString();
+
+                    document.getElementById('sidebarNextFileTime').textContent = formattedTime;
+                    document.getElementById('sidebarNextFileName').textContent = predictionData.next_file_name;
+                    document.getElementById('sidebarConfidence').textContent = predictionData.confidence?.toUpperCase() || 'MEDIUM';
+                    document.getElementById('sidebarStatus').textContent = predictionData.is_overdue ? 'OVERDUE' : 'WAITING';
+
+                    // Update countdown
+                    if (!monitorCountdownInterval) {
+                        monitorCountdownInterval = setInterval(updateMonitorCountdown, 1000);
+                    }
+
+                    // Show/hide download button
+                    const downloadBtn = document.getElementById('sidebarDownloadBtn');
+                    if (predictionData.countdown_seconds <= 0) {
+                        downloadBtn.style.display = 'block';
+                        downloadBtn.disabled = false;
+                    } else {
+                        downloadBtn.style.display = 'none';
+                    }
+
+                } else {
+                    // No data available
+                    document.getElementById('sidebarNextFileTime').textContent = '--';
+                    document.getElementById('sidebarNextFileName').textContent = 'No prediction available';
+                    document.getElementById('sidebarConfidence').textContent = '--';
+                    document.getElementById('sidebarStatus').textContent = 'WAITING';
+                    document.getElementById('sidebarCountdown').textContent = '--:--';
+                    document.getElementById('sidebarDownloadBtn').style.display = 'none';
+
+                    currentPendingFile = null;
+
+                    if (monitorCountdownInterval) {
+                        clearInterval(monitorCountdownInterval);
+                        monitorCountdownInterval = null;
+                    }
+                }
+
+            } catch (err) {
+                console.error('❌ Error updating monitor status:', err);
+                document.getElementById('sidebarStatusText').textContent = 'Update error';
+            }
+        }
+
+        function updateMonitorCountdown() {
+            if (!currentPendingFile) return;
+
+            const countdown = currentPendingFile.countdown_seconds;
+            const countdownEl = document.getElementById('sidebarCountdown');
+
+            if (countdown <= 0) {
+                countdownEl.textContent = '0:00';
+                countdownEl.style.color = '#fbbf24'; // yellow - overdue
+            } else {
+                const mins = Math.floor(countdown / 60);
+                const secs = countdown % 60;
+                countdownEl.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+                countdownEl.style.color = 'var(--theme-primary)';
+
+                // Decrement for next tick
+                currentPendingFile.countdown_seconds--;
+            }
+        }
+
+        async function downloadFromSidebar() {
+            if (!currentPendingFile) {
+                showToast('No file available to download', 'error');
+                return;
+            }
+
+            const filename = currentPendingFile.predicted_dat;
+            const btn = document.getElementById('sidebarDownloadBtn');
+            const originalText = btn.textContent;
+
+            try {
+                btn.disabled = true;
+                btn.textContent = '⏳ Starting...';
+
+                showToast('Starting download...', 'info');
+
+                const data = await fetchJson('/api/playback/download-file', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        filename: filename,
+                        size: currentPendingFile.dat_size || 0
+                    })
+                });
+
+                if (data.success) {
+                    showToast(`Downloading ${filename}`, 'success');
+
+                    // Poll for progress
+                    const maxAttempts = 300;
+                    let attempts = 0;
+
+                    while (attempts < maxAttempts) {
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+
+                        const progressResp = await fetch(`/api/playback/download-progress/${encodeURIComponent(filename)}`);
+                        const progress = await progressResp.json();
+
+                        if (progress.status === 'complete') {
+                            btn.textContent = '✅ Downloaded!';
+                            showToast(`✅ Downloaded: ${filename}`, 'success');
+
+                            // Reset button after delay
+                            setTimeout(() => {
+                                btn.textContent = originalText;
+                                btn.disabled = false;
+                                btn.style.display = 'none';
+                            }, 3000);
+
+                            // Refresh monitor
+                            setTimeout(updateMonitorStatus, 2000);
+                            break;
+                        } else if (progress.status === 'error') {
+                            btn.textContent = '❌ Failed';
+                            showToast(progress.error || 'Download failed', 'error');
+                            setTimeout(() => {
+                                btn.textContent = originalText;
+                                btn.disabled = false;
+                            }, 3000);
+                            break;
+                        } else if (progress.status === 'downloading') {
+                            btn.textContent = `⬇️ ${progress.progress}%`;
+                            console.log(`Download progress: ${progress.progress}%`);
+                        }
+
+                        attempts++;
+                    }
+
+                    if (attempts >= maxAttempts) {
+                        btn.textContent = '⏱️ Timeout';
+                        showToast('Download timeout', 'error');
+                        setTimeout(() => {
+                            btn.textContent = originalText;
+                            btn.disabled = false;
+                        }, 3000);
+                    }
+
+                } else {
+                    btn.textContent = '❌ Failed';
+                    showToast(data.message || 'Download failed', 'error');
+                    setTimeout(() => {
+                        btn.textContent = originalText;
+                        btn.disabled = false;
+                    }, 3000);
+                }
+            } catch (err) {
+                btn.textContent = '❌ Error';
+                showToast('Download error', 'error');
+                console.error(err);
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                }, 3000);
+            }
+        }
     </script>
 </body>
 </html>
