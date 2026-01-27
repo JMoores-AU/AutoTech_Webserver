@@ -32,10 +32,8 @@ def check_ssh_connection(ip_address, timeout=5):
         import paramiko
         print("[SSH] Paramiko imported successfully")
     except ImportError:
-        print("[SSH] Paramiko not found, installing...")
-        subprocess.check_call([sys.executable, "-m", "pip", "install", "paramiko"])
-        import paramiko
-        print("[SSH] Paramiko installed and imported")
+        print("[SSH] ERROR: Paramiko not available - required for SSH connections")
+        return None, None, None
     
     # Try PTXC credentials first (dlog/gold)
     print("[SSH] Trying PTXC credentials (dlog/gold)...")
@@ -117,9 +115,8 @@ class SSHTunnel:
         try:
             import paramiko
         except ImportError:
-            print("[TUNNEL] Installing paramiko...")
-            subprocess.check_call([sys.executable, "-m", "pip", "install", "paramiko"])
-            import paramiko
+            print("[TUNNEL] ERROR: Paramiko not available - required for SSH tunnels")
+            return False
         
         try:
             # Create SSH client

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>T1 Tools CMD - AutoTech</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='AutoTech_Dark.ico') }}" id="favicon">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <style>
         .help-container {
@@ -175,10 +176,6 @@
             <div class="sidebar-header">
                 <div class="sidebar-logo">
                     <img src="{{ url_for('static', filename='autotech_logo.png') }}" alt="AutoTech Logo" class="sidebar-logo-img">
-                    <div>
-                        <div class="sidebar-logo-text">AutoTech</div>
-                        <div class="sidebar-logo-subtitle">Mining Equipment</div>
-                    </div>
                 </div>
             </div>
             <nav class="sidebar-nav">
@@ -307,7 +304,6 @@
                                 <tr><td>list</td><td>Show all equipment</td></tr>
                                 <tr><td>search</td><td>Search by name (e.g., search RD1)</td></tr>
                                 <tr><td>debug</td><td>Debug equipment lookup</td></tr>
-                                <tr><td>import</td><td>Import from server</td></tr>
                                 <tr><td>exit</td><td>Save and exit (also: e)</td></tr>
                             </table>
                         </div>
@@ -321,6 +317,18 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <script>
+        // Auto-apply theme from localStorage
+        (function() {
+            const savedTheme = localStorage.getItem('autotech_theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            const favicon = document.getElementById('favicon');
+            if (favicon) {
+                favicon.href = savedTheme === 'light'
+                    ? "{{ url_for('static', filename='AutoTech_Light.ico') }}"
+                    : "{{ url_for('static', filename='AutoTech_Dark.ico') }}";
+            }
+        })();
+
         function showToast(message, type = 'info') {
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');

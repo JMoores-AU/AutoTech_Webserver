@@ -48,6 +48,8 @@ def init_database(db_path: str) -> bool:
     """
     try:
         conn = sqlite3.connect(db_path)
+        conn.execute('PRAGMA journal_mode=WAL')
+        conn.execute('PRAGMA busy_timeout=5000')
         cursor = conn.cursor()
 
         # Create schema version table
@@ -163,6 +165,8 @@ class PTXUptimeDB:
     def _get_connection(self) -> sqlite3.Connection:
         """Get a database connection with row factory"""
         conn = sqlite3.connect(self.db_path)
+        conn.execute('PRAGMA journal_mode=WAL')
+        conn.execute('PRAGMA busy_timeout=5000')
         conn.row_factory = sqlite3.Row
         return conn
 

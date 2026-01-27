@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" lang="ru-RU" xml:lang="ru-RU" data-mc-search-type="Stem" data-mc-help-system-file-name="Default.xml" data-mc-path-to-help-system="../../../" data-mc-target-type="WebHelp2" data-mc-runtime-file-type="Topic" data-mc-preload-images="false" data-mc-in-preview-mode="false" data-mc-medium="non-print" data-mc-toc-path="Receiver Managing|Status">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" /><title>Data Link</title>
+        <link href="../../../Skins/Default/Stylesheets/Slideshow.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/TextEffects.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/Topic.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/Components/Styles.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/Components/Tablet.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/Components/Mobile.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../Resources/Stylesheets/TRU.css" rel="stylesheet" />
+        <style>/*&lt;meta /&gt;*/
+
+.button.previous-topic-button
+{
+	-pie-background: url('../../../Skins/Default/Stylesheets/Images/navigate-previous.png') no-repeat center center, linear-gradient(#ffffff, #ececec);
+}
+
+.button.current-topic-index-button
+{
+	-pie-background: linear-gradient(#ffffff, #ececec);
+}
+
+.button.next-topic-button
+{
+	-pie-background: url('../../../Skins/Default/Stylesheets/Images/navigate-next.png') no-repeat center center, linear-gradient(#ffffff, #ececec);
+}
+
+.needs-pie
+{
+	behavior: url('../../../Resources/Scripts/PIE-no-motw.htc');
+}
+
+</style>
+        <script src="../../../Resources/Scripts/custom.modernizr.js">
+        </script>
+        <script src="../../../Resources/Scripts/jquery.min.js">
+        </script>
+        <script src="../../../Resources/Scripts/require.min.js">
+        </script>
+        <script src="../../../Resources/Scripts/require.config.js">
+        </script>
+        <script src="../../../Resources/Scripts/foundation.min.js">
+        </script>
+        <script src="../../../Resources/Scripts/plugins.min.js">
+        </script>
+        <script src="../../../Resources/Scripts/MadCapAll.js">
+        </script>
+    </head>
+    <body class="test">
+        <p class="MCWebHelpFramesetLink MCWebHelpFramesetLinkTop"><a href="../../../Default.htm#Topics/ReceiverManaging/DataLink.htm">Open topic with navigation</a>
+        </p>
+        <div class="MCBreadcrumbsBox_0"><span class="MCBreadcrumbsPrefix">You are here: </span><span class="MCBreadcrumbsSelf">Receiver Managing</span><span class="MCBreadcrumbsDivider"> &gt; </span><a class="MCBreadcrumbsLink" href="Status.htm">Status</a><span class="MCBreadcrumbsDivider"> &gt; </span><span class="MCBreadcrumbs">Data Link</span>
+        </div>
+        <h1 class="Heading1">Data Link</h1>
+        <p class="Body" style="font-style: normal;">The <i>Data Link</i> tab displays the live statistics of the data communication links used for receiving DGNSS/RTK&#160;measurements from various sources, including physical reference stations, network software such as <a href="http://www.topconpositioning.com/products/networks/network-systems/topnet">TopNET</a>, Ntrip casters, etc.</p>
+        <p class="Body" style="font-style: normal;">Use this page to determine data loss and link viability. Based on this statistics you can see how well your data communication link is performing.</p>
+        <p class="Body" style="font-style: normal;">To analyze the data use the following parameters:</p>
+        <ul>
+            <li value="1"><i>Port</i> – a name of a receiver port, which obtains DGNSS/RTK corrections.</li>
+            <li value="2"><i>Decoder</i> – a name of  format of incoming DGNSS/RTK corrections to the corresponding receiver port. </li>
+            <p class="Intended2">It can have the following values:</p>
+            <ul>
+                <li value="1"><i>RTCM 2.x / RTCM3.x /CMR</i> and other corrections format  – the format correction name, which the receiver's port obtains.</li>
+                <li value="2"><i>Detecting</i> - the corresponding port is set to the <i>Auto</i> mode, the receiver is trying to determinate a format of incoming corrections, </li>
+                <li value="3">
+                    <img src="../../Resources/Images/lock_31x27.png" style="width: 31;height: 27;" />&lt;<i>correction format name</i>&gt; – the corresponding port is set in the <i>Auto</i> mode, the correction format is decoded, but the receiver does not use the correction. Such case can be occurred if the receiver obtains the RTCM 3.x  corrections for two ports simultaneously, but OAF allows to use only one port for this correction format:</li>
+                <p>
+                    <img src="../../Resources/Images/two_RTCM_corrections_321x78.png" style="width: 321;height: 78;" />
+                </p>
+            </ul>
+            <li value="3"><i>Ref Station</i> – ID of a base station transmitting DGNSS/RTK corrections.</li>
+            <li value="4"><i>Link Quality, %</i> – data link quality of the selected channel in percentage.</li>
+            <li value="5"><i>Data Link Delay, sec</i> – time elapsed since receiving the last message, in seconds. The maximum value – 999 seconds. </li>
+            <li value="6"><i>Received Messages</i> – number of received messages (between 0001 and 9999). </li>
+            <li value="7"><i>Corrupted Messages</i> – number of corrupted messages (between 0001 and 9999). </li>
+        </ul>
+        <div class="buttons clearfix topicToolbarProxy" style="mc-topic-toolbar-items: ;">
+            <div class="button-group-container-left">
+                <button class="button needs-pie previous-topic-button" type="button" title="Navigate previous">
+                    <img src="../../../Skins/Default/Stylesheets/Images/transparent.gif" alt="previous topic" />
+                </button>
+                <div class="button current-topic-index-button disabled"><span class="sequence-index"></span> of <span class="sequence-total"></span></div>
+                <button class="button needs-pie next-topic-button" type="button" title="Navigate next">
+                    <img src="../../../Skins/Default/Stylesheets/Images/transparent.gif" alt="next topic" />
+                </button>
+            </div>
+        </div>
+        <p>&#160;</p>
+    </body>
+</html>

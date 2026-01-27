@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" lang="ru-RU" xml:lang="ru-RU" data-mc-search-type="Stem" data-mc-help-system-file-name="Default.xml" data-mc-path-to-help-system="../../../" data-mc-target-type="WebHelp2" data-mc-runtime-file-type="Topic" data-mc-preload-images="false" data-mc-in-preview-mode="false" data-mc-medium="non-print" data-mc-toc-path="Receiver Managing|Receiver Settings|Input &amp; Output Pulses">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" /><title>Event A / Event B</title>
+        <link href="../../../Skins/Default/Stylesheets/Slideshow.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/TextEffects.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/Topic.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/Components/Styles.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/Components/Tablet.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/Components/Mobile.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../Resources/Stylesheets/TRU.css" rel="stylesheet" />
+        <style>/*&lt;meta /&gt;*/
+
+.button.previous-topic-button
+{
+	-pie-background: url('../../../Skins/Default/Stylesheets/Images/navigate-previous.png') no-repeat center center, linear-gradient(#ffffff, #ececec);
+}
+
+.button.current-topic-index-button
+{
+	-pie-background: linear-gradient(#ffffff, #ececec);
+}
+
+.button.next-topic-button
+{
+	-pie-background: url('../../../Skins/Default/Stylesheets/Images/navigate-next.png') no-repeat center center, linear-gradient(#ffffff, #ececec);
+}
+
+.needs-pie
+{
+	behavior: url('../../../Resources/Scripts/PIE-no-motw.htc');
+}
+
+</style>
+        <script src="../../../Resources/Scripts/custom.modernizr.js">
+        </script>
+        <script src="../../../Resources/Scripts/jquery.min.js">
+        </script>
+        <script src="../../../Resources/Scripts/require.min.js">
+        </script>
+        <script src="../../../Resources/Scripts/require.config.js">
+        </script>
+        <script src="../../../Resources/Scripts/foundation.min.js">
+        </script>
+        <script src="../../../Resources/Scripts/plugins.min.js">
+        </script>
+        <script src="../../../Resources/Scripts/MadCapAll.js">
+        </script>
+    </head>
+    <body class="test">
+        <p class="MCWebHelpFramesetLink MCWebHelpFramesetLinkTop"><a href="../../../Default.htm#Topics/ReceiverManaging/Event.htm">Open topic with navigation</a>
+        </p>
+        <div class="MCBreadcrumbsBox_0"><span class="MCBreadcrumbsPrefix">You are here: </span><span class="MCBreadcrumbsSelf">Receiver Managing</span><span class="MCBreadcrumbsDivider"> &gt; </span><a class="MCBreadcrumbsLink" href="ReceiverSettings.htm">Receiver Settings</a><span class="MCBreadcrumbsDivider"> &gt; </span><a class="MCBreadcrumbsLink" href="PPS_Ev_Freq.htm">Input &amp; Output Pulses</a><span class="MCBreadcrumbsDivider"> &gt; </span><span class="MCBreadcrumbs">Event A / Event B</span>
+        </div>
+        <h1 class="Heading1">Event A / Event B</h1>
+        <p class="Body">Topcon receivers are capable of measuring and recording event times in the specified reference time system with high accuracy.  It is possible to measure the time of either the rising edge or falling edge of the input event signal. Most of the TPS receivers can accommodate up to two external event pins, a (Event A) and b (Event B).</p>
+        <p class="Body">In the <i style="font-style: italic; font-weight: normal;">Event A</i> and <i style="font-weight: normal; font-style: italic;">Event B</i> tabs you can configure receiver to record the time of any input  pulse (with the input low voltage levels from 0.0 V to +0.8 V and the input high voltage levels  from +2.0 V to +3.3 V).</p>
+        <p class="Body">The tabs contains the following parameters:</p>
+        <ul>
+            <li value="1"><i>Enable</i> check box — enables the receiver to  measure and log event times, in the specified reference time.</li>
+            <li value="2"><i>Edge</i>  — specifies whether the receiver will measure the time of the rising edge or falling edge of the input event signal.</li>
+            <li value="3"> <i>Ref.Time</i>  — specifies  the reference time that the event reception time will be synchronized with; either GPS system time, GLONASS system time, UTCus (UTC USNO) system time, or UTCsu (UTC SU) system time.</li>
+            <li value="4"><i>Tied with Ref. Time</i> check box — when selected, the receiver will synchronize the event signal with the chosen reference time. Otherwise, event signal will be synchronized with the receiver's internal clock or with an external reference frequency applied to the receiver.</li>
+            <li value="5"><i>Clock Synchronization</i> check box — when selected, the receiver's internal clock is synchronized with the corresponding edge of the event signal arrived.</li>
+            <ul>
+                <li value="1"><i>Status</i> — indicates whether the receiver clock is actually synchronized with the event signals. “On” means that the synchronization has been done successfully.</li>
+                <li value="2"> <b>Repeat Synchronization</b>  button — clicking on the button performs a synchronization with the event signal.</li>
+            </ul>
+        </ul>
+        <div class="buttons clearfix topicToolbarProxy" style="mc-topic-toolbar-items: ;">
+            <div class="button-group-container-left">
+                <button class="button needs-pie previous-topic-button" type="button" title="Navigate previous">
+                    <img src="../../../Skins/Default/Stylesheets/Images/transparent.gif" alt="previous topic" />
+                </button>
+                <div class="button current-topic-index-button disabled"><span class="sequence-index"></span> of <span class="sequence-total"></span></div>
+                <button class="button needs-pie next-topic-button" type="button" title="Navigate next">
+                    <img src="../../../Skins/Default/Stylesheets/Images/transparent.gif" alt="next topic" />
+                </button>
+            </div>
+        </div>
+        <p>&#160;</p>
+    </body>
+</html>

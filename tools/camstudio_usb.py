@@ -16,7 +16,7 @@ def scan():
     Scan for CamStudio on USB drives.
     Returns dict with status and details.
     """
-    drives = get_removable_drives()
+    drives = get_removable_drives(include_fixed=True)
     result = find_tool_on_usb(TOOL_FOLDER, TOOL_FILE)
     
     return {
@@ -36,7 +36,7 @@ def launch():
     result = find_tool_on_usb(TOOL_FOLDER, TOOL_FILE)
     
     if not result:
-        drives = get_removable_drives()
+        drives = get_removable_drives(include_fixed=True)
         if not drives:
             return False, "No USB drives detected. Please insert the USB drive with CamStudio."
         else:

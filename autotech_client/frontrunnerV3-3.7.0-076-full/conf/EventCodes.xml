@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<!-- This file contains an example of the structure used to modify or add event
+ codes. Whatever information is in this file will supersede the base event file,
+ in the event that any event information differs. To populate this file, add
+ <Events> blocks. The <Profile> block must have a <Event> block for each 
+ event. The two events already present are samples.-->
+
+<Events xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns="urn:com.mmsi.framework.core"
+		xsi:schemaLocation="urn:com.mmsi.framework.core EventCodesSchema.xsd" >
+
+ <Profile>
+ 
+	<!--
+	<Event id="0x5c01">
+		<Priority>20</Priority>
+		<PopupDelay>-1</PopupDelay>
+		<AssociatedCode></AssociatedCode>
+		<MergeEvents>false</MergeEvents>
+		<ForceMergeEvents>false</ForceMergeEvents>
+		<Description>Write description here</Description>
+		<Action>Write action here</Action>
+	</Event>
+	-->
+	
+	<!--
+	Attributes meaning:
+		"id"
+			This is a REQUIRED hexadecimal attribute
+			
+		"Priority"
+			This is a REQUIRED integer attribute
+			Priority field is used to know the priority of the event code. 
+			The ranges are:
+				EMERGENCY  0 - 9
+				MONITOR	 10 - 29
+				NORMAL	30 - 59
+				UNKNOWN 60 - 100
+			
+		"PopupDelay"
+			This is a REQUIRED integer attribute
+			This attribute stores the delay time in which this Event is popped up (if set to -1 or 0 it will not have a delay)
+			
+		"AssociatedCode"
+			This is a REQUIRED String attribute (it can be left empty)
+			This attribute stores codes associated to this Event.
+			
+		"MergeEvents"
+			This is a REQUIRED boolean attribute (has to be lower case "true" or "false")
+			This attribute stores if this Event can be merged with other Events.
+			
+		"ForceMergeEvents"
+			This is a REQUIRED boolean attribute (has to be lower case "true" or "false")
+			This attribute stores if this Event can be forcibly merged with other Events.
+			
+		"Description"
+			This is an OPTIONAL String attribute
+			This attribute stores the Description of the Event code
+			
+		"Action"
+			This is an OPTIONAL String attribute
+			This attribute stores the Description of the Event code
+	-->
+ </Profile>
+</Events>
+

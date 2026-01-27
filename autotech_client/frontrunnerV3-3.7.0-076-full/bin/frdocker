@@ -1,0 +1,242 @@
+#!/bin/bash
+#
+#   docker utility script for FrontRunner
+#
+#   If you want to know how to use this script, please type "frdocker help"
+#
+#   Copyright (c) 2019. Komatsu Ltd. and Modular Mining Systems, Inc. All Rights Reserved.
+#   The information described in this document is furnished as proprietary information and may not be copied or sold without the written permission.
+#
+
+groups | grep -q sudo
+if [ $? -ne 0 ]; then
+  if [ ! "$USER" = "root" ]; then
+    if [ ! "$USER" = "komatsu" ]; then
+      if [ ! "$USER" = "mms" ]; then
+        if [ ! "$USER" = "dlog" ]; then
+          sudo -l -U $USER | grep -q "(ALL : ALL) ALL"
+          if [ $? -ne 0 ]; then
+            echo "This command may only be run by a user in the super user group"
+            exit
+          fi
+        fi
+      fi
+    fi
+  fi
+fi
+
+
+function abort(){
+    echo -e "\033[0;31m[Abort] $@\033[0;39m" 1>&2
+    echo -e "\033[0;31m[Abort] Run 'frdocker help' for more details.\033[0;39m" 1>&2
+    exit 1
+}
+
+#
+# echo function for event log
+#      This is used in frdocker run command
+function echo_for_event_log(){
+    local TIMESTAMP=$(date "+%Y/%m/%d %H:%M:%S.%N")
+    echo -e "${TIMESTAMP}\tFRDOCKER[${CONTAINER_NAME}]: $*"
+}
+
+function docker_stop(){
+    docker stop ${CONTAINER_NAME} > /dev/null 2>&1
+}
+
+function docker_rm(){
+    docker rm -f ${CONTAINER_NAME} > /dev/null 2>&1
+}
+
+#
+# trap function
+#   This function killing docker application,
+#
+function trap_function(){
+    echo_for_event_log  "signal trapped, try to kill docker container:${CONTAINER_NAME}"
+    docker_stop
+    docker_rm
+}
+
+
+function cmd_help(){
+echo "===== frdocker help =====
+command:
+
+    help            show this help and exit.
+                    usage: frdocker help
+
+    run             run docker image.
+                    usage: frdocker run path_to/*docker_conf.sh
+
+    load            load docker image from a gz file
+                    usage: frdocker load ~/haul_road_planning_server.tar.gz
+
+    kill            kill docker container
+                    usage: frdocker kill path_to/*docker_conf.sh
+
+    uninstall       uninstall docker image
+                    usage: frdocker uninstall path_to/*docker_conf.sh
+
+    clean_logs      clean up docker logs
+                    usage: frdocker clean_logs
+
+    show_log_dir    show log file directory path
+                    usage: frdocker show_log_dir path_to/*docker_conf.sh
+
+    show_log_file   show log file path
+                    usage: frdocker show_log_file path_to/*docker_conf.sh
+
+    log_stats       logging docker stat information to a file.
+                    This command get docker stat info each 1 second periodically.
+                    Default file name is docker_stats_log.txt, you can change it with second args
+                    usage: frdocker log_stats
+                    usage: frdocker log_stats ~/docker_log.txt
+"
+}
+
+function cmd_run(){
+    # import user setting parameter
+    source "$2" || abort "Cannot find conf file: $2"
+    echo_for_event_log "docker $1 start!!"
+
+    # setting trap function
+    # [Note] If the process is killed by SIGKILL, this function is not called
+    trap "trap_function" EXIT
+
+    # At first stop a same name container
+    echo_for_event_log "removing docker container::${CONTAINER_NAME}"
+    docker_stop
+    docker_rm
+
+    local IMAGE_NAME=${TAG_NAME}:${VERSION}
+
+    # check docker image exist or not
+    if [[ "$(docker images -q ${IMAGE_NAME} 2> /dev/null)" == "" ]]; then
+        abort "Cannot find the docker images: ${TAG_NAME}:${VERSION}. Please check docker images."
+    fi
+
+    local IMAGE_VERSION="$(docker inspect --format '{{ index .Config.Labels "IMAGE_VERSION"}}' ${IMAGE_NAME})"
+    echo_for_event_log "docker image version is ${IMAGE_VERSION}"
+
+    if [[ "$(docker ps -aqf name=${CONTAINER_NAME} 2> /dev/null)" == "" ]]; then
+        echo_for_event_log "docker running:${CONTAINER_NAME}"
+        docker run \
+            ${DOCKER_RUN_OPTIONS} \
+            ${IMAGE_NAME} > /dev/null # show only stderr in console
+    else
+        echo_for_event_log "found docker container ${CONTAINER_NAME}, so restart it"
+        docker start -a ${CONTAINER_NAME} > /dev/null
+    fi
+    echo_for_event_log "docker $1 done!!"
+}
+
+function cmd_kill(){
+    # import user setting parameter
+    source "$2" || abort "Cannot find conf file: $2"
+    echo "docker $1 start!!"
+
+    # stop and remove docker container
+    echo "killing ${CONTAINER_NAME}..."
+    docker_stop
+    docker_rm
+
+    echo "docker $1 done!!"
+}
+
+function cmd_load(){
+    echo "docker $1 start!!"
+    # import user setting parameter
+    local GZ_FILE=$2
+    echo "GZ_FILE:${GZ_FILE}"
+    local TAR_FILE=$(basename ${GZ_FILE} .gz)
+    echo "TAR_FILE:${TAR_FILE}"
+
+    echo "Unzipping the gz file..."
+    tar -xzf ${GZ_FILE} -C /tmp
+    echo "Loading docker image..."
+    docker load < /tmp/${TAR_FILE}
+    echo "Removing tar file..."
+    rm /tmp/${TAR_FILE}
+    echo "cleaning up unused images..."
+    docker image prune -f
+    echo "docker $1 done!!"
+}
+
+function cmd_uninstall(){
+    source "$2" || abort "Cannot find conf file: $2"
+    echo "docker $1 start!!"
+    docker rmi ${TAG_NAME}:${VERSION}
+    echo "docker $1 done!!"
+}
+
+function cmd_clean_logs(){
+    echo "docker $1 start!!"
+    docker system prune
+    echo "docker $1 done!!"
+}
+
+function cmd_show_log_dir(){
+    source "$2" || abort "Cannot find conf file: $2"
+    echo "docker $1 start!!"
+    echo "log file dir is:"
+    docker inspect --format='{{.LogPath}}' ${CONTAINER_NAME} | xargs dirname
+    echo "docker $1 done!!"
+}
+
+function cmd_show_log_file(){
+    source "$2" || abort "Cannot find conf file: $2"
+    echo "docker $1 start!!"
+    echo "log file pathis:"
+    docker inspect --format='{{.LogPath}}' ${CONTAINER_NAME}
+    echo "docker $1 done!!"
+}
+
+function cmd_log_stats(){
+    echo "docker $1 start!!"
+    local LOG_FILE=${2:-"$CURRENT_DIR/docker_stats_log.txt"}
+    echo "docker stats info is saved at ${LOG_FILE}"
+    # make the file empty
+    : > ${LOG_FILE}
+    while true;
+        # get stats info and save it
+        do docker stats --no-stream --format \
+            "{\"container\": \"{{ .Name }}\",\"memory\": { \"raw\": \"{{ .MemUsage }}\", \"percent\": \"{{ .MemPerc }}\"},\"cpu\": \"{{ .CPUPerc }}\",\"time\":\"$(date --iso-8601="seconds")\" }" \
+            | tee -a ${LOG_FILE}
+        sleep 1;
+    done;
+    echo "docker $1 done!!"
+}
+
+function main(){
+    # Store current dir
+    CURRENT_DIR=$(pwd)
+
+    # move to this script dir
+    cd $(dirname "$0")
+
+    # check docker installed or not
+    if !(type "docker" > /dev/null 2>&1); then
+        abort "Please install docker before using this script"
+    fi
+
+    # check second argument exists or not
+    if [[ $# -lt 1 ]]; then
+        abort "Please set command: e.g: frdocker help"
+    fi
+
+    case $1 in
+        "help") cmd_help;;
+        "run") cmd_run $1 $2;;
+        "load") cmd_load $1 $2;;
+        "kill") cmd_kill $1 $2;;
+        "uninstall") cmd_uninstall $1 $2;;
+        "clean_logs") cmd_clean_logs $1 $2;;
+        "show_log_dir") cmd_show_log_dir $1 $2;;
+        "show_log_file") cmd_show_log_file $1 $2;;
+        "log_stats") cmd_log_stats $1 $2;;
+        *) abort "Unknown command:$1";;
+    esac
+}
+
+main "$@"

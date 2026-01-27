@@ -20,7 +20,7 @@ SCHEMA_VERSION = 2
 
 
 def get_database_path(base_dir: str) -> str:
-    """
+    r"""
     Get the path to the database file.
     Creates the database folder if it doesn't exist.
 
@@ -47,6 +47,8 @@ def init_database(db_path: str) -> bool:
     """
     try:
         conn = sqlite3.connect(db_path)
+        conn.execute('PRAGMA journal_mode=WAL')
+        conn.execute('PRAGMA busy_timeout=5000')
         cursor = conn.cursor()
 
         # Create schema version table
@@ -140,6 +142,8 @@ def save_equipment(db_path: str, equipment_name: str,
     """
     try:
         conn = sqlite3.connect(db_path)
+        conn.execute('PRAGMA journal_mode=WAL')
+        conn.execute('PRAGMA busy_timeout=5000')
         cursor = conn.cursor()
 
         # Normalize equipment name to uppercase
@@ -191,6 +195,8 @@ def get_equipment(db_path: str, equipment_name: str) -> Optional[Dict]:
     """
     try:
         conn = sqlite3.connect(db_path)
+        conn.execute('PRAGMA journal_mode=WAL')
+        conn.execute('PRAGMA busy_timeout=5000')
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
 
@@ -235,6 +241,8 @@ def log_lookup(db_path: str, equipment_name: str, source: str, success: bool) ->
     """
     try:
         conn = sqlite3.connect(db_path)
+        conn.execute('PRAGMA journal_mode=WAL')
+        conn.execute('PRAGMA busy_timeout=5000')
         cursor = conn.cursor()
 
         cursor.execute('''
@@ -258,6 +266,8 @@ def get_all_equipment(db_path: str, limit: int = 100) -> List[Dict]:
     """
     try:
         conn = sqlite3.connect(db_path)
+        conn.execute('PRAGMA journal_mode=WAL')
+        conn.execute('PRAGMA busy_timeout=5000')
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
 
@@ -286,6 +296,8 @@ def get_database_stats(db_path: str) -> Dict:
     """
     try:
         conn = sqlite3.connect(db_path)
+        conn.execute('PRAGMA journal_mode=WAL')
+        conn.execute('PRAGMA busy_timeout=5000')
         cursor = conn.cursor()
 
         # Count total equipment (excluding not_found)
@@ -357,6 +369,8 @@ def search_equipment(db_path: str, search_term: str, limit: int = 20) -> List[Di
     """
     try:
         conn = sqlite3.connect(db_path)
+        conn.execute('PRAGMA journal_mode=WAL')
+        conn.execute('PRAGMA busy_timeout=5000')
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
 
@@ -407,6 +421,8 @@ def parse_ip_list_file(db_path: str, ip_list_path: str) -> Dict:
             return result
 
         conn = sqlite3.connect(db_path)
+        conn.execute('PRAGMA journal_mode=WAL')
+        conn.execute('PRAGMA busy_timeout=5000')
         cursor = conn.cursor()
 
         with open(ip_list_path, 'r', encoding='utf-8', errors='ignore') as f:
@@ -491,6 +507,8 @@ def get_equipment_needing_update(db_path: str, limit: int = 1, max_age_days: int
     """
     try:
         conn = sqlite3.connect(db_path)
+        conn.execute('PRAGMA journal_mode=WAL')
+        conn.execute('PRAGMA busy_timeout=5000')
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
 
@@ -539,6 +557,8 @@ def get_update_progress(db_path: str, max_age_days: int = 7) -> Dict:
     """
     try:
         conn = sqlite3.connect(db_path)
+        conn.execute('PRAGMA journal_mode=WAL')
+        conn.execute('PRAGMA busy_timeout=5000')
         cursor = conn.cursor()
 
         # Total equipment count

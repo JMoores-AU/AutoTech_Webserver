@@ -1,0 +1,49 @@
+Windows Registry Editor Version 5.00
+
+; AutoTech Custom URI Handlers
+; Allows web browser to launch local applications
+
+; AutoTech SSH Protocol Handler
+[HKEY_CLASSES_ROOT\autotech-ssh]
+@="AutoTech SSH Protocol"
+"URL Protocol"=""
+
+[HKEY_CLASSES_ROOT\autotech-ssh\DefaultIcon]
+@="C:\\AutoTech_Client\\putty.exe,0"
+
+[HKEY_CLASSES_ROOT\autotech-ssh\shell]
+
+[HKEY_CLASSES_ROOT\autotech-ssh\shell\open]
+
+[HKEY_CLASSES_ROOT\autotech-ssh\shell\open\command]
+@="\"C:\\AutoTech_Client\\scripts\\launch_putty.bat\" \"%1\""
+
+; AutoTech SFTP Protocol Handler
+[HKEY_CLASSES_ROOT\autotech-sftp]
+@="AutoTech SFTP Protocol"
+"URL Protocol"=""
+
+[HKEY_CLASSES_ROOT\autotech-sftp\DefaultIcon]
+@="C:\\AutoTech_Client\\WinSCP.exe,0"
+
+[HKEY_CLASSES_ROOT\autotech-sftp\shell]
+
+[HKEY_CLASSES_ROOT\autotech-sftp\shell\open]
+
+[HKEY_CLASSES_ROOT\autotech-sftp\shell\open\command]
+@="\"C:\\AutoTech_Client\\scripts\\launch_winscp.bat\" \"%1\""
+
+; AutoTech VNC Protocol Handler
+[HKEY_CLASSES_ROOT\autotech-vnc]
+@="AutoTech VNC Protocol"
+"URL Protocol"=""
+
+[HKEY_CLASSES_ROOT\autotech-vnc\DefaultIcon]
+@="C:\\AutoTech_Client\\vncviewer_5.3.2.exe,0"
+
+[HKEY_CLASSES_ROOT\autotech-vnc\shell]
+
+[HKEY_CLASSES_ROOT\autotech-vnc\shell\open]
+
+[HKEY_CLASSES_ROOT\autotech-vnc\shell\open\command]
+@="\"C:\\AutoTech_Client\\scripts\\launch_vnc.bat\" \"%1\""

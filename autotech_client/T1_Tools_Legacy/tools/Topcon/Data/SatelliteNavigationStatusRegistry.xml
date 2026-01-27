@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<SatelliteNavigationStatusRegistry>
+	<Status ID="00" Wings="true" XLATE_Description="L1CA/E1/B1 code used for absolute and DGNSS position computation"/>
+	<Status ID="01" Wings="true" XLATE_Description="L1P code used for absolute and DGNSS position computation"/>
+	<Status ID="02" Wings="true" XLATE_Description="L2P code used for absolute and DGNSS position computation"/>
+	<Status ID="03" Wings="true" XLATE_Description="Ionosphere-free combination used for absolute position computation"/>
+	<Status ID="04" Wings="false" XLATE_Description="Measurements unavailable"/>
+	<Status ID="05" Wings="false" XLATE_Description="Ephemeris unavailable"/>
+	<Status ID="06" Wings="false" XLATE_Description="Unhealthy SV"/>
+	<Status ID="07" Wings="false" XLATE_Description="Time-Frequency parameters from the ephemeris data set may be wrong"/>
+	<Status ID="08" Wings="false" XLATE_Description="Initial conditions (position and velocity vectors) from the ephemeris data set may be wrong"/>
+	<Status ID="09" Wings="false" XLATE_Description="Almanac SV health indicator unavailable"/>
+	<Status ID="10" Wings="false" XLATE_Description="Unhealthy SV"/>
+	<Status ID="11" Wings="false" XLATE_Description="Alert flag is set"/>
+	<Status ID="12" Wings="false" XLATE_Description="URA indicates the absence of accuracy prediction"/>
+	<Status ID="13" Wings="false" XLATE_Description="User excluded this SV from position computation"/>
+	<Status ID="14" Wings="false" XLATE_Description="User excluded this SV with this frequency channel number from position computation"/>
+	<Status ID="15" Wings="false" XLATE_Description="This SV is excluded from solution because its system number is unknown"/>
+	<Status ID="16" Wings="false" XLATE_Description="This SV has an elevation lower than the specified mask angle"/>
+	<Status ID="17" Wings="false" XLATE_Description="Unable to compute position with the given ephemeris data"/>
+	<Status ID="18" Wings="false" XLATE_Description="Ephemeris data is too old"/>
+	<Status ID="19" Wings="false" XLATE_Description="This SV does not belong to the constellation the user has selected"/>
+	<Status ID="20" Wings="false" XLATE_Description="This SV is not used in DGNSS processing"/>
+	<Status ID="21" Wings="true"  XLATE_Description="DGNSS corrections are not available for this satellite, but its measurements are used in positioning, along with DGNSS-corrected measurements from other satellites"/>
+	<Status ID="22" Wings="false" XLATE_Description="RAIM has detected wrong measurements"/>
+	<Status ID="23" Wings="false" XLATE_Description="SNR below specified minimum level"/>
+	<Status ID="24" Wings="false" XLATE_Description="This SV is not used in DION Local mode"/>
+	<Status ID="26" Wings="false" XLATE_Description="DLL not settled"/>
+	<Status ID="27" Wings="false" XLATE_Description="Ionospheric corrections are not received from reference station"/>
+	<Status ID="28" Wings="false" XLATE_Description="Coarse code outlier (hundreds of meters or more) has been detected"/>
+	<Status ID="29" Wings="false" XLATE_Description="Ephemeris index unavailable (no ephemeris information)"/>
+	<Status ID="30" Wings="false" XLATE_Description="This SV is not used in RTK processing"/>
+	<Status ID="31" Wings="false" XLATE_Description="This SV is excluded from RTK processing because a wrong combination of measurements has been detected"/>
+	<Status ID="32" Wings="false" XLATE_Description="This satellite is excluded from OmniSTAR XP/HP or TopNET Global-D PPP position computation"/>
+	<Status ID="33" Wings="true" XLATE_Description="This satellite is used for TopNET Global-C PPP position computation"/>
+	<Status ID="41" Wings="true" XLATE_Description="L1CA/E1/B1 and L5/L3/B3 measurements are used in RTK processing and DGNSS solution"/>
+	<Status ID="42" Wings="true" XLATE_Description="L1P and L5/L3/B3 measurements are used in RTK processing and DGNSS solution"/>
+	<Status ID="43" Wings="true" XLATE_Description="L2P and L5/L3/B3 measurements are used in RTK processing and DGNSS solution"/>
+	<Status ID="44" Wings="true" XLATE_Description="L1P, L2P and L5/L3/B3 measurements are used in RTK processing and DGNSS solution"/>
+	<Status ID="45" Wings="true" XLATE_Description="L1CA/E1/B1, L2P and L5/L3/B3 measurements are used in RTK processing and DGNSS solution"/>
+	<Status ID="46" Wings="true" XLATE_Description="L5/L3/B3 measurements are used in RTK processing and DGNSS solution"/>
+	<Status ID="47" Wings="true" XLATE_Description="L2C and L5/L3/B3 measurements are used in RTK processing and DGNSS solution"/>
+	<Status ID="48" Wings="true" XLATE_Description="L1P, L2C and L5/L3/B3 measurements are used in RTK processing and DGNSS solution"/>
+	<Status ID="49" Wings="true" XLATE_Description="L1CA/E1/B1, L2C and L5/L3/B3 measurements are used in RTK processing and DGNSS solution"/>
+	<Status ID="51" Wings="true" XLATE_Description="L1CA/E1/B1 measurements are used in RTK processing and DGNSS solution"/>
+	<Status ID="52" Wings="true" XLATE_Description="L1P measurements are used in RTK processing and DGNSS solution"/>
+	<Status ID="53" Wings="true" XLATE_Description="L2P measurements are used in RTK processing and DGNSS solution"/>
+	<Status ID="54" Wings="true" XLATE_Description="L1P and L2P measurements are used in RTK processing and DGNSS solution"/>
+	<Status ID="55" Wings="true" XLATE_Description="L1CA and L2P measurements are used in RTK processing and DGNSS solution"/>
+	<Status ID="56" Wings="true" XLATE_Description="This satellite is used for OmniSTAR XP/HP or TopNET Global-D PPP position computation"/>
+	<Status ID="57" Wings="true" XLATE_Description="L2C measurements are used in RTK processing and DGNSS solution"/>
+	<Status ID="58" Wings="true" XLATE_Description="L1P and L2C measurements are used in RTK processing and DGNSS solution"/>
+	<Status ID="59" Wings="true" XLATE_Description="L1CA/B1 and L2C/B2 measurements are used in RTK processing and DGNSS solution"/>
+	<Status ID="60" Wings="true" XLATE_Description="SBAS data are used to augment positioning engines of the rover receiver"/>
+	<Status ID="61" Wings="false" XLATE_Description="This SV is used only for extrapolating RTK and DGNSS solutions"/>
+	<Status ID="63" Wings="false" XLATE_Description="Satellite navigation status is undefined"/>
+</SatelliteNavigationStatusRegistry>

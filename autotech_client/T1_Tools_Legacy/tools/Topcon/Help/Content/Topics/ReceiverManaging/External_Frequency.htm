@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" lang="ru-RU" xml:lang="ru-RU" data-mc-search-type="Stem" data-mc-help-system-file-name="Default.xml" data-mc-path-to-help-system="../../../" data-mc-target-type="WebHelp2" data-mc-runtime-file-type="Topic" data-mc-preload-images="false" data-mc-in-preview-mode="false" data-mc-medium="non-print" data-mc-toc-path="Receiver Managing|Receiver Settings|Input &amp; Output Pulses">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" /><title>External Frequency</title>
+        <link href="../../../Skins/Default/Stylesheets/Slideshow.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/TextEffects.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/Topic.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/Components/Styles.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/Components/Tablet.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/Components/Mobile.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../Resources/Stylesheets/TRU.css" rel="stylesheet" />
+        <style>/*&lt;meta /&gt;*/
+
+.button.previous-topic-button
+{
+	-pie-background: url('../../../Skins/Default/Stylesheets/Images/navigate-previous.png') no-repeat center center, linear-gradient(#ffffff, #ececec);
+}
+
+.button.current-topic-index-button
+{
+	-pie-background: linear-gradient(#ffffff, #ececec);
+}
+
+.button.next-topic-button
+{
+	-pie-background: url('../../../Skins/Default/Stylesheets/Images/navigate-next.png') no-repeat center center, linear-gradient(#ffffff, #ececec);
+}
+
+.needs-pie
+{
+	behavior: url('../../../Resources/Scripts/PIE-no-motw.htc');
+}
+
+</style>
+        <script src="../../../Resources/Scripts/custom.modernizr.js">
+        </script>
+        <script src="../../../Resources/Scripts/jquery.min.js">
+        </script>
+        <script src="../../../Resources/Scripts/require.min.js">
+        </script>
+        <script src="../../../Resources/Scripts/require.config.js">
+        </script>
+        <script src="../../../Resources/Scripts/foundation.min.js">
+        </script>
+        <script src="../../../Resources/Scripts/plugins.min.js">
+        </script>
+        <script src="../../../Resources/Scripts/MadCapAll.js">
+        </script>
+    </head>
+    <body class="test">
+        <p class="MCWebHelpFramesetLink MCWebHelpFramesetLinkTop"><a href="../../../Default.htm#Topics/ReceiverManaging/External_Frequency.htm">Open topic with navigation</a>
+        </p>
+        <div class="MCBreadcrumbsBox_0"><span class="MCBreadcrumbsPrefix">You are here: </span><span class="MCBreadcrumbsSelf">Receiver Managing</span><span class="MCBreadcrumbsDivider"> &gt; </span><a class="MCBreadcrumbsLink" href="ReceiverSettings.htm">Receiver Settings</a><span class="MCBreadcrumbsDivider"> &gt; </span><a class="MCBreadcrumbsLink" href="PPS_Ev_Freq.htm">Input &amp; Output Pulses</a><span class="MCBreadcrumbsDivider"> &gt; </span><span class="MCBreadcrumbs">External Frequency</span>
+        </div>
+        <h1 class="Heading1">External Frequency</h1>
+        <p class="Body">The <i>External Frequency</i> tab contains settings for configuring the reference frequency; either a high stability external frequency or the receiver's internal crystal oscillator:</p>
+        <ul>
+            <li value="1"><i>Source</i> – specifies the reference frequency input that the receiver will use. Switching from <i>Internal</i> to <i>External</i> may result in temporary loss of lock to satellites.</li>
+            <ul>
+                <li value="1"><i>Internal</i> – the receiver uses the internal quartz oscillator.</li>
+                <li value="2"><i>External</i> – the receiver is configured for using an external frequency.</li>
+                <li value="3"><i>Off</i> – the receiver uses the internal quartz oscillator; external frequency detection and internal frequency output are completely disabled. </li>
+                <li value="4"><i>Auto</i> – the receiver automatically detects the state of the reference frequency. </li>
+            </ul>
+            <p class="Body">If the <i>External</i> is selected in the <i>Source</i> field, the <i>External Frequency Source Parameters</i> fields will be enabled:</p>
+            <ul>
+                <li value="1"><i>Frequency, MHz </i> – the nominal external frequency value. Values are from 2 to 40 MHz; the default is 10 MHz.</li>
+                <li value="2"><i>Source Status</i> – shows whether the external frequency is being used:</li>
+                <ul>
+                    <li value="1"><i>Off</i> –  the receiver is using the internal crystal oscillator;</li>
+                    <li value="2"><i>Wait</i> –  the receiver is waiting for the external frequency lock because the external frequency oscillator is disconnected, the amplitude of input signal is too low, or the actual external frequency is different from that specified in the <i>Ext. frequency value</i> field.</li>
+                    <li value="3"><i>Locked</i> – the receiver is using the external frequency.</li>
+                </ul>
+                <li value="3"><i>Signal amplitude</i> – an estimate of the external frequency signal amplitude.</li>
+                <ul>
+                    <li value="1"> <i>Off </i> – the receiver is using the internal crystal oscillator;</li>
+                    <li value="2"><i>Low</i> – the external frequency signal's amplitude is lower than needed;</li>
+                    <li value="3"><i>Ok</i>– the external frequency signal's amplitude meets the specs.</li>
+                </ul>
+            </ul>
+            <p class="Body">In the <i>Oscillator Offset Reduction</i> field you can govern the behavior of the internal crystal oscillator:</p>
+            <ul>
+                <li value="1"><i>Off</i> - the oscillator frequency offset reduction mode is turned off; </li>
+                <li value="2"><i>Freq. Locked</i> -  the receiver will adjust the internal oscillator's frequency until the measured frequency offset is reduced to
+				zero;</li>
+                <li value="3"><i>Freq. and Time Locked</i> - the receiver will adjust the internal oscillator's frequency and the internal clock until the measured frequency offset is reduced to zero and the clock is fully synchronized with the specified reference time scale. </li>
+            </ul>
+        </ul>
+        <div class="buttons clearfix topicToolbarProxy" style="mc-topic-toolbar-items: ;">
+            <div class="button-group-container-left">
+                <button class="button needs-pie previous-topic-button" type="button" title="Navigate previous">
+                    <img src="../../../Skins/Default/Stylesheets/Images/transparent.gif" alt="previous topic" />
+                </button>
+                <div class="button current-topic-index-button disabled"><span class="sequence-index"></span> of <span class="sequence-total"></span></div>
+                <button class="button needs-pie next-topic-button" type="button" title="Navigate next">
+                    <img src="../../../Skins/Default/Stylesheets/Images/transparent.gif" alt="next topic" />
+                </button>
+            </div>
+        </div>
+        <p>&#160;</p>
+    </body>
+</html>

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" lang="ru-RU" xml:lang="ru-RU" data-mc-search-type="Stem" data-mc-help-system-file-name="Default.xml" data-mc-path-to-help-system="../../../" data-mc-target-type="WebHelp2" data-mc-runtime-file-type="Topic" data-mc-preload-images="false" data-mc-in-preview-mode="false" data-mc-medium="non-print" data-mc-toc-path="Connection">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" /><title>Connecting to the Device in Simple Terminal</title>
+        <link href="../../../Skins/Default/Stylesheets/Slideshow.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/TextEffects.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/Topic.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/Components/Styles.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/Components/Tablet.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/Components/Mobile.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../Resources/Stylesheets/TRU.css" rel="stylesheet" />
+        <style>/*&lt;meta /&gt;*/
+
+.button.previous-topic-button
+{
+	-pie-background: url('../../../Skins/Default/Stylesheets/Images/navigate-previous.png') no-repeat center center, linear-gradient(#ffffff, #ececec);
+}
+
+.button.current-topic-index-button
+{
+	-pie-background: linear-gradient(#ffffff, #ececec);
+}
+
+.button.next-topic-button
+{
+	-pie-background: url('../../../Skins/Default/Stylesheets/Images/navigate-next.png') no-repeat center center, linear-gradient(#ffffff, #ececec);
+}
+
+.needs-pie
+{
+	behavior: url('../../../Resources/Scripts/PIE-no-motw.htc');
+}
+
+</style>
+        <script src="../../../Resources/Scripts/custom.modernizr.js">
+        </script>
+        <script src="../../../Resources/Scripts/jquery.min.js">
+        </script>
+        <script src="../../../Resources/Scripts/require.min.js">
+        </script>
+        <script src="../../../Resources/Scripts/require.config.js">
+        </script>
+        <script src="../../../Resources/Scripts/foundation.min.js">
+        </script>
+        <script src="../../../Resources/Scripts/plugins.min.js">
+        </script>
+        <script src="../../../Resources/Scripts/MadCapAll.js">
+        </script>
+    </head>
+    <body class="test">
+        <p class="MCWebHelpFramesetLink MCWebHelpFramesetLinkTop"><a href="../../../Default.htm#Topics/Connection/ConnectingtotheDeviceSimpleTerminal.htm">Open topic with navigation</a>
+        </p>
+        <div class="MCBreadcrumbsBox_0"><span class="MCBreadcrumbsPrefix">You are here: </span><span class="MCBreadcrumbsSelf">Connection</span><span class="MCBreadcrumbsDivider"> &gt; </span><span class="MCBreadcrumbs">Connecting to the Device in Simple Terminal</span>
+        </div>
+        <h1 class="Heading1">Connecting to the Device in Simple Terminal</h1>
+        <p class="Body">To establish a connection to the device, select <b>Device- &gt; Connect</b> from the main menu. The <b style="font-style: italic; font-weight: normal;">Connection Parameters</b> dialog box displays.</p>
+        <p class="Body">The following connection parameters are available in Simple Terminal mode.</p>
+        <table class="AutoNumber_p_Bulleted" style="width: 100%; margin-left: 0;" cellspacing="0" cellpadding="0">
+            <col style="width: 12px;" />
+            <col style="width: 12px;" />
+            <col style="width: auto;" />
+            <tr>
+                <td valign="top" />
+                <td class="AutoNumber_p_Bulleted" valign="top"><span>• </span>
+                </td>
+                <td class="AutoNumber_p_Bulleted" valign="top" data-mc-autonum="• "><i>Connect Using</i> – select either <i>Serial Port</i>, <i>Bluetooth</i> or <i>Network</i> for communication. PC version also supports <i>USB</i> connection.</td>
+            </tr>
+        </table>
+        <p class="Body">&#160;</p>
+        <table style="border-top-style: solid;border-top-width: 1px;border-top-color: #696969;border-bottom-style: solid;border-bottom-width: 1px;border-bottom-color: #696969;">
+            <col />
+            <col />
+            <tbody>
+                <tr>
+                    <td>
+                        <img src="../../Resources/Images/Note_Icon.gif" />
+                    </td>
+                    <td style="font-size: 11pt;">
+                        <p> Bluetooth transport may not be available in the following situations: </p>
+                        <ul>
+                            <li value="1">the device-specific Bluetooth stack is not supported by the Application;</li>
+                            <li value="2">the Bluetooth power is turned off (for WM/CE);</li>
+                            <li value="3">Bluetooth dongle is not attached (desktop).</li>
+                        </ul>
+                        <p> If the Bluetooth power is off, turn it on before using the Bluetooth manager.</p>
+                        <p>If the Application edition for the specified platform does not support already Bluetooth stack installed, try to use Microsoft Bluetooth stack, or use virtual serial ports provided by a Bluetooth manager for your Bluetooth device.
+ </p>
+                        <p>Windows Server operating systems do not support Bluetooth.</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <p class="Body">&#160;</p>
+        <table style="border-top-style: solid;border-top-width: 1px;border-top-color: #696969;border-bottom-style: solid;border-bottom-width: 1px;border-bottom-color: #696969;">
+            <col />
+            <col />
+            <tbody>
+                <tr>
+                    <td>
+                        <img src="../../Resources/Images/Note_Icon.gif" />
+                    </td>
+                    <td style="font-size: 11pt;">
+                        <p> Bluetooth LE transport can be available for the following cases: </p>
+                        <ul>
+                            <li value="1">the operating system of the PC or Controller is Windows 8 or later version;</li>
+                            <li value="2">the Bluetooth LE-only or dual-mode (combined Bluetooth LE + Bluetooth Clasic) dongle can be used;</li>
+                            <li value="3">the standard Microsoft Bluetooth LE stack, rather than a 3rd party stack is used:<img src="../../Resources/Images/Device_manager_BLE_269x137.png" style="width: 269;height: 137;" /></li>
+                        </ul>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <p class="Body">To find more information how to pair with a Bluetooth LE Topcon receiver, click <a href="../ReceiverManaging/BLE_pairing.htm">here</a>.</p>
+        <p class="Body">&#160;</p>
+        <table style="border-top-style: solid;border-top-width: 1px;border-top-color: #696969;border-bottom-style: solid;border-bottom-width: 1px;border-bottom-color: #696969;">
+            <col />
+            <col />
+            <tbody>
+                <tr>
+                    <td>
+                        <img src="../../Resources/Images/Note_Icon.gif" />
+                    </td>
+                    <td style="font-size: 11pt;">To use a USB connection, install a Topcon USB driver designed for your specific OS version and system type (32- or 64-bit).</td>
+                </tr>
+            </tbody>
+        </table>
+        <p class="Body">&#160;</p>
+        <table class="AutoNumber_p_Bulleted" style="width: 100%; margin-left: 0;" cellspacing="0" cellpadding="0">
+            <col style="width: 12px;" />
+            <col style="width: 12px;" />
+            <col style="width: auto;" />
+            <tr>
+                <td valign="top" />
+                <td class="AutoNumber_p_Bulleted" valign="top"><span>• </span>
+                </td>
+                <td class="AutoNumber_p_Bulleted" valign="top" data-mc-autonum="• "><i>Port name</i> – shows physical and friendly name for the serial port. The Application remembers the last used transport, and the last successful port/device name for every transport, so it is easy to connect to the same port/device.<br />If there is a friendly name for the port/device, you will see both the friendly and physical name. Otherwise, only the physical name is displayed. Click the <b>Browse</b> button <img src="../../Resources/Images/3dots.gif" style="vertical-align: text-bottom;" /> to choose a port from the <i><a href="SelectPortBluetoothDevice.htm"><i>Select Port</i></a></i> dialog and check the <a href="DeviceInfo.htm">port details</a>.<br /></td>
+            </tr>
+        </table>
+        <table class="AutoNumber_p_Bulleted" style="width: 100%; margin-left: 0;" cellspacing="0" cellpadding="0">
+            <col style="width: 12px;" />
+            <col style="width: 12px;" />
+            <col style="width: auto;" />
+            <tr>
+                <td valign="top" />
+                <td class="AutoNumber_p_Bulleted" valign="top"><span>• </span>
+                </td>
+                <td class="AutoNumber_p_Bulleted" valign="top" data-mc-autonum="• "><i>Device Name</i> – shows the receiver name for the Bluetooth, USB, and network connections. Click the <b>Browse</b> button <img src="../../Resources/Images/3dots.gif" style="vertical-align: text-bottom;" /> to select the receiver from the list. For a Bluetooth connection, use this button to <a href="MyBluetoothDevices.htm">search for and add Bluetooth devices</a>. For a network connection, use this button to configure the <a href="MyNetworkDevices.htm">receiver's network parameters</a> (IP address, TCP&#160;port, and password). </td>
+            </tr>
+        </table>
+        <table class="AutoNumber_p_Bulleted" style="width: 100%; margin-left: 0;" cellspacing="0" cellpadding="0">
+            <col style="width: 12px;" />
+            <col style="width: 12px;" />
+            <col style="width: auto;" />
+            <tr>
+                <td valign="top" />
+                <td class="AutoNumber_p_Bulleted" valign="top"><span>• </span>
+                </td>
+                <td class="AutoNumber_p_Bulleted" valign="top" data-mc-autonum="• "><b style="font-style: normal;">Connect</b> – press to establish a connection.<br /></td>
+            </tr>
+        </table>
+        <div class="buttons clearfix topicToolbarProxy" style="mc-topic-toolbar-items: ;">
+            <div class="button-group-container-left">
+                <button class="button needs-pie previous-topic-button" type="button" title="Navigate previous">
+                    <img src="../../../Skins/Default/Stylesheets/Images/transparent.gif" alt="previous topic" />
+                </button>
+                <div class="button current-topic-index-button disabled"><span class="sequence-index"></span> of <span class="sequence-total"></span></div>
+                <button class="button needs-pie next-topic-button" type="button" title="Navigate next">
+                    <img src="../../../Skins/Default/Stylesheets/Images/transparent.gif" alt="next topic" />
+                </button>
+            </div>
+        </div>
+        <p>&#160;</p>
+    </body>
+</html>

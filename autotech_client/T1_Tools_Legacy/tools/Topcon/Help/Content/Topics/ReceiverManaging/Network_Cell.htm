@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" lang="ru-RU" xml:lang="ru-RU" data-mc-search-type="Stem" data-mc-help-system-file-name="Default.xml" data-mc-path-to-help-system="../../../" data-mc-target-type="WebHelp2" data-mc-runtime-file-type="Topic" data-mc-preload-images="false" data-mc-in-preview-mode="false" data-mc-medium="non-print" data-mc-toc-path="Receiver Managing|Receiver Settings|Network">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" /><title>Cell</title>
+        <link href="../../../Skins/Default/Stylesheets/Slideshow.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/TextEffects.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/Topic.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/Components/Styles.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/Components/Tablet.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/Components/Mobile.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../Resources/Stylesheets/TRU.css" rel="stylesheet" />
+        <style>/*&lt;meta /&gt;*/
+
+.button.previous-topic-button
+{
+	-pie-background: url('../../../Skins/Default/Stylesheets/Images/navigate-previous.png') no-repeat center center, linear-gradient(#ffffff, #ececec);
+}
+
+.button.current-topic-index-button
+{
+	-pie-background: linear-gradient(#ffffff, #ececec);
+}
+
+.button.next-topic-button
+{
+	-pie-background: url('../../../Skins/Default/Stylesheets/Images/navigate-next.png') no-repeat center center, linear-gradient(#ffffff, #ececec);
+}
+
+.needs-pie
+{
+	behavior: url('../../../Resources/Scripts/PIE-no-motw.htc');
+}
+
+</style>
+        <script src="../../../Resources/Scripts/custom.modernizr.js">
+        </script>
+        <script src="../../../Resources/Scripts/jquery.min.js">
+        </script>
+        <script src="../../../Resources/Scripts/require.min.js">
+        </script>
+        <script src="../../../Resources/Scripts/require.config.js">
+        </script>
+        <script src="../../../Resources/Scripts/foundation.min.js">
+        </script>
+        <script src="../../../Resources/Scripts/plugins.min.js">
+        </script>
+        <script src="../../../Resources/Scripts/MadCapAll.js">
+        </script>
+    </head>
+    <body class="test">
+        <p class="MCWebHelpFramesetLink MCWebHelpFramesetLinkTop"><a href="../../../Default.htm#Topics/ReceiverManaging/Network_Cell.htm">Open topic with navigation</a>
+        </p>
+        <div class="MCBreadcrumbsBox_0"><span class="MCBreadcrumbsPrefix">You are here: </span><span class="MCBreadcrumbsSelf">Receiver Managing</span><span class="MCBreadcrumbsDivider"> &gt; </span><a class="MCBreadcrumbsLink" href="ReceiverSettings.htm">Receiver Settings</a><span class="MCBreadcrumbsDivider"> &gt; </span><span class="MCBreadcrumbsSelf">Network</span><span class="MCBreadcrumbsDivider"> &gt; </span><span class="MCBreadcrumbs">Cell</span>
+        </div>
+        <h1 class="Heading1">Cell</h1>
+        <p>The <b style="font-style: italic; font-weight: normal;">Cell</b> tab allows you to view the status of the cell modem, configure the cell modem and start the modem to establish connection with GSM Network or another cell modem.</p>
+        <table style="width: 100%;border-top-style: solid;border-top-width: 1px;border-top-color: #696969;border-bottom-style: solid;border-bottom-width: 1px;border-bottom-color: #696969;">
+            <col style="width: 76px;" />
+            <col />
+            <tbody>
+                <tr>
+                    <td>
+                        <img src="../../Resources/Images/Note_Icon.gif" />
+                    </td>
+                    <td style="font-size: 11pt;">
+                        <p class="Body"> Before starting work with the cell modem make sure that the modem is turned on and SIM&#160;card is inserted to the SIM&#160;card slot.</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <p>The <i>Virtual Communication Devices</i> table contains the following columns:</p>
+        <ul>
+            <li value="1"><i>Slot</i> for driver - a slot for uploading a modem driver to a physical modem of the GNSS receiver. There are 4 slots: <i>A</i>,<i>B</i>,<i>C</i>,<i>D</i>. The slot may  be the following state:</li>
+            <ul>
+                <li value="1">
+                    <img src="../../Resources/Images/slot_gray.png" style="vertical-align: text-bottom;" /> - a modem driver is not uploaded to the slot;</li>
+                <li value="2">
+                    <img src="../../Resources/Images/slot_red.png" style="vertical-align: text-bottom;" /> - a modem driver is uploaded to the slot. The profile is not started;</li>
+                <li value="3">
+                    <img src="../../Resources/Images/slot_green.png" style="vertical-align: text-bottom;" />- a modem driver is uploaded to the slot. The profile is started (The user selects the "<i>Start Current Profile</i>")</li>
+                <li value="4">
+                    <img src="../../Resources/Images/slot_yellow.png" style="vertical-align: text-bottom;" /> - a modem driver is uploaded to the slot. The profile is stopped (The user selects the "<i>Stop Current Profile</i>")</li>
+            </ul>
+            <li value="2"><i>Hardware</i> - displays the cell modem type for the slot</li>
+            <li value="3"><i>Current State</i> - displays the current status of the slot:</li>
+            <ul>
+                <li value="1"><i>Off</i> - the profile of the driver is not started;</li>
+                <li value="2"><i>Running</i> - the profile of the driver is running;</li>
+                <li value="3"><i>Stopping</i> - the profile of the driver is stopping. </li>
+            </ul>
+            <li value="4"><i>Report</i> - displays connection status steps of the cell modem, when a profile is running or  stopping. There are different status steps for the different drivers, modems and SIM&#160;card configuration. Below you can see  the steps of connection of GR-5 receiver with <i>Motorola G24</i> cell modem:</li>
+            <ul>
+                <li style="font-style: normal;" value="1">The <i>Internet</i> profile is running:</li>
+                <ul>
+                    <li style="font-style: normal;" value="1"> <i>M105#Looking for modem</i> - verifying the presence and type of the cell modem; </li>
+                    <li value="2"><i>M106#Configuring modem</i> - sending the user parameters for modem initialization; </li>
+                    <li value="3"><i>M107#Checking SIM&#160;card</i> -    verifying the presence and type of the SIM card; </li>
+                    <li value="4"><i>M101#Registering</i> - GSM/CDMA network registration in progress;</li>
+                    <li value="5"><i>M201#PPP handshake</i> - a step for initiative communication;</li>
+                    <li value="6"><i>M205# PPP obtaining IP adress</i> - the cell modem obtains an IP&#160;address in order to access internet.</li>
+                    <li value="7"><i>M204#PPP connected</i> -  the internet connection is established.</li>
+                </ul>
+                <li value="2">The <i>Internet</i> profile is stopping:</li>
+                <ul>
+                    <li value="1"> <i>M202# PPP shutdown </i> - a step for disconnection; </li>
+                    <li value="2"><i>M203#PPP disconnected</i> - the cell modem is disconnected from GSM/CDMA network</li>
+                    <li value="3"><i>M106#Configuring modem</i> - sending the user parameters for deinitialization.</li>
+                </ul>
+                <li style="font-style: normal;" value="3">The <i>c-master</i> profile is running:</li>
+                <ul>
+                    <li style="font-style: normal;" value="1"> <i>M105#Looking for modem</i> - verifying the presence and type of the cell modem;</li>
+                    <li value="2"><i>M106#Configuring modem</i> - sending the user parameters for modem initialization; </li>
+                    <li value="3"><i>M101#Registering</i> - GSM/CDMA network registration in progress;</li>
+                    <li value="4"><i>M102#Dialing</i> - dialing of the slave modem number;</li>
+                    <li value="5"><i>M121#Connected</i> -  the connection is established.</li>
+                </ul>
+                <li style="font-style: normal;" value="4">The <i>c-master</i> profile is stopping:</li>
+                <ul>
+                    <li value="1"><i>M106#Configuring modem</i> - sending the user parameters for modem initialization; </li>
+                </ul>
+                <li style="font-style: normal;" value="5">The <i>c-slave</i> profile is running:</li>
+                <ul>
+                    <li style="font-style: normal;" value="1"> <i>M105#Looking for modem</i> - verifying the presence and type of the cell modem;</li>
+                    <li value="2"><i>M106#Configuring modem</i> - sending the user parameters for modem initialization; </li>
+                    <li value="3"><i>M101#Registering</i> - GSM/CDMA network registration in progress;</li>
+                    <li value="4"><i>M103#Awaiting call</i> - awaiting call from the master modem;</li>
+                    <li value="5"><i>M121#Connected</i> -  the connection is established.</li>
+                </ul>
+                <li style="font-style: normal;" value="6">The <i>c-slave</i> profile is stopping:</li>
+                <ul>
+                    <li value="1"><i>M106#Configuring modem</i> - sending the user parameters for modem initialization.</li>
+                </ul>
+            </ul>
+            <li value="5"><i>Current Profile</i> - the name of the selected profile.</li>
+            <li value="6"><i>Current Script</i> - the name of script, which is running. A script name is shown if a selected profile is running or stopping. When a profile is not started, the column is empty.</li>
+            <p class="Body">Right-click (PC) or tap (Mobile) on the slot with the modem driver to bring up the following controls:</p>
+            <ul>
+                <li value="1"><i>Properties</i> - opens the <i>Slot &lt;'N'&gt;: Properties</i> dialog;</li>
+                <li value="2"><i>Start Current Profile</i> - starts the selected current profile. This command is enabled, if a current profile is selected;</li>
+                <li value="3"><i>Stop Current Profile</i> - stops the selected current profile. This command will be enabled, if a current profile is running</li>
+                <li value="4"><i>Select Current Profile</i> - selects one profile from the list. You cannot select a profile, if another profile is running or stopping.</li>
+            </ul>
+        </ul>
+        <p class="Body">The <i>Parameters</i> panel displays the communications parameters for the selected slot. Right-click (PC) or tap (Mobile) anywhere in the <i>Parameters</i> panel to bring up the controls:</p>
+        <ul>
+            <li value="1"><i>Edit</i> - change the communication parameters. The list of editable parameters depends on the selected profile.</li>
+            <ul>
+                <li value="1"> For the <i>Internet</i> profile you can edit the following parameters:</li>
+                <ul>
+                    <li value="1"><i>PIN</i> for the SIM card of the GNSS rover receiver modem;</li>
+                    <li value="2"><i>APN</i> (Access Point Name) of GSM/CDMA network; </li>
+                    <li value="3"><i>Login</i> and <i>Password</i> for GSM/CDMA network;</li>
+                    <li value="4"><i>Dial Number</i>  of GSM/CDMA network.</li>
+                </ul>
+                <li value="2"> For the <i>c-master</i> profile you can edit the following parameters: </li>
+                <ul>
+                    <li value="1"><i>PIN</i> for the SIM card of the GNSS receiver modem; </li>
+                    <li value="2"><i>Dial Number</i> of the GNSS  receiver modem.</li>
+                </ul>
+                <li value="3"> For the <i>c-slave</i> profile you can edit the <i>PIN</i> for the SIM card of the GNSS receiver modem.</li>
+            </ul>
+            <li value="2"><i>View</i> – select how you want to view the options, in detail (<i>Detailed</i>) or quick view (<i>Overview</i>). In <i>Overview</i> mode, the Application will hide <i>Id</i> and <i>Name</i> columns.</li>
+        </ul>
+        <p>&#160;</p>
+        <p>&#160;</p>
+        <p>&#160;</p>
+        <p>&#160;</p>
+        <div class="buttons clearfix topicToolbarProxy" style="mc-topic-toolbar-items: ;">
+            <div class="button-group-container-left">
+                <button class="button needs-pie previous-topic-button" type="button" title="Navigate previous">
+                    <img src="../../../Skins/Default/Stylesheets/Images/transparent.gif" alt="previous topic" />
+                </button>
+                <div class="button current-topic-index-button disabled"><span class="sequence-index"></span> of <span class="sequence-total"></span></div>
+                <button class="button needs-pie next-topic-button" type="button" title="Navigate next">
+                    <img src="../../../Skins/Default/Stylesheets/Images/transparent.gif" alt="next topic" />
+                </button>
+            </div>
+        </div>
+        <p>&#160;</p>
+    </body>
+</html>

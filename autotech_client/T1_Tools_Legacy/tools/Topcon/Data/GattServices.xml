@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Services>
+	<!-- Standard Gatt Services -->
+	<!-- https://www.bluetooth.com/specifications/gatt/services -->
+	<Service XLATE_SpecificationName="Generic Access" SpecificationType="org.bluetooth.service.generic_access" AssignedNumber="0x1800" SpecificationLevel="Adopted">
+		<Characteristic XLATE_SpecificationName="Device Name"    AssignedNumber="0x2A00" Type="String"/>
+		<Characteristic XLATE_SpecificationName="Appearance"     AssignedNumber="0x2A01" Type="Enum">
+			<Option Key="0x0000" XLATE_Value="Unknown"                                XLATE_Description="None"/>
+			<Option Key="0x0040" XLATE_Value="Generic Phone"                          XLATE_Description="Generic category"/>
+			<Option Key="0x0080" XLATE_Value="Generic Computer"                       XLATE_Description="Generic category"/>
+			<Option Key="0x00C0" XLATE_Value="Generic Watch"                          XLATE_Description="Generic category"/>
+			<Option Key="0x00C1" XLATE_Value="Watch: Sports Watch"                    XLATE_Description="Watch subtype"/>
+			<Option Key="0x0100" XLATE_Value="Generic Clock"                          XLATE_Description="Generic category"/>
+			<Option Key="0x0140" XLATE_Value="Generic Display"                        XLATE_Description="Generic category"/>
+			<Option Key="0x0180" XLATE_Value="Generic Remote Control"                 XLATE_Description="Generic category"/>
+			<Option Key="0x01C0" XLATE_Value="Generic Eye-glasses"                    XLATE_Description="Generic category"/>
+			<Option Key="0x0200" XLATE_Value="Generic Tag"                            XLATE_Description="Generic category"/>
+			<Option Key="0x0240" XLATE_Value="Generic Keyring"                        XLATE_Description="Generic category"/>
+			<Option Key="0x0280" XLATE_Value="Generic Media Player"                   XLATE_Description="Generic category"/>
+			<Option Key="0x02C0" XLATE_Value="Generic Barcode Scanner"                XLATE_Description="Generic category"/>
+			<Option Key="0x0300" XLATE_Value="Generic Thermometer"                    XLATE_Description="Generic category"/>
+			<Option Key="0x0301" XLATE_Value="Thermometer: Ear"                       XLATE_Description="Thermometer subtype"/>
+			<Option Key="0x0340" XLATE_Value="Generic Heart rate Sensor"              XLATE_Description="Generic category"/>
+			<Option Key="0x0341" XLATE_Value="Heart Rate Sensor: Heart Rate Belt"     XLATE_Description="Heart Rate Sensor subtype"/>
+			<Option Key="0x0380" XLATE_Value="Generic Blood Pressure"                 XLATE_Description="Generic category"/>
+			<Option Key="0x0381" XLATE_Value="Blood Pressure: Arm"                    XLATE_Description="Blood Pressure subtype"/>
+			<Option Key="0x0382" XLATE_Value="Blood Pressure: Wrist"                  XLATE_Description="Blood Pressure subtype"/>
+			<Option Key="0x03C0" XLATE_Value="Human Interface Device (HID)"           XLATE_Description="HID Generic"/>
+			<Option Key="0x03C1" XLATE_Value="Keyboard"                               XLATE_Description="HID subtype"/>
+			<Option Key="0x03C2" XLATE_Value="Mouse"                                  XLATE_Description="HID subtype"/>
+			<Option Key="0x03C3" XLATE_Value="Joystick"                               XLATE_Description="HID subtype"/>
+			<Option Key="0x03C4" XLATE_Value="Gamepad"                                XLATE_Description="HID subtype"/>
+			<Option Key="0x03C5" XLATE_Value="Digitizer Tablet"                       XLATE_Description="HID subtype"/>
+			<Option Key="0x03C6" XLATE_Value="Card Reader"                            XLATE_Description="HID subtype"/>
+			<Option Key="0x03C7" XLATE_Value="Digital Pen"                            XLATE_Description="HID subtype"/>
+			<Option Key="0x03C8" XLATE_Value="Barcode Scanner"                        XLATE_Description="HID subtype"/>
+			<Option Key="0x0400" XLATE_Value="Generic Glucose Meter"                  XLATE_Description="Generic category"/>
+			<Option Key="0x0440" XLATE_Value="Generic: Running Walking Sensor"        XLATE_Description="Generic category"/>
+			<Option Key="0x0441" XLATE_Value="Running Walking Sensor: In-Shoe"        XLATE_Description="Running Walking Sensor subtype"/>
+			<Option Key="0x0442" XLATE_Value="Running Walking Sensor: On-Shoe"        XLATE_Description="Running Walking Sensor subtype"/>
+			<Option Key="0x0443" XLATE_Value="Running Walking Sensor: On-Hip"         XLATE_Description="Running Walking Sensor subtype"/>
+			<Option Key="0x0480" XLATE_Value="Generic: Cycling"                       XLATE_Description="Generic category"/>
+			<Option Key="0x0481" XLATE_Value="Cycling: Cycling Computer"              XLATE_Description="Cycling subtype"/>
+			<Option Key="0x0482" XLATE_Value="Cycling: Speed Sensor"                  XLATE_Description="Cycling subtype"/>
+			<Option Key="0x0483" XLATE_Value="Cycling: Cadence Sensor"                XLATE_Description="Cycling subtype"/>
+			<Option Key="0x0484" XLATE_Value="Cycling: Power Sensor"                  XLATE_Description="Cycling subtype"/>
+			<Option Key="0x0485" XLATE_Value="Cycling: Speed and Cadence Sensor"      XLATE_Description="Cycling subtype"/>
+			<Option Key="0x0C40" XLATE_Value="Generic: Pulse Oximeter"                XLATE_Description="Generic Gategory"/>
+			<Option Key="0x0C41" XLATE_Value="Fingertip"                              XLATE_Description="Pulse Oximeter subtype"/>
+			<Option Key="0x0C42" XLATE_Value="Wrist Worn"                             XLATE_Description="Pulse Oximeter subtype"/>
+			<Option Key="0x0C80" XLATE_Value="Generic: Weight Scale"                  XLATE_Description="Weight Scale Generic Category"/>
+			<Option Key="0x1440" XLATE_Value="Generic: Outdoor Sports Activity"       XLATE_Description="Outdoor Sports Activity Generic Category"/>
+			<Option Key="0x1441" XLATE_Value="Location Display Device"                XLATE_Description="Outdoor Sports Activity subtype"/>
+			<Option Key="0x1442" XLATE_Value="Location and Navigation Display Device" XLATE_Description="Outdoor Sports Activity subtype"/>
+			<Option Key="0x1443" XLATE_Value="Location Pod"                           XLATE_Description="Outdoor Sports Activity subtype"/>
+			<Option Key="0x1444" XLATE_Value="Location and Navigation Pod"            XLATE_Description="Outdoor Sports Activity subtype"/>
+		</Characteristic>
+		<Characteristic XLATE_SpecificationName="Peripheral Privacy Flag"                    AssignedNumber="0x2A02" Type="Boolean"/>
+		<Characteristic XLATE_SpecificationName="Reconnection Address"                       AssignedNumber="0x2A03" Type="UINT48"/>
+		<Characteristic XLATE_SpecificationName="Peripheral Preferred Connection Parameters" AssignedNumber="0x2A04" Type="Struct"/>
+	</Service>
+	<Service XLATE_SpecificationName="Generic Attribute"             SpecificationType="org.bluetooth.service.generic_attribute"             AssignedNumber="0x1801" SpecificationLevel="Adopted"/>
+	<Service XLATE_SpecificationName="Immediate Alert"               SpecificationType="org.bluetooth.service.immediate_alert"               AssignedNumber="0x1802" SpecificationLevel="Adopted"/>
+	<Service XLATE_SpecificationName="Link Loss"                     SpecificationType="org.bluetooth.service.link_loss"                     AssignedNumber="0x1803" SpecificationLevel="Adopted"/>
+	<Service XLATE_SpecificationName="Tx Power"                      SpecificationType="org.bluetooth.service.tx_power"                      AssignedNumber="0x1804" SpecificationLevel="Adopted"/>
+	<Service XLATE_SpecificationName="Current Time Service"          SpecificationType="org.bluetooth.service.current_time"                  AssignedNumber="0x1805" SpecificationLevel="Adopted"/>
+	<Service XLATE_SpecificationName="Reference Time Update Service" SpecificationType="org.bluetooth.service.reference_time_update"         AssignedNumber="0x1806" SpecificationLevel="Adopted"/>
+	<Service XLATE_SpecificationName="Next DST Change Service"       SpecificationType="org.bluetooth.service.next_dst_change"               AssignedNumber="0x1807" SpecificationLevel="Adopted"/>
+	<Service XLATE_SpecificationName="Glucose"                       SpecificationType="org.bluetooth.service.glucose"                       AssignedNumber="0x1808" SpecificationLevel="Adopted"/>
+	<Service XLATE_SpecificationName="Health Thermometer"            SpecificationType="org.bluetooth.service.health_thermometer"            AssignedNumber="0x1809" SpecificationLevel="Adopted"/>
+	<Service XLATE_SpecificationName="Device Information"            SpecificationType="org.bluetooth.service.device_information"            AssignedNumber="0x180A" SpecificationLevel="Adopted">
+		<Characteristic XLATE_SpecificationName="System ID"               AssignedNumber="0x2A23" Type="SystemID"/>
+		<Characteristic XLATE_SpecificationName="Model Number"            AssignedNumber="0x2A24" Type="String"/>
+		<Characteristic XLATE_SpecificationName="Serial Number"           AssignedNumber="0x2A25" Type="String"/>
+		<Characteristic XLATE_SpecificationName="Firmware Revision"       AssignedNumber="0x2A26" Type="String"/>
+		<Characteristic XLATE_SpecificationName="Hardware Revision"       AssignedNumber="0x2A27" Type="String"/>  
+		<Characteristic XLATE_SpecificationName="Software Revision"       AssignedNumber="0x2A28" Type="String"/>
+		<Characteristic XLATE_SpecificationName="Manufacturer Name"       AssignedNumber="0x2A29" Type="String"/>
+		<Characteristic XLATE_SpecificationName="Certification Data List" AssignedNumber="0x2A2A" Type="Binary"/>
+		<Characteristic XLATE_SpecificationName="PnP ID"                  AssignedNumber="0x2A50" Type="PnPID"/>
+	</Service>
+	<Service XLATE_SpecificationName="Heart Rate"                    SpecificationType="org.bluetooth.service.heart_rate"                    AssignedNumber="0x180D" SpecificationLevel="Adopted"/>
+	<Service XLATE_SpecificationName="Phone Alert Status Service"    SpecificationType="org.bluetooth.service.phone_alert_status"            AssignedNumber="0x180E" SpecificationLevel="Adopted"/>
+	<Service XLATE_SpecificationName="Battery Service"               SpecificationType="org.bluetooth.service.battery_service"               AssignedNumber="0x180F" SpecificationLevel="Adopted"/>
+	<Service XLATE_SpecificationName="Blood Pressure"                SpecificationType="org.bluetooth.service.blood_pressure"                AssignedNumber="0x1810" SpecificationLevel="Adopted"/>
+	<Service XLATE_SpecificationName="Alert Notification Service"    SpecificationType="org.bluetooth.service.alert_notification"            AssignedNumber="0x1811" SpecificationLevel="Adopted"/>
+	<Service XLATE_SpecificationName="Human Interface Device"        SpecificationType="org.bluetooth.service.human_interface_device"        AssignedNumber="0x1812" SpecificationLevel="Adopted"/>
+	<Service XLATE_SpecificationName="Scan Parameters"               SpecificationType="org.bluetooth.service.scan_parameters"               AssignedNumber="0x1813" SpecificationLevel="Adopted"/>
+	<Service XLATE_SpecificationName="Running Speed and Cadence"     SpecificationType="org.bluetooth.service.running_speed_and_cadence"     AssignedNumber="0x1814" SpecificationLevel="Adopted"/>
+	<Service XLATE_SpecificationName="Automation IO"                 SpecificationType="org.bluetooth.service.automation_io"                 AssignedNumber="0x1815" SpecificationLevel="Adopted"/>
+	<Service XLATE_SpecificationName="Cycling Speed and Cadence"     SpecificationType="org.bluetooth.service.cycling_speed_and_cadence"     AssignedNumber="0x1816" SpecificationLevel="Adopted"/>
+	<Service XLATE_SpecificationName="Cycling Power"                 SpecificationType="org.bluetooth.service.cycling_power"                 AssignedNumber="0x1818" SpecificationLevel="Adopted"/>
+	<Service XLATE_SpecificationName="Location and Navigation"       SpecificationType="org.bluetooth.service.location_and_navigation"       AssignedNumber="0x1819" SpecificationLevel="Adopted"/>
+	<Service XLATE_SpecificationName="Environmental Sensing"         SpecificationType="org.bluetooth.service.environmental_sensing"         AssignedNumber="0x181A" SpecificationLevel="Adopted"/>
+	<Service XLATE_SpecificationName="Body Composition"              SpecificationType="org.bluetooth.service.body_composition"              AssignedNumber="0x181B" SpecificationLevel="Adopted"/>
+	<Service XLATE_SpecificationName="User Data"                     SpecificationType="org.bluetooth.service.user_data"                     AssignedNumber="0x181C" SpecificationLevel="Adopted"/>
+	<Service XLATE_SpecificationName="Weight Scale"                  SpecificationType="org.bluetooth.service.weight_scale"                  AssignedNumber="0x181D" SpecificationLevel="Adopted"/>
+	<Service XLATE_SpecificationName="Bond Management"               SpecificationType="org.bluetooth.service.bond_management"               AssignedNumber="0x181E" SpecificationLevel="Adopted"/>
+	<Service XLATE_SpecificationName="Continuous Glucose Monitoring" SpecificationType="org.bluetooth.service.continuous_glucose_monitoring" AssignedNumber="0x181F" SpecificationLevel="Adopted"/>
+	<Service XLATE_SpecificationName="Internet Protocol Support"     SpecificationType="org.bluetooth.service.internet_protocol_support"     AssignedNumber="0x1820" SpecificationLevel="Adopted"/>
+	<Service XLATE_SpecificationName="Indoor Positioning"            SpecificationType="org.bluetooth.service.indoor_positioning"            AssignedNumber="0x1821" SpecificationLevel="Adopted"/>
+	<Service XLATE_SpecificationName="Pulse Oximeter"                SpecificationType="org.bluetooth.service.pulse_oximeter"                AssignedNumber="0x1822" SpecificationLevel="Adopted"/>
+	<Service XLATE_SpecificationName="HTTP Proxy"                    SpecificationType="org.bluetooth.service.http_proxy"                    AssignedNumber="0x1823" SpecificationLevel="Adopted"/>
+	<Service XLATE_SpecificationName="Transport Discovery"           SpecificationType="org.bluetooth.service.transport_discovery"           AssignedNumber="0x1824" SpecificationLevel="Adopted"/>
+	<Service XLATE_SpecificationName="Object Transfer"               SpecificationType="org.bluetooth.service.object_transfer"               AssignedNumber="0x1825" SpecificationLevel="Adopted"/>
+
+	<!-- Leica Gatt Services -->
+	<Service XLATE_SpecificationName="Leica DISTO"                   SpecificationType=""                                                    AssignedNumber="{3ab10100-f831-4395-b29d-570977d5bf94}" SpecificationLevel=""/>
+
+	<!-- Topcon Gatt Services -->
+	<Service XLATE_SpecificationName="Topcon BLE Streaming"          SpecificationType=""                                                    AssignedNumber="{f000a050-008b-4000-b000-000000000000}" SpecificationLevel=""/>
+</Services>

@@ -1,108 +1,66 @@
-# T1 Tools Web - AutoTech Dashboard
+# CLAUDE.md
 
-## Project Overview
-Flask web app for Komatsu mining equipment remote access/diagnostics. Runs as standalone exe (PyInstaller) or dev server.
-
-## Tech Stack
-- **Backend**: Flask + Paramiko (SSH) + ping3
-- **Frontend**: Jinja2 templates, vanilla JS, CSS
-- **Build**: PyInstaller (`AutoTech.spec`)
-- **DB**: SQLite (equipment_db.py, ptx_uptime_db.py)
-
-## Key Paths
-- `main.py` - Flask app entry point, all routes
-- `tools/` - Tool modules (ptx_uptime.py, ip_finder.py, etc.)
-- `templates/` - Jinja2 HTML templates
-- `static/` - CSS/JS assets
-- `autotech_client/` - Client installer + batch scripts
-- `database/` - SQLite DBs
-
-## Architecture
-- Routes in main.py call tool functions from `tools/*.py`
-- Templates extend `_BASE_TEMPLATE.html` or `layout.html`
-- SSH via Paramiko to Linux servers (serverList.py has IPs)
-- Equipment data cached in SQLite
-
-## Common Tools
-| Tool | Route | Purpose |
-|------|-------|---------|
-| PTX Uptime | /ptx-uptime | Check PTX controller uptimes |
-| IP Finder | /ip-finder | Search equipment by IP/ID |
-| T1 Legacy | /t1-legacy | Launch batch scripts in CMD |
-| Playback | /playback-tools | USB playback file tools |
-
-## Build Commands
-```batch
-pyinstaller AutoTech.spec
-# or
-BUILD_WEBSERVER.bat
-```
-
-## Running as Windows Service
-To run AutoTech 24/7 (even when no user logged in):
-```batch
-# Install service (run as admin)
-Install_AutoTech_Service.bat
-
-# Uninstall service (run as admin)
-Uninstall_AutoTech_Service.bat
-
-# Manual commands
-sc start AutoTech
-sc stop AutoTech
-sc query AutoTech
-```
-Uses built-in Windows `sc.exe` (no external tools, no security warnings).
-
-## Server Credentials
-Stored in `main.py` as MMS_PASSWORD constant. SSH user: `mms`
-
-## Conventions
-- Tool routes: `/tool-name` (kebab-case)
-- API endpoints: `/api/tool-name/action`
-- Templates: `tool_name.html` (snake_case)
+This file defines **governance, constraints, and agent routing rules** for Claude Code when working in this repository. Detailed technical knowledge is stored in `.claude/docs/` and must be loaded only when relevant.
 
 ---
 
-## Token Usage Optimization (IMPORTANT)
+## Project Overview
 
-### Model Usage
-- **Default: Sonnet** (set in `.claude/settings.local.json`)
-- Use Haiku for sub-agents when appropriate
-- Opus only for critical/complex problems
+AutoTech Web Dashboard is a Windows-based Flask application for remote access and diagnostics of Komatsu mining equipment. It runs in development mode, as a standalone executable built with PyInstaller, and as a Windows service. Production deployments are offline and air-gapped.
 
-### Efficient Prompting (for non-coders)
+---
 
-**GOOD prompts (specific, single action):**
-- "Add a button to ptx_uptime.html that clears the results table"
-- "Fix the IP Finder search to also search by equipment name"
-- "Build the exe with BUILD_WEBSERVER.bat"
-- "Change the page title from 'PTX Uptime' to 'Controller Uptime'"
+## Non-Negotiable Constraints
 
-**BAD prompts (vague, causes exploration):**
-- "Make the page better"
-- "Fix the bugs"
-- "Update the tool"
-- "Look into the performance issues"
+- Production environment is **offline**
+- Final deliverable is a **standalone Windows executable**
+- Built with **PyInstaller**
+- Windows-only
+- No internet access at runtime
+- No dynamic downloads or external services
+- All paths must tolerate frozen, service, and USB execution
 
-### Guidelines to Reduce Tokens
-1. **Be specific** - Name exact files, routes, or buttons
-2. **One task at a time** - Don't bundle 5 requests in one prompt
-3. **Trust CLAUDE.md** - Don't ask "how does X work?" unless needed
-4. **Use exact text** - Copy/paste button text or error messages
-5. **Avoid exploration** - If you know the file, say it: "in templates/ptx_uptime.html line 42"
+---
 
-### Common Tasks (Quick Reference)
-```
-Add a button → "Add [button name] to [template file] that does [action]"
-Fix a bug → "In [file], [specific issue], should be [expected behavior]"
-Build exe → "Run BUILD_WEBSERVER.bat"
-Commit → "Commit changes with message: [your message]"
-Change text → "In [file], change '[old text]' to '[new text]'"
+## Build Entry Points
+
+```batch
+python main.py
+pyinstaller AutoTech.spec --noconfirm
+BUILD_WEBSERVER.bat
 ```
 
-### When Token Usage Spikes
-- Long exploration sessions (asking vague questions)
-- Back-and-forth clarifications (be specific upfront)
-- Reading many files unnecessarily (name the file if you know it)
-- Large git status (keep it clean with regular commits)
+---
+
+## Documentation Routing
+
+Load docs from `.claude/docs/` only when relevant. Full index: `.claude/docs/README.md`
+
+| Task Type | Load |
+|-----------|------|
+| Architecture/design | `ARCHITECTURE.md` |
+| Runtime modes (dev/frozen/service) | `RUNTIME_MODES.md` |
+| Background tasks/threads | `BACKGROUND_TASKS.md` |
+| Path resolution issues | `PATH_RESOLUTION.md` |
+| Database schemas | `DATABASES.md` |
+| Build/PyInstaller | `BUILD_AND_DEPLOY.md` |
+| USB deployment | `USB_DEPLOYMENT.md` |
+| Client/URI handlers | `CLIENT_ARCHITECTURE.md` |
+| Templates/UI | `TEMPLATES.md` |
+| Logging | `LOGGING.md` |
+| Tool modules | `TOOLS.md` |
+| Known pitfalls | `PITFALLS.md` |
+
+---
+
+## Agent Routing
+
+Use specialized agents for domain-specific tasks:
+
+| Task Domain | Agent | Trigger Keywords |
+|-------------|-------|------------------|
+| USB detection, client install, URI handlers | `usb-client-specialist` | USB not detected, client install, launch_*.bat, URI handler, autotech-ssh/sftp/vnc |
+| PyInstaller, .spec, BUILD_WEBSERVER.bat | `pyinstaller-build-specialist` | Build fails, frozen mode, hidden imports, service install |
+| Logging infrastructure | `flask-logging-architect` | Add logging, track events, debug visibility |
+| Test protocols, offline validation | `offline-test-authority` | Release gate, offline test, air-gapped validation |
+| Documentation maintenance | `docs-curator` | Update docs, CLAUDE.md, .claude/docs/ |

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" lang="ru-RU" xml:lang="ru-RU" data-mc-search-type="Stem" data-mc-help-system-file-name="Default.xml" data-mc-path-to-help-system="../../../" data-mc-target-type="WebHelp2" data-mc-runtime-file-type="Topic" data-mc-preload-images="false" data-mc-in-preview-mode="false" data-mc-medium="non-print" data-mc-toc-path="Receiver Managing|Status|Logging">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" /><title>Multiple Files Settings</title>
+        <link href="../../../Skins/Default/Stylesheets/Slideshow.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/TextEffects.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/Topic.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/Components/Styles.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/Components/Tablet.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/Components/Mobile.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../Resources/Stylesheets/TRU.css" rel="stylesheet" />
+        <style>/*&lt;meta /&gt;*/
+
+.button.previous-topic-button
+{
+	-pie-background: url('../../../Skins/Default/Stylesheets/Images/navigate-previous.png') no-repeat center center, linear-gradient(#ffffff, #ececec);
+}
+
+.button.current-topic-index-button
+{
+	-pie-background: linear-gradient(#ffffff, #ececec);
+}
+
+.button.next-topic-button
+{
+	-pie-background: url('../../../Skins/Default/Stylesheets/Images/navigate-next.png') no-repeat center center, linear-gradient(#ffffff, #ececec);
+}
+
+.needs-pie
+{
+	behavior: url('../../../Resources/Scripts/PIE-no-motw.htc');
+}
+
+</style>
+        <script src="../../../Resources/Scripts/custom.modernizr.js">
+        </script>
+        <script src="../../../Resources/Scripts/jquery.min.js">
+        </script>
+        <script src="../../../Resources/Scripts/require.min.js">
+        </script>
+        <script src="../../../Resources/Scripts/require.config.js">
+        </script>
+        <script src="../../../Resources/Scripts/foundation.min.js">
+        </script>
+        <script src="../../../Resources/Scripts/plugins.min.js">
+        </script>
+        <script src="../../../Resources/Scripts/MadCapAll.js">
+        </script>
+    </head>
+    <body class="test">
+        <p class="MCWebHelpFramesetLink MCWebHelpFramesetLinkTop"><a href="../../../Default.htm#Topics/ReceiverManaging/MultipleFilesSettings.htm">Open topic with navigation</a>
+        </p>
+        <div class="MCBreadcrumbsBox_0"><span class="MCBreadcrumbsPrefix">You are here: </span><span class="MCBreadcrumbsSelf">Receiver Managing</span><span class="MCBreadcrumbsDivider"> &gt; </span><a class="MCBreadcrumbsLink" href="Status.htm">Status</a><span class="MCBreadcrumbsDivider"> &gt; </span><a class="MCBreadcrumbsLink" href="Logging.htm">Logging</a><span class="MCBreadcrumbsDivider"> &gt; </span><span class="MCBreadcrumbs">Multiple Files Settings</span>
+        </div>
+        <h1 class="Heading1">Multiple Files Settings</h1>
+        <p class="Body">Use the <i>Multiple Files Settings</i> dialog to configure naming scheme and duration of multiple files for real-time data logging to the computer or controller.</p>
+        <blockquote>
+            <table class="AutoNumber_p_Bulleted" style="width: 100%; margin-left: 0;" cellspacing="0" cellpadding="0">
+                <col style="width: 12px;" />
+                <col style="width: 12px;" />
+                <col style="width: auto;" />
+                <tr>
+                    <td valign="top" />
+                    <td class="AutoNumber_p_Bulleted" valign="top"><span>• </span>
+                    </td>
+                    <td class="AutoNumber_p_Bulleted" valign="top" data-mc-autonum="• "><i>Prefix</i>  –  the beginning part of the name for each file. By default, the Site name is used as a prefix.</td>
+                </tr>
+            </table>
+            <table class="AutoNumber_p_Bulleted" style="width: 100%; margin-left: 0;" cellspacing="0" cellpadding="0">
+                <col style="width: 12px;" />
+                <col style="width: 12px;" />
+                <col style="width: auto;" />
+                <tr>
+                    <td valign="top" />
+                    <td class="AutoNumber_p_Bulleted" valign="top"><span>• </span>
+                    </td>
+                    <td class="AutoNumber_p_Bulleted" valign="top" data-mc-autonum="• "><i>Suffix</i>  –  the ending part of the name for each file.</td>
+                </tr>
+            </table>
+            <blockquote>
+                <ul>
+                    <li value="1"><i>Incrementing Counter</i>  – &#160;the suffix  will contain a number varying between 0000 and 2<sup>31</sup>-1. </li>
+                    <li value="2"><i>Date &amp; Time</i>  –  the suffix  will contain a date in the format YYMMDDhhmm; where YY is  year in the range of 00 to 99, MM is month in the range of 01 to 12, DD is day in the range of 01 to 31, hh is hour in the receiver time scale, and mm are minutes in the receiver time scale.</li>
+                </ul>
+            </blockquote>
+            <table class="AutoNumber_p_Bulleted" style="width: 100%; margin-left: 0;" cellspacing="0" cellpadding="0">
+                <col style="width: 12px;" />
+                <col style="width: 12px;" />
+                <col style="width: auto;" />
+                <tr>
+                    <td valign="top" />
+                    <td class="AutoNumber_p_Bulleted" valign="top"><span>• </span>
+                    </td>
+                    <td class="AutoNumber_p_Bulleted" valign="top" data-mc-autonum="• "><i>Initial Value</i>  –  enabled when the <i>Incrementing Counter</i> parameter is selected. Here you can specify the first number to use for file counts. This number will increase by one with each file.</td>
+                </tr>
+            </table>
+            <table class="AutoNumber_p_Bulleted" style="width: 100%; margin-left: 0;" cellspacing="0" cellpadding="0">
+                <col style="width: 12px;" />
+                <col style="width: 12px;" />
+                <col style="width: auto;" />
+                <tr>
+                    <td valign="top" />
+                    <td class="AutoNumber_p_Bulleted" valign="top"><span>• </span>
+                    </td>
+                    <td class="AutoNumber_p_Bulleted" valign="top" data-mc-autonum="• "><i>New File Every</i>  – specifies how often you want to create a new file. You can select among minute, hour, or day. Note, that files may be shorter than the interval entered in these fields. </td>
+                </tr>
+            </table>
+            <table class="AutoNumber_p_Bulleted" style="width: 100%; margin-left: 0;" cellspacing="0" cellpadding="0">
+                <col style="width: 12px;" />
+                <col style="width: 12px;" />
+                <col style="width: auto;" />
+                <tr>
+                    <td valign="top" />
+                    <td class="AutoNumber_p_Bulleted" valign="top"><span>• </span>
+                    </td>
+                    <td class="AutoNumber_p_Bulleted" valign="top" data-mc-autonum="• "><i>Overwrite Existing Files</i>  – over writes existing files that have the same name as new ones.</td>
+                </tr>
+            </table>
+        </blockquote>
+        <div class="buttons clearfix topicToolbarProxy" style="mc-topic-toolbar-items: ;">
+            <div class="button-group-container-left">
+                <button class="button needs-pie previous-topic-button" type="button" title="Navigate previous">
+                    <img src="../../../Skins/Default/Stylesheets/Images/transparent.gif" alt="previous topic" />
+                </button>
+                <div class="button current-topic-index-button disabled"><span class="sequence-index"></span> of <span class="sequence-total"></span></div>
+                <button class="button needs-pie next-topic-button" type="button" title="Navigate next">
+                    <img src="../../../Skins/Default/Stylesheets/Images/transparent.gif" alt="next topic" />
+                </button>
+            </div>
+        </div>
+        <p>&#160;</p>
+    </body>
+</html>

@@ -1,0 +1,80 @@
+<DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>T1 Tools — Command Help</title>
+  <style>
+    body{margin:0;background:#0f1115;color:#e6e6e6;font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Arial}
+    .wrap{max-width:900px;margin:32px auto;padding:0 16px}
+    h1{font-size:26px;margin:0 0 6px}
+    .sub{color:#9aa4b2;font-size:12px;margin-bottom:18px}
+    details{background:#111522;border:1px solid #2a3140;border-radius:10px;margin:12px 0;overflow:hidden}
+    summary{list-style:none;cursor:pointer;padding:12px 14px;font-weight:600}
+    summary::-webkit-details-marker{display:none}
+    .chev{display:inline-block;transition:.15s transform;margin-right:8px}
+    details[open] .chev{transform:rotate(90deg)}
+    .section{border-top:1px solid #2a3140;padding:10px 14px 12px}
+    ul{margin:6px 0 0 22px;padding:0}
+    li{margin:8px 0}
+    .cmd{font-weight:600;color:#a78bfa}
+    code{background:#0b0d12;border:1px solid #2a3140;border-radius:6px;padding:2px 6px;font-family:Consolas,monospace;font-size:12px;color:#e5e7eb}
+    .note{color:#9aa4b2;font-size:12px;margin-top:18px}
+  </style>
+</head>
+<body><div class="wrap">
+  <h1>T1 Tools — Command Help</h1>
+  <div class="sub">Updated Sat 24/01/2026 18:27:52.14</div>
+  <details open>
+    <summary><span class="chev">▸</span>AVI</summary>
+    <div class="section">
+      <ul>
+        <li><span class="cmd">avi</span> — Opens AVI web UI. <code>avi "equipName"</code></li>
+        <li><span class="cmd">avilogs</span> — Tunnel via PTX and open WinSCP to AVI logs. <code>avilogs "equipName"</code></li>
+      </ul>
+    </div>
+  </details>
+  <details>
+    <summary><span class="chev">▸</span>AHT / Flight Recorder</summary>
+    <div class="section">
+      <ul>
+        <li><span class="cmd">atmon</span> — Tunnel to FR (port 50000) + launch ATMonitor. <code>atmon "equipName"</code></li>
+        <li><span class="cmd">frdownload</span> — Open FR in WinSCP; for Dash 5 use SSL. <code>frdownload "equipName"</code>, <code>frdownload -ssl "equipName"</code></li>
+        <li><span class="cmd">frlogin</span> — Remote Desktop to FR. <code>frlogin "equipName"</code></li>
+        <li><span class="cmd">frreset</span> — Restart FR (multi-vehicle ok). <code>frreset "equipName" [...]</code></li>
+      </ul>
+    </div>
+  </details>
+  <details>
+    <summary><span class="chev">▸</span>PTX</summary>
+    <div class="section">
+      <ul>
+        <li><span class="cmd">vnc</span> — VNC to Screen. <code>vnc "equipName"</code></li>
+        <li><span class="cmd">putty</span> — PTX shell in PuTTY. <code>putty "equipName"</code></li>
+        <li><span class="cmd">cache</span> — Open PTX cache in WinSCP. <code>cache "equipName"</code></li>
+        <li><span class="cmd">delcache</span> — Delete cache + reboot PTX. <code>delcache "equipName"</code></li>
+        <li><span class="cmd">ptxr</span> — Reboot PTX. <code>ptxr "equipName"</code></li>
+        <li><span class="cmd">win</span> — Open Screen home dir. <code>win "equipName"</code></li>
+        <li><span class="cmd">ptxlogs</span> — Open PTX logs in WinSCP. <code>ptxlogs "equipName"</code></li>
+      </ul>
+    </div>
+  </details>
+  <details>
+    <summary><span class="chev">▸</span>GNSS</summary>
+    <div class="section">
+      <ul>
+        <li><span class="cmd">tru</span> — Tunnels to both GNSS receivers + open TRU. <code>tru "equipName"</code></li>
+        <li><span class="cmd">gnsslogs</span> — Proxy to GNSS1/2 and pull logs. <code>gnsslogs "equipName"</code></li>
+      </ul>
+    </div>
+  </details>
+  <details>
+    <summary><span class="chev">▸</span>Misc / Legacy</summary>
+    <div class="section">
+      <ul>
+        <li><span class="cmd">import</span> — Legacy FR ≤3.7 equipment list sync. <code>import</code></li>
+      </ul>
+    </div>
+  </details>
+  <div class="note">Tip: Check "Not Entered AT" in Equipment Status before reboots.</div>
+</div></body></html>

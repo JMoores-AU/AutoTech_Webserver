@@ -161,7 +161,45 @@
             font-size: 0.75rem;
         }
         .btn-copy:hover { background: rgba(59, 130, 246, 0.25); }
-        
+
+        /* Health Stats */
+        .health-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .health-stat {
+            background: var(--theme-bg-card);
+            border: 1px solid var(--theme-border);
+            border-radius: var(--radius-sm);
+            padding: 12px;
+        }
+
+        .health-stat-label {
+            font-size: 0.7rem;
+            color: var(--theme-text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .health-stat-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            font-family: 'Consolas', monospace;
+        }
+
+        .health-stat-value.good { color: var(--status-online); }
+        .health-stat-value.warning { color: #f59e0b; }
+        .health-stat-value.critical { color: var(--status-offline); }
+
+        .refresh-indicator {
+            font-size: 0.7rem;
+            color: var(--theme-text-muted);
+            font-style: italic;
+        }
+
         /* Action Buttons */
         .actions-section {
             display: flex;
@@ -326,10 +364,10 @@
             <div class="sidebar-header">
                 <div class="sidebar-logo">
                     <img src="{{ url_for('static', filename='autotech_logo.png') }}" alt="AutoTech Logo" class="sidebar-logo-img">
-                    <div>
+                    <!--<div>
                         <div class="sidebar-logo-text">AutoTech</div>
                         <div class="sidebar-logo-subtitle">Mining Equipment</div>
-                    </div>
+                    </div>-->
                 </div>
             </div>
             <nav class="sidebar-nav">
@@ -340,6 +378,20 @@
                     <!--<a href="{{ url_for('run_tool', tool_name='Playback Tools') }}" class="nav-item"><span class="nav-item-icon">▶️</span><span>Playback Tools</span></a>
                     <a href="/autotech" class="nav-item"><span class="nav-item-icon">🛠️</span><span>T1 Legacy Tools</span></a>
                     <a href="/database" class="nav-item"><span class="nav-item-icon">🗄️</span><span>Equipment Cache</span></a>-->
+                </div>
+
+                <!-- Search Section in Sidebar -->
+                <div class="nav-section" style="margin-top: 24px;">
+                    <div class="nav-section-title">🔍 Search Equipment</div>
+                    <form id="searchForm" onsubmit="searchEquipment(event)" style="padding: 0 12px;">
+                        <input type="text" class="search-input" id="searchInput"
+                               placeholder="Equipment ID or PTX IP..."
+                               autocomplete="off" required
+                               style="width: 100%; margin-bottom: 12px;">
+                        <button type="submit" class="btn-search" id="searchBtn" style="width: 100%;">
+                            🔍 Search
+                        </button>
+                    </form>
                 </div>
             </nav>
             <div class="sidebar-footer">
@@ -354,27 +406,13 @@
             <header class="top-header">
                 <h1 class="header-title">IP Finder</h1>
                 <div class="header-actions">
-                    <a href="{{ url_for('dashboard') }}" class="btn btn-secondary btn-sm">← Dashboard</a>
+                    <button id="popoutBtn" class="btn btn-secondary btn-sm" onclick="popoutDetails()" style="display: none;">
+                        🗗 Pop Out
+                    </button>
                 </div>
             </header>
             
             <div class="content-container">
-                <!-- Search Section -->
-                <div class="search-section">
-                    <div class="search-header">
-                        <span class="icon">🔍</span>
-                        <h2>Search Equipment</h2>
-                    </div>
-                    <form class="search-form" id="searchForm" onsubmit="searchEquipment(event)">
-                        <input type="text" class="search-input" id="searchInput" 
-                               placeholder="Enter equipment ID (e.g., RD190, AHG135) or PTX IP address..." 
-                               autocomplete="off" required>
-                        <button type="submit" class="btn-search" id="searchBtn">
-                            🔍 Search
-                        </button>
-                    </form>
-                </div>
-                
                 <!-- Results Section -->
                 <div class="results-section" id="resultsSection">
                     <!-- Results will be populated here -->
@@ -638,8 +676,17 @@
                                 </div>
                                 ` : ''}
                             </div>
+
+                            <div class="info-section" id="healthSection">
+                                <h3>🏥 System Health <span class="refresh-indicator" id="healthRefreshTimer" style="font-size: 0.7rem; font-weight: normal; margin-left: 8px;"></span></h3>
+                                <div id="healthStats">
+                                    <div style="text-align: center; padding: 12px; color: var(--theme-text-muted); font-size: 0.85rem;">
+                                        Loading health data...
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        
+
                         <div class="actions-section">
                             <button class="action-btn btn-vnc" ${!data.ptx_ip ? 'disabled' : ''} onclick="openVNC(event, '${data.ptx_ip}', ${data.ptxc_found || false}, '${data.OID}', '${ptxModel}')">
                                 🖥️ Open VNC
@@ -663,13 +710,36 @@
                     </div>
                 </div>
             `;
+
+            // Start health check monitoring if PTX IP is available
+            if (data.ptx_ip) {
+                startHealthMonitoring(data.ptx_ip, ptxModel);
+            }
+
+            // Show popout button in header
+            const popoutBtn = document.getElementById('popoutBtn');
+            if (popoutBtn) {
+                popoutBtn.style.display = 'inline-flex';
+            }
         }
-        
+
+        function openProtocolUri(uri) {
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            iframe.src = uri;
+            document.body.appendChild(iframe);
+            setTimeout(() => iframe.remove(), 1500);
+        }
+
         function openVNC(event, ip, isPTXC, equipmentName, ptxModel) {
             if (!ip) {
                 showToast('No PTX IP available', 'error');
                 return;
             }
+
+            const clientReady = localStorage.getItem('autotech_client_check') === 'true';
+            const btn = event?.target;
+            const originalHTML = btn?.innerHTML;
 
             const logEl = document.getElementById('actionLog');
             logEl.className = 'action-log active';
@@ -683,21 +753,20 @@
             addLogLine(logEl, `⚙️ Calling MMS server VNC setup script via plink...`, 'info');
 
             // Disable button while connecting
-            const btn = event?.target;
-            const originalHTML = btn?.innerHTML;
             if (btn) {
                 btn.disabled = true;
                 btn.innerHTML = '<span class="spinner"></span> Starting VNC...';
             }
-            
-            // Call the /api/vnc/start endpoint
+
+            // Call the /api/vnc/start endpoint to run setup script
             fetch('/api/vnc/start', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
+                body: JSON.stringify({
                     ptx_ip: ip,
                     equipment_name: equipmentName || 'Unknown',
-                    ptx_model: ptxModel || ''
+                    ptx_model: ptxModel || '',
+                    client_ready: clientReady  // Tell server whether to launch VNC locally
                 })
             })
             .then(response => response.json())
@@ -706,25 +775,31 @@
                     if (data.ptx_type && data.ptx_type !== 'Unknown') {
                         addLogLine(logEl, `✅ PTX Type: ${data.ptx_type}`, 'success');
                     }
-                    addLogLine(logEl, `✅ VNC script completed`, 'success');
-                    
+                    addLogLine(logEl, `✅ VNC server started on PTX`, 'success');
+
                     // Show script output if available (for debugging)
                     if (data.script_output) {
                         addLogLine(logEl, `📋 Script output: ${data.script_output}`, 'info');
                     }
-                    
-                    if (data.manual_connect) {
+
+                    // If client is ready, launch VNC locally via protocol handler
+                    if (clientReady && !data.manual_connect) {
+                        addLogLine(logEl, `🚀 Launching VNC Viewer locally to ${ip}:0`, 'info');
+                        openProtocolUri(`autotech-vnc://${ip}:0`);
+                        addLogLine(logEl, `✅ VNC window should open shortly...`, 'success');
+                        showToast(`VNC session started to ${ip}:0`, 'success');
+                    } else if (data.manual_connect) {
                         addLogLine(logEl, `⚠️ VNC Viewer not found`, 'warning');
                         addLogLine(logEl, `📋 Connect manually to: ${data.vnc_display}`, 'info');
                         showToast(`Connect manually to ${data.vnc_display}`, 'info');
-                        
+
                         // Copy connection string to clipboard
                         if (navigator.clipboard) {
                             navigator.clipboard.writeText(data.vnc_display);
                             addLogLine(logEl, `📋 Connection address copied to clipboard`, 'success');
                         }
                     } else {
-                        addLogLine(logEl, `✅ VNC Viewer launched to ${data.vnc_display}`, 'success');
+                        addLogLine(logEl, `✅ VNC Viewer launched from server to ${data.vnc_display}`, 'success');
                         addLogLine(logEl, `🎯 VNC window should open shortly...`, 'info');
                         showToast('VNC session started', 'success');
                     }
@@ -1044,7 +1119,129 @@
                 closeCleanupModal();
             }
         }
-        
+
+        // ========================================
+        // LINUX HEALTH CHECK & MONITORING
+        // ========================================
+        let healthCheckInterval = null;
+
+        async function fetchHealthCheck(ptx_ip, ptx_model) {
+            // Check if offline mode - return fake data for testing
+            const config = JSON.parse(document.getElementById('config-data').textContent);
+            if (config.isOffline || currentEquipment?.vehicle_status === 'Simulated') {
+                // Return simulated health data
+                return {
+                    success: true,
+                    cpu_usage: '38.50%',
+                    memory_usage: '92.98%',
+                    uptime: '1 day, 36 minutes',
+                    disk_usage: '/dev/mmcblk0p3  5.6G  2.6G  2.7G  49% /media/realroot/home',
+                    disk_percent: '49%'
+                };
+            }
+
+            try {
+                const response = await fetch('/api/linux_health_check', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ptx_ip, ptx_model })
+                });
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Health check error:', error);
+                return { success: false, error: error.message };
+            }
+        }
+
+        function displayHealthStats(healthData) {
+            const healthStats = document.getElementById('healthStats');
+            if (!healthStats) return;
+
+            if (!healthData.success) {
+                healthStats.innerHTML = '<div style="text-align: center; padding: 12px; color: var(--status-offline); font-size: 0.85rem;">⚠️ ' + (healthData.error || 'Failed to load health data') + '</div>';
+                return;
+            }
+
+            const cpuValue = parseFloat(healthData.cpu_usage) || 0;
+            const memValue = parseFloat(healthData.memory_usage) || 0;
+            const diskValue = parseFloat(healthData.disk_percent) || 0;
+
+            const getCpuClass = (val) => val > 80 ? 'critical' : val > 60 ? 'warning' : 'good';
+            const getMemClass = (val) => val > 90 ? 'critical' : val > 75 ? 'warning' : 'good';
+            const getDiskClass = (val) => val > 85 ? 'critical' : val > 70 ? 'warning' : 'good';
+
+            healthStats.innerHTML = '<div class="health-stats-grid">' +
+                '<div class="health-stat"><div class="health-stat-label">CPU Usage</div><div class="health-stat-value ' + getCpuClass(cpuValue) + '">' + healthData.cpu_usage + '</div></div>' +
+                '<div class="health-stat"><div class="health-stat-label">Memory Usage</div><div class="health-stat-value ' + getMemClass(memValue) + '">' + healthData.memory_usage + '</div></div>' +
+                '<div class="health-stat"><div class="health-stat-label">PTX Uptime</div><div class="health-stat-value" style="font-size: 0.9rem; color: var(--theme-text-bright);">' + healthData.uptime + '</div></div>' +
+                '<div class="health-stat"><div class="health-stat-label">Disk Usage</div><div class="health-stat-value ' + getDiskClass(diskValue) + '">' + healthData.disk_percent + '</div></div>' +
+                '</div>';
+
+            updateRefreshTimer();
+        }
+
+        function updateRefreshTimer() {
+            const timer = document.getElementById('healthRefreshTimer');
+            if (timer) {
+                const now = new Date();
+                timer.textContent = 'Last updated: ' + now.toLocaleTimeString();
+            }
+        }
+
+        async function startHealthMonitoring(ptx_ip, ptx_model) {
+            // Clear any existing interval
+            if (healthCheckInterval) {
+                clearInterval(healthCheckInterval);
+            }
+
+            // Initial fetch
+            const data = await fetchHealthCheck(ptx_ip, ptx_model);
+            displayHealthStats(data);
+
+            // Set up 30-second refresh
+            healthCheckInterval = setInterval(async () => {
+                const data = await fetchHealthCheck(ptx_ip, ptx_model);
+                displayHealthStats(data);
+            }, 30000); // 30 seconds
+        }
+
+        function stopHealthMonitoring() {
+            if (healthCheckInterval) {
+                clearInterval(healthCheckInterval);
+                healthCheckInterval = null;
+            }
+        }
+
+        // Clean up health monitoring on page unload
+        window.addEventListener('beforeunload', () => {
+            stopHealthMonitoring();
+        });
+
+        // ========================================
+        // POPOUT WINDOW FUNCTIONALITY
+        // ========================================
+        function popoutDetails() {
+            if (!currentEquipment) {
+                showToast('No equipment selected', 'warning');
+                return;
+            }
+
+            const equipmentId = currentEquipment.OID;
+            const equipmentName = currentEquipment.OID || 'Equipment';
+
+            // Open equipment-specific monitor in new tab
+            const url = '/equipment_monitor/' + encodeURIComponent(equipmentId);
+            const popout = window.open(url, equipmentName);
+
+            if (!popout) {
+                showToast('Popup blocked. Please allow popups for this site.', 'error');
+                return;
+            }
+
+            showToast('Equipment monitor opened in new tab', 'success');
+        }
+
         // Focus search input on load
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('searchInput').focus();

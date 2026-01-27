@@ -1,0 +1,253 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- Source: https://en.wikipedia.org/wiki/ISO_3166-1 -->
+<Countries>
+	<Country Alpha2="AF" Alpha3="AFG" Numeric="004" XLATE_Name="Afghanistan"/>
+	<Country Alpha2="AX" Alpha3="ALA" Numeric="248" XLATE_Name="Åland Islands"/>
+	<Country Alpha2="AL" Alpha3="ALB" Numeric="008" XLATE_Name="Albania"/>
+	<Country Alpha2="DZ" Alpha3="DZA" Numeric="012" XLATE_Name="Algeria"/>
+	<Country Alpha2="AS" Alpha3="ASM" Numeric="016" XLATE_Name="American Samoa"/>
+	<Country Alpha2="AD" Alpha3="AND" Numeric="020" XLATE_Name="Andorra"/>
+	<Country Alpha2="AO" Alpha3="AGO" Numeric="024" XLATE_Name="Angola"/>
+	<Country Alpha2="AI" Alpha3="AIA" Numeric="660" XLATE_Name="Anguilla"/>
+	<Country Alpha2="AQ" Alpha3="ATA" Numeric="010" XLATE_Name="Antarctica"/>
+	<Country Alpha2="AG" Alpha3="ATG" Numeric="028" XLATE_Name="Antigua and Barbuda"/>
+	<Country Alpha2="AR" Alpha3="ARG" Numeric="032" XLATE_Name="Argentina"/>
+	<Country Alpha2="AM" Alpha3="ARM" Numeric="051" XLATE_Name="Armenia"/>
+	<Country Alpha2="AW" Alpha3="ABW" Numeric="533" XLATE_Name="Aruba"/>
+	<Country Alpha2="AU" Alpha3="AUS" Numeric="036" XLATE_Name="Australia"/>
+	<Country Alpha2="AT" Alpha3="AUT" Numeric="040" XLATE_Name="Austria"/>
+	<Country Alpha2="AZ" Alpha3="AZE" Numeric="031" XLATE_Name="Azerbaijan"/>
+	<Country Alpha2="BS" Alpha3="BHS" Numeric="044" XLATE_Name="Bahamas"/>
+	<Country Alpha2="BH" Alpha3="BHR" Numeric="048" XLATE_Name="Bahrain"/>
+	<Country Alpha2="BD" Alpha3="BGD" Numeric="050" XLATE_Name="Bangladesh"/>
+	<Country Alpha2="BB" Alpha3="BRB" Numeric="052" XLATE_Name="Barbados"/>
+	<Country Alpha2="BY" Alpha3="BLR" Numeric="112" XLATE_Name="Belarus"/>
+	<Country Alpha2="BE" Alpha3="BEL" Numeric="056" XLATE_Name="Belgium"/>
+	<Country Alpha2="BZ" Alpha3="BLZ" Numeric="084" XLATE_Name="Belize"/>
+	<Country Alpha2="BJ" Alpha3="BEN" Numeric="204" XLATE_Name="Benin"/>
+	<Country Alpha2="BM" Alpha3="BMU" Numeric="060" XLATE_Name="Bermuda"/>
+	<Country Alpha2="BT" Alpha3="BTN" Numeric="064" XLATE_Name="Bhutan"/>
+	<Country Alpha2="BO" Alpha3="BOL" Numeric="068" XLATE_Name="Bolivia (Plurinational State of)"/>
+	<Country Alpha2="BQ" Alpha3="BES" Numeric="535" XLATE_Name="Bonaire, Sint Eustatius and Saba"/>
+	<Country Alpha2="BA" Alpha3="BIH" Numeric="070" XLATE_Name="Bosnia and Herzegovina"/>
+	<Country Alpha2="BW" Alpha3="BWA" Numeric="072" XLATE_Name="Botswana"/>
+	<Country Alpha2="BV" Alpha3="BVT" Numeric="074" XLATE_Name="Bouvet Island"/>
+	<Country Alpha2="BR" Alpha3="BRA" Numeric="076" XLATE_Name="Brazil"/>
+	<Country Alpha2="IO" Alpha3="IOT" Numeric="086" XLATE_Name="British Indian Ocean Territory"/>
+	<Country Alpha2="BN" Alpha3="BRN" Numeric="096" XLATE_Name="Brunei Darussalam"/>
+	<Country Alpha2="BG" Alpha3="BGR" Numeric="100" XLATE_Name="Bulgaria"/>
+	<Country Alpha2="BF" Alpha3="BFA" Numeric="854" XLATE_Name="Burkina Faso"/>
+	<Country Alpha2="BI" Alpha3="BDI" Numeric="108" XLATE_Name="Burundi"/>
+	<Country Alpha2="KH" Alpha3="KHM" Numeric="116" XLATE_Name="Cambodia"/>
+	<Country Alpha2="CM" Alpha3="CMR" Numeric="120" XLATE_Name="Cameroon"/>
+	<Country Alpha2="CA" Alpha3="CAN" Numeric="124" XLATE_Name="Canada"/>
+	<Country Alpha2="CV" Alpha3="CPV" Numeric="132" XLATE_Name="Cabo Verde"/>
+	<Country Alpha2="KY" Alpha3="CYM" Numeric="136" XLATE_Name="Cayman Islands"/>
+	<Country Alpha2="CF" Alpha3="CAF" Numeric="140" XLATE_Name="Central African Republic"/>
+	<Country Alpha2="TD" Alpha3="TCD" Numeric="148" XLATE_Name="Chad"/>
+	<Country Alpha2="CL" Alpha3="CHL" Numeric="152" XLATE_Name="Chile"/>
+	<Country Alpha2="CN" Alpha3="CHN" Numeric="156" XLATE_Name="China"/>
+	<Country Alpha2="CX" Alpha3="CXR" Numeric="162" XLATE_Name="Christmas Island"/>
+	<Country Alpha2="CC" Alpha3="CCK" Numeric="166" XLATE_Name="Cocos (Keeling) Islands"/>
+	<Country Alpha2="CO" Alpha3="COL" Numeric="170" XLATE_Name="Colombia"/>
+	<Country Alpha2="KM" Alpha3="COM" Numeric="174" XLATE_Name="Comoros"/>
+	<Country Alpha2="CG" Alpha3="COG" Numeric="178" XLATE_Name="Congo"/>
+	<Country Alpha2="CD" Alpha3="COD" Numeric="180" XLATE_Name="Congo (Democratic Republic of the)"/>
+	<Country Alpha2="CK" Alpha3="COK" Numeric="184" XLATE_Name="Cook Islands"/>
+	<Country Alpha2="CR" Alpha3="CRI" Numeric="188" XLATE_Name="Costa Rica"/>
+	<Country Alpha2="CI" Alpha3="CIV" Numeric="384" XLATE_Name="Côte d'Ivoire"/>
+	<Country Alpha2="HR" Alpha3="HRV" Numeric="191" XLATE_Name="Croatia"/>
+	<Country Alpha2="CU" Alpha3="CUB" Numeric="192" XLATE_Name="Cuba"/>
+	<Country Alpha2="CW" Alpha3="CUW" Numeric="531" XLATE_Name="Curaçao"/>
+	<Country Alpha2="CY" Alpha3="CYP" Numeric="196" XLATE_Name="Cyprus"/>
+	<Country Alpha2="CZ" Alpha3="CZE" Numeric="203" XLATE_Name="Czech Republic"/>
+	<Country Alpha2="DK" Alpha3="DNK" Numeric="208" XLATE_Name="Denmark"/>
+	<Country Alpha2="DJ" Alpha3="DJI" Numeric="262" XLATE_Name="Djibouti"/>
+	<Country Alpha2="DM" Alpha3="DMA" Numeric="212" XLATE_Name="Dominica"/>
+	<Country Alpha2="DO" Alpha3="DOM" Numeric="214" XLATE_Name="Dominican Republic"/>
+	<Country Alpha2="EC" Alpha3="ECU" Numeric="218" XLATE_Name="Ecuador"/>
+	<Country Alpha2="EG" Alpha3="EGY" Numeric="818" XLATE_Name="Egypt"/>
+	<Country Alpha2="SV" Alpha3="SLV" Numeric="222" XLATE_Name="El Salvador"/>
+	<Country Alpha2="GQ" Alpha3="GNQ" Numeric="226" XLATE_Name="Equatorial Guinea"/>
+	<Country Alpha2="ER" Alpha3="ERI" Numeric="232" XLATE_Name="Eritrea"/>
+	<Country Alpha2="EE" Alpha3="EST" Numeric="233" XLATE_Name="Estonia"/>
+	<Country Alpha2="ET" Alpha3="ETH" Numeric="231" XLATE_Name="Ethiopia"/>
+	<Country Alpha2="FK" Alpha3="FLK" Numeric="238" XLATE_Name="Falkland Islands (Malvinas)"/>
+	<Country Alpha2="FO" Alpha3="FRO" Numeric="234" XLATE_Name="Faroe Islands"/>
+	<Country Alpha2="FJ" Alpha3="FJI" Numeric="242" XLATE_Name="Fiji"/>
+	<Country Alpha2="FI" Alpha3="FIN" Numeric="246" XLATE_Name="Finland"/>
+	<Country Alpha2="FR" Alpha3="FRA" Numeric="250" XLATE_Name="France"/>
+	<Country Alpha2="GF" Alpha3="GUF" Numeric="254" XLATE_Name="French Guiana"/>
+	<Country Alpha2="PF" Alpha3="PYF" Numeric="258" XLATE_Name="French Polynesia"/>
+	<Country Alpha2="TF" Alpha3="ATF" Numeric="260" XLATE_Name="French Southern Territories"/>
+	<Country Alpha2="GA" Alpha3="GAB" Numeric="266" XLATE_Name="Gabon"/>
+	<Country Alpha2="GM" Alpha3="GMB" Numeric="270" XLATE_Name="Gambia"/>
+	<Country Alpha2="GE" Alpha3="GEO" Numeric="268" XLATE_Name="Georgia"/>
+	<Country Alpha2="DE" Alpha3="DEU" Numeric="276" XLATE_Name="Germany"/>
+	<Country Alpha2="GH" Alpha3="GHA" Numeric="288" XLATE_Name="Ghana"/>
+	<Country Alpha2="GI" Alpha3="GIB" Numeric="292" XLATE_Name="Gibraltar"/>
+	<Country Alpha2="GR" Alpha3="GRC" Numeric="300" XLATE_Name="Greece"/>
+	<Country Alpha2="GL" Alpha3="GRL" Numeric="304" XLATE_Name="Greenland"/>
+	<Country Alpha2="GD" Alpha3="GRD" Numeric="308" XLATE_Name="Grenada"/>
+	<Country Alpha2="GP" Alpha3="GLP" Numeric="312" XLATE_Name="Guadeloupe"/>
+	<Country Alpha2="GU" Alpha3="GUM" Numeric="316" XLATE_Name="Guam"/>
+	<Country Alpha2="GT" Alpha3="GTM" Numeric="320" XLATE_Name="Guatemala"/>
+	<Country Alpha2="GG" Alpha3="GGY" Numeric="831" XLATE_Name="Guernsey"/>
+	<Country Alpha2="GN" Alpha3="GIN" Numeric="324" XLATE_Name="Guinea"/>
+	<Country Alpha2="GW" Alpha3="GNB" Numeric="624" XLATE_Name="Guinea-Bissau"/>
+	<Country Alpha2="GY" Alpha3="GUY" Numeric="328" XLATE_Name="Guyana"/>
+	<Country Alpha2="HT" Alpha3="HTI" Numeric="332" XLATE_Name="Haiti"/>
+	<Country Alpha2="HM" Alpha3="HMD" Numeric="334" XLATE_Name="Heard Island and McDonald Islands"/>
+	<Country Alpha2="VA" Alpha3="VAT" Numeric="336" XLATE_Name="Holy See"/>
+	<Country Alpha2="HN" Alpha3="HND" Numeric="340" XLATE_Name="Honduras"/>
+	<Country Alpha2="HK" Alpha3="HKG" Numeric="344" XLATE_Name="Hong Kong"/>
+	<Country Alpha2="HU" Alpha3="HUN" Numeric="348" XLATE_Name="Hungary"/>
+	<Country Alpha2="IS" Alpha3="ISL" Numeric="352" XLATE_Name="Iceland"/>
+	<Country Alpha2="IN" Alpha3="IND" Numeric="356" XLATE_Name="India"/>
+	<Country Alpha2="ID" Alpha3="IDN" Numeric="360" XLATE_Name="Indonesia"/>
+	<Country Alpha2="IR" Alpha3="IRN" Numeric="364" XLATE_Name="Iran (Islamic Republic of)"/>
+	<Country Alpha2="IQ" Alpha3="IRQ" Numeric="368" XLATE_Name="Iraq"/>
+	<Country Alpha2="IE" Alpha3="IRL" Numeric="372" XLATE_Name="Ireland"/>
+	<Country Alpha2="IM" Alpha3="IMN" Numeric="833" XLATE_Name="Isle of Man"/>
+	<Country Alpha2="IL" Alpha3="ISR" Numeric="376" XLATE_Name="Israel"/>
+	<Country Alpha2="IT" Alpha3="ITA" Numeric="380" XLATE_Name="Italy"/>
+	<Country Alpha2="JM" Alpha3="JAM" Numeric="388" XLATE_Name="Jamaica"/>
+	<Country Alpha2="JP" Alpha3="JPN" Numeric="392" XLATE_Name="Japan"/>
+	<Country Alpha2="JE" Alpha3="JEY" Numeric="832" XLATE_Name="Jersey"/>
+	<Country Alpha2="JO" Alpha3="JOR" Numeric="400" XLATE_Name="Jordan"/>
+	<Country Alpha2="KZ" Alpha3="KAZ" Numeric="398" XLATE_Name="Kazakhstan"/>
+	<Country Alpha2="KE" Alpha3="KEN" Numeric="404" XLATE_Name="Kenya"/>
+	<Country Alpha2="KI" Alpha3="KIR" Numeric="296" XLATE_Name="Kiribati"/>
+	<Country Alpha2="KP" Alpha3="PRK" Numeric="408" XLATE_Name="Korea (Democratic People's Republic of)"/>
+	<Country Alpha2="KR" Alpha3="KOR" Numeric="410" XLATE_Name="Korea (Republic of)"/>
+	<Country Alpha2="KW" Alpha3="KWT" Numeric="414" XLATE_Name="Kuwait"/>
+	<Country Alpha2="KG" Alpha3="KGZ" Numeric="417" XLATE_Name="Kyrgyzstan"/>
+	<Country Alpha2="LA" Alpha3="LAO" Numeric="418" XLATE_Name="Lao People's Democratic Republic"/>
+	<Country Alpha2="LV" Alpha3="LVA" Numeric="428" XLATE_Name="Latvia"/>
+	<Country Alpha2="LB" Alpha3="LBN" Numeric="422" XLATE_Name="Lebanon"/>
+	<Country Alpha2="LS" Alpha3="LSO" Numeric="426" XLATE_Name="Lesotho"/>
+	<Country Alpha2="LR" Alpha3="LBR" Numeric="430" XLATE_Name="Liberia"/>
+	<Country Alpha2="LY" Alpha3="LBY" Numeric="434" XLATE_Name="Libya"/>
+	<Country Alpha2="LI" Alpha3="LIE" Numeric="438" XLATE_Name="Liechtenstein"/>
+	<Country Alpha2="LT" Alpha3="LTU" Numeric="440" XLATE_Name="Lithuania"/>
+	<Country Alpha2="LU" Alpha3="LUX" Numeric="442" XLATE_Name="Luxembourg"/>
+	<Country Alpha2="MO" Alpha3="MAC" Numeric="446" XLATE_Name="Macao"/>
+	<Country Alpha2="MK" Alpha3="MKD" Numeric="807" XLATE_Name="Macedonia (the former Yugoslav Republic of)"/>
+	<Country Alpha2="MG" Alpha3="MDG" Numeric="450" XLATE_Name="Madagascar"/>
+	<Country Alpha2="MW" Alpha3="MWI" Numeric="454" XLATE_Name="Malawi"/>
+	<Country Alpha2="MY" Alpha3="MYS" Numeric="458" XLATE_Name="Malaysia"/>
+	<Country Alpha2="MV" Alpha3="MDV" Numeric="462" XLATE_Name="Maldives"/>
+	<Country Alpha2="ML" Alpha3="MLI" Numeric="466" XLATE_Name="Mali"/>
+	<Country Alpha2="MT" Alpha3="MLT" Numeric="470" XLATE_Name="Malta"/>
+	<Country Alpha2="MH" Alpha3="MHL" Numeric="584" XLATE_Name="Marshall Islands"/>
+	<Country Alpha2="MQ" Alpha3="MTQ" Numeric="474" XLATE_Name="Martinique"/>
+	<Country Alpha2="MR" Alpha3="MRT" Numeric="478" XLATE_Name="Mauritania"/>
+	<Country Alpha2="MU" Alpha3="MUS" Numeric="480" XLATE_Name="Mauritius"/>
+	<Country Alpha2="YT" Alpha3="MYT" Numeric="175" XLATE_Name="Mayotte"/>
+	<Country Alpha2="MX" Alpha3="MEX" Numeric="484" XLATE_Name="Mexico"/>
+	<Country Alpha2="FM" Alpha3="FSM" Numeric="583" XLATE_Name="Micronesia (Federated States of)"/>
+	<Country Alpha2="MD" Alpha3="MDA" Numeric="498" XLATE_Name="Moldova (Republic of)"/>
+	<Country Alpha2="MC" Alpha3="MCO" Numeric="492" XLATE_Name="Monaco"/>
+	<Country Alpha2="MN" Alpha3="MNG" Numeric="496" XLATE_Name="Mongolia"/>
+	<Country Alpha2="ME" Alpha3="MNE" Numeric="499" XLATE_Name="Montenegro"/>
+	<Country Alpha2="MS" Alpha3="MSR" Numeric="500" XLATE_Name="Montserrat"/>
+	<Country Alpha2="MA" Alpha3="MAR" Numeric="504" XLATE_Name="Morocco"/>
+	<Country Alpha2="MZ" Alpha3="MOZ" Numeric="508" XLATE_Name="Mozambique"/>
+	<Country Alpha2="MM" Alpha3="MMR" Numeric="104" XLATE_Name="Myanmar"/>
+	<Country Alpha2="NA" Alpha3="NAM" Numeric="516" XLATE_Name="Namibia"/>
+	<Country Alpha2="NR" Alpha3="NRU" Numeric="520" XLATE_Name="Nauru"/>
+	<Country Alpha2="NP" Alpha3="NPL" Numeric="524" XLATE_Name="Nepal"/>
+	<Country Alpha2="NL" Alpha3="NLD" Numeric="528" XLATE_Name="Netherlands"/>
+	<Country Alpha2="NC" Alpha3="NCL" Numeric="540" XLATE_Name="New Caledonia"/>
+	<Country Alpha2="NZ" Alpha3="NZL" Numeric="554" XLATE_Name="New Zealand"/>
+	<Country Alpha2="NI" Alpha3="NIC" Numeric="558" XLATE_Name="Nicaragua"/>
+	<Country Alpha2="NE" Alpha3="NER" Numeric="562" XLATE_Name="Niger"/>
+	<Country Alpha2="NG" Alpha3="NGA" Numeric="566" XLATE_Name="Nigeria"/>
+	<Country Alpha2="NU" Alpha3="NIU" Numeric="570" XLATE_Name="Niue"/>
+	<Country Alpha2="NF" Alpha3="NFK" Numeric="574" XLATE_Name="Norfolk Island"/>
+	<Country Alpha2="MP" Alpha3="MNP" Numeric="580" XLATE_Name="Northern Mariana Islands"/>
+	<Country Alpha2="NO" Alpha3="NOR" Numeric="578" XLATE_Name="Norway"/>
+	<Country Alpha2="OM" Alpha3="OMN" Numeric="512" XLATE_Name="Oman"/>
+	<Country Alpha2="PK" Alpha3="PAK" Numeric="586" XLATE_Name="Pakistan"/>
+	<Country Alpha2="PW" Alpha3="PLW" Numeric="585" XLATE_Name="Palau"/>
+	<Country Alpha2="PS" Alpha3="PSE" Numeric="275" XLATE_Name="Palestine, State of"/>
+	<Country Alpha2="PA" Alpha3="PAN" Numeric="591" XLATE_Name="Panama"/>
+	<Country Alpha2="PG" Alpha3="PNG" Numeric="598" XLATE_Name="Papua New Guinea"/>
+	<Country Alpha2="PY" Alpha3="PRY" Numeric="600" XLATE_Name="Paraguay"/>
+	<Country Alpha2="PE" Alpha3="PER" Numeric="604" XLATE_Name="Peru"/>
+	<Country Alpha2="PH" Alpha3="PHL" Numeric="608" XLATE_Name="Philippines"/>
+	<Country Alpha2="PN" Alpha3="PCN" Numeric="612" XLATE_Name="Pitcairn"/>
+	<Country Alpha2="PL" Alpha3="POL" Numeric="616" XLATE_Name="Poland"/>
+	<Country Alpha2="PT" Alpha3="PRT" Numeric="620" XLATE_Name="Portugal"/>
+	<Country Alpha2="PR" Alpha3="PRI" Numeric="630" XLATE_Name="Puerto Rico"/>
+	<Country Alpha2="QA" Alpha3="QAT" Numeric="634" XLATE_Name="Qatar"/>
+	<Country Alpha2="RE" Alpha3="REU" Numeric="638" XLATE_Name="Réunion"/>
+	<Country Alpha2="RO" Alpha3="ROU" Numeric="642" XLATE_Name="Romania"/>
+	<Country Alpha2="RU" Alpha3="RUS" Numeric="643" XLATE_Name="Russian Federation"/>
+	<Country Alpha2="RW" Alpha3="RWA" Numeric="646" XLATE_Name="Rwanda"/>
+	<Country Alpha2="BL" Alpha3="BLM" Numeric="652" XLATE_Name="Saint Barthélemy"/>
+	<Country Alpha2="SH" Alpha3="SHN" Numeric="654" XLATE_Name="Saint Helena, Ascension and Tristan da Cunha"/>
+	<Country Alpha2="KN" Alpha3="KNA" Numeric="659" XLATE_Name="Saint Kitts and Nevis"/>
+	<Country Alpha2="LC" Alpha3="LCA" Numeric="662" XLATE_Name="Saint Lucia"/>
+	<Country Alpha2="MF" Alpha3="MAF" Numeric="663" XLATE_Name="Saint Martin (French part)"/>
+	<Country Alpha2="PM" Alpha3="SPM" Numeric="666" XLATE_Name="Saint Pierre and Miquelon"/>
+	<Country Alpha2="VC" Alpha3="VCT" Numeric="670" XLATE_Name="Saint Vincent and the Grenadines"/>
+	<Country Alpha2="WS" Alpha3="WSM" Numeric="882" XLATE_Name="Samoa"/>
+	<Country Alpha2="SM" Alpha3="SMR" Numeric="674" XLATE_Name="San Marino"/>
+	<Country Alpha2="ST" Alpha3="STP" Numeric="678" XLATE_Name="Sao Tome and Principe"/>
+	<Country Alpha2="SA" Alpha3="SAU" Numeric="682" XLATE_Name="Saudi Arabia"/>
+	<Country Alpha2="SN" Alpha3="SEN" Numeric="686" XLATE_Name="Senegal"/>
+	<Country Alpha2="RS" Alpha3="SRB" Numeric="688" XLATE_Name="Serbia"/>
+	<Country Alpha2="SC" Alpha3="SYC" Numeric="690" XLATE_Name="Seychelles"/>
+	<Country Alpha2="SL" Alpha3="SLE" Numeric="694" XLATE_Name="Sierra Leone"/>
+	<Country Alpha2="SG" Alpha3="SGP" Numeric="702" XLATE_Name="Singapore"/>
+	<Country Alpha2="SX" Alpha3="SXM" Numeric="534" XLATE_Name="Sint Maarten (Dutch part)"/>
+	<Country Alpha2="SK" Alpha3="SVK" Numeric="703" XLATE_Name="Slovakia"/>
+	<Country Alpha2="SI" Alpha3="SVN" Numeric="705" XLATE_Name="Slovenia"/>
+	<Country Alpha2="SB" Alpha3="SLB" Numeric="090" XLATE_Name="Solomon Islands"/>
+	<Country Alpha2="SO" Alpha3="SOM" Numeric="706" XLATE_Name="Somalia"/>
+	<Country Alpha2="ZA" Alpha3="ZAF" Numeric="710" XLATE_Name="South Africa"/>
+	<Country Alpha2="GS" Alpha3="SGS" Numeric="239" XLATE_Name="South Georgia and the South Sandwich Islands"/>
+	<Country Alpha2="SS" Alpha3="SSD" Numeric="728" XLATE_Name="South Sudan"/>
+	<Country Alpha2="ES" Alpha3="ESP" Numeric="724" XLATE_Name="Spain"/>
+	<Country Alpha2="LK" Alpha3="LKA" Numeric="144" XLATE_Name="Sri Lanka"/>
+	<Country Alpha2="SD" Alpha3="SDN" Numeric="729" XLATE_Name="Sudan"/>
+	<Country Alpha2="SR" Alpha3="SUR" Numeric="740" XLATE_Name="Suriname"/>
+	<Country Alpha2="SJ" Alpha3="SJM" Numeric="744" XLATE_Name="Svalbard and Jan Mayen"/>
+	<Country Alpha2="SZ" Alpha3="SWZ" Numeric="748" XLATE_Name="Swaziland"/>
+	<Country Alpha2="SE" Alpha3="SWE" Numeric="752" XLATE_Name="Sweden"/>
+	<Country Alpha2="CH" Alpha3="CHE" Numeric="756" XLATE_Name="Switzerland"/>
+	<Country Alpha2="SY" Alpha3="SYR" Numeric="760" XLATE_Name="Syrian Arab Republic"/>
+	<Country Alpha2="TW" Alpha3="TWN" Numeric="158" XLATE_Name="Taiwan, Province of China[a]"/>
+	<Country Alpha2="TJ" Alpha3="TJK" Numeric="762" XLATE_Name="Tajikistan"/>
+	<Country Alpha2="TZ" Alpha3="TZA" Numeric="834" XLATE_Name="Tanzania, United Republic of"/>
+	<Country Alpha2="TH" Alpha3="THA" Numeric="764" XLATE_Name="Thailand"/>
+	<Country Alpha2="TL" Alpha3="TLS" Numeric="626" XLATE_Name="Timor-Leste"/>
+	<Country Alpha2="TG" Alpha3="TGO" Numeric="768" XLATE_Name="Togo"/>
+	<Country Alpha2="TK" Alpha3="TKL" Numeric="772" XLATE_Name="Tokelau"/>
+	<Country Alpha2="TO" Alpha3="TON" Numeric="776" XLATE_Name="Tonga"/>
+	<Country Alpha2="TT" Alpha3="TTO" Numeric="780" XLATE_Name="Trinidad and Tobago"/>
+	<Country Alpha2="TN" Alpha3="TUN" Numeric="788" XLATE_Name="Tunisia"/>
+	<Country Alpha2="TR" Alpha3="TUR" Numeric="792" XLATE_Name="Turkey"/>
+	<Country Alpha2="TM" Alpha3="TKM" Numeric="795" XLATE_Name="Turkmenistan"/>
+	<Country Alpha2="TC" Alpha3="TCA" Numeric="796" XLATE_Name="Turks and Caicos Islands"/>
+	<Country Alpha2="TV" Alpha3="TUV" Numeric="798" XLATE_Name="Tuvalu"/>
+	<Country Alpha2="UG" Alpha3="UGA" Numeric="800" XLATE_Name="Uganda"/>
+	<Country Alpha2="UA" Alpha3="UKR" Numeric="804" XLATE_Name="Ukraine"/>
+	<Country Alpha2="AE" Alpha3="ARE" Numeric="784" XLATE_Name="United Arab Emirates"/>
+	<Country Alpha2="GB" Alpha3="GBR" Numeric="826" XLATE_Name="United Kingdom of Great Britain and Northern Ireland"/>
+	<Country Alpha2="US" Alpha3="USA" Numeric="840" XLATE_Name="United States of America"/>
+	<Country Alpha2="UM" Alpha3="UMI" Numeric="581" XLATE_Name="United States Minor Outlying Islands"/>
+	<Country Alpha2="UY" Alpha3="URY" Numeric="858" XLATE_Name="Uruguay"/>
+	<Country Alpha2="UZ" Alpha3="UZB" Numeric="860" XLATE_Name="Uzbekistan"/>
+	<Country Alpha2="VU" Alpha3="VUT" Numeric="548" XLATE_Name="Vanuatu"/>
+	<Country Alpha2="VE" Alpha3="VEN" Numeric="862" XLATE_Name="Venezuela (Bolivarian Republic of)"/>
+	<Country Alpha2="VN" Alpha3="VNM" Numeric="704" XLATE_Name="Viet Nam"/>
+	<Country Alpha2="VG" Alpha3="VGB" Numeric="092" XLATE_Name="Virgin Islands (British)"/>
+	<Country Alpha2="VI" Alpha3="VIR" Numeric="850" XLATE_Name="Virgin Islands (U.S.)"/>
+	<Country Alpha2="WF" Alpha3="WLF" Numeric="876" XLATE_Name="Wallis and Futuna"/>
+	<Country Alpha2="EH" Alpha3="ESH" Numeric="732" XLATE_Name="Western Sahara"/>
+	<Country Alpha2="YE" Alpha3="YEM" Numeric="887" XLATE_Name="Yemen"/>
+	<Country Alpha2="ZM" Alpha3="ZMB" Numeric="894" XLATE_Name="Zambia"/>
+	<Country Alpha2="ZW" Alpha3="ZWE" Numeric="716" XLATE_Name="Zimbabwe"/>
+</Countries>

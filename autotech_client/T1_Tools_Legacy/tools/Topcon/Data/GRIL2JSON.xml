@@ -1,0 +1,1814 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Objects>
+	<Object Name="Receiver" XLATE_FriendlyName="Receiver Settings">
+		<Object Name="Satellites">
+			<Object Name="Pos" XLATE_FriendlyName="Constellations Used For Positioning">
+				<Variable Name="GPS" Type="Boolean">
+					<GRIL Parameter="pos/navsys/gps" True="on" False="off" GNSSFirmwareVersions="4.5-100.0"/>
+					<GRIL Parameter="pos/sys" Index="0" True="on" False="off"/>
+				</Variable>
+				<Variable Name="GLONASS" Type="Boolean">
+					<GRIL Parameter="pos/navsys/gln" True="on" False="off" GNSSFirmwareVersions="4.5-100.0"/>
+					<GRIL Parameter="pos/sys" Index="1" True="on" False="off"/>
+				</Variable>
+				<Variable Name="Galileo" Type="Boolean">
+					<GRIL Parameter="pos/navsys/galileo" True="on" False="off"/>
+				</Variable>
+				<Variable Name="BeiDou" Type="Boolean">
+					<GRIL Parameter="pos/navsys/beidou" True="on" False="off"/>
+				</Variable>
+				<Variable Name="SBAS" Type="Boolean">
+					<GRIL Parameter="pos/navsys/sbas" True="on" False="off"/>
+				</Variable>
+				<Variable Name="QZSS" Type="Boolean">
+					<GRIL Parameter="pos/navsys/qzss" True="on" False="off"/>
+				</Variable>
+				<Variable Name="NavIC" Type="Boolean">
+					<GRIL Parameter="pos/navsys/irnss" True="on" False="off"/>
+				</Variable>
+			</Object>
+			<Object Name="Lock" XLATE_FriendlyName="Tracked Signals">
+				<Object Name="GPS">
+					<Object Name="P">
+						<Variable Name="L1P" XLATE_FriendlyName="P L1" Type="Boolean">
+							<GRIL Parameter="lock/gps/pcode" Index="0" True="on" False="off"/>
+						</Variable>
+						<Variable Name="L2P" XLATE_FriendlyName="P L2" Type="Boolean">
+							<GRIL Parameter="lock/gps/pcode" Index="1" True="on" False="off"/>
+						</Variable>
+					</Object>
+					<Object Name="L1C">
+						<Variable Name="L1C-D" XLATE_FriendlyName="L1C Data" Type="Boolean">
+							<GRIL Parameter="lock/gps/l1c" Index="1" True="on" False="off"/>
+						</Variable>
+					</Object>
+					<Object Name="L2C">
+						<Variable Name="L2C-L" Type="Boolean">
+							<GRIL Parameter="lock/gps/l2c" Index="0" True="on" False="off"/>
+						</Variable>
+						<Variable Name="L2C-M" Type="Boolean">
+							<GRIL Parameter="lock/gps/l2c" Index="1" True="on" False="off"/>
+						</Variable>
+					</Object>
+					<Object Name="L5">
+						<Variable Name="L5I" Type="Boolean">
+							<GRIL Parameter="lock/gps/l5" Index="0" True="on" False="off"/>
+						</Variable>
+						<Variable Name="L5Q" Type="Boolean">
+							<GRIL Parameter="lock/gps/l5" Index="1" True="on" False="off"/>
+						</Variable>
+					</Object>
+				</Object>
+				<Object Name="GLONASS">
+					<Object Name="P">
+						<Variable Name="L1P" XLATE_FriendlyName="P L1" Type="Boolean">
+							<GRIL Parameter="lock/glo/pcode" Index="0" True="on" False="off"/>
+						</Variable>
+						<Variable Name="L2P" XLATE_FriendlyName="P L2" Type="Boolean">
+							<GRIL Parameter="lock/glo/pcode" Index="1" True="on" False="off"/>
+						</Variable>
+					</Object>
+					<Variable Name="L2C" Type="Boolean">
+						<GRIL Parameter="lock/glo/l2c" True="on" False="off"/>
+					</Variable>
+					<Variable Name="L3" Type="Boolean">
+						<GRIL Parameter="lock/glo/l3" True="on" False="off"/>
+					</Variable>
+				</Object>
+				<Object Name="Galileo">
+					<Object Name="E5">
+						<Variable Name="E5AI" Type="Boolean">
+							<GRIL Parameter="lock/galileo/E5" Index="0" True="on" False="off"/>
+						</Variable>
+						<Variable Name="E5BI" Type="Boolean">
+							<GRIL Parameter="lock/galileo/E5" Index="1" True="on" False="off"/>
+						</Variable>
+						<Variable Name="E5AltBOC" XLATE_FriendlyName="E5 AltBOC" Type="Boolean">
+							<GRIL Parameter="lock/galileo/E5" Index="2" True="on" False="off"/>
+						</Variable>
+					</Object>
+					<Object Name="E6">
+						<Variable Name="E6A" Type="Boolean">
+							<GRIL Parameter="lock/galileo/E6" Index="0" True="on" False="off"/>
+						</Variable>
+						<Variable Name="E6B" Type="Boolean">
+							<GRIL Parameter="lock/galileo/E6" Index="1" True="on" False="off"/>
+						</Variable>
+						<Variable Name="E6C" Type="Boolean">
+							<GRIL Parameter="lock/galileo/E6" Index="2" True="on" False="off"/>
+						</Variable>
+					</Object>
+				</Object>
+				<Object Name="BeiDou">
+					<Variable Name="B1C" Type="Boolean">
+						<GRIL Parameter="lock/beidou/b1c" True="on" False="off"/>
+					</Variable>
+					<Variable Name="B2" Type="Boolean">
+						<GRIL Parameter="lock/beidou/b2" True="on" False="off"/>
+					</Variable>
+					<Variable Name="B3" Type="Boolean">
+						<GRIL Parameter="lock/beidou/b3" True="on" False="off"/>
+					</Variable>
+				</Object>
+				<Object Name="SBAS">
+					<Variable Name="L5" Type="Boolean">
+						<GRIL Parameter="lock/waas/l5" True="on" False="off"/>
+					</Variable>
+				</Object>
+				<Object Name="QZSS">
+					<Object Name="L1C">
+						<Variable Name="L1CP" XLATE_FriendlyName="L1CP (Pilot (Data-Less))" Type="Boolean">
+							<GRIL Parameter="lock/qzss/l1c" Index="0" True="on" False="off"/>
+						</Variable>
+						<Variable Name="L1CD" XLATE_FriendlyName="L1CD (Data)" Type="Boolean">
+							<GRIL Parameter="lock/qzss/l1c" Index="1" True="on" False="off"/>
+						</Variable>
+					</Object>
+					<Object Name="L2C">
+						<Variable Name="L2C-L" Type="Boolean">
+							<GRIL Parameter="lock/qzss/l2c" Index="0" True="on" False="off"/>
+						</Variable>
+						<Variable Name="L2C-M" Type="Boolean">
+							<GRIL Parameter="lock/qzss/l2c" Index="1" True="on" False="off"/>
+						</Variable>
+					</Object>
+					<Object Name="L5">
+						<Variable Name="L5I" Type="Boolean">
+							<GRIL Parameter="lock/qzss/l5" Index="0" True="on" False="off"/>
+						</Variable>
+						<Variable Name="L5Q" Type="Boolean">
+							<GRIL Parameter="lock/qzss/l5" Index="1" True="on" False="off"/>
+						</Variable>
+					</Object>
+					<Object Name="L6Pilot" XLATE_FriendlyName="L6 (Pilot)">
+						<Variable Name="Lock" XLATE_FriendlyName="Tracked" Type="Boolean">
+							<GRIL Parameter="lock/qzss/lex/pilot" True="on" False="off"/>
+						</Variable>
+					</Object>
+					<Object Name="L6Data" XLATE_FriendlyName="L6 (Data)">
+						<Variable Name="Lock" XLATE_FriendlyName="Tracked" Type="[Boolean">
+							<GRIL Parameter="lock/qzss/l6/sat" True="y" False="n"/>
+						</Variable>
+					</Object>
+				</Object>
+			</Object>
+			<Object Name="GPS">
+				<Object Name="Satellites">
+					<Variable Name="Lock" XLATE_FriendlyName="Tracked" Type="[Boolean">
+						<GRIL Parameter="lock/gps/sat" True="y" False="n"/>
+					</Variable>
+					<Variable Name="Pos" XLATE_FriendlyName="Used For Positioning" Type="[Boolean">
+						<GRIL Parameter="pos/gps/sat" True="y" False="n"/>
+					</Variable>
+				</Object>
+			</Object>
+			<Object Name="GLONASS">
+				<Object Name="Satellites">
+					<Variable Name="Lock" XLATE_FriendlyName="Tracked" Type="[Boolean">
+						<GRIL Parameter="lock/glo/fcn" True="y" False="n"/>
+					</Variable>
+					<Variable Name="Pos" XLATE_FriendlyName="Used For Positioning" Type="[Boolean">
+						<GRIL Parameter="pos/glo/fcn" True="y" False="n"/>
+					</Variable>
+				</Object>
+			</Object>
+			<Object Name="Galileo">
+				<Object Name="Satellites">
+					<Variable Name="Lock" XLATE_FriendlyName="Tracked" Type="[Boolean">
+						<GRIL Parameter="lock/galileo/sat" True="y" False="n"/>
+					</Variable>
+					<Variable Name="Pos" XLATE_FriendlyName="Used For Positioning" Type="[Boolean">
+						<GRIL Parameter="pos/galileo/sat" True="y" False="n"/>
+					</Variable>
+				</Object>
+			</Object>
+			<Object Name="BeiDou">
+				<Object Name="Satellites">
+					<Variable Name="Lock" XLATE_FriendlyName="Tracked" Type="[Boolean">
+						<GRIL Parameter="lock/beidou/sat" True="y" False="n"/>
+					</Variable>
+					<Object Name="Pos" XLATE_FriendlyName="Used For Positioning">
+						<Variable Name="GEO" Type="[Boolean">
+							<GRIL Parameter="pos/beidou/geo/sat" True="y" False="n"/>
+						</Variable>
+						<Variable Name="MEO" Type="[Boolean">
+							<GRIL Parameter="pos/beidou/meo/sat" True="y" False="n"/>
+						</Variable>
+					</Object>
+				</Object>
+			</Object>
+			<Object Name="SBAS">
+				<Object Name="Satellites">
+					<Variable Name="Lock" XLATE_FriendlyName="Tracked" Type="[Boolean">
+						<GRIL Parameter="lock/waas/sat" True="y" False="n"/>
+					</Variable>
+					<Variable Name="Pos" XLATE_FriendlyName="Used For Positioning" Type="[Boolean">
+						<GRIL Parameter="pos/sbas/sat" True="y" False="n"/>
+					</Variable>
+				</Object>
+				<Variable Name="Message0As" XLATE_FriendlyName="Interpret Message #0 As" Type="Integer">
+					<GRIL Parameter="waas/1/instead0"/>
+				</Variable>
+				<Variable Name="UseIonoCorrections" XLATE_FriendlyName="Use Iono Corrections" Type="Integer">
+					<GRIL Parameter="waas/1/ion"/>
+				</Variable>
+			</Object>
+			<Object Name="QZSS">
+				<Object Name="Satellites">
+					<Variable Name="Lock" XLATE_FriendlyName="Tracked" Type="[Boolean">
+						<GRIL Parameter="lock/qzss/sat" True="y" False="n"/>
+					</Variable>
+					<Variable Name="Pos" XLATE_FriendlyName="Used For Positioning" Type="[Boolean">
+						<GRIL Parameter="pos/qzss/sat" True="y" False="n"/>
+					</Variable>
+				</Object>
+			</Object>
+			<Object Name="IRNSS" XLATE_FriendlyName="NavIC">
+				<Object Name="Satellites">
+					<Variable Name="Lock" XLATE_FriendlyName="Tracked" Type="[Boolean">
+						<GRIL Parameter="lock/irnss/sat" True="y" False="n"/>
+					</Variable>
+					<Variable Name="Pos" XLATE_FriendlyName="Used For Positioning" Type="[Boolean">
+						<GRIL Parameter="pos/irnss/sat" True="y" False="n"/>
+					</Variable>
+				</Object>
+			</Object>
+			<Object Name="LBand" XLATE_FriendlyName="L-Band">
+				<Variable Name="Service" Type="String">
+					<GRIL Parameter="lband/service"/>
+				</Variable>
+				<Variable Name="Satellite" Type="String">
+					<GRIL Parameter="lband/sat"/>
+				</Variable>
+				<Variable Name="Frequency" Type="Integer">
+					<GRIL Parameter="lband/usersat/freq"/>
+				</Variable>
+				<Variable Name="SymbolRate" XLATE_FriendlyName="Symbol Rate" Type="Integer">
+					<GRIL Parameter="lband/usersat/srate"/>
+				</Variable>
+				<Variable Name="SID" XLATE_FriendlyName="Service ID" Type="Integer">
+					<GRIL Parameter="lband/usersat/sid" Radix="16"/>
+				</Variable>
+				<Variable Name="ScramblerVector" XLATE_FriendlyName="Scrambler Vector" Type="Integer">
+					<GRIL Parameter="lband/usersat/scrv" Radix="16"/>
+				</Variable>
+			</Object>
+		</Object>
+		<Object Name="TrackingPositioning" XLATE_FriendlyName="Tracking &amp; Positioning">
+			<Object Name="Antenna">
+				<Variable Name="GNSS" Type="String">
+					<GRIL Parameter="ant/inp"/>
+				</Variable>
+				<Variable Name="OmniSTAR" Type="String">
+					<GRIL Parameter="ant/omni/inp"/>
+				</Variable>
+				<Variable Name="TwinAntenna" XLATE_FriendlyName="Activate Twin Antenna System" Type="Boolean">
+					<GRIL Parameter="lock/hd" True="on" False="off"/>
+				</Variable>
+			</Object>
+			<Object Name="Observation">
+				<Object Name="Elm" XLATE_FriendlyName="Elevation Mask">
+					<Variable Name="Lock" XLATE_FriendlyName="Satellites Tracking" Type="Integer">
+						<GRIL Parameter="lock/elm"/>
+					</Variable>
+					<Variable Name="Pos" XLATE_FriendlyName="Position Computation" Type="Integer">
+						<GRIL Parameter="pos/elm"/>
+					</Variable>
+					<Variable Name="RTK" XLATE_FriendlyName="RTK Computationn" Type="Float">
+						<GRIL Parameter="pos/rtk/elm"/>
+					</Variable>
+				</Object>
+				<Object Name="PDOP">
+					<Variable Name="Pos" XLATE_FriendlyName="Position Computation" Type="Float">
+						<GRIL Parameter="pos/pdop"/>
+					</Variable>
+					<Variable Name="RTK" XLATE_FriendlyName="RTK Computation" Type="Float">
+						<GRIL Parameter="pos/rtk/pdop"/>
+					</Variable>
+				</Object>
+			</Object>
+			<Object Name="Positioning">
+				<Variable Name="Mode" XLATE_FriendlyName="Positionong Mode" Type="String">
+					<GRIL Parameter="pos/mode/cur"/>
+				</Variable>
+				<Object Name="Solutions" XLATE_FriendlyName="Enable Solutions">
+					<Variable Name="Standalone" Type="Boolean">
+						<GRIL Parameter="pos/mode/sp" True="on" False="off"/>
+					</Variable>
+					<Variable Name="DGNSS" Type="Boolean">
+						<GRIL Parameter="pos/mode/cd" True="on" False="off"/>
+					</Variable>
+				</Object>
+			</Object>
+			<Object Name="Base">
+				<Variable Name="AntennaType" XLATE_FriendlyName="Antenna Type" Type="QString">
+					<GRIL Parameter="ref/ant/id"/>
+				</Variable>
+				<Object Name="Coord" XLATE_FriendlyName="Base Station Coordinates">
+					<Object Name="ARP" XLATE_FriendlyName="Antenna Reference Point">
+						<Object Name="GPS">
+							<Object Name="XYZ" XLATE_FriendlyName="Cartesian">
+								<Variable Name="Datum" Type="String">
+									<GRIL Parameter="ref/arp/gps/xyz" Index="0"/>
+								</Variable>
+								<Variable Name="X" Type="Float">
+									<GRIL Parameter="ref/arp/gps/xyz" Index="1"/>
+								</Variable>
+								<Variable Name="Y" Type="Float">
+									<GRIL Parameter="ref/arp/gps/xyz" Index="2"/>
+								</Variable>
+								<Variable Name="Z" Type="Float">
+									<GRIL Parameter="ref/arp/gps/xyz" Index="3"/>
+								</Variable>
+							</Object>
+							<Object Name="Geo" XLATE_FriendlyName="Geodetic">
+								<Variable Name="Datum" Type="String">
+									<GRIL Parameter="ref/arp/gps/geo" Index="0"/>
+								</Variable>
+								<Variable Name="Lat" XLATE_FriendlyName="Latitude" Type="String">
+									<GRIL Parameter="ref/arp/gps/geo" Index="1"/>
+								</Variable>
+								<Variable Name="Lon" XLATE_FriendlyName="Longitude" Type="String">
+									<GRIL Parameter="ref/arp/gps/geo" Index="2"/>
+								</Variable>
+								<Variable Name="Alt" XLATE_FriendlyName="Altitude" Type="Float">
+									<GRIL Parameter="ref/arp/gps/geo" Index="3"/>
+								</Variable>
+							</Object>
+						</Object>
+						<Object Name="GLONASS">
+							<Object Name="XYZ" XLATE_FriendlyName="Cartesian">
+								<Variable Name="Datum" Type="String">
+									<GRIL Parameter="ref/arp/glo/xyz" Index="0"/>
+								</Variable>
+								<Variable Name="X" Type="Float">
+									<GRIL Parameter="ref/arp/glo/xyz" Index="1"/>
+								</Variable>
+								<Variable Name="Y" Type="Float">
+									<GRIL Parameter="ref/arp/glo/xyz" Index="2"/>
+								</Variable>
+								<Variable Name="Z" Type="Float">
+									<GRIL Parameter="ref/arp/glo/xyz" Index="3"/>
+								</Variable>
+							</Object>
+							<Object Name="Geo" XLATE_FriendlyName="Geodetic">
+								<Variable Name="Datum" Type="String">
+									<GRIL Parameter="ref/arp/glo/geo" Index="0"/>
+								</Variable>
+								<Variable Name="Lat" XLATE_FriendlyName="Latitude" Type="String">
+									<GRIL Parameter="ref/arp/glo/geo" Index="1"/>
+								</Variable>
+								<Variable Name="Lon" XLATE_FriendlyName="Longitude" Type="String">
+									<GRIL Parameter="ref/arp/glo/geo" Index="2"/>
+								</Variable>
+								<Variable Name="Alt" XLATE_FriendlyName="Altitude" Type="Float">
+									<GRIL Parameter="ref/arp/glo/geo" Index="3"/>
+								</Variable>
+							</Object>
+						</Object>
+					</Object>
+					<Object Name="L1PC" XLATE_FriendlyName="Phase Center L1">
+						<Object Name="GPS">
+							<Object Name="XYZ" XLATE_FriendlyName="Cartesian">
+								<Variable Name="Datum" Type="String">
+									<GRIL Parameter="ref/pos/gps/xyz" Index="0"/>
+								</Variable>
+								<Variable Name="X" Type="Float">
+									<GRIL Parameter="ref/pos/gps/xyz" Index="1"/>
+								</Variable>
+								<Variable Name="Y" Type="Float">
+									<GRIL Parameter="ref/pos/gps/xyz" Index="2"/>
+								</Variable>
+								<Variable Name="Z" Type="Float">
+									<GRIL Parameter="ref/pos/gps/xyz" Index="3"/>
+								</Variable>
+							</Object>
+							<Object Name="Geo" XLATE_FriendlyName="Geodetic">
+								<Variable Name="Datum" Type="String">
+									<GRIL Parameter="ref/pos/gps/geo" Index="0"/>
+								</Variable>
+								<Variable Name="Lat" XLATE_FriendlyName="Latitude" Type="String">
+									<GRIL Parameter="ref/pos/gps/geo" Index="1"/>
+								</Variable>
+								<Variable Name="Lon" XLATE_FriendlyName="Longitude" Type="String">
+									<GRIL Parameter="ref/pos/gps/geo" Index="2"/>
+								</Variable>
+								<Variable Name="Alt" XLATE_FriendlyName="Altitude" Type="Float">
+									<GRIL Parameter="ref/pos/gps/geo" Index="3"/>
+								</Variable>
+							</Object>
+						</Object>
+						<Object Name="GLONASS">
+							<Object Name="XYZ" XLATE_FriendlyName="Cartesian">
+								<Variable Name="Datum" Type="String">
+									<GRIL Parameter="ref/pos/glo/xyz" Index="0"/>
+								</Variable>
+								<Variable Name="X" Type="Float">
+									<GRIL Parameter="ref/pos/glo/xyz" Index="1"/>
+								</Variable>
+								<Variable Name="Y" Type="Float">
+									<GRIL Parameter="ref/pos/glo/xyz" Index="2"/>
+								</Variable>
+								<Variable Name="Z" Type="Float">
+									<GRIL Parameter="ref/pos/glo/xyz" Index="3"/>
+								</Variable>
+							</Object>
+							<Object Name="Geo" XLATE_FriendlyName="Geodetic">
+								<Variable Name="Datum" Type="String">
+									<GRIL Parameter="ref/pos/glo/geo" Index="0"/>
+								</Variable>
+								<Variable Name="Lat" XLATE_FriendlyName="Latitude" Type="String">
+									<GRIL Parameter="ref/pos/glo/geo" Index="1"/>
+								</Variable>
+								<Variable Name="Lon" XLATE_FriendlyName="Longitude" Type="String">
+									<GRIL Parameter="ref/pos/glo/geo" Index="2"/>
+								</Variable>
+								<Variable Name="Alt" XLATE_FriendlyName="Altitude" Type="Float">
+									<GRIL Parameter="ref/pos/glo/geo" Index="3"/>
+								</Variable>
+							</Object>
+						</Object>
+					</Object>
+				</Object>
+			</Object>
+			<Object Name="RTK">
+				<Variable Name="Mode" XLATE_FriendlyName="RTK Mode" Type="String">
+					<GRIL Parameter="pos/pd/mode"/>
+				</Variable>
+				<Variable Name="ExtrapolationTime" XLATE_FriendlyName="Extrapolation Time" Type="Float">
+					<GRIL Parameter="pos/pd/textr"/>
+				</Variable>
+				<Variable Name="BaseCorrectionPeriod" XLATE_FriendlyName="Base Correction Period" Type="Float">
+					<GRIL Parameter="pos/pd/period"/>
+				</Variable>
+				<Variable Name="Dynamics" Type="String">
+					<GRIL Parameter="pos/rtk/dynamic"/>
+				</Variable>
+				<Variable Name="AmbiguityFixingLevel" XLATE_FriendlyName="Ambiguity Fixing Level" Type="String">
+					<GRIL Parameter="pos/pd/aflevel"/>
+				</Variable>
+				<Object Name="Advanced">
+					<Variable Name="VRSMode" XLATE_FriendlyName="VRS Mode" Type="Boolean">
+						<GRIL Parameter="pos/pd/vrs" True="on" False="off"/>
+					</Variable>
+					<Variable Name="IFBaseline" XLATE_FriendlyName="IF Baseline" Type="Float">
+						<GRIL Parameter="pos/rtk/ifr"/>
+					</Variable>
+					<Variable Name="WeightingBasedOnResiduals" XLATE_FriendlyName="Weighting Based On Residuals" Type="Boolean">
+						<GRIL Parameter="pos/rtk/weightres" True="on" False="off"/>
+					</Variable>
+					<Variable Name="MaximumResidualValue" XLATE_FriendlyName="Maximum Residual Value" Type="Integer">
+						<GRIL Parameter="pos/rtk/maxsatres"/>
+					</Variable>
+				</Object>
+			</Object>
+			<Object Name="PPP">
+				<Variable Name="Source" XLATE_FriendlyName="Correction Data Source" Type="String">
+					<GRIL Parameter="pos/ppp/source"/>
+				</Variable>
+				<Variable Name="Dynamic" XLATE_FriendlyName="Dynamic" Type="String">
+					<GRIL Parameter="pos/ppp/dynamic"/>
+				</Variable>
+				<Variable Name="IntResolution" XLATE_FriendlyName="Integer Resolution" Type="Boolean">
+					<GRIL Parameter="pos/ppp/intresolution" True="on" False="off"/>
+				</Variable>
+			</Object>
+			<Object Name="HD2">
+				<Variable Name="HD2Rover" XLATE_FriendlyName="HD2 Rover" Type="Boolean">
+					<GRIL Parameter="hd/mode" True="on" False="off"/>
+				</Variable>
+				<Variable Name="Distmode" Type="Boolean">
+					<GRIL Parameter="pos/rtk/distmode" True="on" False="off"/>
+				</Variable>
+				<Object Name="Smoothing">
+					<Variable Name="Enable" Type="Boolean">
+						<GRIL Parameter="pos/filter/azm/mode" True="on" False="off"/>
+					</Variable>
+					<Variable Name="Value" Type="Float">
+						<GRIL Parameter="pos/filter/azm/wrms"/>
+					</Variable>
+				</Object>
+			</Object>
+			<Object Name="VISOR">
+				<Object Name="Engine" XLATE_FriendlyName="VISOR Engine">
+					<Variable Name="Enable" Type="Boolean">
+						<GRIL Parameter="pos/hd/mode" True="on" False="off"/>
+					</Variable>
+					<Variable Name="InitializationType" XLATE_FriendlyName="Initialization Type" Type="String">
+						<GRIL Parameter="pos/hd/init/type"/>
+					</Variable>
+				</Object>
+				<Object Name="Baseline">
+					<Variable Name="Distmode" Type="Boolean">
+						<GRIL Parameter="pos/rtk/visor/distmode" True="on" False="off"/>
+					</Variable>
+					<Variable Name="Length" Type="Float">
+						<GRIL Parameter="pos/hd/len"/>
+					</Variable>
+				</Object>
+				<Object Name="Advanced">
+					<Object Name="InitialAngles" XLATE_FriendlyName="Initial Angles">
+						<Variable Name="Heading" Type="Float">
+							<GRIL Parameter="pos/hd/init/angles" Index="0"/>
+						</Variable>
+						<Variable Name="Inclination" Type="Float">
+							<GRIL Parameter="pos/hd/init/angles" Index="1"/>
+						</Variable>
+					</Object>
+					<Object Name="Shifts">
+						<Variable Name="Heading" Type="Float">
+							<GRIL Parameter="pos/hd/init/azmshift"/>
+						</Variable>
+						<Variable Name="Inclination" Type="Float">
+							<GRIL Parameter="pos/hd/init/elvshift"/>
+						</Variable>
+					</Object>
+					<Object Name="Advanced">
+						<Variable Name="Dlock" Type="Boolean">
+							<GRIL Parameter="pos/hd/dlock" True="on" False="off"/>
+						</Variable>
+						<Variable Name="AdaptiveSmoothing" XLATE_FriendlyName="Adaptive Smoothing" Type="Boolean">
+							<GRIL Parameter="pos/hd/asmooth" True="on" False="off"/>
+						</Variable>
+						<Variable Name="HeadingOnly" XLATE_FriendlyName="Heading Only" Type="Boolean">
+							<GRIL Parameter="pos/hd/headonly" True="on" False="off"/>
+						</Variable>
+					</Object>
+				</Object>
+			</Object>
+			<Object Name="Advanced">
+				<Variable Name="RawMeasurementsUpdateRate" XLATE_FriendlyName="Raw Measurements Update Rate" Type="Integer">
+					<GRIL Parameter="raw/msint"/>
+				</Variable>
+				<Variable Name="PositionUpdateRate" XLATE_FriendlyName="Position Update Rate" Type="Integer">
+					<GRIL Parameter="pos/msint"/>
+				</Variable>
+				<Variable Name="CACodeMultipathReduction" XLATE_FriendlyName="C/A Code Multipath Reduction" Type="Boolean">
+					<GRIL Parameter="raw/corr/ca/code" True="mpnew" False="normal"/>
+				</Variable>
+				<Variable Name="CACarrierPhaseMultipathReduction" XLATE_FriendlyName="C/A Carrier Phase Multipath Reduction" Type="Boolean">
+					<GRIL Parameter="raw/corr/ca/carrier" True="mpnew" False="normal"/>
+				</Variable>
+				<Variable Name="Cinderella" Type="Boolean">
+					<GRIL Parameter="opts/cind" True="on" False="off"/>
+				</Variable>
+				<Variable Name="QLL" XLATE_FriendlyName="Quartz Lock Loop" Type="Boolean">
+					<GRIL Parameter="raw/clp/qll" True="on" False="off"/>
+				</Variable>
+				<Object Name="Anti-Jamming">
+					<Variable Name="Mode" Type="String">
+						<GRIL Parameter="ajm/mode"/>
+					</Variable>
+					<Object Name="GPS">
+						<Variable Name="L1" Type="Boolean">
+							<GRIL Parameter="ajm/chan/gps/l1" True="on" False="off"/>
+						</Variable>
+						<Variable Name="L2" Type="Boolean">
+							<GRIL Parameter="ajm/chan/gps/l2" True="on" False="off"/>
+						</Variable>
+						<Variable Name="L5" Type="Boolean">
+							<GRIL Parameter="ajm/chan/gps/l5" True="on" False="off"/>
+						</Variable>
+					</Object>
+					<Object Name="GLONASS">
+						<Variable Name="L1" Type="Boolean">
+							<GRIL Parameter="ajm/chan/gln/l1" True="on" False="off"/>
+						</Variable>
+						<Variable Name="L2" Type="Boolean">
+							<GRIL Parameter="ajm/chan/gln/l2" True="on" False="off"/>
+						</Variable>
+					</Object>
+				</Object>
+			</Object>
+		</Object>
+		<Object Name="AutoSeed" XLATE_FriendlyName="Auto Seed">
+			<Variable Name="Enable" Type="Boolean">
+				<GRIL Parameter="ref/avg/mode" True="on" False="off"/>
+			</Variable>
+			<Variable Name="AveragingInterval" XLATE_FriendlyName="Position Averaging Interval" Type="Integer">
+				<GRIL Parameter="ref/avg/span"/>
+			</Variable>
+			<Variable Name="CheckDistance" XLATE_FriendlyName="CheckDistance" Type="Boolean">
+				<GRIL Parameter="ref/avg/check" True="on" False="off"/>
+			</Variable>
+			<Variable Name="Maximum Distance" XLATE_FriendlyName="Maximum Distance" Type="Float">
+				<GRIL Parameter="ref/avg/limit"/>
+			</Variable>
+			<Variable Name="AverageRTKFixedOnly" XLATE_FriendlyName="Average only RTK Fixed solutions" Type="Boolean">
+				<GRIL Parameter="ref/avg/stb/mode" True="on" False="off"/>
+			</Variable>
+			<Variable Name="Max3DRMS" XLATE_FriendlyName="Maximum 3D RMS" Type="Float">
+				<GRIL Parameter="ref/avg/stb/rms"/>
+			</Variable>
+		</Object>
+		<Object Name="PPS" XLATE_FriendlyName="Pulse Per Second (PPS) Parameters">
+			<Object Name="%P" For="%p:a,b;%P:A">
+				<Variable Name="Enable" Type="Boolean">
+					<GRIL Parameter="dev/pps/%p/out" True="on" False="off"/>
+				</Variable>
+				<Variable Name="Period" XLATE_FriendlyName="Signal Period, ms" Type="Integer">
+					<GRIL Parameter="dev/pps/%p/per/ms"/>
+				</Variable>
+				<Object Name="Offset" XLATE_FriendlyName="Signal Offset">
+					<Variable Name="MilliSeconds" Type="Integer">
+						<GRIL Parameter="dev/pps/%p/offs/ms"/>
+					</Variable>
+					<Variable Name="NanoSeconds" Type="Integer">
+						<GRIL Parameter="dev/pps/%p/offs/ns"/>
+					</Variable>
+				</Object>
+				<Variable Name="Edge" Type="String">
+					<GRIL Parameter="dev/pps/%p/edge"/>
+				</Variable>
+				<Variable Name="MarkedSignalsPeriod" XLATE_FriendlyName="Period of Marked Signals" Type="Integer">
+					<GRIL Parameter="dev/pps/%p/mper"/>
+				</Variable>
+				<Variable Name="ReferenceTime" XLATE_FriendlyName="Reference Time" Type="String">
+					<GRIL Parameter="dev/pps/%p/time"/>
+				</Variable>
+				<Variable Name="Tied" XLATE_FriendlyName="Tied With Reference Time" Type="Boolean">
+					<GRIL Parameter="dev/pps/%p/tied" True="on" False="off"/>
+				</Variable>
+        		</Object>
+		</Object>
+		<Object Name="Event" XLATE_FriendlyName="Event Signal Parameters">
+			<Object Name="%P" For="%p:a,b;%P:A">
+				<Variable Name="Enable" Type="Boolean">
+					<GRIL Parameter="dev/event/%p/in" True="on" False="off"/>
+				</Variable>
+				<Variable Name="Edge" Type="String">
+					<GRIL Parameter="dev/event/%p/edge"/>
+				</Variable>
+				<Variable Name="ReferenceTime" XLATE_FriendlyName="Reference Time" Type="String">
+					<GRIL Parameter="dev/event/%p/time"/>
+				</Variable>
+				<Variable Name="Tied" XLATE_FriendlyName="Tied With Reference Time" Type="Boolean">
+					<GRIL Parameter="dev/event/%p/tied" True="on" False="off"/>
+				</Variable>
+				<Variable Name="Lock" XLATE_FriendlyName="Clock Syncronization" Type="Boolean">
+					<GRIL Parameter="dev/event/%p/lock" True="on" False="off"/>
+				</Variable>
+        		</Object>
+		</Object>
+		<Object Name="FrequencySource" XLATE_FriendlyName="Frequency Source">
+			<Variable Name="ReferenceFrequencySource" XLATE_FriendlyName="Reference Frequency Source" Type="String">
+				<GRIL Parameter="frq/input"/>
+			</Variable>
+			<Variable Name="ExternalFrequencyValue" XLATE_FriendlyName="External Frequency Value" Type="Integer">
+				<GRIL Parameter="frq/ext"/>
+			</Variable>
+			<Variable Name="OscillatorOffsetReduction" XLATE_FriendlyName="Oscillator Offset Reduction" Type="String">
+				<GRIL Parameter="osc/mode"/>
+			</Variable>
+		</Object>
+		<Object Name="Ports" Attr="DoNotImportByDefault">
+			<Object Name="Serial">
+				<Object Name="%P" For="%p:a,d;%P:A">
+					<Variable Name="InputMode" XLATE_FriendlyName="Input Mode" Type="String">
+						<GRIL Parameter="dev/ser/%p/imode"/>
+					</Variable>
+					<Variable Name="Messages" XLATE_FriendlyName="Output Mode" Type="[Message" Alt="OMode">
+						<GRIL Parameter="dev/ser/%p"/>
+					</Variable>
+					<Variable Name="Elm" XLATE_FriendlyName="Elevation Mask" Type="Integer">
+						<GRIL Parameter="out/elm/dev/ser/%p"/>
+					</Variable>
+					<Variable Name="Echo" Type="String">
+						<GRIL Parameter="dev/ser/%p/echo"/>
+					</Variable>
+					<Variable Name="EWrap" XLATE_FriendlyName="Wrap Echo Data" Type="Boolean">
+						<GRIL Parameter="dev/ser/%p/ewrap" True="on" False="off"/>
+					</Variable>
+					<Variable Name="WSize" XLATE_FriendlyName="Wrapped Data Buffer" Type="Integer">
+						<GRIL Parameter="dev/ser/%p/wsize"/>
+					</Variable>
+					<Variable Name="EOff" XLATE_FriendlyName="Echo-off Sequence" Type="QString">
+						<GRIL Parameter="dev/ser/%p/eoff"/>
+					</Variable>
+					<Variable Name="Dup" Type="String">
+						<GRIL Parameter="dev/ser/%p/dup"/>
+					</Variable>
+					<Object Name="AIM">
+						<Object Name="%N" For="%N:0,2">
+							<Variable Name="Mode" XLATE_FriendlyName="Operation Mode" Type="String">
+								<GRIL Parameter="dev/ser/%p/jps/%N/mode"/>
+							</Variable>
+							<Variable Name="Id" XLATE_FriendlyName="Message Identifier" Type="Integer">
+								<GRIL Parameter="dev/ser/%p/jps/%N/id"/>
+							</Variable>
+							<Variable Name="Skip" XLATE_FriendlyName="Value of Skip Field" Type="Boolean">
+								<GRIL Parameter="dev/ser/%p/jps/%N/skip" True="y" False="n"/>
+							</Variable>
+							<Variable Name="Port" XLATE_FriendlyName="Source/Destination Port" Type="QString">
+								<GRIL Parameter="dev/ser/%p/jps/%N/port"/>
+							</Variable>
+						</Object>
+					</Object>
+					<Variable Name="BaudRate" XLATE_FriendlyName="Baud Rate" Type="Integer">
+						<GRIL Parameter="dev/ser/%p/rate"/>
+					</Variable>
+					<Variable Name="ByteSize" XLATE_FriendlyName="Byte Size" Type="Integer">
+						<GRIL Parameter="dev/ser/%p/bits"/>
+					</Variable>
+					<Variable Name="StopBits" XLATE_FriendlyName="Stop Bits" Type="Integer">
+						<GRIL Parameter="dev/ser/%p/stops"/>
+					</Variable>
+					<Variable Name="Parity" Type="String">
+						<GRIL Parameter="dev/ser/%p/parity"/>
+					</Variable>
+					<Variable Name="RtsCts" XLATE_FriendlyName="RTS/CTS" Type="Boolean">
+						<GRIL Parameter="dev/ser/%p/rtscts" True="on" False="off"/>
+					</Variable>
+				</Object>
+			</Object>
+			<Object Name="Modem">
+				<Object Name="A">
+					<Variable Name="InputMode" XLATE_FriendlyName="Input Mode" Type="String">
+						<GRIL Parameter="dev/modem/a/imode"/>
+					</Variable>
+					<Variable Name="Messages" XLATE_FriendlyName="Output Mode" Type="[Message" Alt="OMode">
+						<GRIL Parameter="dev/modem/a"/>
+					</Variable>
+					<Variable Name="Elm" XLATE_FriendlyName="Elevation Mask" Type="Integer">
+						<GRIL Parameter="out/elm/dev/modem/a"/>
+					</Variable>
+					<Variable Name="Echo" Type="String">
+						<GRIL Parameter="dev/modem/a/echo"/>
+					</Variable>
+					<Variable Name="EWrap" XLATE_FriendlyName="Wrap Echo Data" Type="Boolean">
+						<GRIL Parameter="dev/modem/a/ewrap" True="on" False="off"/>
+					</Variable>
+					<Variable Name="WSize" XLATE_FriendlyName="Wrapped Data Buffer" Type="Integer">
+						<GRIL Parameter="dev/modem/a/wsize"/>
+					</Variable>
+					<Variable Name="EOff" XLATE_FriendlyName="Echo-off Sequence" Type="QString">
+						<GRIL Parameter="dev/modem/a/eoff"/>
+					</Variable>
+					<Variable Name="Dup" Type="String">
+						<GRIL Parameter="dev/modem/a/dup"/>
+					</Variable>
+					<Object Name="AIM">
+						<Object Name="%N" For="%N:0,2">
+							<Variable Name="Mode" XLATE_FriendlyName="Operation Mode" Type="String">
+								<GRIL Parameter="dev/modem/a/jps/%N/mode"/>
+							</Variable>
+							<Variable Name="Id" XLATE_FriendlyName="Message Identifier" Type="Integer">
+								<GRIL Parameter="dev/modem/a/jps/%N/id"/>
+							</Variable>
+							<Variable Name="Skip" XLATE_FriendlyName="Value of Skip Field" Type="Boolean">
+								<GRIL Parameter="dev/modem/a/jps/%N/skip" True="y" False="n"/>
+							</Variable>
+							<Variable Name="Port" XLATE_FriendlyName="Source/Destination Port" Type="QString">
+								<GRIL Parameter="dev/modem/a/jps/%N/port"/>
+							</Variable>
+						</Object>
+					</Object>
+				</Object>
+			</Object>
+			<Object Name="USB">
+				<Object Name="A">
+					<Variable Name="InputMode" XLATE_FriendlyName="Input Mode" Type="String">
+						<GRIL Parameter="dev/usb/a/imode"/>
+					</Variable>
+					<Variable Name="Messages" XLATE_FriendlyName="Output Mode" Type="[Message" Alt="OMode">
+						<GRIL Parameter="dev/usb/a"/>
+					</Variable>
+					<Variable Name="Elm" XLATE_FriendlyName="Elevation Mask" Type="Integer">
+						<GRIL Parameter="out/elm/dev/usb/a"/>
+					</Variable>
+					<Variable Name="Echo" Type="String">
+						<GRIL Parameter="dev/usb/a/echo"/>
+					</Variable>
+					<Variable Name="EWrap" XLATE_FriendlyName="Wrap Echo Data" Type="Boolean">
+						<GRIL Parameter="dev/usb/a/ewrap" True="on" False="off"/>
+					</Variable>
+					<Variable Name="WSize" XLATE_FriendlyName="Wrapped Data Buffer" Type="Integer">
+						<GRIL Parameter="dev/usb/a/wsize"/>
+					</Variable>
+					<Variable Name="EOff" XLATE_FriendlyName="Echo-off Sequence" Type="QString">
+						<GRIL Parameter="dev/usb/a/eoff"/>
+					</Variable>
+					<Variable Name="Dup" Type="String">
+						<GRIL Parameter="dev/usb/a/dup"/>
+					</Variable>
+					<Object Name="AIM">
+						<Object Name="%N" For="%N:0,2">
+							<Variable Name="Mode" XLATE_FriendlyName="Operation Mode" Type="String">
+								<GRIL Parameter="dev/usb/a/jps/%N/mode"/>
+							</Variable>
+							<Variable Name="Id" XLATE_FriendlyName="Message Identifier" Type="Integer">
+								<GRIL Parameter="dev/usb/a/jps/%N/id"/>
+							</Variable>
+							<Variable Name="Skip" XLATE_FriendlyName="Value of Skip Field" Type="Boolean">
+								<GRIL Parameter="dev/usb/a/jps/%N/skip" True="y" False="n"/>
+							</Variable>
+							<Variable Name="Port" XLATE_FriendlyName="Source/Destination Port" Type="QString">
+								<GRIL Parameter="dev/usb/a/jps/%N/port"/>
+							</Variable>
+						</Object>
+					</Object>
+				</Object>
+			</Object>
+			<Object Name="TCP">
+				<Object Name="%P" For="%p:a,j;%P:A">
+					<Variable Name="InputMode" XLATE_FriendlyName="Input Mode" Type="String">
+						<GRIL Parameter="dev/tcp/%p/imode"/>
+					</Variable>
+					<Variable Name="Messages" XLATE_FriendlyName="Output Mode" Type="[Message" Alt="OMode">
+						<GRIL Parameter="dev/tcp/%p"/>
+					</Variable>
+					<Variable Name="Elm" XLATE_FriendlyName="Elevation Mask" Type="Integer">
+						<GRIL Parameter="out/elm/dev/tcp/%p"/>
+					</Variable>
+					<Variable Name="Echo" Type="String">
+						<GRIL Parameter="dev/tcp/%p/echo"/>
+					</Variable>
+					<Variable Name="EWrap" XLATE_FriendlyName="Wrap Echo Data" Type="Boolean">
+						<GRIL Parameter="dev/tcp/%p/ewrap" True="on" False="off"/>
+					</Variable>
+					<Variable Name="WSize" XLATE_FriendlyName="Wrapped Data Buffer" Type="Integer">
+						<GRIL Parameter="dev/tcp/%p/wsize"/>
+					</Variable>
+					<Variable Name="EOff" XLATE_FriendlyName="Echo-off Sequence" Type="QString">
+						<GRIL Parameter="dev/tcp/%p/eoff"/>
+					</Variable>
+					<Variable Name="Dup" Type="String">
+						<GRIL Parameter="dev/tcp/%p/dup"/>
+					</Variable>
+					<Object Name="AIM">
+						<Object Name="%N" For="%N:0,2">
+							<Variable Name="Mode" XLATE_FriendlyName="Operation Mode" Type="String">
+								<GRIL Parameter="dev/tcp/%p/jps/%N/mode"/>
+							</Variable>
+							<Variable Name="Id" XLATE_FriendlyName="Message Identifier" Type="Integer">
+								<GRIL Parameter="dev/tcp/%p/jps/%N/id"/>
+							</Variable>
+							<Variable Name="Skip" XLATE_FriendlyName="Value of Skip Field" Type="Boolean">
+								<GRIL Parameter="dev/tcp/%p/jps/%N/skip" True="y" False="n"/>
+							</Variable>
+							<Variable Name="Port" XLATE_FriendlyName="Source/Destination Port" Type="QString">
+								<GRIL Parameter="dev/tcp/%p/jps/%N/port"/>
+							</Variable>
+						</Object>
+					</Object>
+					<Variable Name="Port" XLATE_FriendlyName="TCP Port" Type="Integer">
+						<GRIL Parameter="net/tcp/%p/port"/>
+					</Variable>
+					<Variable Name="Authentication" Type="Boolean">
+						<GRIL Parameter="net/tcp/%p/noauth" True="on" False="off"/>
+					</Variable>
+				</Object>
+			</Object>
+			<Object Name="UDP">
+				<Object Name="%P" For="%p:a,j;%P:A">
+					<Variable Name="InputMode" XLATE_FriendlyName="Input Mode" Type="String">
+						<GRIL Parameter="dev/udp/%p/imode"/>
+					</Variable>
+					<Variable Name="Messages" XLATE_FriendlyName="Output Mode" Type="[Message" Alt="OMode">
+						<GRIL Parameter="dev/udp/%p"/>
+					</Variable>
+					<Variable Name="Elm" XLATE_FriendlyName="Elevation Mask" Type="Integer">
+						<GRIL Parameter="out/elm/dev/udp/%p"/>
+					</Variable>
+					<Variable Name="Echo" Type="String">
+						<GRIL Parameter="dev/udp/%p/echo"/>
+					</Variable>
+					<Variable Name="EWrap" XLATE_FriendlyName="Wrap Echo Data" Type="Boolean">
+						<GRIL Parameter="dev/udp/%p/ewrap" True="on" False="off"/>
+					</Variable>
+					<Variable Name="WSize" XLATE_FriendlyName="Wrapped Data Buffer" Type="Integer">
+						<GRIL Parameter="dev/udp/%p/wsize"/>
+					</Variable>
+					<Variable Name="EOff" XLATE_FriendlyName="Echo-off Sequence" Type="QString">
+						<GRIL Parameter="dev/udp/%p/eoff"/>
+					</Variable>
+					<Variable Name="Dup" Type="String">
+						<GRIL Parameter="dev/udp/%p/dup"/>
+					</Variable>
+					<Object Name="AIM">
+						<Object Name="%N" For="%N:0,2">
+							<Variable Name="Mode" XLATE_FriendlyName="Operation Mode" Type="String">
+								<GRIL Parameter="dev/udp/%p/jps/%N/mode"/>
+							</Variable>
+							<Variable Name="Id" XLATE_FriendlyName="Message Identifier" Type="Integer">
+								<GRIL Parameter="dev/udp/%p/jps/%N/id"/>
+							</Variable>
+							<Variable Name="Skip" XLATE_FriendlyName="Value of Skip Field" Type="Boolean">
+								<GRIL Parameter="dev/udp/%p/jps/%N/skip" True="y" False="n"/>
+							</Variable>
+							<Variable Name="Port" XLATE_FriendlyName="Source/Destination Port" Type="QString">
+								<GRIL Parameter="dev/udp/%p/jps/%N/port"/>
+							</Variable>
+						</Object>
+					</Object>
+				</Object>
+			</Object>
+			<Object Name="Bluetooth">
+				<Object Name="Class2" XLATE_FriendlyName="Class 2">
+					<Object Name="A">
+						<Variable Name="InputMode" XLATE_FriendlyName="Input Mode" Type="String">
+							<GRIL Parameter="dev/bth/a/imode"/>
+						</Variable>
+						<Variable Name="Messages" XLATE_FriendlyName="Output Mode" Type="[Message" Alt="OMode">
+							<GRIL Parameter="dev/bth/a"/>
+						</Variable>
+						<Variable Name="Elm" XLATE_FriendlyName="Elevation Mask" Type="Integer">
+							<GRIL Parameter="out/elm/dev/bth/a"/>
+						</Variable>
+						<Variable Name="Echo" Type="String">
+							<GRIL Parameter="dev/bth/a/echo"/>
+						</Variable>
+						<Variable Name="EWrap" XLATE_FriendlyName="Wrap Echo Data" Type="Boolean">
+							<GRIL Parameter="dev/bth/a/ewrap" True="on" False="off"/>
+						</Variable>
+						<Variable Name="WSize" XLATE_FriendlyName="Wrapped Data Buffer" Type="Integer">
+							<GRIL Parameter="dev/bth/a/wsize"/>
+						</Variable>
+						<Variable Name="EOff" XLATE_FriendlyName="Echo-off Sequence" Type="QString">
+							<GRIL Parameter="dev/bth/a/eoff"/>
+						</Variable>
+						<Variable Name="Dup" Type="String">
+							<GRIL Parameter="dev/bth/a/dup"/>
+						</Variable>
+						<Object Name="AIM">
+							<Object Name="%N" For="%N:0,2">
+								<Variable Name="Mode" XLATE_FriendlyName="Operation Mode" Type="String">
+									<GRIL Parameter="dev/bth/a/jps/%N/mode"/>
+								</Variable>
+								<Variable Name="Id" XLATE_FriendlyName="Message Identifier" Type="Integer">
+									<GRIL Parameter="dev/bth/a/jps/%N/id"/>
+								</Variable>
+								<Variable Name="Skip" XLATE_FriendlyName="Value of Skip Field" Type="Boolean">
+									<GRIL Parameter="dev/bth/a/jps/%N/skip" True="y" False="n"/>
+								</Variable>
+								<Variable Name="Port" XLATE_FriendlyName="Source/Destination Port" Type="QString">
+									<GRIL Parameter="dev/bth/a/jps/%N/port"/>
+								</Variable>
+							</Object>
+						</Object>
+					</Object>
+				</Object>
+				<Object Name="LE" XLATE_FriendlyName="Low Energy">
+					<Object Name="A">
+						<Variable Name="InputMode" XLATE_FriendlyName="Input Mode" Type="String">
+							<GRIL Parameter="dev/ble/a/imode"/>
+						</Variable>
+						<Variable Name="Messages" XLATE_FriendlyName="Output Mode" Type="[Message" Alt="OMode">
+							<GRIL Parameter="dev/ble/a"/>
+						</Variable>
+						<Variable Name="Elm" XLATE_FriendlyName="Elevation Mask" Type="Integer">
+							<GRIL Parameter="out/elm/dev/ble/a"/>
+						</Variable>
+						<Variable Name="Echo" Type="String">
+							<GRIL Parameter="dev/ble/a/echo"/>
+						</Variable>
+						<Variable Name="EWrap" XLATE_FriendlyName="Wrap Echo Data" Type="Boolean">
+							<GRIL Parameter="dev/ble/a/ewrap" True="on" False="off"/>
+						</Variable>
+						<Variable Name="WSize" XLATE_FriendlyName="Wrapped Data Buffer" Type="Integer">
+							<GRIL Parameter="dev/ble/a/wsize"/>
+						</Variable>
+						<Variable Name="EOff" XLATE_FriendlyName="Echo-off Sequence" Type="QString">
+							<GRIL Parameter="dev/ble/a/eoff"/>
+						</Variable>
+						<Variable Name="Dup" Type="String">
+							<GRIL Parameter="dev/ble/a/dup"/>
+						</Variable>
+						<Object Name="AIM">
+							<Object Name="%N" For="%N:0,2">
+								<Variable Name="Mode" XLATE_FriendlyName="Operation Mode" Type="String">
+									<GRIL Parameter="dev/ble/a/jps/%N/mode"/>
+								</Variable>
+								<Variable Name="Id" XLATE_FriendlyName="Message Identifier" Type="Integer">
+									<GRIL Parameter="dev/ble/a/jps/%N/id"/>
+								</Variable>
+								<Variable Name="Skip" XLATE_FriendlyName="Value of Skip Field" Type="Boolean">
+									<GRIL Parameter="dev/ble/a/jps/%N/skip" True="y" False="n"/>
+								</Variable>
+								<Variable Name="Port" XLATE_FriendlyName="Source/Destination Port" Type="QString">
+									<GRIL Parameter="dev/ble/a/jps/%N/port"/>
+								</Variable>
+							</Object>
+						</Object>
+					</Object>
+				</Object>
+				<Object Name="LL" XLATE_FriendlyName="Long Link">
+					<Object Name="Serial">
+						<Object Name="A">
+							<Variable Name="InputMode" XLATE_FriendlyName="Input Mode" Type="String">
+								<GRIL Parameter="dev/btsp/a/imode"/>
+							</Variable>
+							<Variable Name="Messages" XLATE_FriendlyName="Output Mode" Type="[Message" Alt="OMode">
+								<GRIL Parameter="dev/btsp/a"/>
+							</Variable>
+							<Variable Name="Elm" XLATE_FriendlyName="Elevation Mask" Type="Integer">
+								<GRIL Parameter="out/elm/dev/btsp/a"/>
+							</Variable>
+							<Variable Name="Echo" Type="String">
+								<GRIL Parameter="dev/btsp/a/echo"/>
+							</Variable>
+							<Variable Name="EWrap" XLATE_FriendlyName="Wrap Echo Data" Type="Boolean">
+								<GRIL Parameter="dev/btsp/a/ewrap" True="on" False="off"/>
+							</Variable>
+							<Variable Name="WSize" XLATE_FriendlyName="Wrapped Data Buffer" Type="Integer">
+								<GRIL Parameter="dev/btsp/a/wsize"/>
+							</Variable>
+							<Variable Name="EOff" XLATE_FriendlyName="Echo-off Sequence" Type="QString">
+								<GRIL Parameter="dev/btsp/a/eoff"/>
+							</Variable>
+							<Variable Name="Dup" Type="String">
+								<GRIL Parameter="dev/btsp/a/dup"/>
+							</Variable>
+							<Object Name="AIM">
+								<Object Name="%N" For="%N:0,2">
+									<Variable Name="Mode" XLATE_FriendlyName="Operation Mode" Type="String">
+										<GRIL Parameter="dev/btsp/a/jps/%N/mode"/>
+									</Variable>
+									<Variable Name="Id" XLATE_FriendlyName="Message Identifier" Type="Integer">
+										<GRIL Parameter="dev/btsp/a/jps/%N/id"/>
+									</Variable>
+									<Variable Name="Skip" XLATE_FriendlyName="Value of Skip Field" Type="Boolean">
+										<GRIL Parameter="dev/btsp/a/jps/%N/skip" True="y" False="n"/>
+									</Variable>
+									<Variable Name="Port" XLATE_FriendlyName="Source/Destination Port" Type="QString">
+										<GRIL Parameter="dev/btsp/a/jps/%N/port"/>
+									</Variable>
+								</Object>
+							</Object>
+						</Object>
+					</Object>
+					<Object Name="Client">
+						<Object Name="A">
+							<Variable Name="InputMode" XLATE_FriendlyName="Input Mode" Type="String">
+								<GRIL Parameter="dev/btc/a/imode"/>
+							</Variable>
+							<Variable Name="Messages" XLATE_FriendlyName="Output Mode" Type="[Message" Alt="OMode">
+								<GRIL Parameter="dev/btc/a"/>
+							</Variable>
+							<Variable Name="Elm" XLATE_FriendlyName="Elevation Mask" Type="Integer">
+								<GRIL Parameter="out/elm/dev/btc/a"/>
+							</Variable>
+							<Variable Name="Echo" Type="String">
+								<GRIL Parameter="dev/btc/a/echo"/>
+							</Variable>
+							<Variable Name="EWrap" XLATE_FriendlyName="Wrap Echo Data" Type="Boolean">
+								<GRIL Parameter="dev/btc/a/ewrap" True="on" False="off"/>
+							</Variable>
+							<Variable Name="WSize" XLATE_FriendlyName="Wrapped Data Buffer" Type="Integer">
+								<GRIL Parameter="dev/btc/a/wsize"/>
+							</Variable>
+							<Variable Name="EOff" XLATE_FriendlyName="Echo-off Sequence" Type="QString">
+								<GRIL Parameter="dev/btc/a/eoff"/>
+							</Variable>
+							<Variable Name="Dup" Type="String">
+								<GRIL Parameter="dev/btc/a/dup"/>
+							</Variable>
+							<Object Name="AIM">
+								<Object Name="%N" For="%N:0,2">
+									<Variable Name="Mode" XLATE_FriendlyName="Operation Mode" Type="String">
+										<GRIL Parameter="dev/btc/a/jps/%N/mode"/>
+									</Variable>
+									<Variable Name="Id" XLATE_FriendlyName="Message Identifier" Type="Integer">
+										<GRIL Parameter="dev/btc/a/jps/%N/id"/>
+									</Variable>
+									<Variable Name="Skip" XLATE_FriendlyName="Value of Skip Field" Type="Boolean">
+										<GRIL Parameter="dev/btc/a/jps/%N/skip" True="y" False="n"/>
+									</Variable>
+									<Variable Name="Port" XLATE_FriendlyName="Source/Destination Port" Type="QString">
+										<GRIL Parameter="dev/btc/a/jps/%N/port"/>
+									</Variable>
+								</Object>
+							</Object>
+						</Object>
+					</Object>
+					<Object Name="Service">
+						<Object Name="A">
+							<Variable Name="InputMode" XLATE_FriendlyName="Input Mode" Type="String">
+								<GRIL Parameter="dev/btsvc/a/imode"/>
+							</Variable>
+							<Variable Name="Messages" XLATE_FriendlyName="Output Mode" Type="[Message" Alt="OMode">
+								<GRIL Parameter="dev/btsvc/a"/>
+							</Variable>
+							<Variable Name="Elm" XLATE_FriendlyName="Elevation Mask" Type="Integer">
+								<GRIL Parameter="out/elm/dev/btsvc/a"/>
+							</Variable>
+							<Variable Name="Echo" Type="String">
+								<GRIL Parameter="dev/btsvc/a/echo"/>
+							</Variable>
+							<Variable Name="Echo" Type="String">
+								<GRIL Parameter="dev/btsvc/a/echo"/>
+							</Variable>
+							<Variable Name="EWrap" XLATE_FriendlyName="Wrap Echo Data" Type="Boolean">
+								<GRIL Parameter="dev/btsvc/a/ewrap" True="on" False="off"/>
+							</Variable>
+							<Variable Name="WSize" XLATE_FriendlyName="Wrapped Data Buffer" Type="Integer">
+								<GRIL Parameter="dev/btsvc/a/wsize"/>
+							</Variable>
+							<Variable Name="EOff" XLATE_FriendlyName="Echo-off Sequence" Type="QString">
+								<GRIL Parameter="dev/btsvc/a/eoff"/>
+							</Variable>
+							<Variable Name="Dup" Type="String">
+								<GRIL Parameter="dev/btsvc/a/dup"/>
+							</Variable>
+							<Object Name="AIM">
+								<Object Name="%N" For="%N:0,2">
+									<Variable Name="Mode" XLATE_FriendlyName="Operation Mode" Type="String">
+										<GRIL Parameter="dev/btsvc/a/jps/%N/mode"/>
+									</Variable>
+									<Variable Name="Id" XLATE_FriendlyName="Message Identifier" Type="Integer">
+										<GRIL Parameter="dev/btsvc/a/jps/%N/id"/>
+									</Variable>
+									<Variable Name="Skip" XLATE_FriendlyName="Value of Skip Field" Type="Boolean">
+										<GRIL Parameter="dev/btsvc/a/jps/%N/skip" True="y" False="n"/>
+									</Variable>
+									<Variable Name="Port" XLATE_FriendlyName="Source/Destination Port" Type="QString">
+										<GRIL Parameter="dev/btsvc/a/jps/%N/port"/>
+									</Variable>
+								</Object>
+							</Object>
+						</Object>
+					</Object>
+				</Object>
+			</Object>
+			<Object Name="Ntrip">
+				<Object Name="%P" For="%p:a,c;%P:A">
+					<Variable Name="InputMode" XLATE_FriendlyName="Input Mode" Type="String">
+						<GRIL Parameter="dev/ntrip/%p/imode"/>
+					</Variable>
+					<Variable Name="Messages" XLATE_FriendlyName="Output Mode" Type="[Message" Alt="OMode">
+						<GRIL Parameter="dev/ntrip/%p"/>
+					</Variable>
+					<Variable Name="Elm" XLATE_FriendlyName="Elevation Mask" Type="Integer">
+						<GRIL Parameter="out/elm/dev/ntrip/%p"/>
+					</Variable>
+					<Variable Name="Echo" Type="String">
+						<GRIL Parameter="dev/ntrip/%p/echo"/>
+					</Variable>
+					<Variable Name="EWrap" XLATE_FriendlyName="Wrap Echo Data" Type="Boolean">
+						<GRIL Parameter="dev/ntrip/%p/ewrap" True="on" False="off"/>
+					</Variable>
+					<Variable Name="WSize" XLATE_FriendlyName="Wrapped Data Buffer" Type="Integer">
+						<GRIL Parameter="dev/ntrip/%p/wsize"/>
+					</Variable>
+					<Variable Name="EOff" XLATE_FriendlyName="Echo-off Sequence" Type="QString">
+						<GRIL Parameter="dev/ntrip/%p/eoff"/>
+					</Variable>
+					<Variable Name="Dup" Type="String">
+						<GRIL Parameter="dev/ntrip/%p/dup"/>
+					</Variable>
+					<Object Name="AIM">
+						<Object Name="%N" For="%N:0,2">
+							<Variable Name="Mode" XLATE_FriendlyName="Operation Mode" Type="String">
+								<GRIL Parameter="dev/ntrip/%p/jps/%N/mode"/>
+							</Variable>
+							<Variable Name="Id" XLATE_FriendlyName="Message Identifier" Type="Integer">
+								<GRIL Parameter="dev/ntrip/%p/jps/%N/id"/>
+							</Variable>
+							<Variable Name="Skip" XLATE_FriendlyName="Value of Skip Field" Type="Boolean">
+								<GRIL Parameter="dev/ntrip/%p/jps/%N/skip" True="y" False="n"/>
+							</Variable>
+							<Variable Name="Port" XLATE_FriendlyName="Source/Destination Port" Type="QString">
+								<GRIL Parameter="dev/ntrip/%p/jps/%N/port"/>
+							</Variable>
+						</Object>
+					</Object>
+				</Object>
+				<Object Name="%N" For="%N:1,9">
+					<Variable Name="Messages" XLATE_FriendlyName="Output Mode" Type="[Message" Alt="OMode">
+						<GRIL Parameter="dev/ntrip/%N"/>
+					</Variable>
+					<Variable Name="Elm" XLATE_FriendlyName="Elevation Mask" Type="Integer">
+						<GRIL Parameter="out/elm/dev/ntrip/%N"/>
+					</Variable>
+				</Object>
+			</Object>
+			<Object Name="MVP">
+				<Object Name="%P" For="%p:a,h;%P:A">
+					<Variable Name="InputMode" XLATE_FriendlyName="Input Mode" Type="String">
+						<GRIL Parameter="dev/mvp/%p/imode"/>
+					</Variable>
+					<Variable Name="Messages" XLATE_FriendlyName="Output Mode" Type="[Message" Alt="OMode">
+						<GRIL Parameter="dev/mvp/%p"/>
+					</Variable>
+					<Variable Name="Elm" XLATE_FriendlyName="Elevation Mask" Type="Integer">
+						<GRIL Parameter="out/elm/dev/mvp/%p"/>
+					</Variable>
+					<Variable Name="Echo" Type="String">
+						<GRIL Parameter="dev/mvp/%p/echo"/>
+					</Variable>
+					<Variable Name="EWrap" XLATE_FriendlyName="Wrap Echo Data" Type="Boolean">
+						<GRIL Parameter="dev/mvp/%p/ewrap" True="on" False="off"/>
+					</Variable>
+					<Variable Name="WSize" XLATE_FriendlyName="Wrapped Data Buffer" Type="Integer">
+						<GRIL Parameter="dev/mvp/%p/wsize"/>
+					</Variable>
+					<Variable Name="EOff" XLATE_FriendlyName="Echo-off Sequence" Type="QString">
+						<GRIL Parameter="dev/mvp/%p/eoff"/>
+					</Variable>
+					<Variable Name="Dup" Type="String">
+						<GRIL Parameter="dev/mvp/%p/dup"/>
+					</Variable>
+					<Object Name="AIM">
+						<Object Name="%N" For="%N:0,2">
+							<Variable Name="Mode" XLATE_FriendlyName="Operation Mode" Type="String">
+								<GRIL Parameter="dev/mvp/%p/jps/%N/mode"/>
+							</Variable>
+							<Variable Name="Id" XLATE_FriendlyName="Message Identifier" Type="Integer">
+								<GRIL Parameter="dev/mvp/%p/jps/%N/id"/>
+							</Variable>
+							<Variable Name="Skip" XLATE_FriendlyName="Value of Skip Field" Type="Boolean">
+								<GRIL Parameter="dev/mvp/%p/jps/%N/skip" True="y" False="n"/>
+							</Variable>
+							<Variable Name="Port" XLATE_FriendlyName="Source/Destination Port" Type="QString">
+								<GRIL Parameter="dev/mvp/%p/jps/%N/port"/>
+							</Variable>
+						</Object>
+					</Object>
+				</Object>
+			</Object>
+		</Object>
+		<Object Name="Bluetooth">
+			<Object Name="Class2" XLATE_FriendlyName="Class 2">
+				<Variable Name="Enable" Type="Boolean">
+					<GRIL Parameter="/app/bt/device/mode" True="bcsp" False="none"/>
+				</Variable>
+				<Variable Name="Name" Type="QString">
+					<GRIL Parameter="/app/bt/device/name"/>
+				</Variable>
+				<Variable Name="PIN" Type="QString">
+					<GRIL Parameter="/app/bt/device/pincode"/>
+				</Variable>
+				<Variable Name="Address" Type="QString" Attr="ReadOnly">
+					<GRIL Parameter="/app/bt/device/addr"/>
+				</Variable>
+			</Object>
+			<Object Name="LL" XLATE_FriendlyName="Long Link">
+				<Variable Name="Enable" Type="Boolean">
+					<GRIL Parameter="bt/device/mode" True="bcsp" False="none"/>
+				</Variable>
+				<Variable Name="Name" Type="QString">
+					<GRIL Parameter="bt/device/name"/>
+				</Variable>
+				<Variable Name="PIN" Type="QString">
+					<GRIL Parameter="bt/device/pincode"/>
+				</Variable>
+				<Variable Name="Address" Type="QString" Attr="ReadOnly">
+					<GRIL Parameter="bt/device/addr"/>
+				</Variable>
+			</Object>
+		</Object>
+		<Object Name="Network">
+			<Object Name="Ethernet">
+				<Variable Name="DHCP" Type="Boolean">
+					<GRIL Parameter="net/ip/dhcp" True="on" False="off"/>
+				</Variable>
+				<Variable Name="IP" XLATE_FriendlyName="IP Address" Type="String" Attr="DoNotImportByDefault">
+					<GRIL Parameter="net/ip/addr"/>
+				</Variable>
+				<Variable Name="Mask" Type="String">
+					<GRIL Parameter="net/ip/mask"/>
+				</Variable>
+				<Variable Name="Gateway" Type="String">
+					<GRIL Parameter="net/ip/gw"/>
+				</Variable>
+				<Variable Name="DNS" Type="String">
+					<GRIL Parameter="net/ip/dns"/>
+				</Variable>
+				<Variable Name="MAC" Type="QString" Attr="ReadOnly">
+					<GRIL Parameter="net/mac/addr"/>
+				</Variable>
+			</Object>
+			<Object Name="Wi-Fi">
+				<Variable Name="Mode" Type="String">
+					<GRIL Parameter="wlan/mode"/>
+				</Variable>
+				<Variable Name="MAC" Type="QString" Attr="ReadOnly">
+					<GRIL Parameter="wlan/mac"/>
+				</Variable>
+				<Object Name="AP" XLATE_FriendlyName="Access Point">
+					<Variable Name="SSID" Type="QString" Attr="DoNotExportByDefault">
+						<GRIL Parameter="wlan/ap/name"/>
+					</Variable>
+					<Variable Name="Password" Type="QString" Attr="DoNotExportByDefault">
+						<GRIL Parameter="wlan/ap/passwd"/>
+					</Variable>
+					<Variable Name="IP" XLATE_FriendlyName="IP Address" Type="String" Attr="DoNotImportByDefault">
+						<GRIL Parameter="wlan/ap/ip"/>
+					</Variable>
+					<Variable Name="Mask" Type="String">
+						<GRIL Parameter="wlan/ap/mask"/>
+					</Variable>
+					<Variable Name="HideSSID" XLATE_FriendlyName="Don't Broadcast SSID" Type="Boolean">
+						<GRIL Parameter="wlan/ap/hidessid" True="on" False="off"/>
+					</Variable>
+				</Object>
+				<Object Name="Client">
+					<Variable Name="SSID" Type="QString" Attr="DoNotExportByDefault">
+						<GRIL Parameter="wlan/client/network"/>
+					</Variable>
+					<Variable Name="Username" Type="QString" Attr="DoNotExportByDefault">
+						<GRIL Parameter="wlan/client/username"/>
+					</Variable>
+					<Variable Name="Password" Type="QString" Attr="DoNotExportByDefault">
+						<GRIL Parameter="wlan/client/passwd"/>
+					</Variable>
+				</Object>
+			</Object>
+			<Object Name="TCP">
+				<Variable Name="Port" Type="Integer">
+					<GRIL Parameter="net/tcp/port"/>
+				</Variable>
+				<Variable Name="Timeout" Type="Integer">
+					<GRIL Parameter="net/tcp/idle" GNSSFirmwareVersions="3.5-100.0"/>
+					<GRIL Parameter="net/tcp/timeout"/>
+				</Variable>
+				<Variable Name="Password" Type="QString" Attr="DoNotExportByDefault">
+					<GRIL Parameter="net/passwd"/>
+				</Variable>
+				<Variable Name="NoDelay" XLATE_FriendlyName="No Delay Mode" Type="Boolean">
+					<GRIL Parameter="net/tcp/nodelay" True="on" False="off"/>
+				</Variable>
+			</Object>
+			<Object Name="TCPC" XLATE_FriendlyName="TCP Client">
+				<Variable Name="Enable" Type="Boolean" Attr="DoNotImportByDefault">
+					<GRIL Parameter="net/tcpc/enable" True="y" False="n"/>
+				</Variable>
+				<Variable Name="IP" XLATE_FriendlyName="IP Address" Type="String">
+					<GRIL Parameter="net/tcpc/addr"/>
+				</Variable>
+				<Variable Name="Port" Type="Integer">
+					<GRIL Parameter="net/tcpc/port"/>
+				</Variable>
+				<Variable Name="Timeout" Type="Integer">
+					<GRIL Parameter="net/tcpc/timeout"/>
+				</Variable>
+			</Object>
+			<Object Name="UDP">
+				<Variable Name="Port" Type="Integer">
+					<GRIL Parameter="net/udp/port"/>
+				</Variable>
+			</Object>
+			<Object Name="HTTP">
+				<Variable Name="Login" Type="QString" Attr="DoNotExportByDefault">
+					<GRIL Parameter="net/http/login"/>
+				</Variable>
+				<Variable Name="Password" Type="QString" Attr="DoNotExportByDefault">
+					<GRIL Parameter="net/http/passwd"/>
+				</Variable>
+				<Variable Name="AdminPassword" XLATE_FriendlyName="Admin Password" Type="QString" Attr="DoNotExportByDefault">
+					<GRIL Parameter="net/http/adminpasswd"/>
+				</Variable>
+				<Variable Name="UserPassword" XLATE_FriendlyName="User Password" Type="QString" Attr="DoNotExportByDefault">
+					<GRIL Parameter="net/http/userpasswd"/>
+				</Variable>
+				<Variable Name="Port" XLATE_FriendlyName="HTTP Port" Type="Integer">
+					<GRIL Parameter="net/http/port"/>
+				</Variable>
+				<Variable Name="SPort" XLATE_FriendlyName="HTTPS Port" Type="Integer">
+					<GRIL Parameter="net/http/sport"/>
+				</Variable>
+			</Object>
+			<Object Name="FTP">
+				<Variable Name="Port" Type="Integer">
+					<GRIL Parameter="net/ftp/port"/>
+				</Variable>
+				<Variable Name="Timeout" Type="Integer">
+					<GRIL Parameter="net/ftp/timeout"/>
+				</Variable>
+				<Variable Name="Login" Type="QString" Attr="DoNotExportByDefault">
+					<GRIL Parameter="net/ftp/login"/>
+				</Variable>
+				<Variable Name="Password" Type="QString" Attr="DoNotExportByDefault">
+					<GRIL Parameter="net/ftp/passwd"/>
+				</Variable>
+			</Object>
+			<!--Object Name="PPP">
+				<Variable Name="Mode" Type="String">
+					<GRIL Parameter="ppp/mode"/>
+				</Variable>
+				<Variable Name="Dial" XLATE_FriendlyName="Dial Number" Type="QString">
+					<GRIL Parameter="ppp/gprs/dial"/>
+				</Variable>
+				<Variable Name="APN" Type="QString">
+					<GRIL Parameter="ppp/gprs/pdp/apn"/>
+				</Variable>
+				<Variable Name="Login" Type="QString" Attr="DoNotExportByDefault">
+					<GRIL Parameter="ppp/gprs/user"/>
+				</Variable>
+				<Variable Name="Password" Type="QString" Attr="DoNotExportByDefault">
+					<GRIL Parameter="ppp/gprs/passwd"/>
+				</Variable>
+				<Variable Name="ManualModeState" XLATE_FriendlyName="Manual Mode State" Type="String">
+					<GRIL Parameter="ppp/manual"/>
+				</Variable>
+			</Object-->
+			<Object Name="AdvComm" XLATE_FriendlyName="Cell">
+				<Object Name="%P" For="%p:a,d;%P:A">
+					<Variable Name="Mode" XLATE_FriendlyName="Mode" Type="String">
+						<GRIL Parameter="com/%p/mode"/>
+					</Variable>
+					<Variable Name="Profile" XLATE_FriendlyName="Profile" Type="String">
+						<GRIL Parameter="com/%p/profile"/>
+					</Variable>
+					<Variable Name="ID" XLATE_FriendlyName="ID" Type="String" Attr="DoNotImportByDefault">
+						<GRIL Parameter="com/%p/id"/>
+					</Variable>
+					<Object Name="Port" XLATE_FriendlyName="Port">
+						<Variable Name="User" XLATE_FriendlyName="User" Type="QString" Attr="ReadOnly">
+							<GRIL Parameter="com/%p/port/user"/>
+						</Variable>
+						<Variable Name="Data" XLATE_FriendlyName="Data" Type="QString" Attr="ReadOnly">
+							<GRIL Parameter="com/%p/port/data"/>
+						</Variable>
+					</Object>
+					<Object Name="Variables" XLATE_FriendlyName="Variables">
+						<Object Name="%N" For="%N:0,9">
+							<Variable Name="Name" XLATE_FriendlyName="Name" Type="QString">
+								<GRIL Parameter="com/%p/var/%N/name"/>
+							</Variable>
+							<Variable Name="Value" XLATE_FriendlyName="Value" Type="QString">
+								<GRIL Parameter="com/%p/var/%N/value"/>
+							</Variable>
+						</Object>
+					</Object>
+				</Object>
+			</Object>
+		</Object>
+		<Object Name="Ntrip">
+			<Variable Name="Mode" Type="String">
+				<GRIL Parameter="ntrip/mode"/>
+			</Variable>
+			<Variable Name="Timeout" Type="Integer">
+				<GRIL Parameter="ntrip/timeout"/>
+			</Variable>
+			<Variable Name="DataPort" XLATE_FriendlyName="Data Port" Type="String">
+				<GRIL Parameter="ntrip/data/port"/>
+			</Variable>
+			<Object Name="Client">
+				<Variable Name="Address" Type="String">
+					<GRIL Parameter="ntrip/caster/addr"/>
+				</Variable>
+				<Variable Name="Port" Type="Integer">
+					<GRIL Parameter="ntrip/caster/port"/>
+				</Variable>
+				<Variable Name="Protocol" Type="String">
+					<GRIL Parameter="ntrip/caster/protocol"/>
+				</Variable>
+				<Variable Name="User" Type="QString" Attr="DoNotExportByDefault">
+					<GRIL Parameter="ntrip/caster/user"/>
+				</Variable>
+				<Variable Name="Password" Type="QString" Attr="DoNotExportByDefault">
+					<GRIL Parameter="ntrip/caster/passwd"/>
+				</Variable>
+				<Variable Name="Mountpoint" Type="QString">
+					<GRIL Parameter="ntrip/caster/mountpt"/>
+				</Variable>
+				<Variable Name="NMEA" XLATE_FriendlyName="Period of sending NMEA GGA" Type="Integer">
+					<GRIL Parameter="ntrip/caster/nmea"/>
+				</Variable>
+				<Variable Name="ResetRTK" XLATE_FriendlyName="Reset RTK if a new Ntrip session starts" Type="Boolean">
+					<GRIL Parameter="ntrip/caster/init" True="all" False="none"/>
+				</Variable>
+				<Object Name="Proxy">
+					<Variable Name="Address" Type="String">
+						<GRIL Parameter="ntrip/caster/proxy/addr"/>
+					</Variable>
+					<Variable Name="Port" Type="Integer">
+						<GRIL Parameter="ntrip/caster/proxy/port"/>
+					</Variable>
+				</Object>
+			</Object>
+			<Object Name="Server">
+				<Object Name="1">
+					<Variable Name="Address" Type="String">
+						<GRIL Parameter="ntrip/server/addr"/>
+					</Variable>
+					<Variable Name="Port" Type="Integer">
+						<GRIL Parameter="ntrip/server/port"/>
+					</Variable>
+					<Variable Name="Protocol" Type="String">
+						<GRIL Parameter="ntrip/server/protocol"/>
+					</Variable>
+					<Variable Name="User" Type="QString" Attr="DoNotExportByDefault">
+						<GRIL Parameter="ntrip/server/user"/>
+					</Variable>
+					<Variable Name="Password" Type="QString" Attr="DoNotExportByDefault">
+						<GRIL Parameter="ntrip/server/passwd"/>
+					</Variable>
+					<Object Name="Mountpoint">
+						<Variable Name="Name" Type="QString">
+							<GRIL Parameter="ntrip/server/mountpt/name"/>
+						</Variable>
+						<Variable Name="QDescription" Type="QString">
+							<GRIL Parameter="ntrip/server/mountpt/descr"/>
+						</Variable>
+					</Object>
+					<Object Name="Proxy">
+						<Variable Name="Address" Type="String">
+							<GRIL Parameter="ntrip/server/proxy/addr"/>
+						</Variable>
+						<Variable Name="Port" Type="Integer">
+							<GRIL Parameter="ntrip/server/proxy/port"/>
+						</Variable>
+					</Object>
+				</Object>
+				<Object Name="%M" For="%N:1,2;%M:2">
+					<Variable Name="Enable" Type="Boolean" Attr="DoNotImportByDefault">
+						<GRIL Parameter="/app/ntrip/server/%N/mode" True="on" False="off"/>
+					</Variable>
+					<Variable Name="Address" Type="String">
+						<GRIL Parameter="/app/ntrip/server/%N/addr"/>
+					</Variable>
+					<Variable Name="Port" Type="Integer">
+						<GRIL Parameter="/app/ntrip/server/%N/port"/>
+					</Variable>
+					<Variable Name="Protocol" Type="String">
+						<GRIL Parameter="/app/ntrip/server/%N/protocol"/>
+					</Variable>
+					<Variable Name="User" Type="QString" Attr="DoNotExportByDefault">
+						<GRIL Parameter="/app/ntrip/server/%N/user"/>
+					</Variable>
+					<Variable Name="Password" Type="QString" Attr="DoNotExportByDefault">
+						<GRIL Parameter="/app/ntrip/server/%N/passwd"/>
+					</Variable>
+					<Object Name="Mountpoint">
+						<Variable Name="Name" Type="QString">
+							<GRIL Parameter="/app/ntrip/server/%N/mountpt/name"/>
+						</Variable>
+						<Variable Name="QDescription" Type="QString">
+							<GRIL Parameter="/app/ntrip/server/%N/mountpt/descr"/>
+						</Variable>
+					</Object>
+					<Object Name="Proxy">
+						<Variable Name="Address" Type="String">
+							<GRIL Parameter="/app/ntrip/server/%N/proxy/addr"/>
+						</Variable>
+						<Variable Name="Port" Type="Integer">
+							<GRIL Parameter="/app/ntrip/server/%N/proxy/port"/>
+						</Variable>
+					</Object>
+				</Object>
+			</Object>
+			<Object Name="Caster">
+				<Variable Name="Enable" Type="Boolean" Attr="DoNotImportByDefault">
+					<GRIL Parameter="/app/ntrip/caster/mode" True="on" False="off"/>
+				</Variable>
+				<Variable Name="Name" Type="QString">
+					<GRIL Parameter="/app/ntrip/caster/name"/>
+				</Variable>
+				<Variable Name="Country" Type="QString">
+					<GRIL Parameter="/app/ntrip/caster/country"/>
+				</Variable>
+				<Variable Name="Authentication" Type="String">
+					<GRIL Parameter="/app/ntrip/caster/auth"/>
+				</Variable>
+				<Object Name="Users">
+					<Object Name="%N" For="%N:1,25">
+						<Variable Name="Name" Type="QString">
+							<GRIL Parameter="/app/ntrip/caster/usr/%N/name" Test="/app/ntrip/caster/usr" Default=""/>
+						</Variable>
+						<Variable Name="Password" Type="QString" Attr="DoNotExportByDefault">
+							<GRIL Parameter="/app/ntrip/caster/usr/%N/passwd"/>
+						</Variable>
+						<Variable Name="Group" XLATE_FriendlyName="Access To" Type="Integer">
+							<GRIL Parameter="/app/ntrip/caster/usr/%N/grpnum"/>
+						</Variable>
+						<Variable Name="StartAt" XLATE_FriendlyName="Valid From" Type="String">
+							<GRIL Parameter="/app/ntrip/caster/usr/%N/startat"/>
+						</Variable>
+						<Variable Name="ExpireAt" XLATE_FriendlyName="Valid Until" Type="String">
+							<GRIL Parameter="/app/ntrip/caster/usr/%N/expireat"/>
+						</Variable>
+					</Object>
+				</Object>
+				<Object Name="%C" For="%C:1,3">
+					<Variable Name="Port" Type="Integer">
+						<GRIL Parameter="/app/ntrip/caster/%C/port"/>
+					</Variable>
+					<Object Name="Mountpoint">
+						<Object Name="%M" For="%M:1,3">
+							<Variable Name="Name" Type="QString">
+								<GRIL Parameter="/app/ntrip/caster/%C/%M/name"/>
+							</Variable>
+							<Variable Name="MessageSet" XLATE_FriendlyName="Message Set" Type="QString">
+								<GRIL Parameter="/app/ntrip/caster/%C/%M/msgset"/>
+							</Variable>
+						</Object>
+					</Object>
+				</Object>
+			</Object>
+		</Object>
+		<Object Name="Notifications">
+			<Object Name="Events">
+				<Object Name="MinSatCount" XLATE_FriendlyName="Minimum number of tracking satellites">
+					<Variable Name="Threshold" Type="Integer">
+						<GRIL Parameter="/app/notif/sat/nmb/min"/>
+					</Variable>
+				</Object>
+				<Object Name="MaxBaseDistance" XLATE_FriendlyName="Maximum base station offset">
+					<Variable Name="Threshold" Type="Float">
+						<GRIL Parameter="/app/notif/pos/dist/max"/>
+					</Variable>
+				</Object>
+				<Object Name="AvailableStorageBelow" XLATE_FriendlyName="Minimum available disk space">
+					<Variable Name="Threshold" Type="Integer">
+						<GRIL Parameter="/app/notif/storage/space/min"/>
+					</Variable>
+					<Variable Name="Period" Type="Integer">
+						<GRIL Parameter="/app/notif/storage/space/period"/>
+					</Variable>
+				</Object>
+				<Object Name="BatteryABelow" XLATE_FriendlyName="Minimum charge level of Battery A">
+					<Variable Name="Threshold" Type="Integer">
+						<GRIL Parameter="/app/notif/bat/a/level/min"/>
+					</Variable>
+					<Variable Name="Period" Type="Integer">
+						<GRIL Parameter="/app/notif/bat/a/level/period"/>
+					</Variable>
+				</Object>
+				<Object Name="BatteryBBelow" XLATE_FriendlyName="Minimum charge level of Battery B">
+					<Variable Name="Threshold" Type="Integer">
+						<GRIL Parameter="/app/notif/bat/b/level/min"/>
+					</Variable>
+					<Variable Name="Period" Type="Integer">
+						<GRIL Parameter="/app/notif/bat/b/level/period"/>
+					</Variable>
+				</Object>
+				<Object Name="OAFExpires" XLATE_FriendlyName="Leased OAF is about to expire">
+					<Variable Name="Threshold" Type="Integer">
+						<GRIL Parameter="/app/notif/opts/expdays/min"/>
+					</Variable>
+				</Object>
+			</Object>
+			<Object Name="EmailAccount" XLATE_FriendlyName="Email Account">
+				<Variable Name="Server" Type="QString">
+					<GRIL Parameter="/app/notif/email/host"/>
+				</Variable>
+				<Variable Name="Port" XLATE_FriendlyName="TCP Port" Type="Integer">
+					<GRIL Parameter="/app/notif/email/port"/>
+				</Variable>
+				<Variable Name="User" XLATE_FriendlyName="Login" Type="QString" Attr="DoNotExportByDefault">
+					<GRIL Parameter="/app/notif/email/user"/>
+				</Variable>
+				<Variable Name="Password" Type="QString" Attr="DoNotExportByDefault">
+					<GRIL Parameter="/app/notif/email/password"/>
+				</Variable>
+				<Variable Name="Auth" XLATE_FriendlyName="Server authorization method" Type="String">
+					<GRIL Parameter="/app/notif/email/auth"/>
+				</Variable>
+				<Variable Name="UseTLS" XLATE_FriendlyName="Use TLS" Type="Boolean">
+					<GRIL Parameter="/app/notif/email/tls" True="on" False="off"/>
+				</Variable>
+				<Variable Name="UseSTARTTLS" XLATE_FriendlyName="Use STARTTLS" Type="Boolean">
+					<GRIL Parameter="/app/notif/email/starttls" True="on" False="off"/>
+				</Variable>
+			</Object>
+			<Object Name="Watchers">
+				<Object Name="%N" For="%N:1,10">
+					<Variable Name="Email" Type="QString">
+						<GRIL Parameter="/app/notif/watchers/%N/email"/>
+					</Variable>
+					<Variable Name="WarningLevel" XLATE_FriendlyName="Warning Level" Type="Integer">
+						<GRIL Parameter="/app/notif/watchers/%N/level"/>
+					</Variable>
+				</Object>
+			</Object>
+		</Object>
+		<Object Name="ELC" XLATE_FriendlyName="Level &amp; Compass">
+			<Variable Name="Enable" Type="Boolean" Attr="DoNotImportByDefault">
+				<GRIL Parameter="ins/elc/mode" True="on" False="off"/>
+			</Variable>
+			<Variable Name="LevelRange" XLATE_FriendlyName="Level Range" Type="Integer">
+				<GRIL Parameter="ins/elc/level/range"/>
+			</Variable>
+		</Object>
+		<Object Name="FileSystem" XLATE_FriendlyName="File Explorer">
+			<Object Name="Logs">
+				<Object Name="%F" For="%f:a,p;%F:A;%N:0">
+					<Variable Name="Prefix" Type="QString">
+						<GRIL Parameter="cmd/create/pre/%f"/>
+					</Variable>
+					<Variable Name="Elm" XLATE_FriendlyName="Elevation Mask" Type="Integer">
+						<GRIL Parameter="out/elm/cur/file/%f"/>
+					</Variable>
+					<Variable Name="Period" XLATE_FriendlyName="MINTER &amp; AFRM Logging Period" Type="Float">
+						<GRIL Parameter="log/%f/sc/period"/>
+					</Variable>
+					<Variable Name="AFRMRotationMultiplier" XLATE_FriendlyName="AFRM Rotation Multiplier" Type="Integer">
+						<GRIL Parameter="log/%f/rot/mul"/>
+					</Variable>
+					<Variable Name="ControllableAM" XLATE_FriendlyName="Controllable via MINTER &amp; AFRM" Type="Boolean">
+						<GRIL Parameter="log/imp/%N" True="y" False="n"/>
+						<GRIL Parameter="log/imp/%f" True="y" False="n"/>
+					</Variable>
+					<Variable Name="ConvertToRINEX" XLATE_FriendlyName="Convert To RINEX" Type="String">
+						<GRIL Parameter="log/%f/rinex"/>
+					</Variable>
+				</Object>
+			</Object>
+			<Object Name="MINTER">
+				<Object Name="Advanced">
+					<Variable Name="ButtonAction" XLATE_FriendlyName="FN/PWR Key Mode" Type="String">
+						<GRIL Parameter="button/action"/>
+					</Variable>
+					<Variable Name="InitialDynamicMode" XLATE_FriendlyName="Initial Data Collection Dynamic Mode" Type="String">
+						<GRIL Parameter="button/dyn"/>
+					</Variable>
+					<Variable Name="RecordOnStartUp" XLATE_FriendlyName="Data Recording Auto-start" Type="String">
+						<GRIL Parameter="button/auto"/>
+					</Variable>
+					<Variable Name="AppendToFile" XLATE_FriendlyName="Always Append to the File" Type="QString">
+						<GRIL Parameter="button/file"/>
+					</Variable>
+				</Object>
+			</Object>
+
+			<Object Name="AFRM">
+				<Variable Name="Enable" Type="Boolean" Attr="DoNotImportByDefault">
+					<GRIL Parameter="log/rot/mode" True="on" False="off"/>
+				</Variable>
+				<Variable Name="AutoRemoveOldFiles" XLATE_FriendlyName="Automatically Remove Old Files" Type="Boolean">
+					<GRIL Parameter="log/rot/rmold" True="on" False="off"/>
+				</Variable>
+				<Variable Name="Period" XLATE_FriendlyName="File Rotation Period" Type="Integer">
+					<GRIL Parameter="log/rot/sc/period"/>
+				</Variable>
+				<Variable Name="Phase" XLATE_FriendlyName="File Rotation Phase" Type="Integer">
+					<GRIL Parameter="log/rot/sc/phase"/>
+				</Variable>
+				<Variable Name="Counter" XLATE_FriendlyName="File Rotation Counter" Type="Integer">
+					<GRIL Parameter="log/rot/sc/count"/>
+				</Variable>
+        		</Object>
+
+			<Object Name="RINEX">
+				<Variable Name="Enable" Type="Boolean" Attr="DoNotImportByDefault">
+					<GRIL Parameter="rinex/start" True="on" False="off"/>
+				</Variable>
+				<Variable Name="SNRObservation" XLATE_FriendlyName="SNR Observation" Type="Boolean">
+					<GRIL Parameter="rinex/snr" True="on" False="off"/>
+				</Variable>
+				<Variable Name="SmoothPseudoranges" XLATE_FriendlyName="Smooth Pseudoranges" Type="Boolean">
+					<GRIL Parameter="rinex/smooth" True="on" False="off"/>
+				</Variable>
+				<Variable Name="HatanakaCompression" XLATE_FriendlyName="Hatanaka Compression" Type="Boolean">
+					<GRIL Parameter="rinex/format" True="rinexc" False="rinex"/>
+				</Variable>
+				<Variable Name="V3Naming" XLATE_FriendlyName="Enable V3 Naming" Type="Boolean">
+					<GRIL Parameter="rinex/lfname" True="on" False="off"/>
+				</Variable>
+				<Variable Name="ZIPCompression" XLATE_FriendlyName="ZIP Compression" Type="String">
+					<GRIL Parameter="rinex/zip"/>
+				</Variable>
+				<Object Name="Path">
+					<Variable Name="Local" XLATE_FriendlyName="Local Folder" Type="QString">
+						<GRIL Parameter="rinex/path/local"/>
+					</Variable>
+					<Variable Name="FTP" XLATE_FriendlyName="FTP Folder" Type="QString">
+						<GRIL Parameter="rinex/path/ftp"/>
+					</Variable>
+	        		</Object>
+				<Object Name="Header">
+					<Variable Name="Country" Type="QString">
+						<GRIL Parameter="rinex/country"/>
+					</Variable>
+					<Variable Name="Agency" Type="QString">
+						<GRIL Parameter="rinex/agency"/>
+					</Variable>
+					<Variable Name="Observer" Type="QString">
+						<GRIL Parameter="rinex/observer"/>
+					</Variable>
+					<Variable Name="MarkerName" XLATE_FriendlyName="Marker Name" Type="QString">
+						<GRIL Parameter="rinex/mrkname"/>
+					</Variable>
+					<Variable Name="MarkerNumber" XLATE_FriendlyName="Marker Number" Type="QString">
+						<GRIL Parameter="rinex/mrknum"/>
+					</Variable>
+					<Variable Name="AntennaNumber" XLATE_FriendlyName="Antenna Number" Type="QString">
+						<GRIL Parameter="rinex/antnum"/>
+					</Variable>
+					<Variable Name="AntennaPosition" XLATE_FriendlyName="Antenna Position" Type="[Float">
+						<GRIL Parameter="rinex/antpos"/>
+					</Variable>
+	        		</Object>
+        		</Object>
+		</Object>
+		<Object Name="MessageSets" XLATE_FriendlyName="Message Sets">
+			<Variable Name="0" Type="[Message" Attr="DoNotImportByDefault" Alt="DefMsgSet">
+				<GRIL Parameter="/msg/def/"/>
+			</Variable>
+			<Variable Name="1" Type="[Message" Attr="DoNotImportByDefault" Alt="DefMsgSet">
+				<GRIL Parameter="/msg/def1/"/>
+			</Variable>
+			<Variable Name="2" Type="[Message" Attr="DoNotImportByDefault" Alt="DefMsgSet">
+				<GRIL Parameter="/msg/def2/"/>
+			</Variable>
+			<Variable Name="3" Type="[Message" Attr="DoNotImportByDefault" Alt="DefMsgSet">
+				<GRIL Parameter="/msg/def3/"/>
+			</Variable>
+			<Variable Name="4" Type="[Message" Attr="DoNotImportByDefault" Alt="DefMsgSet">
+				<GRIL Parameter="/msg/def4/"/>
+			</Variable>
+		</Object>
+	</Object>
+</Objects>

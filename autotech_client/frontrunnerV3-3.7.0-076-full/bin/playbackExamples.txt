@@ -1,0 +1,35 @@
+Configurable properties:
+-   cache.playback.console.mode = true if user wants to use the command line export.
+-   cache.playback.dir = “/../playback” the directory where the playback .dat files are.
+-   cache.playback.export.save.path = the directory where you want to save your export files.
+-   cache.playback.export.filename= “” default is empty and it will use the name of the .dat file selected.
+-   cache.playback.data.type= 0,1 or 2 will take a number default is set to 0 which is Position data, 1 is for Events and 2 is for map dxf file.
+-   cache.playback.command.type= “include” default will include all the numbers in the command entered, “exclude” will exclude all the numbers in the command entered. 
+    For example: Frontrunner console playback -Dcache.playback.command.type=include -Dcache.playback.command=1,3,5 (the export file will only contain columns 1,3,5) 
+    if the command type were to be “exclude”. The export file would contain all but 1,3,5 columns.
+
+
+1. Example for a single file export with all Position data:
+frontrunner console playback -Dcache.playback.console.mode=true -Dcache.playback.files.to.export=AHS_LOG_20170504_192345.dat
+(This is an example for a single file, all Position columns will be included and will be saved in the playback folder)
+
+2. Example for a single file export with all Event data:
+frontrunner console playback -Dcache.playback.console.mode=true -Dcache.playback.files.to.export=AHS_LOG_20170504_192345.dat -D cache.playback.data.type=1
+
+2. Example for a single file export a dxf map file:
+frontrunner console playback -Dcache.playback.console.mode=true -Dcache.playback.files.to.export=AHS_LOG_20170504_192345.dat -D cache.playback.data.type=2
+
+3. Example of multiple files to export of Position data:
+frontrunner console playback -Dcache.playback.console.mode=true -Dcache.playback.files.to.export=AHS_LOG_20170504_192345.dat, AHS_LOG_20170505_192345.dat, AHS_LOG_20170506_192345.dat -Dcache.playback.data.type=0 
+( not need of data type since default is position) each file to export is separated by a comma and no spaces.
+
+4. In case the .dat files are not in the default /../playback folder:
+frontrunner console playback -Dcache.playback.console.mode=true -Dcache.playback.files.to.export=AHS_LOG_20170504_192345.dat -Dcache.playback.dir =path
+
+5. Example of custom command including all the entered numbers:
+frontrunner console playback -Dcache.playback.console.mode=true -Dcache.playback.files.to.export=AHS_LOG_20170906_142958.dat -Dcache.playback.command=0,2,3,5
+
+6. Example of custom command excluding all the numbers entered in the command property:
+ frontrunner console playback -Dcache.playback.console.mode=true -Dcache.playback.files.to.export=AHS_LOG_20170906_142958.dat  -Dcache.playback.command=0,2,3,5 -Dcache.playback.command.type=exclude
+
+ 

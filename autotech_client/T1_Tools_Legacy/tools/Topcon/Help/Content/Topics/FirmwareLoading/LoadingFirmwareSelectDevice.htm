@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" lang="ru-RU" xml:lang="ru-RU" data-mc-search-type="Stem" data-mc-help-system-file-name="Default.xml" data-mc-path-to-help-system="../../../" data-mc-target-type="WebHelp2" data-mc-runtime-file-type="Topic" data-mc-preload-images="false" data-mc-in-preview-mode="false" data-mc-medium="non-print" data-mc-toc-path="Firmware Loading">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" /><title>Select Target</title>
+        <link href="../../../Skins/Default/Stylesheets/Slideshow.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/TextEffects.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/Topic.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/Components/Styles.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/Components/Tablet.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/Components/Mobile.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../Resources/TableStyles/NoticeWarning.css" rel="stylesheet" />
+        <link href="../../Resources/Stylesheets/TRU.css" rel="stylesheet" />
+        <style>/*&lt;meta /&gt;*/
+
+.button.previous-topic-button
+{
+	-pie-background: url('../../../Skins/Default/Stylesheets/Images/navigate-previous.png') no-repeat center center, linear-gradient(#ffffff, #ececec);
+}
+
+.button.current-topic-index-button
+{
+	-pie-background: linear-gradient(#ffffff, #ececec);
+}
+
+.button.next-topic-button
+{
+	-pie-background: url('../../../Skins/Default/Stylesheets/Images/navigate-next.png') no-repeat center center, linear-gradient(#ffffff, #ececec);
+}
+
+.needs-pie
+{
+	behavior: url('../../../Resources/Scripts/PIE-no-motw.htc');
+}
+
+</style>
+        <script src="../../../Resources/Scripts/custom.modernizr.js">
+        </script>
+        <script src="../../../Resources/Scripts/jquery.min.js">
+        </script>
+        <script src="../../../Resources/Scripts/require.min.js">
+        </script>
+        <script src="../../../Resources/Scripts/require.config.js">
+        </script>
+        <script src="../../../Resources/Scripts/foundation.min.js">
+        </script>
+        <script src="../../../Resources/Scripts/plugins.min.js">
+        </script>
+        <script src="../../../Resources/Scripts/MadCapAll.js">
+        </script>
+    </head>
+    <body class="test">
+        <p class="MCWebHelpFramesetLink MCWebHelpFramesetLinkTop"><a href="../../../Default.htm#Topics/FirmwareLoading/LoadingFirmwareSelectDevice.htm">Open topic with navigation</a>
+        </p>
+        <div class="MCBreadcrumbsBox_0"><span class="MCBreadcrumbsPrefix">You are here: </span><span class="MCBreadcrumbsSelf">Firmware Loading</span><span class="MCBreadcrumbsDivider"> &gt; </span><span class="MCBreadcrumbs">Selecting Target</span>
+        </div>
+        <h1 class="Heading1">Select Target</h1>
+        <p class="Body"> To load the firmware to a device, do the following in this dialog:</p>
+        <ol>
+            <li value="1">In the <i>Target </i> control, select the device to which you want to load the firmware. The following device types are available:</li>
+            <ul>
+                <li value="1"><i>Receiver</i>,</li>
+                <li value="2"> <i>Peripheral Device (Modem, Bluetooth, etc.)</i>,</li>
+                <li value="3"> <i>Power Board</i>,</li>
+                <li value="4"><i>MC Controller Board</i>,</li>
+                <li value="5"><i>MC IMU</i>
+                </li>
+            </ul>
+            <li value="2">In the <i>Firmware Image Format</i> control,  you can specify which firmware format to use:</li>
+            <ul>
+                <li value="1">There are following firmware formats for the <i>Receiver</i>:</li>
+                <ul>
+                    <li value="1">*. ldp or  *.tfi file. Using this selection you can load a GNSS firmware file to a receiver, which has a Flash Card.</li>
+                    <li value="2">*. ldr and *.ldp files. Using this selection you can load two GNSS firmware files to a receiver via physical Serial Port. In this case the receiver Flash card is not required. Also you can select the <i>Capture Method</i><a name="Capture_method"></a>:</li>
+                    <ul>
+                        <li value="1"><i>Soft Break</i> method - the receiver will be switched into firmware updating mode through the software.</li>
+                        <li value="2"> <i>Power ON</i> method - the receiver will be switched into firmware updating mode after power reset of the receiver.</li>
+                    </ul>
+                    <p>
+                        <table style="mc-table-style: url('../../Resources/TableStyles/NoticeWarning.css');" class="TableStyle-NoticeWarning" cellspacing="0">
+                            <col class="TableStyle-NoticeWarning-Column-Column1" />
+                            <col class="TableStyle-NoticeWarning-Column-Column1" />
+                            <tbody>
+                                <tr class="TableStyle-NoticeWarning-Body-Body1">
+                                    <td class="TableStyle-NoticeWarning-BodyB-Column1-Body1">
+                                        <img src="../../Resources/Images/Note_Icon.gif" />
+                                    </td>
+                                    <td class="TableStyle-NoticeWarning-BodyA-Column1-Body1">
+                                        <p class="Body">When you are updating firmware of a TPS receiver integrated into a controller (GRS-1 and Tesla) using the <i>Power ON</i> capture method, you do not need to reset the receiver. The Application does it automatically.</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </p>
+                </ul>
+                <li value="2">There are following firmware formats for the <i>Peripheral Device (Modem, Bluetooth, etc)</i>:</li>
+                <ul>
+                    <li value="1">*. ldp or  *.tfi file. Using this selection you can load a modem or Bluetooth firmware file to a receiver, which has a Flash Card.</li>
+                    <li value="2">*. ldr and *.ldp files. Using this selection you can load two a modem or Bluetooth  files to a receiver via physical Serial Port. In this case the receiver Flash card is not required. Also you can select the <i><a href="#Capture_method" class="selected">Capture Method</a></i></li>
+                    <li value="3">Native firmware file. Using this selection you can load native modem firmware file to the modem. In this case, for the internal modem you can specify  the serial port through which it is connected with the GNSS receiver (e.g <i>Via Receiver's "Serial N"</i>), and for external modem you can specify  the direct connection to PC or Controller.</li>
+                </ul>
+                <li value="3">There are following firmware formats for the <i>Power Board </i>:</li>
+                <ul>
+                    <li value="1">  *.tfi file. Using this selection you can load the power board firmware file to a &#160;receiver, which has a Flash Card.</li>
+                    <li value="2">*. ldr  files. Using this selection you can load  the power board firmware file to a receiver via physical Serial Port. In this case the receiver Flash card is not required. Also you can select the <i><a href="#Capture_method" class="selected">Capture Method</a></i></li>
+                </ul>
+                <li value="4">There is one firmware format for the <i>MC Controller Board</i>:</li>
+                <ul>
+                    <li value="1">*. ldr and *.ldp files. You can load two MC Controller board firmware files to a receiver via physical Serial Port. In this case the receiver Flash card is not required and  the <i>Capture Method</i> is always <i>Power On</i>.</li>
+                </ul>
+                <li value="5">There is one firmware format for the <i>MC IMU</i>:</li>
+                <ul>
+                    <li value="1">*. ldp file. Using this selection you can load a MC IMU firmware file to a receiver, which has a Flash Card.</li>
+                </ul>
+            </ul>
+            <li value="3">Click <i>Next</i> to review  the information about the connected device.</li>
+        </ol>
+        <div class="buttons clearfix topicToolbarProxy" style="mc-topic-toolbar-items: ;">
+            <div class="button-group-container-left">
+                <button class="button needs-pie previous-topic-button" type="button" title="Navigate previous">
+                    <img src="../../../Skins/Default/Stylesheets/Images/transparent.gif" alt="previous topic" />
+                </button>
+                <div class="button current-topic-index-button disabled"><span class="sequence-index"></span> of <span class="sequence-total"></span></div>
+                <button class="button needs-pie next-topic-button" type="button" title="Navigate next">
+                    <img src="../../../Skins/Default/Stylesheets/Images/transparent.gif" alt="next topic" />
+                </button>
+            </div>
+        </div>
+        <p>&#160;</p>
+    </body>
+</html>

@@ -2,7 +2,21 @@
 <html>
 <head>
     <title>{{ tool }} - AutoTech</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='AutoTech_Dark.ico') }}" id="favicon">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script>
+        // Auto-apply theme from localStorage
+        (function() {
+            const savedTheme = localStorage.getItem('autotech_theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            const favicon = document.getElementById('favicon');
+            if (favicon) {
+                favicon.href = savedTheme === 'light'
+                    ? "{{ url_for('static', filename='AutoTech_Light.ico') }}"
+                    : "{{ url_for('static', filename='AutoTech_Dark.ico') }}";
+            }
+        })();
+    </script>
     <style>
         .form-container {
             max-width: 600px;

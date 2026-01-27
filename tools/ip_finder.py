@@ -310,3 +310,115 @@ def get_avi_credentials():
         "username": "root",  # or your AVI username
         "password": "root"  # or your AVI password
     }
+
+def check_linux_health(ptx_ip, ssh_user="dlog", ssh_password="gold", timeout=15):
+    """
+    Run Linux health check on PTX/Server via SSH
+    Returns CPU, Memory, Uptime, and Disk usage stats
+
+    Args:
+        ptx_ip: IP address of the PTX/server
+        ssh_user: SSH username (default: dlog for PTXC)
+        ssh_password: SSH password (default: gold for PTXC)
+        timeout: SSH timeout in seconds
+
+    Returns:
+        dict with health check results or error info
+    """
+    if not ptx_ip:
+        return {
+            "success": False,
+            "error": "No PTX IP provided"
+        }
+
+    ssh_client = None
+    try:
+        # Create SSH client
+        ssh_client = paramiko.SSHClient()
+        ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+        # Connect to PTX
+        ssh_client.connect(
+            hostname=ptx_ip,
+            port=22,
+            username=ssh_user,
+            password=ssh_password,
+            timeout=timeout,
+            auth_timeout=timeout
+        )
+
+        # CPU Usage - using top command
+        cpu_cmd = "top -bn1 | grep 'Cpu(s)' | sed 's/.*, *\\([0-9.]*\\)%* id.*/\\1/' | awk '{print 100 - $1}'"
+        stdin, stdout, stderr = ssh_client.exec_command(cpu_cmd, timeout=5)
+        cpu_usage = stdout.read().decode('utf-8').strip()
+
+        # Memory Usage - using free command
+        mem_cmd = "free | grep Mem | awk '{printf \"%.2f\", $3/$2 * 100.0}'"
+        stdin, stdout, stderr = ssh_client.exec_command(mem_cmd, timeout=5)
+        mem_usage = stdout.read().decode('utf-8').strip()
+
+        # System Uptime
+        uptime_cmd = "uptime -p"
+        stdin, stdout, stderr = ssh_client.exec_command(uptime_cmd, timeout=5)
+        uptime_raw = stdout.read().decode('utf-8').strip()
+        # Fallback to 'uptime' if 'uptime -p' not available
+        if not uptime_raw or uptime_raw.startswith('uptime:'):
+            uptime_cmd = "uptime | awk -F'( |,|:)+' '{if ($7==\"min\") m=$6; else {if ($7~/^day/) {d=$6;h=$8;m=$9} else {h=$6;m=$7}}} END {print d+0,\"days\",h+0,\"hours\",m+0,\"minutes\"}'"
+            stdin, stdout, stderr = ssh_client.exec_command(uptime_cmd, timeout=5)
+            uptime_raw = stdout.read().decode('utf-8').strip()
+
+        # Disk Usage - get /home or / partition
+        disk_cmd = "df -h | grep -E '(/home|/media/realroot/home|/$)' | head -1"
+        stdin, stdout, stderr = ssh_client.exec_command(disk_cmd, timeout=5)
+        disk_usage = stdout.read().decode('utf-8').strip()
+
+        # Parse disk usage percentage
+        disk_percent = None
+        if disk_usage:
+            # Extract percentage from df output (e.g., "49%")
+            disk_match = re.search(r'(\d+)%', disk_usage)
+            if disk_match:
+                disk_percent = disk_match.group(1)
+
+        # Close SSH connection
+        if ssh_client:
+            ssh_client.close()
+
+        # Format results
+        return {
+            "success": True,
+            "cpu_usage": f"{cpu_usage}%" if cpu_usage else "N/A",
+            "memory_usage": f"{mem_usage}%" if mem_usage else "N/A",
+            "uptime": uptime_raw.replace("up ", "") if uptime_raw else "N/A",
+            "disk_usage": disk_usage if disk_usage else "N/A",
+            "disk_percent": f"{disk_percent}%" if disk_percent else "N/A"
+        }
+
+    except paramiko.AuthenticationException:
+        if ssh_client:
+            ssh_client.close()
+        return {
+            "success": False,
+            "error": "Authentication failed"
+        }
+    except paramiko.SSHException as e:
+        if ssh_client:
+            ssh_client.close()
+        return {
+            "success": False,
+            "error": f"SSH error: {str(e)}"
+        }
+    except socket.timeout:
+        if ssh_client:
+            ssh_client.close()
+        return {
+            "success": False,
+            "error": "Connection timeout"
+        }
+    except Exception as e:
+        if ssh_client:
+            ssh_client.close()
+        return {
+            "success": False,
+            "error": f"Unexpected error: {str(e)}"
+        }

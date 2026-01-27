@@ -1,0 +1,64 @@
+# --- Python bytecode / caches ---
+__pycache__/
+*.py[cod]
+*$py.class
+
+# --- Virtual environments ---
+.venv/
+venv/
+ENV/
+env/
+
+# --- PyInstaller / build outputs ---
+build/
+dist/
+*.toc
+*.pyz
+*.pkg
+*.manifest
+*.spec~
+*.log
+
+# --- Test / tooling caches ---
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.cache/
+.coverage
+htmlcov/
+
+# --- IDE / editor ---
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# --- OS junk ---
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# ======================================================
+# AutoTech — RUNTIME DATA (DO NOT COMMIT)
+# ======================================================
+
+# Logs (all runtime logs)
+**/logs/
+*.log
+
+# SQLite databases (runtime-generated)
+database/*.db
+database/*.db-journal
+database/*.db-wal
+database/*.db-shm
+database/*.sqlite
+database/*.sqlite3
+database/*.sqlite-journal
+
+# Optional future runtime artifacts
+*.pid
+*.lock
+
+# --- Local config (if added later) ---
+*.env
+.env*

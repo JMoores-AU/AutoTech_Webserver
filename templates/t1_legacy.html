@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>T1 Legacy Tools - AutoTech</title>
+    <title>Legacy Scripts</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='AutoTech_Dark.ico') }}" id="favicon">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <style>
         /* Fix button.nav-item styling to match a.nav-item */
@@ -499,62 +500,6 @@
             color: var(--theme-text);
         }
 
-        /* Sidebar Client Status */
-        .sidebar-client-status {
-            padding: 0 16px;
-            margin-bottom: 12px;
-        }
-
-        .sidebar-client-badge {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 12px;
-            border-radius: var(--radius-sm);
-            font-size: 0.85rem;
-        }
-
-        .sidebar-client-badge.installed {
-            background: rgba(40, 167, 69, 0.15);
-            border: 1px solid rgba(40, 167, 69, 0.3);
-            color: #28a745;
-        }
-
-        .sidebar-client-badge.not-installed {
-            background: rgba(255, 193, 7, 0.15);
-            border: 1px solid rgba(255, 193, 7, 0.3);
-            color: #ffc107;
-        }
-
-        .sidebar-client-badge.update-available {
-            background: rgba(0, 123, 255, 0.15);
-            border: 1px solid rgba(0, 123, 255, 0.3);
-            color: #007bff;
-        }
-
-        .sidebar-client-badge .badge-icon {
-            font-size: 1rem;
-        }
-
-        .sidebar-client-badge .badge-text {
-            flex: 1;
-            font-weight: 500;
-        }
-
-        .sidebar-client-badge .badge-action {
-            background: transparent;
-            border: none;
-            color: inherit;
-            cursor: pointer;
-            padding: 2px;
-            font-size: 0.9rem;
-            opacity: 0.7;
-            transition: opacity 0.2s;
-        }
-
-        .sidebar-client-badge .badge-action:hover {
-            opacity: 1;
-        }
     </style>
 </head>
 <body>
@@ -564,10 +509,6 @@
             <div class="sidebar-header">
                 <div class="sidebar-logo">
                     <img src="{{ url_for('static', filename='autotech_logo.png') }}" alt="AutoTech Logo" class="sidebar-logo-img">
-                    <div>
-                        <div class="sidebar-logo-text">AutoTech</div>
-                        <div class="sidebar-logo-subtitle">T1 Tools</div>
-                    </div>
                 </div>
             </div>
             <nav class="sidebar-nav">
@@ -580,7 +521,7 @@
                     </a>
                     <a href="/autotech" class="nav-item active">
                         <span class="nav-item-icon">🛠️</span>
-                        <span>T1 Legacy Tools</span>
+                        <span>Legacy Scripts</span>
                     </a>
                     <a href="/t1-tools-help" class="nav-item">
                         <span class="nav-item-icon">💻</span>
@@ -592,15 +533,6 @@
                     </a>
                 </div>
             </nav>
-
-            <!-- Client Installation Status -->
-            <div class="sidebar-client-status" id="sidebar-client-status">
-                <div class="sidebar-client-badge not-installed" id="sidebar-client-badge">
-                    <span class="badge-icon">⚠️</span>
-                    <span class="badge-text">Client Not Installed</span>
-                    <button class="badge-action" onclick="resetClientCheck()" title="Re-check">↻</button>
-                </div>
-            </div>
 
             <div class="sidebar-footer">
                 <div class="sidebar-status">
@@ -622,22 +554,13 @@
             <div class="content-container">
                 <div class="legacy-container">
 
-                    <!-- Info Box - Shown if AutoTech Client is not installed (check done on Dashboard) -->
-                    <div class="info-box" id="install-info-box" style="display: none;">
-                        <strong>⚠️ Client Not Installed:</strong> Please complete client installation from the <a href="/" style="color: #3b82f6; text-decoration: underline;">Dashboard</a> page.
-                        <br><br>
-                        <small style="color: var(--theme-text-muted);">
-                            The client installation test has been moved to the main dashboard for better tracking.
-                        </small>
-                    </div>
-
                     <!-- Two-column layout: Web Terminal (left) | MMS Scripts (right) -->
                     <div class="tools-layout">
                         <!-- LEFT COLUMN: Web Terminal -->
                         <div class="tools-column">
                             <div class="section-header">
                                 <span class="section-icon">⚡</span>
-                                <h2>Web Terminal</h2>
+                                <h2>Live Terminal</h2>
                             </div>
 
                             <div class="terminal-section">
@@ -711,7 +634,7 @@
                         <div class="tools-column">
                             <div class="section-header">
                                 <span class="section-icon">📟</span>
-                                <h2>MMS Batch Scripts (Local CMD)</h2>
+                                <h2>MMS Scripts (Opens Local CMD)</h2>
                             </div>
 
                             <div class="scripts-grid">
@@ -785,44 +708,17 @@
     </div>
 
     <script>
-        // ========================================
-        // AUTOTECH CLIENT CHECK (READ FROM CACHE ONLY)
-        // ========================================
-        function checkClientInstalled() {
-            const installInfoBox = document.getElementById('install-info-box');
-            const sidebarBadge = document.getElementById('sidebar-client-badge');
-
-            // Read from localStorage cache (set by Dashboard test)
-            const cachedCheck = localStorage.getItem('autotech_client_check');
-            const cachedVersion = localStorage.getItem('autotech_client_version');
-            const cacheTime = localStorage.getItem('autotech_client_check_time');
-
-            // Cache valid for 5 minutes
-            if (cachedCheck && cacheTime && (Date.now() - parseInt(cacheTime)) < 300000) {
-                if (cachedCheck === 'true') {
-                    // Client is installed
-                    installInfoBox.style.display = 'none';
-                    sidebarBadge.className = 'sidebar-client-badge installed';
-                    sidebarBadge.querySelector('.badge-icon').textContent = '✅';
-                    sidebarBadge.querySelector('.badge-text').textContent = 'Client v' + (cachedVersion || '1.1.1');
-                } else {
-                    // Client not installed
-                    installInfoBox.style.display = 'block';
-                    sidebarBadge.className = 'sidebar-client-badge not-installed';
-                    sidebarBadge.querySelector('.badge-icon').textContent = '⚠️';
-                    sidebarBadge.querySelector('.badge-text').textContent = 'Not Installed';
-                }
-            } else {
-                // No cache - show warning to complete setup on dashboard
-                installInfoBox.style.display = 'block';
-                sidebarBadge.className = 'sidebar-client-badge not-installed';
-                sidebarBadge.querySelector('.badge-icon').textContent = '⚠️';
-                sidebarBadge.querySelector('.badge-text').textContent = 'Setup Required';
+        // Auto-apply theme from localStorage
+        (function() {
+            const savedTheme = localStorage.getItem('autotech_theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            const favicon = document.getElementById('favicon');
+            if (favicon) {
+                favicon.href = savedTheme === 'light'
+                    ? "{{ url_for('static', filename='AutoTech_Light.ico') }}"
+                    : "{{ url_for('static', filename='AutoTech_Dark.ico') }}";
             }
-        }
-
-        // Run check on page load
-        checkClientInstalled();
+        })();
 
         // ========================================
         // MMS BATCH SCRIPT LAUNCHER

@@ -1,0 +1,428 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ReceiverMessageRegistry>
+	<jps XLATE_Description="TPS">
+		<Message Notation=">>" XLATE_Description="Wrapped Data" />
+		<Message Notation="1E" XLATE_Description="L1 P signal-to-noise ratios x 4" />
+		<Message Notation="1P" XLATE_Description="L1 P carrier phases computed relative to pseudoranges from the RC message" />
+		<Message Notation="1R" XLATE_Description="Relative L1 P pseudoranges" />
+		<Message Notation="1p" XLATE_Description="L1 P carrier phases computed relative to pseudoranges from the rc message" />
+		<Message Notation="1r" XLATE_Description="Relative delta L1 P pseudoranges" />
+		<Message Notation="2E" XLATE_Description="L2 P signal-to-noise ratios x 4" />
+		<Message Notation="2P" XLATE_Description="L2 P carrier phases computed relative to pseudoranges from the RC message" />
+		<Message Notation="2R" XLATE_Description="Relative L2 P pseudoranges" />
+		<Message Notation="2p" XLATE_Description="L2 P carrier phases computed relative to pseudoranges from the rc message" />
+		<Message Notation="2r" XLATE_Description="Relative delta L2 P pseudoranges" />
+		<Message Notation="3D" XLATE_Description=""/>
+		<Message Notation="3d" XLATE_Description=""/>
+		<Message Notation="3E" XLATE_Description="GPS L2C and GLONASS L2 C/A signal-to-noise ratios x 4" />
+		<Message Notation="3P" XLATE_Description="GPS L2C and GLONASS L2 C/A carrier phases computed relative to pseudoranges from the RC message" />
+		<Message Notation="3R" XLATE_Description="Relative GPS L2C / GLONASS L2 C/A pseudoranges"/>
+		<Message Notation="AB" XLATE_Description="Baseline length" />
+		<Message Notation="AP" XLATE_Description="Position covariance matrix"/>
+		<Message Notation="AS" XLATE_Description="OmniStar status" />
+		<Message Notation="AV" XLATE_Description="Short Term Base position survey status" />
+		<Message Notation="AZ" XLATE_Description="Satellite azimuths" />
+		<Message Notation="aL" XLATE_Description="" />
+		<Message Notation="B1" XLATE_Description="L1 P fast signal-to-noise ratios" />
+		<Message Notation="B2" XLATE_Description="L2 P fast signal-to-noise ratios" />
+		<Message Notation="B3" XLATE_Description="GPS L2C and GLONASS L2 C/A fast signal-to-noise ratios" />
+		<Message Notation="BA" XLATE_Description="BeiDou almanac" Schedule="0,1800,0,0x22"/>
+		<Message Notation="BC" XLATE_Description="L1 C/A fast signal-to-noise ratios" />
+		<Message Notation="BD" XLATE_Description="Long Link: Bluetooth device discovery result" />
+		<Message Notation="BE" XLATE_Description="Long Link: Bluetooth event" />
+		<Message Notation="BI" XLATE_Description="Base station information" />
+		<Message Notation="BL" XLATE_Description="Base line" />
+		<Message Notation="BN" XLATE_Description="BeiDou raw navigation data" Schedule="0,0,0,0x2"/>
+		<Message Notation="BP" XLATE_Description="Rough indicator of receiver synchronization to reference time" />
+		<Message Notation="BS" XLATE_Description="BeiDou status" />
+		<Message Notation="Bs" XLATE_Description="Long Link: Link status" />
+		<Message Notation="C1" XLATE_Description="L1 P pseudorange smoothing corrections" />
+		<Message Notation="C2" XLATE_Description="L2 P pseudorange smoothing corrections" />
+		<Message Notation="C3" XLATE_Description="GPS L2C / GLONASS L2 C/A pseudorange smoothing corrections"/>
+		<Message Notation="CC" XLATE_Description="L1 C/A pseudorange smoothing corrections" />
+		<Message Notation="CE" XLATE_Description="L1 C/A signal-to-noise ratios x 4" />
+		<Message Notation="CL" XLATE_Description="CPU Load" />
+		<Message Notation="CP" XLATE_Description="L1 C/A carrier phases computed relative to pseudoranges from the RC message" />
+		<Message Notation="CT" XLATE_Description="Coordinate Transformation" Schedule="0,0,0,0x2"/>
+		<Message Notation="c1" XLATE_Description="Short L1 P pseudorange smoothing corrections" />
+		<Message Notation="c2" XLATE_Description="Short L2 P pseudorange smoothing corrections" />
+		<Message Notation="cc" XLATE_Description="Short L1 C/A pseudorange smoothing corrections" />
+		<Message Notation="cL" XLATE_Description="" />
+		<Message Notation="cp" XLATE_Description="L1 C/A carrier phases computed relative to pseudoranges from the rc message" />
+		<Message Notation="D1" XLATE_Description="L1 P Doppler" />
+		<Message Notation="D2" XLATE_Description="L2 P Doppler" />
+		<Message Notation="D3" XLATE_Description="GPS L2C and GLONASS L2 C/A Doppler" />
+		<Message Notation="DB" XLATE_Description="GPS pseudorange corrections from SBAS data" Schedule="0,0,0,0x2"/>
+		<Message Notation="DC" XLATE_Description="L1 C/A Doppler" />
+		<Message Notation="DD" XLATE_Description="DION debug" />
+		<Message Notation="DE" XLATE_Description="BeiDou ephemeris" Schedule="0,900,0,0x2"/>
+		<Message Notation="de" XLATE_Description="BeiDou ephemeris" />
+		<Message Notation="DG" XLATE_Description="" />
+		<Message Notation="DL" XLATE_Description="Data link status" />
+		<Message Notation="DN" XLATE_Description="" />
+		<Message Notation="DO" XLATE_Description="Derivative of receiver time offset" />
+		<Message Notation="DP" XLATE_Description="Dilution of Precision (DOP)" />
+		<Message Notation="e1" XLATE_Description="L1 P fast signal-to-noise ratios" />
+		<Message Notation="E1" XLATE_Description="L1 P signal-to-noise ratios" />
+		<Message Notation="e2" XLATE_Description="L2 P fast signal-to-noise ratios" />
+		<Message Notation="E2" XLATE_Description="L2 P signal-to-noise ratios" />
+		<Message Notation="e3" XLATE_Description="GPS L2C and GLONASS L2 C/A fast signal-to-noise ratios" />
+		<Message Notation="E3" XLATE_Description="GPS L2C and GLONASS L2 C/A signal-to-noise ratios" />
+		<Message Notation="ec" XLATE_Description="L1 C/A fast signal-to-noise ratios (SNR20)" />
+		<Message Notation="EC" XLATE_Description="L1 C/A signal-to-noise ratios (SNR)" />
+		<Message Notation="ED" XLATE_Description="" />
+		<Message Notation="EE" XLATE_Description="Epoch end" />
+		<Message Notation="EL" XLATE_Description="Satellite elevations"/>
+		<Message Notation="EN" XLATE_Description="" />
+		<Message Notation="ER" XLATE_Description="Receiver NAK reply" />
+		<Message Notation="ES" XLATE_Description="" />
+		<Message Notation="ET" XLATE_Description="Epoch time" />
+		<Message Notation="EV" XLATE_Description="Event data" Schedule="0,0,0,0x30"/>
+		<Message Notation="F1" XLATE_Description="L1 P signal lock loop flags" />
+		<Message Notation="F2" XLATE_Description="L2 P signal lock loop flags" />
+		<Message Notation="F3" XLATE_Description="GPS L2C and GLONASS L2 C/A signal lock loop flags" />
+		<Message Notation="FC" XLATE_Description="L1 C/A signal lock loop flags" />
+		<Message Notation="FO" XLATE_Description="" />
+		<Message Notation="FV" XLATE_Description="" />
+		<Message Notation="G2" XLATE_Description="GPS CNAV/CNAV-2 ephemeris" Schedule="1,900,0,0x22"/>
+		<Message Notation="GA" XLATE_Description="GPS almanac" Schedule="1,1800,0,0x22"/>
+		<Message Notation="GD" XLATE_Description="GPS raw navigation data" Schedule="0,0,0,0x2"/>
+		<Message Notation="GE" XLATE_Description="GPS ephemeris" Schedule="1,900,0,0x22"/>
+		<Message Notation="GO" XLATE_Description="GPS time to receiver time offset" />
+		<Message Notation="GS" XLATE_Description="GPS SV status"/>
+		<Message Notation="GT" XLATE_Description="GPS time" />
+		<Message Notation="ha" XLATE_Description="2D attitude parameters" />
+		<Message Notation="IA" XLATE_Description="NavIC almanac" Schedule="0,0,0,0x2"/>
+		<Message Notation="ID" XLATE_Description="Ionospheric delays" />
+		<Message Notation="IE" XLATE_Description="NavIC ephemeris" Schedule="0,0,0,0x2"/>
+		<Message Notation="IM" XLATE_Description="" />
+		<Message Notation="iM" XLATE_Description="" />
+		<Message Notation="IN" XLATE_Description="NavIC L5 SPS raw bit stream" Schedule="0,0,0,0x2"/>
+		<Message Notation="IO" XLATE_Description="Ionospheric parameters" Schedule="0,0,0,0x2"/>
+		<Message Notation="IS" XLATE_Description="" />
+		<Message Notation="Is" XLATE_Description="NavIC SV status" />
+		<Message Notation="JE" XLATE_Description="Extended Jamming Suppressor information"/>
+		<Message Notation="JI" XLATE_Description="Jamming Suppressor information" />
+		<Message Notation="JP" XLATE_Description="Topcon Positioning Systems file identifier" Schedule="0,0,0,0x1c" />
+		<Message Notation="KD" XLATE_Description="GLONASS CDMA raw navigation data"/>
+		<Message Notation="LA" XLATE_Description="Galileo almanac" Schedule="0,0,0,0x2"/>
+		<Message Notation="La" XLATE_Description="" Schedule="0,0,0,0x2"/>
+		<Message Notation="LB" XLATE_Description="L-Band Receiver Status" />
+		<Message Notation="LC" XLATE_Description="Level and compass data" />
+		<Message Notation="LD" XLATE_Description="GLONASS raw navigation data" Schedule="0,0,0,0x2"/>
+		<Message Notation="LE" XLATE_Description="Galileo ephemeris" Schedule="0,0,0,0x2"/>
+		<Message Notation="Le" XLATE_Description="" Schedule="0,0,0,0x2"/>
+		<Message Notation="LH" XLATE_Description="Logging history" Schedule="0,0,0,0x2"/>
+		<Message Notation="LI" XLATE_Description="Short integrals IMU measurements" />
+		<Message Notation="LK" XLATE_Description="Coupling filter state" />
+		<Message Notation="LL" XLATE_Description="" />
+		<Message Notation="LS" XLATE_Description="Galileo SV status" />
+		<Message Notation="LT" XLATE_Description="Message output latency" />
+		<Message Notation="Lh" XLATE_Description="Logging history for all current GNSS constellations" Schedule="0,0,0,0x2"/>
+		<Message Notation="MD" XLATE_Description="Galileo Commercial Service navigation data" />
+		<Message Notation="MF" XLATE_Description="Messages format and identifier" Schedule="0,60,0,0x37" />
+		<Message Notation="MP" XLATE_Description="Position in given map projection or local coordinates" />
+		<Message Notation="MS" XLATE_Description="RTCM 2.x status message"/>
+		<Message Notation="NA" XLATE_Description="GLONASS almanac" Schedule="0,0,0,0x2"/>
+		<Message Notation="NB" XLATE_Description="" Schedule="0,0,0,0x2"/>
+		<Message Notation="ND" XLATE_Description="mmGPS data" />
+		<Message Notation="NE" XLATE_Description="GLONASS ephemeris" Schedule="0,0,0,0x2"/>
+		<Message Notation="NN" XLATE_Description="GLONASS satellite system numbers" Schedule="1,0,0,0x23"/>
+		<Message Notation="NO" XLATE_Description="GLONASS time to receiver time offset" />
+		<Message Notation="NP" XLATE_Description="Navigation position" />
+		<Message Notation="NR" XLATE_Description="" Schedule="0,0,0,0x2"/>
+		<Message Notation="NS" XLATE_Description="GLONASS SV status"/>
+		<Message Notation="NT" XLATE_Description="GLONASS time" />
+		<Message Notation="OO" XLATE_Description="Oscillator offset" />
+		<Message Notation="OS" XLATE_Description="OmniSTAR Status" />
+		<Message Notation="P1" XLATE_Description="Full L1 P carrier phases"/>
+		<Message Notation="P2" XLATE_Description="Full L2 P carrier phases" />
+		<Message Notation="P3" XLATE_Description="Full GPS L2C and GLONASS L2 C/A carrier phases" />
+		<Message Notation="PA" XLATE_Description="" />
+		<Message Notation="PB" XLATE_Description="" />
+		<Message Notation="PC" XLATE_Description="Full L1 C/A carrier phases" />
+		<Message Notation="PG" XLATE_Description="Geodetic position" />
+		<Message Notation="pi" XLATE_Description="Extended status of real-time solution" />
+		<Message Notation="PI" XLATE_Description="Status of real-time solution" Schedule="1,900,0,0x22"/>
+		<Message Notation="PM" XLATE_Description="Receiver parameters" Schedule="0,0,0,0x7"/>
+		<Message Notation="PO" XLATE_Description="Cartesian position" />
+		<Message Notation="PS" XLATE_Description="Position statistics" />
+		<Message Notation="PT" XLATE_Description="Time of continuous position computation" />
+		<Message Notation="PV" XLATE_Description="Cartesian position and velocity" />
+		<Message Notation="p1" XLATE_Description="Short L1 P carrier phases" />
+		<Message Notation="p2" XLATE_Description="Short L2 P carrier phases" />
+		<Message Notation="pc" XLATE_Description="Short L1 C/A carrier phases" />
+		<Message Notation="Q2" XLATE_Description="QZSS CNAV/CNAV-2 ephemeris data" Schedule="0,0,0,0x2"/>
+		<Message Notation="QA" XLATE_Description="QZSS almanac" Schedule="0,0,0,0x2"/>
+		<Message Notation="QD" XLATE_Description="QZSS LEX raw navigation symbol stream" />
+		<Message Notation="QE" XLATE_Description="QZSS ephemeris" Schedule="0,0,0,0x2"/>
+		<Message Notation="QS" XLATE_Description="QZSS SV status" />
+		<Message Notation="qs" XLATE_Description="" />
+		<Message Notation="R1" XLATE_Description="Full L1 P pseudoranges" />
+		<Message Notation="R2" XLATE_Description="Full L2 P pseudoranges" />
+		<Message Notation="R3" XLATE_Description="Full GPS L2C and GLONASS L2 C/A pseudoranges" />
+		<Message Notation="RC" XLATE_Description="Full L1 C/A pseudoranges" />
+		<Message Notation="RD" XLATE_Description="Receiver date" Schedule="1,120,0,0x23"/>
+		<Message Notation="rd" XLATE_Description="" />
+		<Message Notation="RE" XLATE_Description="Receiver ACK reply" />
+		<Message Notation="re" XLATE_Description="" />
+		<Message Notation="RI" XLATE_Description="Raw IMU measurements" />
+		<Message Notation="RK" XLATE_Description="RTK parameters" />
+		<Message Notation="RM" XLATE_Description="Results of RAIM processing" />
+		<Message Notation="RN" XLATE_Description="Reference Station Information" Schedule="5,900,0,0x3"/>
+		<Message Notation="RP" XLATE_Description="Reference station parameters" Schedule="0,0,0,0x2"/>
+		<Message Notation="RR" XLATE_Description="" />
+		<Message Notation="RS" XLATE_Description="Reference station status" />
+		<Message Notation="RT" XLATE_Description="Receiver time" />
+		<Message Notation="RV" XLATE_Description="" />
+		<Message Notation="r1" XLATE_Description="Delta L1 P pseudoranges" />
+		<Message Notation="r2" XLATE_Description="Delta L2 P pseudoranges" />
+		<Message Notation="rC" XLATE_Description="Modernized Pseudorange Smoothing Corrections" />
+		<Message Notation="rD" XLATE_Description="Raw Measurements" />
+		<Message Notation="rE" XLATE_Description="Reference epoch" />
+		<Message Notation="rL" XLATE_Description="Raw Measurements from Secondary Antennas in Multiantenna Receivers" />
+		<Message Notation="rM" XLATE_Description="Raw Measurements" />
+		<Message Notation="rP" XLATE_Description="Diagnostic message" />
+		<Message Notation="rR" XLATE_Description="RTK Alarms" Schedule="0,0,0,0x2"/>
+		<Message Notation="rS" XLATE_Description="Modernized Raw Measurements"/>
+		<Message Notation="rT" XLATE_Description="Receiver’s clock offsets" />
+		<Message Notation="rV" XLATE_Description="Position and velocity" />
+		<Message Notation="rc" XLATE_Description="Delta L1 C/A pseudoranges" />
+		<Message Notation="S1" XLATE_Description="Status of L-Band Services" />
+		<Message Notation="S2" XLATE_Description="Subscription of L-Band Services" />
+		<Message Notation="SC" XLATE_Description="Standalone/DGNSS position" />
+		<Message Notation="SD" XLATE_Description="Long Link: Service discovery result" />
+		<Message Notation="SE" XLATE_Description="Security" />
+		<Message Notation="SG" XLATE_Description="Position and velocity RMS errors"/>
+		<Message Notation="SI" XLATE_Description="Satellite indices" Schedule="1,0,0,0x23"/>
+		<Message Notation="SM" XLATE_Description="Security for rM message" />
+		<Message Notation="SP" XLATE_Description="Position covariance matrix"/>
+		<Message Notation="SR" XLATE_Description="" />
+		<Message Notation="SS" XLATE_Description="Satellite navigation status" Schedule="1,0,0,0x22"/>
+		<Message Notation="ST" XLATE_Description="Solution time-tag" />
+		<Message Notation="SV" XLATE_Description="Velocity covariance matrix" />
+		<Message Notation="sC" XLATE_Description="SBAS Differential Corrections" />
+		<Message Notation="sA" XLATE_Description="" />
+		<Message Notation="TC" XLATE_Description="Time since last loss-of-lock on particular L1 C/A channel"/>
+		<Message Notation="TM" XLATE_Description="Clock offsets and their time derivatives" />
+		<Message Notation="TO" XLATE_Description="Receiver reference time to receiver time offset"/>
+		<Message Notation="TR" XLATE_Description="Time residuals" />
+		<Message Notation="TT" XLATE_Description="Time since last loss-of-lock on all L1 C/A channels" />
+		<Message Notation="TX" XLATE_Description="Text message" Schedule="0,0,0,0x2"/>
+		<Message Notation="UO" XLATE_Description="Universal Coordinated Time (UTC) parameters" Schedule="1,3600,0,0x23"/>
+		<Message Notation="V1" XLATE_Description="Ionospheric scintillations activity for GPS" />
+		<Message Notation="V2" XLATE_Description="Ionospheric scintillations activity for GLONASS" />
+		<Message Notation="V3" XLATE_Description="Ionospheric scintillation flags and total activity"/>
+		<Message Notation="V4" XLATE_Description="Amplitude and phase of ionospheric scintillations intensity"/>
+		<Message Notation="V5" XLATE_Description=""/>
+		<Message Notation="V6" XLATE_Description=""/>
+		<Message Notation="V7" XLATE_Description=""/>
+		<Message Notation="vC" XLATE_Description=""/>
+		<Message Notation="VE" XLATE_Description="Cartesian velocity"/>
+		<Message Notation="VG" XLATE_Description="NEU velocity" />
+		<Message Notation="WA" XLATE_Description="SBAS almanac" Schedule="0,0,0,0x2"/>
+		<Message Notation="WD" XLATE_Description="SBAS raw data" />
+		<Message Notation="WE" XLATE_Description="SBAS ephemeris" Schedule="0,0,0,0x2"/>
+		<Message Notation="WG" XLATE_Description="" />
+		<Message Notation="WO" XLATE_Description="SBAS time" Schedule="1,3600,0,0x23"/>
+		<Message Notation="WS" XLATE_Description="SBAS status" />
+		<Message Notation="XA" XLATE_Description="External event" Schedule="0,0,0,0x0"/>
+		<Message Notation="XB" XLATE_Description="External event" Schedule="0,0,0,0x0"/>
+		<Message Notation="XD" XLATE_Description="Data from NMEA XDR sentence" Schedule="1,0,0,0x2"/>
+		<Message Notation="XE" XLATE_Description="" />
+		<Message Notation="XI" XLATE_Description="" />
+		<Message Notation="XM" XLATE_Description="" />
+		<Message Notation="XS" XLATE_Description="Extended Position statistics" />
+		<Message Notation="XV" XLATE_Description="" />
+		<Message Notation="XX" XLATE_Description="Special receiver information" />
+		<Message Notation="YA" XLATE_Description="Time offset at PPS generation time" Schedule="0,0,0,0x0" />
+		<Message Notation="YB" XLATE_Description="Time offset at PPS generation time" Schedule="0,0,0,0x0"/>
+		<Message Notation="ZA" XLATE_Description="PPS offset" Schedule="0,0,0,0x0"/>
+		<Message Notation="ZB" XLATE_Description="PPS offset" Schedule="0,0,0,0x0"/>
+	</jps>
+	<nmea>
+		<Message Notation="ATT" XLATE_Description="Attitude parameters"/>
+		<Message Notation="GGA" XLATE_Description="Global Positioning System fix data"/>
+		<Message Notation="GLL" XLATE_Description="Geographic position – latitude/longitude"/>
+		<Message Notation="GMP" XLATE_Description="GNSS map projection fix data"/>
+		<Message Notation="GNS" XLATE_Description="GNSS fix data"/>
+		<Message Notation="GRS" XLATE_Description="GNSS range residuals"/>
+		<Message Notation="GSA" XLATE_Description="GNSS DOP and active satellites"/>
+		<Message Notation="GST" XLATE_Description="GNSS pseudorange error statistics"/>
+		<Message Notation="GSV" XLATE_Description="GNSS satellites in view"/>
+		<Message Notation="HDT" XLATE_Description="Heading, True"/>
+		<Message Notation="P_ATT" XLATE_Description="Attitude parameters"/>
+		<Message Notation="RMC" XLATE_Description="Recommended minimum specific GNSS data"/>
+		<Message Notation="ROT" XLATE_Description="Rate of turn"/>
+		<Message Notation="UID" XLATE_Description="User identification codes"/>
+		<Message Notation="V3D" XLATE_Description="Extended 3-D attitude parameters"/>
+		<Message Notation="VHD" XLATE_Description="Extended attitude parameters"/>
+		<Message Notation="VTG" XLATE_Description="Course over ground and ground speed"/>
+		<Message Notation="ZDA" XLATE_Description="Time &amp; Date"/>
+	</nmea>
+	<rtcm Option="RTMO">
+		<Message Notation="01" XLATE_Description=""/>
+		<Message Notation="03" XLATE_Description="GNSS Reference Station Parameters" Option="" Schedule="10,0,0,0x0"/>
+		<Message Notation="06" XLATE_Description="GPS Null Frame" Option="" Schedule="30,0,0,0x0"/>
+		<Message Notation="09" XLATE_Description=""/>
+		<Message Notation="1" XLATE_Description="Differential GPS corrections"/>
+		<Message Notation="2" XLATE_Description="Delta Differential GPS Corrections"/>
+		<Message Notation="3" XLATE_Description="Reference Station Parameters" Option="" Schedule="10,0,0,0x0"/>
+		<Message Notation="4" XLATE_Description="Reference Station Datum Message"  />
+		<Message Notation="5" XLATE_Description="GPS Constellation Health"  />
+		<Message Notation="6" XLATE_Description="GPS Null Frame" Option=""  Schedule="30,0,0,0x0"/>
+		<Message Notation="7" XLATE_Description="DGPS Radiobeacon Almanac" />
+		<Message Notation="8" XLATE_Description="Pseudolite Almanac" />
+		<Message Notation="9" XLATE_Description="GPS Partial Correction Set"/>
+		<Message Notation="10" XLATE_Description="P-Code Differential Corrections"/>
+		<Message Notation="11" XLATE_Description="C/A Code L2 Corrections"/>
+		<Message Notation="12" XLATE_Description="Pseudolite Station Parameters" />
+		<Message Notation="13" XLATE_Description="Ground Transmitter Parameters" />
+		<Message Notation="14" XLATE_Description="GPS Time Of Week" />
+		<Message Notation="15" XLATE_Description="Ionospheric Delay Message" Option=""  Schedule="60,0,0,0x0"/>
+		<Message Notation="16" XLATE_Description="GPS Special Message" Option="" Schedule="30,0,0,0x0"/>
+		<Message Notation="17" XLATE_Description="GPS Ephemerides"/>
+		<Message Notation="18" XLATE_Description="RTK Uncorrected Carrier Phases"/>
+		<Message Notation="19" XLATE_Description="RTK Uncorrected Pseudoranges"/>
+		<Message Notation="20" XLATE_Description="RTK Carrier Phase Corrections"/>
+		<Message Notation="21" XLATE_Description="High-Accuracy Pseudorange Corrections"/>
+		<Message Notation="22" XLATE_Description="Extended Reference Station Parameters" Option="" Schedule="10,0,0,0x0"/>
+		<Message Notation="23" XLATE_Description="Antenna Type Definition Record" Option="" Schedule="10,0,0,0x0"/>
+		<Message Notation="24" XLATE_Description="Antenna Reference Point" Option="" Schedule="10,0,0,0x0"/>
+		<Message Notation="27" XLATE_Description="Extended Radiobeacon Almanac"/>
+		<Message Notation="31" XLATE_Description="Differential GLONASS corrections"/>
+		<Message Notation="32" XLATE_Description="GLONASS Reference Station Parameters" Option="" Schedule="10,0,0,0x0"/>
+		<Message Notation="33" XLATE_Description="GLONASS Constellation Health" Option="" />
+		<Message Notation="34" XLATE_Description="GLONASS Partial Correction Set"/>
+		<Message Notation="34" XLATE_Description="GLONASS Null Frame"/>
+		<Message Notation="35" XLATE_Description="GLONASS Radiobeacon Almanac"/>
+		<Message Notation="36" XLATE_Description="GLONASS Special Message" Option="" Schedule="30,0,0,0x0"/>
+		<Message Notation="37" XLATE_Description="GNSS System Time Offset"/>
+		<Message Notation="41" XLATE_Description="GNSS Differential Corrections"/>
+		<Message Notation="59t" XLATE_Description="TPS Proprietary Message" Option=""/>
+		<Message Notation="65" XLATE_Description="" Option="" Schedule="30,0,0,0x0"/>
+	</rtcm>
+	<rtcm3 Option="RM3O">
+		<Message Notation="1001" XLATE_Description="GPS Basic RTK, L1 Only"/>
+		<Message Notation="1002" XLATE_Description="GPS Extended RTK, L1 Only"/>
+		<Message Notation="1003" XLATE_Description="GPS Basic RTK, L1 &amp; L2"/>
+		<Message Notation="1004" XLATE_Description="GPS Extended RTK, L1 &amp; L2"/>
+		<Message Notation="1005" XLATE_Description="Stationary Antenna Reference Point, No Height Information" Option="" Schedule="10,0,0,0x0"/>
+		<Message Notation="1006" XLATE_Description="Stationary Antenna Reference Point, with Height Information" Option="" Schedule="10,0,0,0x0"/>
+		<Message Notation="1007" XLATE_Description="Antenna Descriptor" Option="" Schedule="10,0,0,0x0"/>
+		<Message Notation="1008" XLATE_Description="Antenna Descriptor &amp; Serial Number" Option="" Schedule="10,0,0,0x0"/>
+		<Message Notation="1009" XLATE_Description="GLONASS Basic RTK, L1 Only"/>
+		<Message Notation="1010" XLATE_Description="GLONASS Extended RTK, L1 Only"/>
+		<Message Notation="1011" XLATE_Description="GLONASS Basic RTK, L1 &amp; L2"/>
+		<Message Notation="1012" XLATE_Description="GLONASS Extended RTK, L1 &amp; L2"/>
+		<Message Notation="1013" XLATE_Description="System Parameters"/>
+		<Message Notation="1014" XLATE_Description="Network Auxiliary Station Data"/>
+		<Message Notation="1015" XLATE_Description="GPS Ionospheric Correction Differences"/>
+		<Message Notation="1016" XLATE_Description="GPS Geometric Correction Differences"/>
+		<Message Notation="1017" XLATE_Description="GPS Combined Geometric and Ionospheric Correction Differences"/>
+		<Message Notation="1019" XLATE_Description="GPS ephemeris" Option="" Schedule="0,0,0,0x2"/>
+		<Message Notation="1020" XLATE_Description="GLONASS ephemeris" Option="" Schedule="0,0,0,0x2"/>
+		<Message Notation="1021" XLATE_Description="Helmert/Abridged Molodenski Transformation Parameters"/>
+		<Message Notation="1022" XLATE_Description="Molodenski-Badekas Transformation Parameters"/>
+		<Message Notation="1023" XLATE_Description="Residuals, Ellipsoidal Grid Representation"/>
+		<Message Notation="1024" XLATE_Description="Residuals, Plane Grid Representation"/>
+		<Message Notation="1025" XLATE_Description="Projection Parameters, Projection Types other than Lambert Conic Conformal (2 SP) and Oblique Mercator"/>
+		<Message Notation="1026" XLATE_Description="Parameters, Projection Type LCC2SP (Lambert Conic Conformal (2 SP))"/>
+		<Message Notation="1027" XLATE_Description="Projection Parameters, Projection Type OM (Oblique Mercator)"/>
+		<Message Notation="1028" XLATE_Description="Reserved for Global to Plate-Fixed Transformation"/>
+		<Message Notation="1029" XLATE_Description="Unicode Text String (used for human readable text)" Option="" Schedule="10,0,0,0x0"/>
+		<Message Notation="1030" XLATE_Description="GPS Network RTK Residual" />
+		<Message Notation="1031" XLATE_Description="GLONASS Network RTK Residual"/>
+		<Message Notation="1032" XLATE_Description="Physical Reference Station Position"/>
+		<Message Notation="1033" XLATE_Description="Receiver and antenna descriptors" Option="" Schedule="10,0,0,0x0"/>
+		<Message Notation="1042" XLATE_Description="BeiDou Ephemerides" Option="" Schedule="0,0,0,0x2"/>
+		<Message Notation="1044" XLATE_Description="QZSS Ephemerides" Option="" Schedule="0,0,0,0x2"/>
+		<Message Notation="1045" XLATE_Description="Galileo F/NAV Ephemerides" Option="" Schedule="0,0,0,0x2"/>
+		<Message Notation="1046" XLATE_Description="Galileo I/NAV Ephemerides" Option="" Schedule="0,0,0,0x2"/>
+		<Message Notation="1071" XLATE_Description="Compact GPS Pseudoranges"/>
+		<Message Notation="1072" XLATE_Description="Compact GPS PhaseRanges"/>
+		<Message Notation="1073" XLATE_Description="Compact GPS Pseudoranges and PhaseRanges"/>
+		<Message Notation="1074" XLATE_Description="Full GPS Pseudoranges and PhaseRanges plus CNR"/>
+		<Message Notation="1075" XLATE_Description="Full GPS Pseudoranges, PhaseRanges, PhaseRangeRate and CNR"/>
+		<Message Notation="1076" XLATE_Description="Full GPS Pseudoranges and PhaseRanges plus CNR (high resolution)"/>
+		<Message Notation="1077" XLATE_Description="Full GPS Pseudoranges, PhaseRanges, PhaseRangeRate and CNR (high resolution)"/>
+		<Message Notation="1081" XLATE_Description="Compact GLONASS Pseudoranges"/>
+		<Message Notation="1082" XLATE_Description="Compact GLONASS PhaseRanges"/>
+		<Message Notation="1083" XLATE_Description="Compact GLONASS Pseudoranges and PhaseRanges"/>
+		<Message Notation="1084" XLATE_Description="Full GLONASS Pseudoranges and PhaseRanges plus CNR"/>
+		<Message Notation="1085" XLATE_Description="Full GLONASS Pseudoranges, PhaseRanges, PhaseRangeRate and CNR"/>
+		<Message Notation="1086" XLATE_Description="Full GLONASS Pseudoranges and PhaseRanges plus CNR (high resolution)"/>
+		<Message Notation="1087" XLATE_Description="Full GLONASS Pseudoranges, PhaseRanges, PhaseRangeRate and CNR (high resolution)"/>
+		<Message Notation="1091" XLATE_Description="Compact GALILEO Pseudoranges"/>
+		<Message Notation="1092" XLATE_Description="Compact GALILEO PhaseRanges"/>
+		<Message Notation="1093" XLATE_Description="Compact GALILEO Pseudoranges and PhaseRanges"/>
+		<Message Notation="1094" XLATE_Description="Full GALILEO Pseudoranges and PhaseRanges plus CNR"/>
+		<Message Notation="1095" XLATE_Description="Full GALILEO Pseudoranges, PhaseRanges, PhaseRangeRate and CNR"/>
+		<Message Notation="1096" XLATE_Description="Full GALILEO Pseudoranges and PhaseRanges plus CNR (high resolution)"/>
+		<Message Notation="1097" XLATE_Description="Full GALILEO Pseudoranges, PhaseRanges, PhaseRangeRate and CNR (high resolution)"/>
+		<Message Notation="1101" XLATE_Description="Compact SBAS Pseudoranges"/>
+		<Message Notation="1102" XLATE_Description="Compact SBAS PhaseRanges"/>
+		<Message Notation="1103" XLATE_Description="Compact SBAS Pseudoranges and PhaseRanges"/>
+		<Message Notation="1104" XLATE_Description="Full SBAS Pseudoranges and PhaseRanges plus CNR"/>
+		<Message Notation="1105" XLATE_Description="Full SBAS Pseudoranges, PhaseRanges, PhaseRangeRate and CNR"/>
+		<Message Notation="1106" XLATE_Description="Full SBAS Pseudoranges and PhaseRanges plus CNR (high resolution)"/>
+		<Message Notation="1107" XLATE_Description="Full SBAS Pseudoranges, PhaseRanges, PhaseRangeRate and CNR (high resolution)"/>
+		<Message Notation="1111" XLATE_Description="Compact QZSS Pseudoranges"/>
+		<Message Notation="1112" XLATE_Description="Compact QZSS PhaseRanges"/>
+		<Message Notation="1113" XLATE_Description="Compact QZSS Pseudoranges and PhaseRanges"/>
+		<Message Notation="1114" XLATE_Description="Full QZSS Pseudoranges and PhaseRanges plus CNR"/>
+		<Message Notation="1115" XLATE_Description="Full QZSS Pseudoranges, PhaseRanges, PhaseRangeRate and CNR"/>
+		<Message Notation="1116" XLATE_Description="Full QZSS Pseudoranges and PhaseRanges plus CNR (high resolution)"/>
+		<Message Notation="1117" XLATE_Description="Full QZSS Pseudoranges, PhaseRanges, PhaseRangeRate and CNR (high resolution)"/>
+		<Message Notation="1121" XLATE_Description="Compact BeiDou Pseudoranges"/>
+		<Message Notation="1122" XLATE_Description="Compact BeiDou PhaseRanges"/>
+		<Message Notation="1123" XLATE_Description="Compact BeiDou Pseudoranges and PhaseRanges"/>
+		<Message Notation="1124" XLATE_Description="Full BeiDou Pseudoranges and PhaseRanges plus CNR"/>
+		<Message Notation="1125" XLATE_Description="Full BeiDou Pseudoranges, PhaseRanges, PhaseRangeRate and CNR"/>
+		<Message Notation="1126" XLATE_Description="Full BeiDou Pseudoranges and PhaseRanges plus CNR (high resolution)"/>
+		<Message Notation="1127" XLATE_Description="Full BeiDou Pseudoranges, PhaseRanges, PhaseRangeRate and CNR (high resolution)"/>
+		<Message Notation="1131" XLATE_Description="Compact NavIC Pseudoranges"/>
+		<Message Notation="1132" XLATE_Description="Compact NavIC PhaseRanges"/>
+		<Message Notation="1133" XLATE_Description="Compact NavIC Pseudoranges and PhaseRanges"/>
+		<Message Notation="1134" XLATE_Description="Full NavIC Pseudoranges and PhaseRanges plus CNR"/>
+		<Message Notation="1135" XLATE_Description="Full NavIC Pseudoranges, PhaseRanges, PhaseRangeRate and CNR"/>
+		<Message Notation="1136" XLATE_Description="Full NavIC Pseudoranges and PhaseRanges plus CNR (high resolution)"/>
+		<Message Notation="1137" XLATE_Description="Full NavIC Pseudoranges, PhaseRanges, PhaseRangeRate and CNR (high resolution)"/>
+		<Message Notation="1230" XLATE_Description="GLONASS Bias Information" Option="" Schedule="10,0,0,0x0"/>
+		<Message Notation="4087G" XLATE_Description="GPS Ephemerides, Fugro proprietary Support conditions are not applicable for proprietary messages" Option="" Schedule="0,0,0,0x2"/>
+		<Message Notation="4087N" XLATE_Description="GLONASS Ephemerides, Fugro proprietary" Option="" Schedule="0,0,0,0x2"/>
+		<Message Notation="4091h" XLATE_Description="Moving Base Position" Option=""/>
+		<Message Notation="4091i" XLATE_Description="Ionospheric Scintillations" Option=""/>
+		<Message Notation="4091t" XLATE_Description="TPS Proprietary Text Message" Option="" Schedule="10,0,0,0x0"/>
+	</rtcm3>
+	<cmr Option="CMRO">
+		<Message Notation="0" XLATE_Description="GPS Observables"/>
+		<Message Notation="1" XLATE_Description="Reference Station Coordinates" Option="" Schedule="10,0,0,0x0"/>
+		<Message Notation="2" XLATE_Description="Reference Station Description" Option=""  Schedule="10,0,0,0x0"/>
+		<Message Notation="5" XLATE_Description="TPS Proprietary Message" Option="" Schedule="10,0,0,0x0"/>
+		<Message Notation="9" XLATE_Description="Scrolling Station Information" Option=""/>
+		<Message Notation="10" XLATE_Description="GLONASS Observables"/>
+	</cmr>
+	<binex Option="">
+		<Message Notation="00_00" XLATE_Description="Information about the site, monument, marker, reference point, and equipment setup" Option="" Schedule="0,0,1,0x1C" />
+		<Message Notation="01_01" XLATE_Description="GPS ephemeris"  Schedule="0,0,0,0x2" />
+		<Message Notation="01_02" XLATE_Description="GLONASS ephemeris" Schedule="0,0,0,0x2" />
+		<Message Notation="01_03" XLATE_Description="SBAS ephemeris" Schedule="0,0,0,0x2"/>
+		<Message Notation="01_04" XLATE_Description="Galileo ephemeris" Schedule="0,0,0,0x2"/>
+		<Message Notation="01_05" XLATE_Description="BeiDou ephemeris" Schedule="0,0,0,0x2"/>
+		<Message Notation="01_06" XLATE_Description="QZSS ephemeris" Schedule="0,0,0,0x2"/>
+		<Message Notation="01_07" XLATE_Description="QZSS ephemeris" Schedule="0,0,0,0x2"/>
+		<Message Notation="01_14" XLATE_Description="Upgraded Galileo ephemeris"  Schedule="0,0,0,0x2"/>
+		<Message Notation="7E_00" XLATE_Description="Ancillary site data" Schedule="0,0,0,0x2"/>
+		<Message Notation="7D_00" XLATE_Description="State variables"  />
+		<Message Notation="7F_02" XLATE_Description="Information on GNSS time tag, channel, constellation, observables"  />
+		<Message Notation="7F_03" XLATE_Description="Observation data" />
+		<Message Notation="7F_04" XLATE_Description="Epochs where the receiver should be tracking, but is unable to track any SVs"  />
+		<Message Notation="7F_05" XLATE_Description="Observation data" />
+	</binex>
+	<misc>
+		<Message Notation="AGTILT" XLATE_Description="Tilt System Setup" Schedule="600,0,0,0x0"/>
+		<Message Notation="MET3" XLATE_Description="Meteorological System Setup" Schedule="600,0,0,0x0"/>
+		<Message Notation="MET4" XLATE_Description="Meteorological System Setup"/>
+	</misc>
+</ReceiverMessageRegistry>

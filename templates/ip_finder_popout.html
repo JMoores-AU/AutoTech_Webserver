@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ equipment_id }} - Equipment Monitor</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='AutoTech_Dark.ico') }}" id="favicon">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        body {
+            background: var(--theme-bg);
+            color: var(--theme-text);
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        .popout-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        .popout-header {
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid var(--theme-border);
+        }
+
+        .popout-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--theme-text-bright);
+            margin: 0;
+        }
+
+        /* Copy styles from main IP Finder */
+        .equipment-card {
+            background: var(--theme-bg-card);
+            border: 1px solid var(--theme-border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+        }
+
+        .equipment-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 24px;
+            background: var(--theme-bg);
+            border-bottom: 1px solid var(--theme-border);
+        }
+
+        .equipment-id {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--theme-text-bright);
+        }
+
+        .status-badge {
+            padding: 6px 14px;
+            border-radius: 16px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .status-badge.online { background: rgba(34, 197, 94, 0.15); color: var(--status-online); border: 1px solid rgba(34, 197, 94, 0.3); }
+        .status-badge.offline { background: rgba(239, 68, 68, 0.15); color: var(--status-offline); border: 1px solid rgba(239, 68, 68, 0.3); }
+        .status-badge.simulated { background: rgba(168, 85, 247, 0.15); color: #a855f7; border: 1px solid rgba(168, 85, 247, 0.3); }
+
+        .equipment-body {
+            padding: 24px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .info-section {
+            background: var(--theme-bg);
+            border-radius: var(--radius-md);
+            padding: 16px;
+        }
+
+        .info-section h3 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--theme-text-bright);
+            margin: 0 0 12px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--theme-border);
+        }
+        .info-row:last-child { border-bottom: none; }
+
+        .info-label {
+            font-size: 0.85rem;
+            color: var(--theme-text-muted);
+        }
+
+        .info-value {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Consolas', monospace;
+            color: var(--theme-text);
+        }
+
+        .btn-copy {
+            background: rgba(59, 130, 246, 0.15);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: var(--status-info);
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.75rem;
+        }
+        .btn-copy:hover { background: rgba(59, 130, 246, 0.25); }
+
+        /* Health Stats */
+        .health-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .health-stat {
+            background: var(--theme-bg-card);
+            border: 1px solid var(--theme-border);
+            border-radius: var(--radius-sm);
+            padding: 12px;
+        }
+
+        .health-stat-label {
+            font-size: 0.7rem;
+            color: var(--theme-text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .health-stat-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            font-family: 'Consolas', monospace;
+        }
+
+        .health-stat-value.good { color: var(--status-online); }
+        .health-stat-value.warning { color: #f59e0b; }
+        .health-stat-value.critical { color: var(--status-offline); }
+
+        .refresh-indicator {
+            font-size: 0.7rem;
+            color: var(--theme-text-muted);
+            font-style: italic;
+        }
+
+        /* Action Buttons */
+        .actions-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            padding-top: 16px;
+            border-top: 1px solid var(--theme-border);
+        }
+
+        .action-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+        .action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .btn-vnc { background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white; }
+        .btn-vnc:hover:not(:disabled) { background: linear-gradient(135deg, #7c3aed, #6d28d9); }
+
+        .btn-avi { background: linear-gradient(135deg, #06b6d4, #0891b2); color: white; }
+        .btn-avi:hover:not(:disabled) { background: linear-gradient(135deg, #0891b2, #0e7490); }
+
+        .btn-flight { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; }
+        .btn-flight:hover:not(:disabled) { background: linear-gradient(135deg, #d97706, #b45309); }
+
+        .btn-tru { background: linear-gradient(135deg, #10b981, #059669); color: white; }
+        .btn-tru:hover:not(:disabled) { background: linear-gradient(135deg, #059669, #047857); }
+
+        .btn-cleanup { background: linear-gradient(135deg, #f97316, #ea580c); color: white; }
+        .btn-cleanup:hover:not(:disabled) { background: linear-gradient(135deg, #ea580c, #c2410c); }
+
+        .action-log {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            margin-top: 16px;
+            font-family: 'Consolas', monospace;
+            font-size: 0.8rem;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+        }
+        .action-log.active { display: block; }
+        .log-line { padding: 2px 0; }
+        .log-line.success { color: var(--status-online); }
+        .log-line.error { color: var(--status-offline); }
+        .log-line.info { color: var(--status-info); }
+
+        .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: currentColor; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            background: var(--theme-bg-card);
+            border: 1px solid var(--theme-border);
+            border-radius: var(--radius-md);
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 250px;
+            box-shadow: var(--shadow-lg);
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .toast.success { border-left: 4px solid var(--status-online); }
+        .toast.error { border-left: 4px solid var(--status-offline); }
+        .toast.info { border-left: 4px solid var(--status-info); }
+    </style>
+</head>
+<body>
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="popout-container">
+        <div class="popout-header">
+            <h1 class="popout-title">{{ equipment_id }} - Live Monitor</h1>
+        </div>
+
+        <div id="equipmentContent">
+            <div style="text-align: center; padding: 40px; color: var(--theme-text-muted);">
+                <div style="font-size: 2rem; margin-bottom: 16px;">⏳</div>
+                <div>Loading equipment details...</div>
+            </div>
+        </div>
+    </div>
+
+    <script id="config-data" type="application/json">
+        {"equipment_id": "{{ equipment_id }}", "isOffline": {{ 'true' if not online else 'false' }}}
+    </script>
+
+    <script>
+        // Auto-apply theme from localStorage
+        (function() {
+            const savedTheme = localStorage.getItem('autotech_theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            const favicon = document.getElementById('favicon');
+            if (favicon) {
+                favicon.href = savedTheme === 'light'
+                    ? "{{ url_for('static', filename='AutoTech_Light.ico') }}"
+                    : "{{ url_for('static', filename='AutoTech_Dark.ico') }}";
+            }
+        })();
+
+        const config = JSON.parse(document.getElementById('config-data').textContent);
+        const equipmentId = config.equipment_id;
+        let currentEquipment = null;
+        let healthCheckInterval = null;
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            const icons = { info: 'ℹ️', success: '✅', error: '❌', warning: '⚠️' };
+            toast.innerHTML = `<span>${icons[type]}</span><span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 5000);
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast(`Copied: ${text}`, 'success');
+            }).catch(() => {
+                showToast('Failed to copy', 'error');
+            });
+        }
+
+        async function loadEquipmentData() {
+            try {
+                const response = await fetch('/api/equipment_search', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query: equipmentId })
+                });
+
+                const data = await response.json();
+
+                if (data.found) {
+                    currentEquipment = data;
+                    displayEquipment(data);
+                } else {
+                    document.getElementById('equipmentContent').innerHTML = `
+                        <div style="text-align: center; padding: 40px; color: var(--status-offline);">
+                            <div style="font-size: 2rem; margin-bottom: 16px;">❌</div>
+                            <div>Equipment "${equipmentId}" not found</div>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Load error:', error);
+                document.getElementById('equipmentContent').innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: var(--status-offline);">
+                        <div style="font-size: 2rem; margin-bottom: 16px;">⚠️</div>
+                        <div>Failed to load equipment data</div>
+                    </div>
+                `;
+            }
+        }
+
+        function displayEquipment(data) {
+            const statusClass = data.vehicle_status === 'Online' ? 'online' :
+                               data.vehicle_status === 'Simulated' ? 'simulated' : 'offline';
+
+            const hasFlightRecorder = data.profile === 'K830E' || data.profile === 'K930E';
+            const flightRecorderIP = data.flight_recorder_ip || (hasFlightRecorder ? getFlightRecorderIP(data.ptx_ip) : null);
+            const ptxModel = data.ptxc_found ? 'PTXC' : (data.ptx_model || 'PTX10');
+
+            document.getElementById('equipmentContent').innerHTML = `
+                <div class="equipment-card">
+                    <div class="equipment-header">
+                        <div class="equipment-id">${data.OID}</div>
+                        <span class="status-badge ${statusClass}">${data.vehicle_status || 'Unknown'}</span>
+                    </div>
+
+                    <div class="equipment-body">
+                        <div class="info-grid">
+                            <div class="info-section">
+                                <h3>📋 Equipment Details</h3>
+                                <div class="info-row">
+                                    <span class="info-label">Equipment ID</span>
+                                    <span class="info-value">${data.OID}</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Profile / Type</span>
+                                    <span class="info-value">${data.profile || 'Unknown'}</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">PTX Model</span>
+                                    <span class="info-value">${ptxModel}${data.ptxc_found ? ' ✓' : ''}</span>
+                                </div>
+                                ${data.cid ? `
+                                <div class="info-row">
+                                    <span class="info-label">Category</span>
+                                    <span class="info-value">${data.cid}</span>
+                                </div>
+                                ` : ''}
+                            </div>
+
+                            <div class="info-section">
+                                <h3>🌐 Network Info</h3>
+                                <div class="info-row">
+                                    <span class="info-label">PTX IP</span>
+                                    <span class="info-value">
+                                        ${data.ptx_ip || 'N/A'}
+                                        ${data.ptx_ip ? `<button class="btn-copy" onclick="copyToClipboard('${data.ptx_ip}')">📋</button>` : ''}
+                                    </span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">AVI IP</span>
+                                    <span class="info-value">
+                                        ${data.avi_ip || 'N/A'}
+                                        ${data.avi_ip ? `<button class="btn-copy" onclick="copyToClipboard('${data.avi_ip}')">📋</button>` : ''}
+                                    </span>
+                                </div>
+                                ${flightRecorderIP ? `
+                                <div class="info-row">
+                                    <span class="info-label">Flight Recorder IP</span>
+                                    <span class="info-value">
+                                        ${flightRecorderIP}
+                                        <button class="btn-copy" onclick="copyToClipboard('${flightRecorderIP}')">📋</button>
+                                    </span>
+                                </div>
+                                ` : ''}
+                            </div>
+
+                            <div class="info-section" id="healthSection">
+                                <h3>🏥 System Health <span class="refresh-indicator" id="healthRefreshTimer"></span></h3>
+                                <div id="healthStats">
+                                    <div style="text-align: center; padding: 12px; color: var(--theme-text-muted); font-size: 0.85rem;">
+                                        Loading health data...
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="actions-section">
+                            <button class="action-btn btn-vnc" ${!data.ptx_ip ? 'disabled' : ''} onclick="openVNC('${data.ptx_ip}', ${data.ptxc_found || false}, '${data.OID}', '${ptxModel}')">
+                                🖥️ Open VNC
+                            </button>
+                            <button class="action-btn btn-avi" ${!data.avi_ip ? 'disabled' : ''} onclick="openAVI('${data.avi_ip}')">
+                                📹 Open AVI
+                            </button>
+                            ${flightRecorderIP ? `
+                            <button class="action-btn btn-flight" onclick="openFlightRecorder('${flightRecorderIP}')">
+                                🛩️ Flight Recorder
+                            </button>
+                            ` : ''}
+                            <button class="action-btn btn-tru" ${!data.ptx_ip ? 'disabled' : ''} onclick="openTRU('${data.OID}', '${data.ptx_ip}')">
+                                🚛 TRU Access
+                            </button>
+                        </div>
+                        <div class="action-log" id="actionLog"></div>
+                    </div>
+                </div>
+            `;
+
+            // Start health monitoring
+            if (data.ptx_ip) {
+                startHealthMonitoring(data.ptx_ip, ptxModel);
+            }
+        }
+
+        function getFlightRecorderIP(ptxIP) {
+            if (!ptxIP) return null;
+            const parts = ptxIP.split('.');
+            if (parts.length !== 4) return null;
+            return `${parts[0]}.${parts[1]}.${parts[2]}.${parseInt(parts[3]) + 1}`;
+        }
+
+        // Health monitoring functions
+        async function fetchHealthCheck(ptx_ip, ptx_model) {
+            if (config.isOffline || currentEquipment?.vehicle_status === 'Simulated') {
+                return {
+                    success: true,
+                    cpu_usage: '38.50%',
+                    memory_usage: '92.98%',
+                    uptime: '1 day, 36 minutes',
+                    disk_usage: '/dev/mmcblk0p3  5.6G  2.6G  2.7G  49% /media/realroot/home',
+                    disk_percent: '49%'
+                };
+            }
+
+            try {
+                const response = await fetch('/api/linux_health_check', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ptx_ip, ptx_model })
+                });
+                return await response.json();
+            } catch (error) {
+                console.error('Health check error:', error);
+                return { success: false, error: error.message };
+            }
+        }
+
+        function displayHealthStats(healthData) {
+            const healthStats = document.getElementById('healthStats');
+            if (!healthStats) return;
+
+            if (!healthData.success) {
+                healthStats.innerHTML = '<div style="text-align: center; padding: 12px; color: var(--status-offline); font-size: 0.85rem;">⚠️ ' + (healthData.error || 'Failed to load health data') + '</div>';
+                return;
+            }
+
+            const cpuValue = parseFloat(healthData.cpu_usage) || 0;
+            const memValue = parseFloat(healthData.memory_usage) || 0;
+            const diskValue = parseFloat(healthData.disk_percent) || 0;
+
+            const getCpuClass = (val) => val > 80 ? 'critical' : val > 60 ? 'warning' : 'good';
+            const getMemClass = (val) => val > 90 ? 'critical' : val > 75 ? 'warning' : 'good';
+            const getDiskClass = (val) => val > 85 ? 'critical' : val > 70 ? 'warning' : 'good';
+
+            healthStats.innerHTML = '<div class="health-stats-grid">' +
+                '<div class="health-stat"><div class="health-stat-label">CPU Usage</div><div class="health-stat-value ' + getCpuClass(cpuValue) + '">' + healthData.cpu_usage + '</div></div>' +
+                '<div class="health-stat"><div class="health-stat-label">Memory Usage</div><div class="health-stat-value ' + getMemClass(memValue) + '">' + healthData.memory_usage + '</div></div>' +
+                '<div class="health-stat"><div class="health-stat-label">PTX Uptime</div><div class="health-stat-value" style="font-size: 0.9rem; color: var(--theme-text-bright);">' + healthData.uptime + '</div></div>' +
+                '<div class="health-stat"><div class="health-stat-label">Disk Usage</div><div class="health-stat-value ' + getDiskClass(diskValue) + '">' + healthData.disk_percent + '</div></div>' +
+                '</div>';
+
+            const timer = document.getElementById('healthRefreshTimer');
+            if (timer) timer.textContent = 'Last updated: ' + new Date().toLocaleTimeString();
+        }
+
+        async function startHealthMonitoring(ptx_ip, ptx_model) {
+            if (healthCheckInterval) clearInterval(healthCheckInterval);
+
+            const data = await fetchHealthCheck(ptx_ip, ptx_model);
+            displayHealthStats(data);
+
+            healthCheckInterval = setInterval(async () => {
+                const data = await fetchHealthCheck(ptx_ip, ptx_model);
+                displayHealthStats(data);
+            }, 30000);
+        }
+
+        // Action button functions (simplified versions)
+        function openVNC(ip, isPTXC, equipmentName, ptxModel) {
+            if (!ip) {
+                showToast('No PTX IP available', 'error');
+                return;
+            }
+            showToast('Opening VNC for ' + equipmentName, 'info');
+            fetch('/api/vnc/start', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ptx_ip: ip, equipment_name: equipmentName, ptx_model: ptxModel })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('VNC launched successfully', 'success');
+                } else {
+                    showToast('VNC launch failed: ' + (data.error || 'Unknown error'), 'error');
+                }
+            });
+        }
+
+        function openAVI(ip) {
+            if (!ip) {
+                showToast('No AVI IP available', 'error');
+                return;
+            }
+            window.open('http://' + ip, '_blank');
+            showToast('Opening AVI in new tab', 'success');
+        }
+
+        function openFlightRecorder(ip) {
+            if (!ip) {
+                showToast('No Flight Recorder IP available', 'error');
+                return;
+            }
+            window.open('http://' + ip, '_blank');
+            showToast('Opening Flight Recorder in new tab', 'success');
+        }
+
+        function openTRU(equipmentId, ptxIp) {
+            showToast('TRU Access: ' + equipmentId, 'info');
+        }
+
+        // Load equipment data on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadEquipmentData();
+        });
+
+        // Clean up on page unload
+        window.addEventListener('beforeunload', () => {
+            if (healthCheckInterval) clearInterval(healthCheckInterval);
+        });
+    </script>
+</body>
+</html>

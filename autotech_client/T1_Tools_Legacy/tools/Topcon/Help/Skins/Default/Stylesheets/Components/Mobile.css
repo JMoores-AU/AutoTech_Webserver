@@ -1,0 +1,60 @@
+/*<meta />*/
+
+@media only screen and (max-width: 767px)
+{
+	.search-bar
+	{
+		width: 100%;
+	}
+
+	.buttons
+	{
+		
+	}
+
+	.button
+	{
+		
+	}
+
+	.button.collapse-all-button
+	{
+		
+	}
+
+	.button.current-topic-index-button
+	{
+		
+	}
+
+	.button.expand-all-button
+	{
+		
+	}
+
+	.button.next-topic-button
+	{
+		
+	}
+
+	.button.previous-topic-button
+	{
+		
+	}
+
+	.button.print-button
+	{
+		
+	}
+
+	.button.remove-highlight-button
+	{
+		
+	}
+
+	.button-separator
+	{
+		
+	}
+}
+

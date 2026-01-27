@@ -1,0 +1,7 @@
+  [  Running  ]  FrontRunner Server
+  [  Running  ]  haul road planning server
+  [  Running  ]  path planning server
+ -------------------------------------
+ Number of processes running: 3 out of 3
+   All processes running
+   All processes running

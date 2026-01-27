@@ -1,0 +1,29 @@
+   command:
+     (*)  start      win32: Starts application in a new window.
+                     unix : Starts application in background process.   
+                     Log will be redirected to /agent/_work/2/s/distributions/frontrunnerV3-dev/logs/.
+
+     (*)  console    Starts application in current terminal.
+                     Log will be redirected to system output.
+
+          admin      Starts frontrunner in administrative mode.  
+                     Administrative mode allows to configure the system and check its health.
+
+          help       Displays this help and exit.
+
+          examples   Shows examples of frontrunner command usage.
+
+     (*) requires [application]
+ 
+   application:
+         standalone  Runs server and client applications all together
+                     without any network capabilities.
+
+         server      Runs server with network capabilities.
+
+         desktop     Runs desktop application.
+
+         embedded    Runs embedded application.
+         
+         emergency   Runs desktop emergency application.
+

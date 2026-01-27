@@ -4,7 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - AutoTech</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='AutoTech_Dark.ico') }}" id="favicon">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script>
+        // Auto-apply theme from localStorage
+        (function() {
+            const savedTheme = localStorage.getItem('autotech_theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            const favicon = document.getElementById('favicon');
+            if (favicon) {
+                favicon.href = savedTheme === 'light'
+                    ? "{{ url_for('static', filename='AutoTech_Light.ico') }}"
+                    : "{{ url_for('static', filename='AutoTech_Dark.ico') }}";
+            }
+        })();
+    </script>
     <style>
         .login-container {
             min-height: 100vh;

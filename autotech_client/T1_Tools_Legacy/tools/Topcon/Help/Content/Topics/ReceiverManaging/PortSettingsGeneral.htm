@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" lang="ru-RU" xml:lang="ru-RU" data-mc-search-type="Stem" data-mc-help-system-file-name="Default.xml" data-mc-path-to-help-system="../../../" data-mc-target-type="WebHelp2" data-mc-runtime-file-type="Topic" data-mc-preload-images="false" data-mc-in-preview-mode="false" data-mc-medium="non-print" data-mc-toc-path="Receiver Managing|Receiver Settings|Ports">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" /><title>Port Settings: General</title>
+        <link href="../../../Skins/Default/Stylesheets/Slideshow.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/TextEffects.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/Topic.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/Components/Styles.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/Components/Tablet.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/Components/Mobile.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../Resources/TableStyles/_2ColmnTable.css" rel="stylesheet" />
+        <link href="../../Resources/Stylesheets/TRU.css" rel="stylesheet" />
+        <style>/*&lt;meta /&gt;*/
+
+.button.previous-topic-button
+{
+	-pie-background: url('../../../Skins/Default/Stylesheets/Images/navigate-previous.png') no-repeat center center, linear-gradient(#ffffff, #ececec);
+}
+
+.button.current-topic-index-button
+{
+	-pie-background: linear-gradient(#ffffff, #ececec);
+}
+
+.button.next-topic-button
+{
+	-pie-background: url('../../../Skins/Default/Stylesheets/Images/navigate-next.png') no-repeat center center, linear-gradient(#ffffff, #ececec);
+}
+
+.needs-pie
+{
+	behavior: url('../../../Resources/Scripts/PIE-no-motw.htc');
+}
+
+</style>
+        <script src="../../../Resources/Scripts/custom.modernizr.js">
+        </script>
+        <script src="../../../Resources/Scripts/jquery.min.js">
+        </script>
+        <script src="../../../Resources/Scripts/require.min.js">
+        </script>
+        <script src="../../../Resources/Scripts/require.config.js">
+        </script>
+        <script src="../../../Resources/Scripts/foundation.min.js">
+        </script>
+        <script src="../../../Resources/Scripts/plugins.min.js">
+        </script>
+        <script src="../../../Resources/Scripts/MadCapAll.js">
+        </script>
+    </head>
+    <body class="test">
+        <p class="MCWebHelpFramesetLink MCWebHelpFramesetLinkTop"><a href="../../../Default.htm#Topics/ReceiverManaging/PortSettingsGeneral.htm">Open topic with navigation</a>
+        </p>
+        <div class="MCBreadcrumbsBox_0"><span class="MCBreadcrumbsPrefix">You are here: </span><span class="MCBreadcrumbsSelf">Receiver Managing</span><span class="MCBreadcrumbsDivider"> &gt; </span><a class="MCBreadcrumbsLink" href="ReceiverSettings.htm">Receiver Settings</a><span class="MCBreadcrumbsDivider"> &gt; </span><a class="MCBreadcrumbsLink" href="ReceiverPorts.htm">Ports</a><span class="MCBreadcrumbsDivider"> &gt; </span><span class="MCBreadcrumbs">Port Settings: General</span>
+        </div>
+        <h1 class="Heading1">Port Settings: General</h1>
+        <p class="Body">For Serial, USB, TCP, Bluetooth, and Ntrip ports, you can change <i>Input Mode</i>, <i>Output Mode</i>, <i>Period</i> and <i>Elevation Mask</i>. You can also <a href="Messages.htm">view and edit set of messages</a>, which are output to the port.</p>
+        <table class="AutoNumber_p_Bulleted" style="width: 100%; margin-left: 0;" cellspacing="0" cellpadding="0">
+            <col style="width: 12px;" />
+            <col style="width: 12px;" />
+            <col style="width: auto;" />
+            <tr>
+                <td valign="top" />
+                <td class="AutoNumber_p_Bulleted" valign="top"><span>• </span>
+                </td>
+                <td class="AutoNumber_p_Bulleted" valign="top" data-mc-autonum="• "><i>Input Mode</i>- specifies the type of data to input on the selected port.</td>
+            </tr>
+        </table>
+        <blockquote>
+            <ul style="list-style-type: square;">
+                <li value="1"><i>None</i> - the port will reject any incoming data</li>
+                <li value="2"><i>Command</i>- the port is in command mode and will recognize user-sent commands</li>
+                <li value="3"><i>Echo</i> - the port is in echo mode and will redirect all incoming data to an output stream, either another port or the current log file</li>
+                <li value="4"><i>Auto</i> - the port is in the mode of automatic detection of correction data format. </li>
+                <p>
+                    <table style="border-top-style: solid;border-top-width: 1px;border-top-color: #696969;border-bottom-style: solid;border-bottom-width: 1px;border-bottom-color: #696969;">
+                        <col />
+                        <col />
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <img src="../../Resources/Images/Note_Icon.gif" />
+                                </td>
+                                <td style="font-size: 11pt;">
+                                    <p class="Body">You can set the Auto mode only for one port of the receiver. </p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </p>
+                <li value="5"><i>RTCM 2.x</i> - the receiver recognizes and decodes RTCM version 2.1, 2.2, and 2.3 messages accepted on the corresponding port</li>
+                <li value="6"><i>RTCM 3.x</i> - the receiver recognizes and decodes RTCM version 3.x messages accepted on the corresponding port</li>
+                <li value="7"><i>CMR</i> - the port recognizes and decodes accepted CMR messages</li>
+                <li value="8"><i>TPS</i> - the port recognizes and decodes accepted TPS messages</li>
+                <li value="9"><i>OmniSTAR</i> - the port recognizes and decodes OmniSTAR VBS corrections</li>
+                <li value="10"><i>Data Transfer</i> - the port is in Data Transfer Protocol mode, which is used for data transfer to/from the receiver</li>
+                <li value="11"><i>PPP</i> - the port is in PPP mode</li>
+            </ul>
+        </blockquote>
+        <table style="border-top-style: solid;border-top-width: 1px;border-top-color: #696969;border-bottom-style: solid;border-bottom-width: 1px;border-bottom-color: #696969;">
+            <col />
+            <col />
+            <tbody>
+                <tr>
+                    <td>
+                        <img src="../../Resources/Images/Note_Icon.gif" />
+                    </td>
+                    <td style="font-size: 11pt;">
+                        <p class="Body">To be able to connect to the receiver through a port, input mode of the port should be Command.</p>
+                        <p>You may not modify input mode of the port, which you are currently using to connect to the receiver.</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <table class="AutoNumber_p_Bulleted" style="width: 100%; margin-left: 0;" cellspacing="0" cellpadding="0">
+            <col style="width: 12px;" />
+            <col style="width: 12px;" />
+            <col style="width: auto;" />
+            <tr>
+                <td valign="top" />
+                <td class="AutoNumber_p_Bulleted" valign="top"><span>• </span>
+                </td>
+                <td class="AutoNumber_p_Bulleted" valign="top" data-mc-autonum="• "><i>Output Mode</i>: specifies a predefined message set to output into the selected port. The following predefined message sets are available.</td>
+            </tr>
+        </table>
+        <table style="mc-table-style: url('../../Resources/TableStyles/_2ColmnTable.css');" class="TableStyle-_2ColmnTable" cellspacing="0">
+            <col class="TableStyle-_2ColmnTable-Column-Column1" />
+            <col class="TableStyle-_2ColmnTable-Column-Column1" />
+            <col class="TableStyle-_2ColmnTable-Column-Column1" />
+            <tbody>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <th class="TableStyle-_2ColmnTable-BodyH-Column1-Body1">Message Set/Output Mode</th>
+                    <th class="TableStyle-_2ColmnTable-BodyH-Column1-Body1">Messages</th>
+                    <th class="TableStyle-_2ColmnTable-BodyG-Column1-Body1">Period, s</th>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1" rowspan="3">DGNSS RTCM 2.x</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1">1</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyG-Column1-Body1">Variable</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1">31</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyG-Column1-Body1">Variable</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyE-Column1-Body1">3</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyD-Column1-Body1">10</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1" rowspan="6">RTK RTCM 2.1</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1">18</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyG-Column1-Body1">Variable</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1">19</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyG-Column1-Body1">Variable</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1">22</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyG-Column1-Body1">10</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyE-Column1-Body1">3</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyD-Column1-Body1">10</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1">16</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyG-Column1-Body1">5</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1">59t</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyG-Column1-Body1">10</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1" rowspan="6">RTK RTCM 2.3</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1">18</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyG-Column1-Body1">Variable</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyE-Column1-Body1">19</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyD-Column1-Body1">Variable</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1">23</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyG-Column1-Body1">10</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1">24</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyG-Column1-Body1">10</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1">16</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyG-Column1-Body1">5</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyE-Column1-Body1">59t</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyD-Column1-Body1">10</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1" rowspan="6">RTK RTCM 3.1</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1">1004</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyG-Column1-Body1">Variable</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1">1012</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyG-Column1-Body1">Variable</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1">1006</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyG-Column1-Body1">10</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyE-Column1-Body1">1008</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyD-Column1-Body1">10</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1">4091t</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyG-Column1-Body1">10</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1">1033</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyG-Column1-Body1">10</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td class="TableStyle-_2ColmnTable-BodyH-Column1-Body1" style="text-align: center;" rowspan="10">RTK RTCM 3.2 MSM3</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1">1073</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyG-Column1-Body1">Variable</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyE-Column1-Body1">1083</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyD-Column1-Body1">Variable</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1">1093</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyG-Column1-Body1">Variable</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1">1103</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyG-Column1-Body1">Variable</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1">1113</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyG-Column1-Body1">Variable</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyE-Column1-Body1">1123</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyD-Column1-Body1">Variable</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1">1006</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyG-Column1-Body1">10</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1">1008</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyG-Column1-Body1">10</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1">4091t</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyG-Column1-Body1">10</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyE-Column1-Body1">1033</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyD-Column1-Body1">10</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td class="TableStyle-_2ColmnTable-BodyH-Column1-Body1" rowspan="10" style="text-align: center;">RTK RTCM 3.2 MSM4</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1">1074</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyG-Column1-Body1">Variable</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1">1084</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyG-Column1-Body1">Variable</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1">1094</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyG-Column1-Body1">Variable</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyE-Column1-Body1">1104</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyD-Column1-Body1">Variable</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1">1114</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyG-Column1-Body1">Variable</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1">1124</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyG-Column1-Body1">Variable</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1">1006</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyG-Column1-Body1">10</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyE-Column1-Body1">1008</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyD-Column1-Body1">10</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1">4091t</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyG-Column1-Body1">10</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1">1033</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyG-Column1-Body1">10</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td class="TableStyle-_2ColmnTable-BodyH-Column1-Body1" rowspan="5" style="text-align: center;">RTK CMR</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1">10</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyG-Column1-Body1">Variable</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyE-Column1-Body1">0</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyD-Column1-Body1">Variable</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1">1</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyG-Column1-Body1">10</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1">2</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyG-Column1-Body1">10</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1">5</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyG-Column1-Body1">10</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyE-Column1-Body1" rowspan="3">RTK CMR+</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyE-Column1-Body1">10</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyD-Column1-Body1">Variable</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1">0</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyG-Column1-Body1">Variable</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1">9</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyG-Column1-Body1">Variable</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td class="TableStyle-_2ColmnTable-BodyH-Column1-Body1" style="text-align: center;" rowspan="8">HD2 TPS</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1">RT</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyG-Column1-Body1">Variable</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyE-Column1-Body1">SI</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyD-Column1-Body1">Variable</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1">rc</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyG-Column1-Body1">Variable</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1">2r</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyG-Column1-Body1">Variable</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1">cp</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyG-Column1-Body1">Variable</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyE-Column1-Body1">2p</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyD-Column1-Body1">Variable</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1">PO</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyG-Column1-Body1">Variable</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1">ET</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyG-Column1-Body1">Variable</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td class="TableStyle-_2ColmnTable-BodyH-Column1-Body1" rowspan="8" style="text-align: center;">HD2 RTCM 3.2 MSM3</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1">1008</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyG-Column1-Body1">10 </td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyE-Column1-Body1">4091h</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyD-Column1-Body1">Variable</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1">1073</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyG-Column1-Body1">Variable</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1">1083</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyG-Column1-Body1">Variable</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1">1093</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyG-Column1-Body1">Variable</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyE-Column1-Body1">1103</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyD-Column1-Body1">Variable</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1">1113</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyG-Column1-Body1">Variable</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1">1123</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyG-Column1-Body1">Variable</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1" rowspan="4">NMEA</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1">GGA</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyG-Column1-Body1">Variable</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyE-Column1-Body1">GSA</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyD-Column1-Body1">Variable</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1">ZDA</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyG-Column1-Body1">Variable</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyB-Column1-Body1">VTG</td>
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyA-Column1-Body1">Variable</td>
+                </tr>
+            </tbody>
+        </table>
+        <table style="width: 100%;border-top-style: solid;border-top-width: 1px;border-top-color: #696969;border-bottom-style: solid;border-bottom-width: 1px;border-bottom-color: #696969;">
+            <col style="width: 76px;" />
+            <col />
+            <tbody>
+                <tr>
+                    <td>
+                        <img src="../../Resources/Images/Note_Icon.gif" />
+                    </td>
+                    <td style="font-size: 11pt;">
+                        <p>A predefined message set can include messages with variable period as well as messages with fixed period. Messages with variable period will be generated by the receiver at the period specified in the Period, s edit box. Value entered to the Period, s edit box has no effect on messages with fixed period.</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <table class="AutoNumber_p_Bulleted" style="width: 100%; margin-left: 0;" cellspacing="0" cellpadding="0">
+            <col style="width: 12px;" />
+            <col style="width: 12px;" />
+            <col style="width: auto;" />
+            <tr>
+                <td valign="top" />
+                <td class="AutoNumber_p_Bulleted" valign="top"><span>• </span>
+                </td>
+                <td class="AutoNumber_p_Bulleted" valign="top" data-mc-autonum="• "><i>Period, s</i>- specifies the interval at which the receiver will generate messages included into the currently selected predefined message set, in seconds. This field will be enabled, if the port is set in the Output Mode.</td>
+            </tr>
+        </table>
+        <table class="AutoNumber_p_Bulleted" style="width: 100%; margin-left: 0;" cellspacing="0" cellpadding="0">
+            <col style="width: 12px;" />
+            <col style="width: 12px;" />
+            <col style="width: auto;" />
+            <tr>
+                <td valign="top" />
+                <td class="AutoNumber_p_Bulleted" valign="top"><span>• </span>
+                </td>
+                <td class="AutoNumber_p_Bulleted" valign="top" data-mc-autonum="• "><i>Elev. Mask, deg</i> - specifies the minimum angle at which the receiver will output measurement data from satellites to a specified port. The receiver will not output measurement data to the specified port from the satellites with elevations below this mask. Measured in degrees. This field will be enabled, if the port is set in the Output Mode.</td>
+            </tr>
+        </table>
+        <table class="AutoNumber_p_Bulleted" style="width: 100%; margin-left: 0;" cellspacing="0" cellpadding="0">
+            <col style="width: 12px;" />
+            <col style="width: 12px;" />
+            <col style="width: auto;" />
+            <tr>
+                <td valign="top" />
+                <td class="AutoNumber_p_Bulleted" valign="top"><span>• </span>
+                </td>
+                <td class="AutoNumber_p_Bulleted" valign="top" data-mc-autonum="• "><i>Messages</i>- opens the <b style="font-style: italic; font-weight: normal;"><a href="Messages.htm">Messages</a></b> dialog to configure output messages on the corresponding port manually.</td>
+            </tr>
+        </table>
+        <table class="AutoNumber_p_Bulleted" style="width: 100%; margin-left: 0;" cellspacing="0" cellpadding="0">
+            <col style="width: 12px;" />
+            <col style="width: 12px;" />
+            <col style="width: auto;" />
+            <tr>
+                <td valign="top" />
+                <td class="AutoNumber_p_Bulleted" valign="top"><span>• </span>
+                </td>
+                <td class="AutoNumber_p_Bulleted" valign="top" data-mc-autonum="• ">On the <b>Ntrip</b> tab for <b>HiPer HR</b> and <b>Net G5</b> receivers the <i>Input</i> mode is not available for the followings ports: Ntrip B, Ntrip C, Ntrip 1, Ntrip 2, Ntrip 3, Ntrip 4, Ntrip 5, Ntrip 6, Ntrip 7, Ntrip 8, Ntrip 9. But for Ntrip A port both <i>Input</i> mode and <i>Output</i> mode are available.</td>
+            </tr>
+        </table>
+        <div class="buttons clearfix topicToolbarProxy" style="mc-topic-toolbar-items: ;">
+            <div class="button-group-container-left">
+                <button class="button needs-pie previous-topic-button" type="button" title="Navigate previous">
+                    <img src="../../../Skins/Default/Stylesheets/Images/transparent.gif" alt="previous topic" />
+                </button>
+                <div class="button current-topic-index-button disabled"><span class="sequence-index"></span> of <span class="sequence-total"></span></div>
+                <button class="button needs-pie next-topic-button" type="button" title="Navigate next">
+                    <img src="../../../Skins/Default/Stylesheets/Images/transparent.gif" alt="next topic" />
+                </button>
+            </div>
+        </div>
+        <p>&#160;</p>
+    </body>
+</html>

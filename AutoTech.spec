@@ -16,6 +16,7 @@ a = Analysis(
         ('templates', 'templates'),
         ('static', 'static'),
         ('tools', 'tools'),
+        ('VERSION', '.'),
     ],
     hiddenimports=[
         'flask',

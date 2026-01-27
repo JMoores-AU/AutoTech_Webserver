@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Regions>
+	<Region XLATE_Name="Americas Region">
+		<Region XLATE_Name="Eastern U.S.">
+			<Satellite XLATE_Name="MSV-E" Frequency="1557845000" SymbolRate="2438" DataRate="1200"/>
+		</Region>
+		<Region XLATE_Name="Central U.S.">
+			<Satellite XLATE_Name="MSV-C" Frequency="1557835000" SymbolRate="2438" DataRate="1200"/>
+		</Region>
+		<Region XLATE_Name="Western U.S.">
+			<Satellite XLATE_Name="MSV-W" Frequency="1557855000" SymbolRate="2438" DataRate="1200"/>
+		</Region>
+		<Region XLATE_Name="North, Central and South America including the Caribbean">
+			<Satellite XLATE_Name="ASAT"  Frequency="1539932500" SymbolRate="2438" DataRate="1200"/>
+		</Region>
+		<Region XLATE_Name="Atlantic Ocean West">
+			<Satellite XLATE_Name="AORW"  Frequency="1539962500" SymbolRate="1219" DataRate="600"/>
+		</Region>
+	</Region>
+	<Region XLATE_Name="Europe / Africa Region">
+		<Region XLATE_Name="Atlantic Ocean East">
+			<Satellite XLATE_Name="AORE"  Frequency="1539972500" SymbolRate="1219" DataRate="600"/>
+		</Region>
+		<Region XLATE_Name="Europe, Africa &amp; Middle-East">
+			<Satellite XLATE_Name="ESAT"  Frequency="1539912500" SymbolRate="2438" DataRate="1200"/>
+		</Region>
+		<Region XLATE_Name="India, CIS, Middle-East">
+			<Satellite XLATE_Name="IOR"   Frequency="1539932500" SymbolRate="1219" DataRate="600"/>
+		</Region>
+	</Region>
+	<Region XLATE_Name="Asia Pacific Region">
+		<Region XLATE_Name="Asia">
+			<Satellite XLATE_Name="PASAT" Frequency="1539922500" SymbolRate="2438" DataRate="1200"/>
+		</Region>
+		<Region XLATE_Name="Australia &amp; Pacific Rim">
+			<Satellite XLATE_Name="AUSAT" Frequency="1539962500" SymbolRate="2438" DataRate="1200"/>
+			<Satellite XLATE_Name="PORL"  Frequency="1539952500"/>
+		</Region>
+	</Region>
+</Regions>

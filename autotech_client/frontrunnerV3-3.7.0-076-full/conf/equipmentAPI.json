@@ -1,0 +1,372 @@
+{
+    "openapi": "3.0.0",
+    "servers": [{
+        "url": "{protocol}://{hostname}:{port}/{basePath}",
+        "variables": {
+            "protocol": {
+                "enum": [
+                    "http",
+                    "https",
+                    "ws"
+                ],
+                "default": "https"
+            },
+            "hostname": {
+                "default": "localhost"
+            },
+            "port": {
+                "default": "8080"
+            },
+            "basePath": {
+                "default": "api"
+            }
+        }
+    }],
+    "info": {
+        "description": "Provides endpoints to import, export, and modify FrontRunner equipment entities.",
+        "version": "3.4",
+        "title": "Equipment"
+    },
+    "paths": {
+        "/equipments": {
+            "get" : {
+                "tags": [
+                    "FrontRunner",
+                    "Equipment"
+                ],
+                "summary" : "Retrieves all equipment currently tracked",
+                "operationId": "getAllEquipments",
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "description": "Get Equipment by name",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "EMV1"
+                        }
+                    },
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "description": "Get Equipment by Type",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "EMV"
+                        }
+                    },
+                    {
+                        "name": "isFrontRunnerFleet",
+                        "in": "query",
+                        "description": "Filter by if isFrontRunnerFleet",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "areaOriginX",
+                        "in": "query",
+                        "description": "Get equipment in certain region (x-val)",
+                        "required": false,
+                        "schema": {
+                            "type": "number",
+                            "example": "245.5"
+                        }
+                    },
+                    {
+                        "name": "areaOriginY",
+                        "in": "query",
+                        "description": "Get equipment in certain region (y-val)",
+                        "required": false,
+                        "schema": {
+                            "type": "number",
+                            "example": "223"
+                        }
+                    },
+                    {
+                        "name": "areaRadius",
+                        "in": "query",
+                        "description": "Get equipment in certain region (radius of region from x,y origin)",
+                        "required": false,
+                        "schema": {
+                            "type": "number",
+                            "example": "50.2"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/equipment-info-response"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid filters.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/error-response"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid Auth key.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/error-response"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Exception has occurred",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/exception-response"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/equipment/{equipment_id}": {
+            "get": {
+                "tags": [
+                    "FrontRunner",
+                    "Equipment"
+                ],
+                "summary" : "Retrieves single equipment by its ID",
+                "operationId": "getEquipmentById",
+                "parameters": [
+                    {
+                        "name": "equipment_id",
+                        "in": "path",
+                        "description": "Get Equipment by its ID",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "../api/equipment/T12"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/equipment-info-response"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid filters.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/error-response"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid Auth key.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/error-response"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Exception has occurred",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/exception-response"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "modular_identity_auth": {
+                "type": "oauth2",
+                "flows": {
+                    "clientCredentials": {
+                        "tokenUrl": "/connect/token",
+                        "scopes": {
+                            "FrontRunnerEquipment_Read": "Allows user to retrieve FrontRunner Equipment.",
+                            "FrontRunnerEquipment_Write": "Allows user to create and delete FrontRunner Equipment."
+                        }
+                    }
+                }
+            }
+        },
+        "schemas": {
+            "equipment-info-response": {
+                "type": "object",
+                "properties": {
+                    "identity": {
+                        "type": "string",
+                        "description": "An Equipment's Identity, to be used as it's identifier",
+                        "example": "T1"
+                    },
+                    "type": {
+                        "type": "string",
+                        "description": "An Equipment's vehicle type",
+                        "example": "AHT"
+                    },
+                    "model": {
+                        "type": "string",
+                        "description": "The equipment/vehicle's specific model",
+                        "example": "K930E"
+                    },
+                    "dspStatus": {
+                        "type": "string",
+                        "description": "The current status of the equipment",
+                        "example": "Ready"
+                    },
+                    "isFrontRunnerFleet": {
+                        "type": "boolean",
+                        "description": "Boolean representing whether or not the equipment is part of the FrontRunner Fleet",
+                        "example": "false"
+                    },
+                    "networkAddress": {
+                        "type": "string",
+                        "description": "The unique network address that the equipment possesses",
+                        "example": "201"
+                    },
+                    "coordinates": {
+                        "type": "object",
+                        "properties": {
+                            "latitude": {
+                                "type": "double",
+                                "description": "The latitude (Y-position) of the equipment",
+                                "example": "105.21"
+                            },
+                            "longitude": {
+                                "type": "double",
+                                "description": "The longitude (X-position) of the equipment",
+                                "example": "-32.5889"
+                            },
+                            "altitude": {
+                                "type": "double",
+                                "description": "The altitude (Z-position) of the equipment",
+                                "example": "123"
+                            },
+                            "heading": {
+                                "type": "double",
+                                "description": "The current heading of the equipment in degrees",
+                                "example": "32.36"
+                            },
+                            "positionTimeStamp": {
+                                "type": "string",
+                                "description": "The date, time, and timezone of when the position was last updated for the equipment. Empty string is no position data available.",
+                                "example": "2019-11-04T14:21:38-0700"
+                            }
+                        },
+                        "description": "The latitude, longitude, altitude, heading, and positionTimeStamp of the equipment"
+                    },
+                    "operator": {
+                        "type": "string",
+                        "description": "The operator ID of the individual logged on the equipment",
+                        "example": "123"
+                    },
+                    "fuel": {
+                        "type": "int",
+                        "description": "The percentage of fuel remaining in the equipment in integer form",
+                        "example": "25"
+                    },
+                    "speed": {
+                        "type": "int",
+                        "description": "The current speed of the vehicle",
+                        "example": "15"
+                    },
+                    "destination": {
+                        "type": "string",
+                        "description": "The current destination of the equipment",
+                        "example": "HIGH_DUMP"
+                    },
+                    "load": {
+                        "type": "int",
+                        "description": "The current load of the equipment in tons",
+                        "example": "196"
+                    },
+                    "active": {
+                        "type": "boolean",
+                        "description": "Boolean representing whether or not the equipment is active",
+                        "example": "true"
+                    }
+                },
+                "required": [
+                    "identity",
+                    "type",
+                    "active",
+                    "coordinates",
+                    "operator",
+                    "fuel",
+                    "speed",
+                    "destination",
+                    "load"
+                ]
+            },
+            "error-response": {
+                "type": "object",
+                "required": [
+                    "error"
+                ],
+                "properties": {
+                    "error": {
+                        "type": "string",
+                        "description": "A string that contains the error message associated with the response",
+                        "example": "Invalid filters"
+                    }
+                }
+            },
+            "exception-response": {
+                "type": "object",
+                "required": [
+                    "error",
+                    "exception"
+                ],
+                "properties": {
+                    "error": {
+                        "type": "string",
+                        "description": "A string that contains the exception title/type that occurred",
+                        "example": "Exception Type or Title goes here"
+                    },
+                    "exception": {
+                        "type": "string",
+                        "description": "A string that contains the exception message that occurred",
+                        "example": "Exception Message goes here"
+                    }
+                }
+            }
+        }
+    }
+}

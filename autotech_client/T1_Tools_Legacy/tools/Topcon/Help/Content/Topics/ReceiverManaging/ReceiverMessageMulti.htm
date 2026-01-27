@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html xmlns:MadCap="http://www.madcapsoftware.com/Schemas/MadCap.xsd" lang="ru-RU" xml:lang="ru-RU" data-mc-search-type="Stem" data-mc-help-system-file-name="Default.xml" data-mc-path-to-help-system="../../../" data-mc-target-type="WebHelp2" data-mc-runtime-file-type="Topic" data-mc-preload-images="false" data-mc-in-preview-mode="false" data-mc-medium="non-print" data-mc-toc-path="">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" /><title>Bulk Schedule Change</title>
+        <link href="../../../Skins/Default/Stylesheets/Slideshow.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/TextEffects.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/Topic.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/Components/Styles.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/Components/Tablet.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../../Skins/Default/Stylesheets/Components/Mobile.css" rel="stylesheet" data-mc-generated="True" />
+        <link href="../../Resources/TableStyles/_2ColmnTable.css" rel="stylesheet" />
+        <link href="../../Resources/Stylesheets/TRU.css" rel="stylesheet" />
+        <style>/*&lt;meta /&gt;*/
+
+.button.previous-topic-button
+{
+	-pie-background: url('../../../Skins/Default/Stylesheets/Images/navigate-previous.png') no-repeat center center, linear-gradient(#ffffff, #ececec);
+}
+
+.button.current-topic-index-button
+{
+	-pie-background: linear-gradient(#ffffff, #ececec);
+}
+
+.button.next-topic-button
+{
+	-pie-background: url('../../../Skins/Default/Stylesheets/Images/navigate-next.png') no-repeat center center, linear-gradient(#ffffff, #ececec);
+}
+
+.needs-pie
+{
+	behavior: url('../../../Resources/Scripts/PIE-no-motw.htc');
+}
+
+</style>
+        <script src="../../../Resources/Scripts/custom.modernizr.js">
+        </script>
+        <script src="../../../Resources/Scripts/jquery.min.js">
+        </script>
+        <script src="../../../Resources/Scripts/require.min.js">
+        </script>
+        <script src="../../../Resources/Scripts/require.config.js">
+        </script>
+        <script src="../../../Resources/Scripts/foundation.min.js">
+        </script>
+        <script src="../../../Resources/Scripts/plugins.min.js">
+        </script>
+        <script src="../../../Resources/Scripts/MadCapAll.js">
+        </script>
+    </head>
+    <body class="test">
+        <p class="MCWebHelpFramesetLink MCWebHelpFramesetLinkTop"><a href="../../../Default.htm#Topics/ReceiverManaging/ReceiverMessageMulti.htm">Open topic with navigation</a>
+        </p>
+        <h1 class="Heading1">Bulk Schedule Change</h1>
+        <p class="Body">In this dialog, you can specify the schedule of the multiple highlighted messages. The <b>Schedule Specification</b> fields are used to specify the same output scheme for  all selected messages:</p>
+        <ul>
+            <li value="1"><i>Period</i> - specifies the message output interval. If it is set to zero, the corresponding message will be output at the highest possible rate.</li>
+            <li value="2"><i>Phase</i> - specifies a time shift in the output of a message with respect to the moment when the receiver time is a multiplier of the specified period.</li>
+            <li value="3"><i>Count</i>- serves two purposes. Firstly, if set to a positive number, specifies how many times the message outputs. Zero means an unlimited number of times the message outputs. Secondly, if set to a negative number, instructs the receiver to insert the message into wrap-message (with &gt;&gt; ID) prior to output.</li>
+            <li value="4"><i>Flags</i> - provides further adjustment of the way the message is output. They are briefly explained below.</li>
+        </ul>
+        <table style="mc-table-style: url('../../Resources/TableStyles/_2ColmnTable.css');" class="TableStyle-_2ColmnTable" cellspacing="0">
+            <col class="TableStyle-_2ColmnTable-Column-Column1" style="width: 96px;" />
+            <col class="TableStyle-_2ColmnTable-Column-Column1" />
+            <tbody>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <th class="TableStyle-_2ColmnTable-BodyH-Column1-Body1">Flag</th>
+                    <th class="TableStyle-_2ColmnTable-BodyG-Column1-Body1">Description</th>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1"><i>Out</i>
+                    </td>
+                    <td class="TableStyle-_2ColmnTable-BodyG-Column1-Body1">If the flag is set, the first of the messages invoked by the corresponding command will be output at the epoch closest to the command execution time (regardless of the specified "period" option).</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1"><i>Change</i>
+                    </td>
+                    <td class="TableStyle-_2ColmnTable-BodyG-Column1-Body1">If the flag is set, the corresponding message will be output only if the message data have changed.</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyE-Column1-Body1"><i>Out On Add</i>
+                    </td>
+                    <td class="TableStyle-_2ColmnTable-BodyD-Column1-Body1">If the flag is set, then the (first) message will be output immediately after executing the corresponding <b>em</b> or <b>out</b> command.</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1"><i>Notena</i>
+                    </td>
+                    <td class="TableStyle-_2ColmnTable-BodyG-Column1-Body1">If the flag is set, the receiver cannot  output the file header every time you change the "period" value when recording data into the log file.</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1"><i>Fix Per</i>
+                    </td>
+                    <td rowspan="4" class="TableStyle-_2ColmnTable-BodyG-Column1-Body1">If these flags are set, the user cannot change the option values (Period, Phase, Count, and Flags).</td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyH-Column1-Body1"><i>Fix Ph</i>
+                    </td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyE-Column1-Body1"><i>Fix Cnt</i>
+                    </td>
+                </tr>
+                <tr class="TableStyle-_2ColmnTable-Body-Body1">
+                    <td style="text-align: center;" class="TableStyle-_2ColmnTable-BodyB-Column1-Body1"><i>Fix Fl</i>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="buttons clearfix topicToolbarProxy" style="mc-topic-toolbar-items: ;">
+            <div class="button-group-container-left">
+                <button class="button needs-pie previous-topic-button" type="button" title="Navigate previous">
+                    <img src="../../../Skins/Default/Stylesheets/Images/transparent.gif" alt="previous topic" />
+                </button>
+                <div class="button current-topic-index-button disabled"><span class="sequence-index"></span> of <span class="sequence-total"></span></div>
+                <button class="button needs-pie next-topic-button" type="button" title="Navigate next">
+                    <img src="../../../Skins/Default/Stylesheets/Images/transparent.gif" alt="next topic" />
+                </button>
+            </div>
+        </div>
+        <p>&#160;</p>
+    </body>
+</html>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+"IDI_MEDIA_CF"          ICON                    "res\\Media_CompactFlash_128.ico"
+"IDI_MEDIA_INTERNAL"    ICON                    "res\\Media_InternalFlash_128.ico"
+"IDI_MEDIA_SD"          ICON                    "res\\Media_SD_128.ico"
+"IDI_MEDIA_UNKNOWN"     ICON                    "res\\Media_Unknown_128.ico"
+"IDI_MEDIA_USB"         ICON                    "res\\Media_USBFlashDrive_128.ico"
+-->
+<Drives>
+    <Drive Icon="CommonRes.dll:IDI_MEDIA_SD">
+        <Blk media="sd"/>
+
+        <Rcv model="B110_OEM"/>
+        <Rcv model="B111"/>
+        <Rcv model="B111A"/>
+        <Rcv model="B125_OEM"/>
+        <Rcv model="B210_OEM"/>
+        <Rcv model="GR5*"/>
+        <Rcv sn="HiPerV*"/>
+    </Drive>
+    <Drive Icon="CommonRes.dll:IDI_MEDIA_USB">
+        <Blk media="usb"/>
+    </Drive>
+    <Drive Icon="CommonRes.dll:IDI_MEDIA_CF">
+        <Rcv model="NET-G3A"/>
+        <Rcv model="U112_OEM"/>
+    </Drive>
+    <Drive Icon="CommonRes.dll:IDI_MEDIA_INTERNAL">
+        <Blk media="internal"/>
+
+        <Rcv model="ADM__OEM*"/>
+        <Rcv model="AGI12SC"/>
+        <Rcv model="AGM-1"/>
+        <Rcv model="HIPER_SR"/>
+        <Rcv model="MM-2*"/>
+        <Rcv model="MR-2*"/>
+        <Rcv model="GCX2"/>
+        <Rcv model="GCX3"/>
+        <Rcv model="GSX2"/>
+        <Rcv model="U112"/>
+    </Drive>
+    <Drive Icon="CommonRes.dll:IDI_MEDIA_UNKNOWN">
+        <Blk/>
+    </Drive>
+</Drives>

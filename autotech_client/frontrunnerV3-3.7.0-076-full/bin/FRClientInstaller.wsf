@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<package>
+    <job id="shortcut">
+        <?job error="true" debug="true" ?>
+        <object id="objFs" progid="Scripting.FileSystemObject" />
+        <script language="VBScript">
+            <![CDATA[
+
+                Option Explicit
+
+                Class Launcher
+                    Private fileName
+                    Private shortcutName
+                    Private serverNeeded
+                    Private domainNeeded
+                    Private found
+
+                    ' Setters
+                    Public Sub SetFileName(name)
+                        fileName = name
+                    End Sub
+                    Public Sub SetShortcutName(name)
+                        shortcutName = name
+                    End Sub
+                    Public Sub SetServerNeeded(val)
+                        serverNeeded = val
+                    End Sub
+                    Public Sub SetDomainNeeded(val)
+                        domainNeeded = val
+                    End Sub
+                    Public Sub SetFound(val)
+                        found = val
+                    End Sub
+
+                    ' Getters
+                    Public Function GetFileName()
+                        GetFileName = fileName
+                    End Function
+                    Public Function GetShortcutName()
+                        GetShortcutName = shortcutName
+                    End Function
+                    Public Function IsServerNeeded()
+                        IsServerNeeded = serverNeeded
+                    End Function
+                    Public Function IsDomainNeeded()
+                        IsDomainNeeded = domainNeeded
+                    End Function
+                    Public Function IsFound()
+                        IsFound = found
+                    End Function
+                End Class
+
+                ' VBScript class cannot have constructor.
+                ' Use factory method instead of constructor.
+                Function newLauncher( fileName, shortcutName, needServer, needDomain )
+                    Dim launcher
+                    Set launcher = New Launcher
+                    launcher.SetFileName(fileName)
+                    launcher.SetShortcutName(shortcutName)
+                    launcher.SetServerNeeded(needServer)
+                    launcher.SetDomainNeeded(needDomain)
+                    launcher.SetFound(False)
+
+                    Set newLauncher = launcher
+                End Function
+
+                ' Definition of the FrontRunner launcher files.
+                Dim launcherInfo
+                Dim launcherInfoList(5)  ' n -->> 0 to n, i.e. (n+1) dimension.
+                Set launcherInfoList(0) = newLauncher( "FrontRunnerV3_Controller.bat", "FrontRunner Controller Launcher", False,  True )
+                Set launcherInfoList(1) = newLauncher( "FrontRunnerV3_MineView.bat",   "FrontRunner MineView Launcher",    True,  True )
+
+                ' Check if launcher listed in launcherInfoList exists
+                ' in the same directory as this script.
+                Dim found
+                found = False
+                Dim strScriptPath
+                strScriptPath = objFs.GetParentFolderName( WScript.ScriptFullName )
+
+                Dim strFrontRunnerPath
+                strFrontRunnerPath = objFs.GetParentFolderName( strScriptPath )
+
+                Dim strIconDirPath
+                strIconDirPath = objFs.BuildPath( strFrontRunnerPath, "icon" )
+
+                Dim strFilePath
+                For Each launcherInfo In launcherInfoList
+                    If Not IsNull(launcherInfo) And Not IsEmpty(launcherInfo) Then
+                        strFilePath = objFs.BuildPath( strScriptPath, launcherInfo.GetFileName() )
+                        launcherInfo.SetFound( objFs.FileExists(strFilePath) )
+                    End If
+                Next
+
+                Dim serverNeeded, domainNeeded
+                For Each launcherInfo In launcherInfoList
+                    If Not IsNull(launcherInfo) And Not IsEmpty(launcherInfo) Then
+                        If launcherInfo.IsFound() = True Then
+                            found = True
+                            If launcherInfo.IsServerNeeded() = True Then
+                                serverNeeded = True
+                            End If
+                            If launcherInfo.IsDomainNeeded() = True Then
+                                domainNeeded = True
+                            End If
+                        End If
+                    End If
+                Next
+                If found = False Then
+                    MsgBox "Launcher is not found in this release package." & vbCrLf _
+                         & "Obtain release package from download center, and isntall again."
+                    Quit 127
+                End If
+
+                Function CheckAbort( exitCode )
+                    Dim abort
+                    abort = Msgbox( "Do you want to abort installation?", vbYesNo, "Abort installation" )
+
+                    If abort = vbYes Then
+                        WScript.Quit( exitCode )
+                    End If
+                End Function
+
+                Function GetInputValue( message, title, defaultValue )
+                    Dim value
+                    Do
+                        value = InputBox( message, title, defaultValue )
+                        If IsEmpty(value) Or IsNull(value) Then
+                            value = ""
+                        Else
+                            value = Trim(value)
+                        End If
+
+                        If value = "" Then
+                            CheckAbort( 1 )
+                        Else
+                            Exit Do
+                        End If
+                    Loop While True
+
+                    GetInputValue = value
+                End Function
+
+                Dim WshShell
+                Set WshShell = WScript.CreateObject( "WScript.Shell" )
+
+                If serverNeeded = True Or domainNeeded = True Then
+                    Dim WshUserEnv
+                    Set WshUserEnv = WshShell.Environment( "User" )
+
+                    Dim serverConfigName, serverConfig
+                    serverConfigName = "FRV3_SERVER"
+                    serverConfig = WshUserEnv(serverConfigName)
+                    If IsEmpty(serverConfig) Or IsNull(serverConfig) Then
+                        serverConfig = ""
+                    End If
+
+                    Dim domainConfigName, domainConfig
+                    domainConfigName = "FRV3_DOMAIN"
+                    domainConfig = WshUserEnv(domainConfigName)
+                    If IsEmpty(domainConfig) Or IsNull(domainConfig) Then
+                        domainConfig = ""
+                    End If
+
+                    Do
+                        If serverNeeded = True Then
+                            serverConfig = GetInputValue( "Please input server address.", "Input Server Address", serverConfig )
+                        End If
+
+                        If domainNeeded = True Then
+                            If domainConfig = "" And Not serverConfig = "" Then
+                                ' Create default domain from serverConfig
+                                Dim addr
+                                addr = Split(serverConfig,".")
+                                If addr(0) = "10" Then
+                                    domainConfig = serverConfig & "/" & 8
+                                ElseIf addr(0) = "172" Then
+                                    domainConfig = serverConfig & "/" & 16
+                                ElseIf addr(0) = "192" Then
+                                    domainConfig = serverConfig & "/" & 24
+                                Else
+                                    domainConfig = serverConfig
+                                End If
+                            End If
+                            domainConfig = GetInputValue( "Please input MMSDOMAIN (Address/Mask-bits)", "Input MMSDOMAIN", domainConfig )
+                        End If
+
+                        Dim confirmMsg, yesNo
+                        confirmMsg = "Setting user environment...."
+                        If serverNeeded = True Then
+                            confirmMsg = confirmMsg & vbCrLf & vbTab & "Server address: " & serverConfig
+                        End If
+                        If domainNeeded = True Then
+                            confirmMsg = confirmMsg & vbCrLf & vbTab & "     MMSDOMAIN: " & domainConfig
+                        End If
+
+                        yesNo = Msgbox( confirmMsg, vbYesNo, "Applying parameters" )
+                        If yesNo = vbYes Then
+                            ' Configure here.
+                            If serverNeeded = True Then
+                                WshUserEnv(serverConfigName) = serverConfig
+                            End If
+                            If domainNeeded = True Then
+                                WshUserEnv(domainConfigName) = domainConfig
+                            End If
+
+                            Exit Do
+                        Else
+                            CheckAbort( 2 )
+                        End If
+                    Loop While True
+                End If
+
+                ' Create shortcuts on desktop.
+                Dim endMessage
+                endMessage = "Short cut is created on desktop:"
+                Dim desktopPath
+                desktopPath = WshShell.SpecialFolders("Desktop")
+                For Each launcherInfo In launcherInfoList
+                    If Not IsNull(launcherInfo) And Not IsEmpty(launcherInfo) Then
+                        If launcherInfo.IsFound() = True Then
+
+                            ' Create shortcut on the Desktop.
+                            Dim shortCut, shortCutName, linkedFileName
+                            shortCutName   = launcherInfo.GetShortcutName() & ".lnk"
+                            linkedFileName = launcherInfo.GetFileName()
+
+                            Set shortCut = WshShell.CreateShortcut( objFs.BuildPath(desktopPath,shortCutName) )
+
+                            ' Set comment.
+                            shortCut.Description = shortCutName
+
+                            ' the path to the file/directory to be linked
+                            shortCut.TargetPath = objFs.BuildPath( strScriptPath, linkedFileName )
+
+                            ' Set icon.
+                            shortCut.IconLocation = objFs.BuildPath( strIconDirPath, "FrontRunnerV3.ico" )
+
+                            ' ' Set Hotkey.
+                            ' shortCut.Hotkey =
+
+                            ' ' Set Arguments.
+                            ' shortCut.Arguments =
+
+                            ' The working directory
+                            shortCut.WorkingDirectory = strScriptPath
+
+                            ' Save the created shortcut.
+                            shortCut.Save
+
+                            endMessage = endMessage & vbCrLf & vbTab & Replace( shortCutName, ".lnk", "" )
+                        End If
+                    End If
+                Next
+                MsgBox endMessage
+            ]]>
+        </script>
+    </job>
+</package>

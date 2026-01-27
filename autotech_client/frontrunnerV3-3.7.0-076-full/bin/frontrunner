@@ -1,0 +1,446 @@
+#!/bin/bash
+
+groups | grep -q sudo
+if [ $? -ne 0 ]; then
+  if [ ! "$USER" = "root" ]; then
+    if [ ! "$USER" = "komatsu" ]; then
+      if [ ! "$USER" = "mms" ]; then
+        if [ ! "$USER" = "dlog" ]; then
+          sudo -l -U $USER | grep -q "(ALL : ALL) ALL"
+          if [ $? -ne 0 ]; then
+            echo "This command may only be run by a user in the super user group"
+            exit
+          fi
+        fi
+      fi
+    fi
+  fi
+fi
+
+
+# TODO
+# 1. test this scripts with symbolic lynks
+
+print_help_usage() {
+    echo ""
+    echo "Run 'frontrunner help' for more details."
+}
+
+print_invalid_usage() {
+    print_header
+    echo ""
+    echo "ERROR: Invalid command! Run 'frontrunner help' for more details."
+}
+
+print_header() {
+    echo "FrontRunner - Copyright 2011 Modular Mining System Incorporated."
+    echo ""
+}
+
+print_usage() {
+    print_header
+    echo "Usage: "
+    echo " frontrunner command [application] [java args]"
+    echo ""
+}
+
+print_help() {
+    print_usage
+    cat help.txt
+}
+
+###############################################################################
+# findConfFile
+###############################################################################
+findConfFile() {
+    CONF_FILE=
+
+    if [ -f $REALDIR/../work/$1/config.ini ]
+    then
+
+        configpermsissions=$(stat -c "%a" "$REALDIR/../work/$1/config.ini")
+        if (( (${configpermsissions:0:1} >= 4) && (${configpermsissions:1:1} >= 4) && (${configpermsissions:2:1} >= 4) ))
+        then
+            CONF_FILE=$REALDIR/../work/$1/config.ini
+            CONF_DIR=$REALDIR/../work/$1
+
+            case "$1" in
+                "standalone")
+                    SYSTEM_MODE=STANDALONE
+                    ;;
+
+                "controller")
+                    SYSTEM_MODE=CLIENT
+                    APP_NAME=_controller
+                    ;;
+
+                "mineview")
+                    SYSTEM_MODE=CLIENT
+                    APP_NAME=_mineview
+                    ;;
+
+                "super")
+                    SYSTEM_MODE=CLIENT
+                    APP_NAME=_super
+                    ;;
+
+                "playback")
+                    SYSTEM_MODE=PLAYBACK
+                    APP_NAME=_playback
+                    ;;
+
+                "server")
+                    SYSTEM_MODE=SERVER
+                    APP_NAME=_server
+                    ;;
+
+                "embedded")
+                    SYSTEM_MODE=CLIENT
+                    APP_NAME=_minemobile
+                    ;;
+
+                "emergency")
+                    SYSTEM_MODE=CLIENT
+                    APP_NAME=_emergencyapp
+                    ;;
+
+                "gnssgs")
+                    APP_NAME=_gnssgs
+                    ;;
+
+                "gnssgm")
+                    APP_NAME=_gnssgm
+                    ;;
+
+                *)
+                    # Unknown.
+                    ;;
+            esac
+
+            if [ "$SYSTEM_MODE" == "" ]
+            then
+                SYSTEM_MODE=NONE
+            fi
+
+        else
+            print_header
+            echo "ERROR: FrontRunner does not have permission to read Config file $REALDIR/../work/$1/config.ini"
+            print_help_usage
+            exit
+        fi
+    fi
+}
+
+###############################################################################
+# parseArgs
+###############################################################################
+parseArgs() {
+    count=0
+    for i in "$@"; do
+        let count=count+1
+
+        #ignoring "frontrunner command" arguments
+        if [ "$count" -lt 3 ]
+        then
+            continue
+        fi
+
+        if [[ ${i:0:2} = "-D" || ${i:0:2} = "-X" ]]
+        then
+            JAVA_ARGS="$JAVA_ARGS $i"
+        else
+            if [ ${i:0:6} = "-debug" ]
+            then
+                REMOTE_DEBUG="-Xmx384M -agentlib:jdwp=transport=dt_socket,address=30303,server=y,suspend=y"
+            else
+                if [ ${i:0:8} = "-profile" ]
+                then
+                    REMOTE_PROFILE="-agentpath:$REALDIR/../lib/linux_x86_32/jdk16/libprofilerinterface.so=$REALDIR/../lib/java,5140"
+                else
+                    APP_ARGS="$APP_ARGS $i"
+                fi
+            fi
+        fi
+    done
+}
+
+
+###############################################################################
+# start
+###############################################################################
+start() {
+
+    if [ "$2" == "" ]
+    then
+        print_header
+        echo "ERROR: Missing argument!"
+        print_help_usage
+        exit
+    fi
+
+    findConfFile $2
+
+    if [ "$CONF_FILE" == "" ]
+    then
+        print_header
+        echo "ERROR: Invalid command argument: $2 !"
+        print_help_usage
+        exit
+    fi
+
+    if [[ !(-d "$REALDIR/../bundles") ]]
+    then
+        print_header
+        echo "Missing bundles directory. Forgot to run pack200/unpack.sh?"
+        exit
+    fi
+
+
+####parse java and app args
+    parseArgs "$@"
+
+    LBITS=`getconf LONG_BIT`
+    if [ "$LBITS" == "64" ]
+    then
+        LIB_LINUX_DIR=linux_x86_64
+        CAN_BIT_VERSION='-64'
+    else
+        LIB_LINUX_DIR=linux_x86_32
+        CAN_BIT_VERSION=''
+    fi
+    
+    # This is needed to load the corresponding JSSC library, i.e. x86, ARM.
+    ARCH=`uname -m`
+    if [ "$ARCH" == "armv7l" ]
+    then
+        JSSC_PATH=:armhf
+    else 
+        if [ "$2" == "embedded" ]
+        then
+            #Turn off moving averages for AHX-10 only
+            export skipMA="true"
+        fi
+    fi
+
+    case "$2" in
+        "embedded")
+            export JAVA_MEM_OPTIONS="-Xms356m -Xmx356m -XX:NewSize=32m -XX:MaxNewSize=32m -XX:+UseConcMarkSweepGC
+            -XX:+ExplicitGCInvokesConcurrent -XX:SurvivorRatio=2 -XX:TargetSurvivorRatio=90 -XX:MaxTenuringThreshold=15"
+            ;;
+
+        "gnssgs")
+            export JAVA_MEM_OPTIONS="-Xms356m -Xmx356m -XX:NewSize=32m -XX:MaxNewSize=32m -XX:+UseConcMarkSweepGC -XX:SurvivorRatio=1 -XX:TargetSurvivorRatio=90 -XX:MaxTenuringThreshold=15"
+            ;;
+
+        "gnssgm")
+            export JAVA_MEM_OPTIONS="-Xms356m -Xmx356m -XX:NewSize=32m -XX:MaxNewSize=32m -XX:+UseConcMarkSweepGC -XX:SurvivorRatio=1 -XX:TargetSurvivorRatio=90 -XX:MaxTenuringThreshold=15"
+            ;;
+
+        "playback")
+            export JAVA_MEM_OPTIONS="-Xms512m -Xmx16G"
+            ;;
+
+        "server")
+            #given analysis of server on it steady state for running 30+33, the heap size utilization is around 1.2g, so the heap is being set to 1.5g to give a little bit of room when pathplanner is running
+            export JAVA_MEM_OPTIONS="-XX:+UseG1GC -XX:MaxGCPauseMillis=50 -XX:GCPauseIntervalMillis=1000 -Xms4096m -Xmx4096m -Dio.netty.recycler.maxCapacity=5000"
+
+            #if pause target times are not helping with avoiding full gcs, we can try the seeting of YongGenSize
+            #when the system is running on its steady state with 30+33, it has been observed that yong generation
+            #spaces varies from 350Mb and 470Mb. so we can safely set it to 512m.
+            #export JAVA_MEM_OPTIONS="-XX:+UseG1GC -XX:+G1YoungGenSize=512m -Xms1536m -Xmx1536m"
+
+            #it has been observed that netty starts maintaining high amounts of heap if it is not properly configured,
+            #to keep control of this it was added the following parameter.
+            #-Dio.netty.recycler.maxCapacity=5000
+            ;;
+
+        *)
+            export JAVA_MEM_OPTIONS="-XX:+UseG1GC"
+            ;;
+    esac
+
+    export OMSMTU=65536
+    export GC_EXTRAS="-XX:+PrintGCDateStamps -XX:+PrintGCDetails -XX:+PrintPromotionFailure -XX:PrintCMSStatistics=2 -XX:+PrintTenuringDistribution -Xloggc:../logs/gc$APP_NAME.log"
+    export GC_EXTRAS_EXTENDED="$GC_EXTRAS -XX:+PrintGCApplicationStoppedTime -XX:+PrintGCApplicationConcurrentTime -XX:+PrintSafepointStatistics"
+
+#PERF EXTRAS are experiments being done during the fine tune for memory and gc paramters
+    export PERF_EXTRAS="-XX-ScavengeBeforeFullGC"
+
+    export DUMP_HEAP="-XX:+HeapDumpOnOutOfMemoryError"
+    export LD_LIBRARY_PATH=$REALDIR/../lib/$LIB_LINUX_DIR:$LD_LIBRARY_PATH
+    export JAVA_EXTRAS=" -Domsproperties.dir=$REALDIR/../conf -Djava.util.Arrays.useLegacyMergeSort=true -Dfile.encoding=UTF8 -Dsun.java2d.xrender=false -Dmariadb.logging.disable=true"
+    export JMX_ARGS=" -Djava.rmi.server.hostname=IP_GOES_HERE -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.port=30301 -Dcom.sun.management.jmxremote.authenticate=false"
+
+    export EXTERNAL_LIBS="$REALDIR/../lib/java/comm-3.0_u1.jar:$REALDIR/../lib/java/jssc-2.8.0.jar:\
+$REALDIR/../lib/java/libsocket-can-java$CAN_BIT_VERSION-1.0.jar:$REALDIR/../lib/java/jdom-1.1.jar:\
+$REALDIR/../lib/java/mms-extension-jaas-1.7.0-076.jar:$REALDIR/../lib/java/jsch-0.1.53.jar"
+
+
+    export BUNDLES="$REALDIR/../bundles/slf4j-api-1.7.25.jar:$REALDIR/../bundles/vertx-core-3.9.12.jar:\
+$REALDIR/../bundles/vertx-auth-common-3.9.12.jar:$REALDIR/../bundles/vertx-web-3.9.12-mms-3.jar:\
+$REALDIR/../bundles/netty-buffer-4.1.72.Final.jar:$REALDIR/../bundles/netty-codec-http-4.1.72.Final.jar:\
+$REALDIR/../bundles/netty-codec-http2-4.1.72.Final.jar:$REALDIR/../bundles/netty-codec-dns-4.1.72.Final.jar:\
+$REALDIR/../bundles/netty-handler-4.1.72.Final.jar:$REALDIR/../bundles/netty-codec-4.1.72.Final.jar:\
+$REALDIR/../bundles/netty-common-4.1.72.Final.jar:$REALDIR/../bundles/netty-transport-4.1.72.Final.jar:\
+$REALDIR/../bundles/netty-resolver-4.1.72.Final.jar:$REALDIR/../bundles/netty-resolver-dns-4.1.72.Final.jar"
+
+
+# The only reason java.library.path is being set here is because CanPort.so doesn't get loaded
+# even with the LD_LIBRARY_PATH set. See more details at Mantis #35377.
+# to debug java security stuff(related to mms-extensions-jaas), use this: -Djava.security.debug=all 
+    export MMS_LAUNCHER="-XX:-OmitStackTraceInFastThrow -Djava.security.auth.login.config=$REALDIR/../conf/jaas.config -Dfrontrunner.app.name=$APP_NAME -Djava.library.path=$REALDIR/../lib/$LIB_LINUX_DIR$JSSC_PATH -classpath $REALDIR/../lib/java/org.eclipse.osgi-3.11.3.jar:$EXTERNAL_LIBS:$BUNDLES org.eclipse.core.runtime.adaptor.EclipseStarter"
+    export MMS_LAUNCHER_WITH_ARGS="$GC_EXTRAS $DUMP_HEAP $REMOTE_DEBUG $REMOTE_PROFILE $JAVA_ARGS $JAVA_MEM_OPTIONS $JAVA_EXTRAS -Dosgi.framework.activeThreadType=normal -Dosgi.noShutdown=true -Declipse.ignoreApp=true -Dmms.system.mode=$SYSTEM_MODE $MMS_LAUNCHER -configuration $CONF_DIR"
+    export LOG_TO_CONSOLE=-Dlogback.configurationFile=$REALDIR/../conf/logback-console.xml
+    export LOG_TO_FILE=-Dlogback.configurationFile=$REALDIR/../conf/logback.xml
+    export FRONTRUNNER_LOG_DIR=$REALDIR/../logs/
+
+    # On OutOfMemoryError, send SIGQUIT for FULL-THREAD-DUMP, then send SIGHUP to terminate.
+    # Now, uncaught exception handler terminates program in case of OutOfMemoryError and so on.
+    # So, it won't be necessary to send SIGHUP signal, but keeping just in case....
+    # This property is being added to JAVA_OPTIONS instead going to MMS_LAUNCHER_WITH_ARGS, due to the use of double quotes in the parameter
+    # Since the commands will be sent in "sh", "kill -SIGXXXX pid" doesn't work.
+    # It must be "kill -s XXXX pid".
+    export _JAVA_OPTIONS="$_JAVA_OPTIONS -XX:OnOutOfMemoryError=\"kill -s QUIT %p; kill -s HUP %p\""
+
+####starting application
+
+    local EXIT_STATUS
+    case "$START_MODE" in
+        "console")
+            . starter "$LOG_TO_CONSOLE $MMS_LAUNCHER_WITH_ARGS"
+            EXIT_STATUS=$?
+            ;;
+
+        "start_and_wait")
+            # This is to hide osgi console.
+            BACKGROUND=true
+
+            # To print after start waiting, echo 3 seconds later.
+            # For real environment, nobody can see this.
+            # But this is something convenient when testing "start_and_wait" launcher....
+            ( sleep 3; echo "WAITING ${APP_NAME} to terminate...." )&
+
+            # To have HUP signal work, this needs to be running as foreground job.
+            . starter "$LOG_TO_FILE $MMS_LAUNCHER_WITH_ARGS"
+            EXIT_STATUS=$?
+            ;;
+
+        *)
+            # start
+            BACKGROUND=true
+            . starter "$LOG_TO_FILE $MMS_LAUNCHER_WITH_ARGS"&
+            EXIT_STATUS=$?
+            sleep 2
+            ;;
+    esac
+    return ${EXIT_STATUS}
+}
+
+
+###############################################################################
+# setWorkingDir
+###############################################################################
+setWorkingDir() {
+
+    # Get the fully qualified path to the script
+    case $0 in
+        /*)
+            SCRIPT="$0"
+            ;;
+        *)
+            PWD=`pwd`
+            SCRIPT="$PWD/$0"
+            ;;
+    esac
+
+    # Resolve the true real path without any sym links.
+    CHANGED=true
+    while [ "X$CHANGED" != "X" ]
+    do
+        # Change spaces to ":" so the tokens can be parsed.
+        SCRIPT=`echo $SCRIPT | sed -e 's; ;:;g'`
+        # Get the real path to this script, resolving any symbolic links
+        TOKENS=`echo $SCRIPT | sed -e 's;/; ;g'`
+        REALPATH=
+        for C in $TOKENS; do
+            REALPATH="$REALPATH/$C"
+            while [ -h "$REALPATH" ] ; do
+                LS="`ls -ld "$REALPATH"`"
+                LINK="`expr "$LS" : '.*-> \(.*\)$'`"
+                if expr "$LINK" : '/.*' > /dev/null; then
+                    REALPATH="$LINK"
+                else
+                    REALPATH="`dirname "$REALPATH"`""/$LINK"
+                fi
+            done
+        done
+        # Change ":" chars back to spaces.
+        REALPATH=`echo $REALPATH | sed -e 's;:; ;g'`
+
+        if [ "$REALPATH" = "$SCRIPT" ]
+        then
+            CHANGED=""
+        else
+            SCRIPT="$REALPATH"
+        fi
+    done
+
+    # Change the current directory to the location of the script
+    cd "`dirname "$REALPATH"`"
+    REALDIR=`pwd`
+}
+
+###############################################################################
+# frontrunner
+###############################################################################
+setWorkingDir $0
+
+EXIT_STATUS=255
+case "$1" in
+    'console')
+        START_MODE=console
+        start "$@"
+        EXIT_STATUS=$?
+        ;;
+
+    'start'|'start_and_wait')
+        START_MODE=$1
+        export BACKGOUND=true
+        start "$@"
+        EXIT_STATUS=$?
+        ;;
+
+    'admin')
+        export APP_NAME="_$2"
+        shift
+        frontrunner console admin "$@"
+        EXIT_STATUS=$?
+        ;;
+
+    'help')
+        print_help
+        EXIT_STATUS=254
+        ;;
+
+    'playback-examples')
+        print_header
+        EXIT_STATUS=$?
+        cat playbackExamples.txt
+        ;;
+
+    'examples')
+        print_header
+        EXIT_STATUS=$?
+        cat examples.txt
+        ;;
+
+    *)
+        echo ERROR: Invalid usage
+        print_help
+        EXIT_STATUS=253
+        ;;
+esac
+
+# To have it possible to handle exit status code in external scripts,
+# exit with the exit status.
+exit ${EXIT_STATUS}

@@ -40,6 +40,8 @@ def init_database(db_path: str) -> bool:
     """
     try:
         conn = sqlite3.connect(db_path)
+        conn.execute('PRAGMA journal_mode=WAL')
+        conn.execute('PRAGMA busy_timeout=5000')
         cursor = conn.cursor()
 
         # Create schema version table
@@ -123,6 +125,8 @@ def log_process_event(db_path: str, service_name: str, status: str) -> None:
     """
     try:
         conn = sqlite3.connect(db_path)
+        conn.execute('PRAGMA journal_mode=WAL')
+        conn.execute('PRAGMA busy_timeout=5000')
         cursor = conn.cursor()
 
         now = datetime.now()
@@ -181,6 +185,8 @@ def log_disk_event(db_path: str, disk_percent: float, disk_used_gb: float, disk_
     """
     try:
         conn = sqlite3.connect(db_path)
+        conn.execute('PRAGMA journal_mode=WAL')
+        conn.execute('PRAGMA busy_timeout=5000')
         cursor = conn.cursor()
 
         now = datetime.now()
@@ -243,6 +249,8 @@ def get_active_events(db_path: str) -> Dict[str, List[Dict]]:
     """
     try:
         conn = sqlite3.connect(db_path)
+        conn.execute('PRAGMA journal_mode=WAL')
+        conn.execute('PRAGMA busy_timeout=5000')
         cursor = conn.cursor()
 
         # Get active process events
@@ -310,6 +318,8 @@ def get_event_history(db_path: str, limit: int = 100) -> Dict[str, List[Dict]]:
     """
     try:
         conn = sqlite3.connect(db_path)
+        conn.execute('PRAGMA journal_mode=WAL')
+        conn.execute('PRAGMA busy_timeout=5000')
         cursor = conn.cursor()
 
         # Get process events

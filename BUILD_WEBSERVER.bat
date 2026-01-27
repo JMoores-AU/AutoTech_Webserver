@@ -1,13 +1,12 @@
 @echo off
 setlocal enabledelayedexpansion
 :: ============================================
-:: AutoTech Web - Build & Test Script
+:: AutoTech Web - Build & Test Script (FIXED)
 :: ============================================
-:: Features:
-::  - Git version control integration
-::  - Pre-build verification (check_main.py)
-::  - Automatic backups
-::  - Version management
+:: Fixes added:
+::  - Always kills anything holding port 8888
+::  - Also kills AutoTech.exe + AutoTech_Tray.exe (tray app) so stale HTML can’t persist
+::  - Option 13 (FULLBUILD) preserved
 :: ============================================
 
 title AutoTech - Build Script
@@ -49,6 +48,7 @@ echo    10. Pre-Build Checklist
 echo    11. Build Executable
 echo    12. Test Executable
 echo    13. Full Build Pipeline (USB Deploy)
+echo    18. Build Client USB (sync autotech_client)
 echo.
 echo  UTILITIES
 echo    14. Create Backup
@@ -73,6 +73,7 @@ if "%choice%"=="10" goto PREBUILD
 if "%choice%"=="11" goto BUILD
 if "%choice%"=="12" goto TESTEXE
 if "%choice%"=="13" goto FULLBUILD
+if "%choice%"=="18" goto BUILDCLIENTUSB
 if "%choice%"=="14" goto BACKUP
 if "%choice%"=="15" goto CLEAN
 if "%choice%"=="16" goto SETUPGIT
@@ -81,6 +82,27 @@ if "%choice%"=="17" goto END
 echo Invalid option. Press any key to try again...
 pause >nul
 goto MENU
+
+
+:: ============================================
+:: ROUTINE: Kill anything that could be serving 8888
+:: ============================================
+:KILL_8888
+echo  Stopping anything serving on port 8888...
+
+:: Kill by port (LISTENING)
+for /f "tokens=5" %%a in ('netstat -ano ^| findstr :8888 ^| findstr LISTENING') do (
+    echo    - Killing PID %%a (LISTENING :8888)
+    taskkill /PID %%a /F >nul 2>&1
+)
+
+:: Kill known packaged binaries that may stay alive in tray
+taskkill /IM AutoTech.exe /F >nul 2>&1
+taskkill /IM AutoTech_Tray.exe /F >nul 2>&1
+
+timeout /t 1 /nobreak >nul
+exit /b 0
+
 
 :: ============================================
 :: DEVELOPMENT SERVER (with browser)
@@ -92,11 +114,8 @@ echo  Starting Development Server...
 echo ============================================
 echo.
 
-:: Kill any existing server on port 8888
 echo  Stopping any existing server...
-for /f "tokens=5" %%a in ('netstat -ano ^| findstr :8888 ^| findstr LISTENING') do (
-    taskkill /PID %%a /F >nul 2>&1
-)
+call :KILL_8888
 
 echo  Clearing Python cache...
 if exist __pycache__ rmdir /s /q __pycache__
@@ -119,6 +138,7 @@ start http://localhost:8888
 
 goto MENU
 
+
 :: ============================================
 :: RESTART SERVER (no browser)
 :: ============================================
@@ -129,12 +149,8 @@ echo  Restarting Development Server...
 echo ============================================
 echo.
 
-:: Kill any existing server on port 8888
 echo  Stopping existing server...
-for /f "tokens=5" %%a in ('netstat -ano ^| findstr :8888 ^| findstr LISTENING') do (
-    taskkill /PID %%a /F >nul 2>&1
-)
-timeout /t 1 /nobreak >nul
+call :KILL_8888
 
 echo  Clearing Python cache...
 if exist __pycache__ rmdir /s /q __pycache__
@@ -150,6 +166,7 @@ start "AutoTech Server" cmd /k "python main.py"
 
 goto MENU
 
+
 :: ============================================
 :: STOP SERVER
 :: ============================================
@@ -160,17 +177,14 @@ echo  Stopping Development Server...
 echo ============================================
 echo.
 
-:: Kill any existing server on port 8888
-for /f "tokens=5" %%a in ('netstat -ano ^| findstr :8888 ^| findstr LISTENING') do (
-    echo  Killing process %%a...
-    taskkill /PID %%a /F >nul 2>&1
-)
+call :KILL_8888
 
 echo.
 echo  Server stopped.
 echo.
 pause
 goto MENU
+
 
 :: ============================================
 :: VERIFY CODE
@@ -201,6 +215,7 @@ echo.
 pause
 goto MENU
 
+
 :: ============================================
 :: RUN TESTS & GIT STATUS
 :: ============================================
@@ -226,7 +241,7 @@ if exist "check_main.py" (
     if %ERRORLEVEL% EQU 0 (
         echo   [OK] All components present
     ) else (
-        echo   [WARNING] Missing components - run option 2 for details
+        echo   [WARNING] Missing components - run option 4 for details
     )
 ) else (
     echo   [SKIP] check_main.py not found
@@ -246,6 +261,7 @@ if %GIT_AVAILABLE%==1 (
 echo.
 pause
 goto MENU
+
 
 :: ============================================
 :: GIT COMMIT
@@ -289,6 +305,7 @@ echo.
 pause
 goto MENU
 
+
 :: ============================================
 :: GIT DIFF
 :: ============================================
@@ -312,6 +329,7 @@ if %ERRORLEVEL% NEQ 0 (
 echo.
 pause
 goto MENU
+
 
 :: ============================================
 :: GIT CHECKOUT (UNDO)
@@ -348,6 +366,7 @@ echo.
 pause
 goto MENU
 
+
 :: ============================================
 :: GIT LOG
 :: ============================================
@@ -370,6 +389,7 @@ echo (Showing last 20 commits)
 echo.
 pause
 goto MENU
+
 
 :: ============================================
 :: PRE-BUILD CHECKLIST
@@ -456,6 +476,7 @@ echo.
 pause
 goto MENU
 
+
 :: ============================================
 :: BUILD EXECUTABLE
 :: ============================================
@@ -471,7 +492,7 @@ if exist "check_main.py" (
     python check_main.py main.py >nul 2>&1
     if %ERRORLEVEL% NEQ 0 (
         echo [ERROR] Pre-build verification failed!
-        echo Run option 2 for details.
+        echo Run option 4 for details.
         pause
         goto MENU
     )
@@ -506,147 +527,99 @@ if exist "dist\AutoTech.exe" (
         echo [USB] Detected AUTOTECH drive: !USB_DRIVE!
         echo.
 
-        :: Check if AutoTech.exe needs updating (compare file sizes)
-        set "NEED_EXE_UPDATE=0"
-        if not exist "!USB_DRIVE!\AutoTech.exe" (
-            set "NEED_EXE_UPDATE=1"
-        ) else (
-            for %%A in ("dist\AutoTech.exe") do set "SRC_SIZE=%%~zA"
-            for %%A in ("!USB_DRIVE!\AutoTech.exe") do set "DST_SIZE=%%~zA"
-            if not "!SRC_SIZE!"=="!DST_SIZE!" set "NEED_EXE_UPDATE=1"
-        )
-
-        if "!NEED_EXE_UPDATE!"=="1" (
-            echo [USB] Copying AutoTech.exe...
-            copy /Y "dist\AutoTech.exe" "!USB_DRIVE!\" >nul
-            if exist "!USB_DRIVE!\AutoTech.exe" (
-                echo   [OK] Copied to !USB_DRIVE!\AutoTech.exe
+        set "DEPLOY_SERVER_BIN=Y"
+        set /p DEPLOY_SERVER_BIN="Deploy server binaries (AutoTech.exe, service installers) to this USB? (Y/N): "
+        if /i "!DEPLOY_SERVER_BIN!"=="Y" (
+            :: Check if AutoTech.exe needs updating (compare file sizes)
+            set "NEED_EXE_UPDATE=0"
+            if not exist "!USB_DRIVE!\AutoTech.exe" (
+                set "NEED_EXE_UPDATE=1"
             ) else (
-                echo   [ERROR] Failed to copy AutoTech.exe
+                for %%A in ("dist\AutoTech.exe") do set "SRC_SIZE=%%~zA"
+                for %%A in ("!USB_DRIVE!\AutoTech.exe") do set "DST_SIZE=%%~zA"
+                if not "!SRC_SIZE!"=="!DST_SIZE!" set "NEED_EXE_UPDATE=1"
             )
-        ) else (
-            echo [USB] AutoTech.exe is up-to-date, skipping
-        )
 
-        :: Copy AutoTech_Tray.exe if it exists
-        if exist "dist\AutoTech_Tray.exe" (
-            copy /Y "dist\AutoTech_Tray.exe" "!USB_DRIVE!\" >nul
-            if exist "!USB_DRIVE!\AutoTech_Tray.exe" (
-                echo   [OK] Copied to !USB_DRIVE!\AutoTech_Tray.exe
-            )
-        )
-        echo.
-
-        :: Deploy AutoTech Client installer package
-        :: Deploy AutoTech Client installer package to E:\AutoTech\autotech_client
-        echo [USB] Checking autotech_client folder...
-        set "CLIENT_SRC=autotech_client"
-        set "CLIENT_DST=!USB_DRIVE!\AutoTech\autotech_client"
-
-        if not exist "!CLIENT_DST!" (
-            echo   Creating !CLIENT_DST!
-            mkdir "!CLIENT_DST!"
-        )
-
-        :: Check and copy installer batch file
-        set "NEED_INSTALLER_UPDATE=0"
-        if not exist "!CLIENT_DST!\Install_AutoTech_Client.bat" (
-            set "NEED_INSTALLER_UPDATE=1"
-        ) else (
-            for %%A in ("!CLIENT_SRC!\Install_AutoTech_Client.bat") do set "SRC_SIZE=%%~zA"
-            for %%A in ("!CLIENT_DST!\Install_AutoTech_Client.bat") do set "DST_SIZE=%%~zA"
-            if not "!SRC_SIZE!"=="!DST_SIZE!" set "NEED_INSTALLER_UPDATE=1"
-        )
-        if "!NEED_INSTALLER_UPDATE!"=="1" (
-            copy /Y "!CLIENT_SRC!\Install_AutoTech_Client.bat" "!CLIENT_DST!\"
-            if !ERRORLEVEL! EQU 0 (
-                echo   [OK] Install_AutoTech_Client.bat
-            ) else (
-                echo   [ERROR] Failed to copy Install_AutoTech_Client.bat
-            )
-        ) else (
-            echo   [SKIP] Install_AutoTech_Client.bat up-to-date
-        )
-
-        :: Check and copy VERSION file (for client update tracking)
-        if exist "!CLIENT_SRC!\VERSION" (
-            set "NEED_VERSION_UPDATE=0"
-            if not exist "!CLIENT_DST!\VERSION" (
-                set "NEED_VERSION_UPDATE=1"
-            ) else (
-                fc /b "!CLIENT_SRC!\VERSION" "!CLIENT_DST!\VERSION" >nul 2>&1
-                if !ERRORLEVEL! NEQ 0 set "NEED_VERSION_UPDATE=1"
-            )
-            if "!NEED_VERSION_UPDATE!"=="1" (
-                copy /Y "!CLIENT_SRC!\VERSION" "!CLIENT_DST!\"
-                if !ERRORLEVEL! EQU 0 (
-                    for /f %%v in ('type "!CLIENT_SRC!\VERSION"') do echo   [OK] VERSION updated to %%v
+            if "!NEED_EXE_UPDATE!"=="1" (
+                echo [USB] Copying AutoTech.exe...
+                copy /Y "dist\AutoTech.exe" "!USB_DRIVE!\" >nul
+                if exist "!USB_DRIVE!\AutoTech.exe" (
+                    echo   [OK] Copied to !USB_DRIVE!\AutoTech.exe
                 ) else (
-                    echo   [ERROR] Failed to copy VERSION
+                    echo   [ERROR] Failed to copy AutoTech.exe
                 )
             ) else (
-                for /f %%v in ('type "!CLIENT_DST!\VERSION"') do echo   [SKIP] VERSION %%v up-to-date
+                echo [USB] AutoTech.exe is up-to-date, skipping
+            )
+
+            :: Copy AutoTech_Tray.exe if it exists
+            if exist "dist\AutoTech_Tray.exe" (
+                copy /Y "dist\AutoTech_Tray.exe" "!USB_DRIVE!\" >nul
+                if exist "!USB_DRIVE!\AutoTech_Tray.exe" (
+                    echo   [OK] Copied to !USB_DRIVE!\AutoTech_Tray.exe
+                )
+            )
+
+            :: Deploy Windows Service installers to E:\AutoTech
+            echo.
+            echo [USB] Checking service installers...
+            if exist "Install_AutoTech_Service.bat" (
+                copy /Y "Install_AutoTech_Service.bat" "!USB_DRIVE!\AutoTech\" >nul
+                echo   [OK] Install_AutoTech_Service.bat synced
+            )
+            if exist "Uninstall_AutoTech_Service.bat" (
+                copy /Y "Uninstall_AutoTech_Service.bat" "!USB_DRIVE!\AutoTech\" >nul
+                echo   [OK] Uninstall_AutoTech_Service.bat synced
             )
         ) else (
-            echo   [WARNING] VERSION file not found in !CLIENT_SRC!
+            echo [USB] Skipping server binaries for client-only USB.
         )
-
-        :: Check and copy tools folder
-        if exist "!CLIENT_SRC!\tools" (
-            if not exist "!CLIENT_DST!\tools" mkdir "!CLIENT_DST!\tools"
-            xcopy "!CLIENT_SRC!\tools\*.*" "!CLIENT_DST!\tools\" /E /I /Q /Y /D
-            if !ERRORLEVEL! EQU 0 (
-                echo   [OK] tools folder synced
-            ) else (
-                echo   [ERROR] Failed to sync tools folder
-            )
-        )
-
-        :: Check and copy scripts folder
-        if exist "!CLIENT_SRC!\scripts" (
-            if not exist "!CLIENT_DST!\scripts" mkdir "!CLIENT_DST!\scripts"
-            xcopy "!CLIENT_SRC!\scripts\*.*" "!CLIENT_DST!\scripts\" /E /I /Q /Y /D
-            if !ERRORLEVEL! EQU 0 (
-                echo   [OK] scripts folder synced
-            ) else (
-                echo   [ERROR] Failed to sync scripts folder
-            )
-        )
-
-        :: Deploy database folder to E:\AutoTech\database (for equipment_cache.db)
         echo.
-        echo [USB] Checking database folder...
-        set "DB_DST=!USB_DRIVE!\AutoTech\database"
-        if not exist "!DB_DST!" (
-            echo   Creating !DB_DST!
-            mkdir "!DB_DST!"
-            echo   [OK] database folder created
-        ) else (
-            echo   [OK] database folder exists
-        )
-        echo   [INFO] IP_list.dat referenced from !USB_DRIVE!\T1_Tools_Legacy\bin\
 
-        :: Deploy tools folder to E:\AutoTech\tools (for equipment_db.py)
-        echo.
-        echo [USB] Checking tools folder...
-        set "TOOLS_DST=!USB_DRIVE!\AutoTech\tools"
-        if not exist "!TOOLS_DST!" (
-            echo   Creating !TOOLS_DST!
-            mkdir "!TOOLS_DST!"
+        :: Deploy AutoTech Client structure to USB
+        echo [USB] Deploying client structure from autotech_client/...
+
+        :: Copy Install_AutoTech_Client.bat to USB root
+        if exist "Install_AutoTech_Client.bat" (
+            copy /Y "Install_AutoTech_Client.bat" "!USB_DRIVE!\" >nul
+            echo   [OK] Install_AutoTech_Client.bat
         )
+
+        :: Copy VERSION to USB root
+        if exist "VERSION" (
+            copy /Y "VERSION" "!USB_DRIVE!\" >nul
+            for /f %%v in ('type "VERSION"') do echo   [OK] VERSION %%v
+        )
+
+        :: Sync AutoTech folder from autotech_client/AutoTech/ to USB
+        if exist "autotech_client\AutoTech\" (
+            if not exist "!USB_DRIVE!\AutoTech\" mkdir "!USB_DRIVE!\AutoTech\"
+            xcopy "autotech_client\AutoTech\*.*" "!USB_DRIVE!\AutoTech\" /E /I /Q /Y /D >nul
+            echo   [OK] AutoTech\ folder synced (tools, scripts, database)
+        )
+
+        :: Copy standalone playback launcher to AutoTech root
+        if exist "V3.7.0 Playback Tool.bat" (
+            copy /Y "V3.7.0 Playback Tool.bat" "!USB_DRIVE!\AutoTech\" >nul
+            echo   [OK] V3.7.0 Playback Tool.bat copied
+        )
+
+        :: Update Python tools in AutoTech\tools
+        echo.
+        echo [USB] Updating Python tools...
         if exist "tools\equipment_db.py" (
-            copy /Y "tools\equipment_db.py" "!TOOLS_DST!\" >nul
-            echo   [OK] equipment_db.py synced
+            copy /Y "tools\equipment_db.py" "!USB_DRIVE!\AutoTech\tools\" >nul
+            echo   [OK] equipment_db.py
         )
         if exist "tools\ptx_uptime_db.py" (
-            copy /Y "tools\ptx_uptime_db.py" "!TOOLS_DST!\" >nul
-            echo   [OK] ptx_uptime_db.py synced
+            copy /Y "tools\ptx_uptime_db.py" "!USB_DRIVE!\AutoTech\tools\" >nul
+            echo   [OK] ptx_uptime_db.py
         )
         if exist "tools\__init__.py" (
-            copy /Y "tools\__init__.py" "!TOOLS_DST!\" >nul
+            copy /Y "tools\__init__.py" "!USB_DRIVE!\AutoTech\tools\" >nul
         )
 
-        :: Deploy Windows Service installers to E:\AutoTech
+        :: Deploy Windows Service installers to E:\AutoTech (again - preserved from your original)
         echo.
         echo [USB] Checking service installers...
         if exist "Install_AutoTech_Service.bat" (
@@ -662,9 +635,17 @@ if exist "dist\AutoTech.exe" (
         echo [USB] Deployment complete!
         echo.
         echo ============================================
-        echo  REMINDER: Remote clients need to re-run
-        echo  Install_AutoTech_Client.bat from USB to
-        echo  receive updated client tools and scripts.
+        echo  USB DEPLOYMENT COMPLETE!
+        echo ============================================
+        echo.
+        echo  USB Structure:
+        echo    !USB_DRIVE!\Install_AutoTech_Client.bat
+        echo    !USB_DRIVE!\AutoTech\tools\ (PuTTY, WinSCP, VNC, Python tools)
+        echo    !USB_DRIVE!\AutoTech\scripts\ (launchers + mms_scripts)
+        echo    !USB_DRIVE!\AutoTech\database\
+        echo.
+        echo  REMINDER: Remote clients must run Install_AutoTech_Client.bat
+        echo  from USB root to update their local launchers.
         echo ============================================
     ) else (
         echo [INFO] USB drive not detected - skipping USB deployment
@@ -693,6 +674,271 @@ echo.
 pause
 goto MENU
 
+
+:: ============================================
+:: BUILD CLIENT USB (sync autotech_client)
+:: ============================================
+:BUILDCLIENTUSB
+cls
+echo ============================================
+echo  Build Client USB (autotech_client -> USB root)
+echo ============================================
+echo.
+echo This option creates a complete client USB package with:
+echo   - Install_AutoTech_Client.bat (installer)
+echo   - AutoTech\tools\ (putty, WinSCP, VNC, plink, pscp)
+echo   - AutoTech\scripts\ (launch_*.bat scripts)
+echo   - AutoTech\scripts\mms_scripts\ (MMS batch scripts)
+echo   - VERSION file
+echo   - Frontrunner playback tools
+echo   - T1 Tools Legacy
+echo   - CamStudio USB
+echo.
+
+:: Enumerate removable/fixed (non-system) drives using PowerShell to avoid network shares
+set "USB_DRIVE="
+set "DRIVE_LIST="
+for /f "usebackq delims=" %%D in (`powershell -NoLogo -NoProfile -Command "Get-CimInstance Win32_LogicalDisk | Where-Object { $_.DriveType -in 2,3 } | Select-Object -ExpandProperty DeviceID"` ) do (
+    set "DRIVE_LIST=!DRIVE_LIST! %%D"
+    if not defined USB_DRIVE set "USB_DRIVE=%%D"
+)
+
+echo Available removable/fixed drives: %DRIVE_LIST%
+if not defined USB_DRIVE (
+    echo [ERROR] No removable/fixed drives detected. Plug in USB and retry.
+    echo.
+    pause
+    goto MENU
+)
+
+echo Detected default: %USB_DRIVE%
+set /p USB_DRIVE_IN="Enter target drive letter (e.g. I) or press Enter to use %USB_DRIVE%: "
+if not "%USB_DRIVE_IN%"=="" set "USB_DRIVE=%USB_DRIVE_IN%:"
+if not "%USB_DRIVE:~-1%"==":" set "USB_DRIVE=%USB_DRIVE%:"
+
+if not exist "%USB_DRIVE%\\" (
+    echo [ERROR] Drive %USB_DRIVE% not found.
+    pause
+    goto MENU
+)
+
+echo.
+echo This will copy contents of autotech_client\\ to %USB_DRIVE%\\
+echo (existing files will be updated; unique files on USB are kept).
+set /p CONFIRM="Proceed? (Y/N): "
+if /i not "%CONFIRM%"=="Y" (
+    echo Cancelled.
+    pause
+    goto MENU
+)
+
+:: Create destination folders
+if not exist "%USB_DRIVE%\\" (
+    echo [ERROR] Cannot access %USB_DRIVE%\\
+    pause
+    goto MENU
+)
+
+echo.
+echo ============================================
+echo  SYNCING CLIENT USB PACKAGE
+echo ============================================
+echo.
+
+:: Copy VERSION from repo root to USB root (canonical version)
+echo [1/7] Copying VERSION file...
+if exist "VERSION" (
+    copy /Y "VERSION" "%USB_DRIVE%\\" >nul
+    for /f %%v in ('type "VERSION"') do echo   [OK] VERSION %%v copied to USB root
+) else (
+    echo   [WARN] VERSION file not found at repo root
+)
+echo.
+
+:: Copy Install_AutoTech_Client.bat to USB root
+echo [2/7] Copying installer...
+if exist "autotech_client\Install_AutoTech_Client.bat" (
+    copy /Y "autotech_client\Install_AutoTech_Client.bat" "%USB_DRIVE%\\" >nul
+    echo   [OK] Install_AutoTech_Client.bat
+) else (
+    echo   [ERROR] Install_AutoTech_Client.bat not found in autotech_client!
+)
+echo.
+
+:: Sync AutoTech folder (tools, scripts, mms_scripts, database)
+echo [3/7] Syncing AutoTech folder (tools, scripts, database)...
+if exist "autotech_client\AutoTech\" (
+    where robocopy >nul 2>&1
+    if %ERRORLEVEL% EQU 0 (
+        robocopy "autotech_client\AutoTech" "%USB_DRIVE%\AutoTech" /E /COPY:DAT /R:2 /W:1 /NFL /NDL /NP >nul
+    ) else (
+        xcopy "autotech_client\AutoTech\*.*" "%USB_DRIVE%\AutoTech\" /E /I /Q /Y /D >nul
+    )
+    echo   [OK] AutoTech\ folder synced
+    :: Verify key tools
+    if exist "%USB_DRIVE%\AutoTech\tools\putty.exe" (
+        echo        - tools\putty.exe
+    ) else (
+        echo        - [WARN] tools\putty.exe missing!
+    )
+    if exist "%USB_DRIVE%\AutoTech\tools\WinSCP.exe" (
+        echo        - tools\WinSCP.exe
+    ) else (
+        echo        - [WARN] tools\WinSCP.exe missing!
+    )
+    if exist "%USB_DRIVE%\AutoTech\tools\vncviewer_5.3.2.exe" (
+        echo        - tools\vncviewer_5.3.2.exe
+    ) else (
+        echo        - [WARN] tools\vncviewer missing!
+    )
+    if exist "%USB_DRIVE%\AutoTech\scripts\launch_putty.bat" (
+        echo        - scripts\launch_*.bat present
+    ) else (
+        echo        - [WARN] scripts\launch_*.bat missing!
+    )
+    if exist "%USB_DRIVE%\AutoTech\scripts\mms_scripts\T1_Tools.bat" (
+        echo        - scripts\mms_scripts\ present
+    ) else (
+        echo        - [WARN] scripts\mms_scripts\ missing!
+    )
+) else (
+    echo   [ERROR] autotech_client\AutoTech\ folder not found!
+)
+echo.
+
+:: Sync Frontrunner playback folder
+echo [4/7] Syncing Frontrunner playback tools...
+if exist "autotech_client\frontrunnerV3-3.7.0-076-full\" (
+    where robocopy >nul 2>&1
+    if %ERRORLEVEL% EQU 0 (
+        robocopy "autotech_client\frontrunnerV3-3.7.0-076-full" "%USB_DRIVE%\frontrunnerV3-3.7.0-076-full" /E /COPY:DAT /R:2 /W:1 /NFL /NDL /NP >nul
+    ) else (
+        xcopy "autotech_client\frontrunnerV3-3.7.0-076-full\*.*" "%USB_DRIVE%\frontrunnerV3-3.7.0-076-full\" /E /I /Q /Y /D >nul
+    )
+    echo   [OK] frontrunnerV3-3.7.0-076-full\ synced
+) else (
+    echo   [SKIP] frontrunnerV3-3.7.0-076-full\ not found (optional)
+)
+echo.
+
+:: Sync T1 Tools Legacy
+echo [5/7] Syncing T1 Tools Legacy...
+if exist "autotech_client\T1_Tools_Legacy\" (
+    where robocopy >nul 2>&1
+    if %ERRORLEVEL% EQU 0 (
+        robocopy "autotech_client\T1_Tools_Legacy" "%USB_DRIVE%\T1_Tools_Legacy" /E /COPY:DAT /R:2 /W:1 /NFL /NDL /NP >nul
+    ) else (
+        xcopy "autotech_client\T1_Tools_Legacy\*.*" "%USB_DRIVE%\T1_Tools_Legacy\" /E /I /Q /Y /D >nul
+    )
+    echo   [OK] T1_Tools_Legacy\ synced
+) else (
+    echo   [SKIP] T1_Tools_Legacy\ not found (optional)
+)
+echo.
+
+:: Sync CamStudio USB
+echo [6/7] Syncing CamStudio USB tools...
+if exist "autotech_client\CamStudio_USB\" (
+    where robocopy >nul 2>&1
+    if %ERRORLEVEL% EQU 0 (
+        robocopy "autotech_client\CamStudio_USB" "%USB_DRIVE%\CamStudio_USB" /E /COPY:DAT /R:2 /W:1 /NFL /NDL /NP >nul
+    ) else (
+        xcopy "autotech_client\CamStudio_USB\*.*" "%USB_DRIVE%\CamStudio_USB\" /E /I /Q /Y /D >nul
+    )
+    echo   [OK] CamStudio_USB\ synced
+) else (
+    echo   [SKIP] CamStudio_USB\ not found (optional)
+)
+echo.
+
+:: Sync AT Monitor
+echo [7/7] Syncing AT Monitor...
+if exist "autotech_client\AT Monitor V3.7.0\" (
+    where robocopy >nul 2>&1
+    if %ERRORLEVEL% EQU 0 (
+        robocopy "autotech_client\AT Monitor V3.7.0" "%USB_DRIVE%\AT Monitor V3.7.0" /E /COPY:DAT /R:2 /W:1 /NFL /NDL /NP >nul
+    ) else (
+        xcopy "autotech_client\AT Monitor V3.7.0\*.*" "%USB_DRIVE%\AT Monitor V3.7.0\" /E /I /Q /Y /D >nul
+    )
+    echo   [OK] AT Monitor V3.7.0\ synced
+) else (
+    echo   [SKIP] AT Monitor V3.7.0\ not found (optional)
+)
+echo.
+
+:: Final verification
+echo ============================================
+echo  VERIFYING USB PACKAGE
+echo ============================================
+echo.
+set "USB_OK=1"
+
+:: Check required files
+if not exist "%USB_DRIVE%\Install_AutoTech_Client.bat" (
+    echo [ERROR] Missing: Install_AutoTech_Client.bat
+    set "USB_OK=0"
+) else (
+    echo [OK] Install_AutoTech_Client.bat
+)
+
+if not exist "%USB_DRIVE%\VERSION" (
+    echo [WARN] Missing: VERSION
+) else (
+    for /f %%v in ('type "%USB_DRIVE%\VERSION"') do echo [OK] VERSION (%%v)
+)
+
+if not exist "%USB_DRIVE%\AutoTech\tools\putty.exe" (
+    echo [ERROR] Missing: AutoTech\tools\putty.exe
+    set "USB_OK=0"
+) else (
+    echo [OK] AutoTech\tools\ (putty, WinSCP, VNC, plink, pscp)
+)
+
+if not exist "%USB_DRIVE%\AutoTech\scripts\launch_putty.bat" (
+    echo [ERROR] Missing: AutoTech\scripts\launch_*.bat
+    set "USB_OK=0"
+) else (
+    echo [OK] AutoTech\scripts\ (launch scripts)
+)
+
+if not exist "%USB_DRIVE%\AutoTech\scripts\mms_scripts\T1_Tools.bat" (
+    echo [WARN] Missing: AutoTech\scripts\mms_scripts\
+) else (
+    echo [OK] AutoTech\scripts\mms_scripts\ (MMS scripts)
+)
+
+echo.
+echo ============================================
+if "!USB_OK!"=="1" (
+    echo  CLIENT USB BUILD COMPLETE!
+) else (
+    echo  CLIENT USB BUILD INCOMPLETE - CHECK ERRORS ABOVE
+)
+echo ============================================
+echo.
+echo Target: %USB_DRIVE%\
+echo.
+echo USB Structure:
+echo   %USB_DRIVE%\Install_AutoTech_Client.bat  (run on client PC)
+echo   %USB_DRIVE%\VERSION
+echo   %USB_DRIVE%\AutoTech\tools\             (putty, WinSCP, VNC)
+echo   %USB_DRIVE%\AutoTech\scripts\           (launch_*.bat)
+echo   %USB_DRIVE%\AutoTech\scripts\mms_scripts\  (MMS batch scripts)
+echo   %USB_DRIVE%\AutoTech\database\          (optional DBs)
+echo   %USB_DRIVE%\frontrunnerV3-3.7.0-076-full\  (playback tools)
+echo   %USB_DRIVE%\T1_Tools_Legacy\            (legacy T1 tools)
+echo   %USB_DRIVE%\CamStudio_USB\              (screen recording)
+echo   %USB_DRIVE%\AT Monitor V3.7.0\          (AT Monitor)
+echo.
+echo USAGE: On client PC, right-click Install_AutoTech_Client.bat
+echo        and select "Run as administrator"
+echo.
+echo Rerun this option anytime to refresh the USB.
+echo.
+pause
+goto MENU
+
+
 :: ============================================
 :: TEST EXECUTABLE
 :: ============================================
@@ -705,10 +951,17 @@ echo.
 
 if not exist "dist\AutoTech.exe" (
     echo [ERROR] Executable not found!
-    echo Run option 9 to build first.
+    echo Run option 11 to build first.
     pause
     goto MENU
 )
+
+echo [IMPORTANT]
+echo This runs the PACKAGED AutoTech.exe.
+echo It may stay running in the SYSTEM TRAY and keep serving port 8888.
+echo Close it from the tray after testing, or run option 3 (Stop Server).
+echo.
+pause
 
 echo Starting AutoTech.exe...
 echo.
@@ -723,10 +976,16 @@ echo  - Legacy Tools page loads
 echo  - Terminal starts
 echo  - No console errors (F12)
 echo.
-echo  Close the application window to return here.
+echo  Close the application window (and tray icon if present) to return here.
 echo ============================================
 start /wait dist\AutoTech.exe
+
+echo.
+echo If anything stayed running, clearing port 8888 now...
+call :KILL_8888
+
 goto MENU
+
 
 :: ============================================
 :: CREATE BACKUP
@@ -757,6 +1016,7 @@ echo.
 pause
 goto MENU
 
+
 :: ============================================
 :: CLEAN BUILD FOLDERS
 :: ============================================
@@ -785,6 +1045,7 @@ echo.
 pause
 goto MENU
 
+
 :: ============================================
 :: FULL BUILD PIPELINE
 :: ============================================
@@ -795,14 +1056,14 @@ echo  Full Build Pipeline
 echo ============================================
 echo.
 
-echo [1/7] Creating backup...
+echo [1/8] Creating backup...
 if not exist "backups" mkdir backups
 for /f "tokens=2-4 delims=/ " %%a in ('date /t') do (set backup_date=%%c-%%a-%%b)
 copy main.py "backups\main_PREBUILD_%backup_date%.py" >nul
 echo   [OK] Backup created
 echo.
 
-echo [2/7] Verifying code...
+echo [2/8] Verifying code...
 if exist "check_main.py" (
     python check_main.py main.py >nul 2>&1
     if %ERRORLEVEL% NEQ 0 (
@@ -816,7 +1077,7 @@ if exist "check_main.py" (
 )
 echo.
 
-echo [3/7] Committing to Git...
+echo [3/8] Committing to Git...
 if %GIT_AVAILABLE%==1 (
     git diff-index --quiet HEAD --
     if %ERRORLEVEL% NEQ 0 (
@@ -836,13 +1097,13 @@ if %GIT_AVAILABLE%==1 (
 )
 echo.
 
-echo [4/7] Cleaning old builds...
+echo [4/8] Cleaning old builds...
 if exist "build" rmdir /s /q build
 if exist "dist" rmdir /s /q dist
 echo   [OK] Clean complete
 echo.
 
-echo [5/7] Building executable...
+echo [5/8] Building executable...
 python -m PyInstaller AutoTech.spec --noconfirm
 echo.
 
@@ -859,116 +1120,60 @@ set "USB_DRIVE="
 for %%D in (D E F G H I J K L) do (
     if exist "%%D:\AutoTech" set "USB_DRIVE=%%D:"
 )
+
 if defined USB_DRIVE (
     echo   USB detected: !USB_DRIVE!
 
-    :: Check if AutoTech.exe needs updating (compare file sizes)
-    set "NEED_EXE_UPDATE=0"
-    if not exist "!USB_DRIVE!\AutoTech.exe" (
-        set "NEED_EXE_UPDATE=1"
-    ) else (
-        for %%A in ("dist\AutoTech.exe") do set "SRC_SIZE=%%~zA"
-        for %%A in ("!USB_DRIVE!\AutoTech.exe") do set "DST_SIZE=%%~zA"
-        if not "!SRC_SIZE!"=="!DST_SIZE!" set "NEED_EXE_UPDATE=1"
-    )
-    if "!NEED_EXE_UPDATE!"=="1" (
-        copy /Y "dist\AutoTech.exe" "!USB_DRIVE!\" >nul
-        echo   [OK] AutoTech.exe updated
-    ) else (
-        echo   [SKIP] AutoTech.exe up-to-date
-    )
-
-    :: Deploy autotech_client folder to E:\AutoTech\autotech_client
-    set "CLIENT_SRC=autotech_client"
-    set "CLIENT_DST=!USB_DRIVE!\AutoTech\autotech_client"
-    if not exist "!CLIENT_DST!" (
-        echo   Creating !CLIENT_DST!
-        mkdir "!CLIENT_DST!"
-    )
-
-    :: Check and copy installer batch file
-    set "NEED_INSTALLER_UPDATE=0"
-    if not exist "!CLIENT_DST!\Install_AutoTech_Client.bat" (
-        set "NEED_INSTALLER_UPDATE=1"
-    ) else (
-        for %%A in ("!CLIENT_SRC!\Install_AutoTech_Client.bat") do set "SRC_SIZE=%%~zA"
-        for %%A in ("!CLIENT_DST!\Install_AutoTech_Client.bat") do set "DST_SIZE=%%~zA"
-        if not "!SRC_SIZE!"=="!DST_SIZE!" set "NEED_INSTALLER_UPDATE=1"
-    )
-    if "!NEED_INSTALLER_UPDATE!"=="1" (
-        copy /Y "!CLIENT_SRC!\Install_AutoTech_Client.bat" "!CLIENT_DST!\"
-        if !ERRORLEVEL! EQU 0 (
-            echo   [OK] Install_AutoTech_Client.bat updated
+    set "DEPLOY_SERVER_BIN=Y"
+    set /p DEPLOY_SERVER_BIN="Deploy server binaries (AutoTech.exe, service installers) to this USB? (Y/N): "
+    if /i "!DEPLOY_SERVER_BIN!"=="Y" (
+        :: Check if AutoTech.exe needs updating (compare file sizes)
+        set "NEED_EXE_UPDATE=0"
+        if not exist "!USB_DRIVE!\AutoTech.exe" (
+            set "NEED_EXE_UPDATE=1"
         ) else (
-            echo   [ERROR] Failed to copy Install_AutoTech_Client.bat
+            for %%A in ("dist\AutoTech.exe") do set "SRC_SIZE=%%~zA"
+            for %%A in ("!USB_DRIVE!\AutoTech.exe") do set "DST_SIZE=%%~zA"
+            if not "!SRC_SIZE!"=="!DST_SIZE!" set "NEED_EXE_UPDATE=1"
+        )
+        if "!NEED_EXE_UPDATE!"=="1" (
+            copy /Y "dist\AutoTech.exe" "!USB_DRIVE!\" >nul
+            echo   [OK] AutoTech.exe updated
+        ) else (
+            echo   [SKIP] AutoTech.exe up-to-date
         )
     ) else (
-        echo   [SKIP] Install_AutoTech_Client.bat up-to-date
+        echo   [SKIP] Server binaries skipped for client-only USB
     )
 
-    :: Check and copy VERSION file (for client update tracking)
-    if exist "!CLIENT_SRC!\VERSION" (
-        set "NEED_VERSION_UPDATE=0"
-        if not exist "!CLIENT_DST!\VERSION" (
-            set "NEED_VERSION_UPDATE=1"
-        ) else (
-            fc /b "!CLIENT_SRC!\VERSION" "!CLIENT_DST!\VERSION" >nul 2>&1
-            if !ERRORLEVEL! NEQ 0 set "NEED_VERSION_UPDATE=1"
-        )
-        if "!NEED_VERSION_UPDATE!"=="1" (
-            copy /Y "!CLIENT_SRC!\VERSION" "!CLIENT_DST!\"
-            if !ERRORLEVEL! EQU 0 (
-                for /f %%v in ('type "!CLIENT_SRC!\VERSION"') do echo   [OK] VERSION updated to %%v
-            ) else (
-                echo   [ERROR] Failed to copy VERSION
-            )
-        ) else (
-            for /f %%v in ('type "!CLIENT_DST!\VERSION"') do echo   [SKIP] VERSION %%v up-to-date
-        )
-    ) else (
-        echo   [WARNING] VERSION file not found in !CLIENT_SRC!
+    :: Deploy client structure from autotech_client/ (represents USB root)
+    if exist "Install_AutoTech_Client.bat" (
+        copy /Y "Install_AutoTech_Client.bat" "!USB_DRIVE!\" >nul
+        echo   [OK] Install_AutoTech_Client.bat
     )
 
-    :: Sync tools folder
-    if exist "!CLIENT_SRC!\tools" (
-        if not exist "!CLIENT_DST!\tools" mkdir "!CLIENT_DST!\tools"
-        xcopy "!CLIENT_SRC!\tools\*.*" "!CLIENT_DST!\tools\" /E /I /Q /Y /D
-        if !ERRORLEVEL! EQU 0 (
-            echo   [OK] tools folder synced
-        ) else (
-            echo   [ERROR] Failed to sync tools folder
-        )
+    if exist "VERSION" (
+        copy /Y "VERSION" "!USB_DRIVE!\" >nul
+        for /f %%v in ('type "VERSION"') do echo   [OK] VERSION %%v
     )
 
-    :: Sync scripts folder
-    if exist "!CLIENT_SRC!\scripts" (
-        if not exist "!CLIENT_DST!\scripts" mkdir "!CLIENT_DST!\scripts"
-        xcopy "!CLIENT_SRC!\scripts\*.*" "!CLIENT_DST!\scripts\" /E /I /Q /Y /D
-        if !ERRORLEVEL! EQU 0 (
-            echo   [OK] scripts folder synced
-        ) else (
-            echo   [ERROR] Failed to sync scripts folder
-        )
+    if exist "autotech_client\AutoTech\" (
+        if not exist "!USB_DRIVE!\AutoTech\" mkdir "!USB_DRIVE!\AutoTech\"
+        xcopy "autotech_client\AutoTech\*.*" "!USB_DRIVE!\AutoTech\" /E /I /Q /Y /D >nul
+        echo   [OK] AutoTech\ synced
     )
 
-    :: Deploy database folder (equipment_cache.db location)
-    set "DB_DST=!USB_DRIVE!\AutoTech\database"
-    if not exist "!DB_DST!" mkdir "!DB_DST!"
-    echo   [OK] database folder ready (IP_list.dat from T1_Tools_Legacy\bin\)
-
-    :: Deploy tools folder (equipment_db.py, ptx_uptime_db.py)
-    set "TOOLS_DST=!USB_DRIVE!\AutoTech\tools"
-    if not exist "!TOOLS_DST!" mkdir "!TOOLS_DST!"
+    :: Update Python tools
     if exist "tools\equipment_db.py" (
-        copy /Y "tools\equipment_db.py" "!TOOLS_DST!\" >nul
-        echo   [OK] equipment_db.py synced
+        copy /Y "tools\equipment_db.py" "!USB_DRIVE!\AutoTech\tools\" >nul
+        echo   [OK] equipment_db.py
     )
     if exist "tools\ptx_uptime_db.py" (
-        copy /Y "tools\ptx_uptime_db.py" "!TOOLS_DST!\" >nul
-        echo   [OK] ptx_uptime_db.py synced
+        copy /Y "tools\ptx_uptime_db.py" "!USB_DRIVE!\AutoTech\tools\" >nul
+        echo   [OK] ptx_uptime_db.py
     )
     if exist "tools\__init__.py" (
-        copy /Y "tools\__init__.py" "!TOOLS_DST!\" >nul
+        copy /Y "tools\__init__.py" "!USB_DRIVE!\AutoTech\tools\" >nul
     )
 ) else (
     echo   [SKIP] USB drive not detected
@@ -999,14 +1204,12 @@ if defined USB_DRIVE (
     echo  USB DEPLOYMENT STATUS:
     echo    Drive: !USB_DRIVE!
     echo    - AutoTech.exe
-    echo    - AutoTech\Install_AutoTech_Service.bat
-    echo    - AutoTech\Uninstall_AutoTech_Service.bat
-    echo    - autotech_client\Install_AutoTech_Client.bat
-    echo    - autotech_client\VERSION
-    echo    - autotech_client\tools\
-    echo    - autotech_client\scripts\
-    echo    - tools\equipment_db.py
-    echo    - tools\ptx_uptime_db.py
+    echo    - Install_AutoTech_Client.bat
+    echo    - VERSION
+    echo    - AutoTech\tools\ (PuTTY, WinSCP, VNC, Python tools)
+    echo    - AutoTech\scripts\ (launchers + mms_scripts)
+    echo    - AutoTech\database\
+    echo    - AutoTech\service installers
     echo.
 ) else (
     echo  *** USB NOT CONNECTED ***
@@ -1033,6 +1236,7 @@ echo.
 echo ============================================
 pause
 goto MENU
+
 
 :: ============================================
 :: SETUP GIT
@@ -1111,11 +1315,12 @@ echo ============================================
 echo  [SUCCESS] Git setup complete!
 echo ============================================
 echo.
-echo You can now use Git options 4-7 in the menu.
+echo You can now use Git options 6-9 in the menu.
 echo.
 pause
 set GIT_AVAILABLE=1
 goto MENU
+
 
 :: ============================================
 :: EXIT

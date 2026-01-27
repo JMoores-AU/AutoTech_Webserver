@@ -4,7 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ tool_name }} - AutoTech</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='AutoTech_Dark.ico') }}" id="favicon">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script>
+        // Auto-apply theme from localStorage
+        (function() {
+            const savedTheme = localStorage.getItem('autotech_theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            const favicon = document.getElementById('favicon');
+            if (favicon) {
+                favicon.href = savedTheme === 'light'
+                    ? "{{ url_for('static', filename='AutoTech_Light.ico') }}"
+                    : "{{ url_for('static', filename='AutoTech_Dark.ico') }}";
+            }
+        })();
+    </script>
 </head>
 <body>
     <div class="app-container">
@@ -16,10 +30,6 @@
             <div class="sidebar-header">
                 <div class="sidebar-logo">
                     <img src="{{ url_for('static', filename='autotech_logo.png') }}" alt="AutoTech Logo" class="sidebar-logo-img">
-                    <div>
-                        <div class="sidebar-logo-text">AutoTech</div>
-                        <div class="sidebar-logo-subtitle">Mining Equipment</div>
-                    </div>
                 </div>
             </div>
             

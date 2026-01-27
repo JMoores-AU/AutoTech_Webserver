@@ -1,0 +1,313 @@
+#! /bin/bash
+
+# Patterns delimited with commas, colons or semi-colons of the name of debugging class.
+# If fully described class name, the class or the sub-class will be logged.
+# Otherwise, logged if match with the REGEX pattern.
+# To log in/out of cache for the debugging classes,
+# it is necessary to set log level of "com.mmsi.framework.cache.inout"
+# at DEBUG or TRACE, too.
+# Using TRACE level, stacktrace will be logged on in/out cache.
+#
+# For more details, see JAVADOC of ICacheListReader#isDebugging()
+#export DEBUGGING_CLASSES="
+#    pattern_1,
+#    pattern_2
+#"
+
+initRedirectFile() {
+    FRONTRUNNER_LOG_DIR=$(readlink -f $FRONTRUNNER_LOG_DIR)
+    if [ ! -e "$FRONTRUNNER_LOG_DIR" ]
+    then
+        mkdir "$FRONTRUNNER_LOG_DIR"
+        find "$FRONTRUNNER_LOG_DIR" -print0 -exec chmod -f 766 {} + > /dev/null 2>&1
+        chmod -f 776 "$FRONTRUNNER_LOG_DIR"
+    fi
+
+    # Chop STDOUT/STDERR log by month of time on starting up.
+    local PREFIX="frontrunner-command"
+    local SUFFIX="log"
+    if [ -d "$FRONTRUNNER_LOG_DIR" ]
+    then
+        FILE_NAME="$FRONTRUNNER_LOG_DIR/$PREFIX.$SUFFIX"
+    fi
+
+    if [ ! -e "$FILE_NAME" ]
+    then
+        touch "$FILE_NAME"
+    fi
+
+    if [ ! -w "$FILE_NAME" ]
+    then
+        echo ". Script logging disabled. Can't write to $FILE_NAME"
+        FILE_NAME=""
+    fi
+}
+
+###############################################################################
+# redirect
+###############################################################################
+redirect() {
+    if [ "$FILE_NAME" != "" ]
+    then
+        if [ "$2" != "" ]
+        then
+            echo -e "$1"
+        fi
+        echo -e "$1" >> "$FILE_NAME"
+    fi
+}
+
+###############################################################################
+# zipAndRemove (log filename) (pid)
+###############################################################################
+ZIP_AND_REMOVE=""
+initZipAndRemoveScript() {
+    # frontrunnerV3/bin directory is initialized as "${REALDIR}" in "frontrunnerV3/bin/frontrunner" script.
+    local BIN_DIR="${REALDIR}"
+    local SCRIPT_NAME="zipAndRemove.sh"
+    case "${BIN_DIR}" in
+        */)
+            ZIP_AND_REMOVE="${BIN_DIR}"zipAndRemove.sh
+            ;;
+        *)
+            ZIP_AND_REMOVE="${BIN_DIR}"/zipAndRemove.sh
+            ;;
+    esac
+
+    if [ ! -f "${ZIP_AND_REMOVE}" ] ; then
+        echo -e "APP=<${APP_NAME}>: ${ZIP_AND_REMOVE} not found!" >> "$FILE_NAME"
+    fi
+}
+zipAndRemove() {
+    if [ ! -f "${ZIP_AND_REMOVE}" ] ; then
+        return
+    fi
+
+    which flock > /dev/null
+    if [ $? -eq 0 ] ; then
+        redirect " Executing ZIP & REMOVE with lock...."
+        REDIRECT_FILE="${FILE_NAME}" flock "${ZIP_AND_REMOVE}" sh "${ZIP_AND_REMOVE}" "$@"
+    else
+        redirect "No 'flock'.  Executing ZIP & REMOVE without lock...."
+        REDIRECT_FILE="${FILE_NAME}" sh "${ZIP_AND_REMOVE}" "$@"
+    fi
+}
+
+###############################################################################
+# start
+###############################################################################
+start() {
+
+    ##### zipAndRemove is implemented but dropped finally in ver 3.4 ##########
+    ##### But keep the code as comment for the future.
+    # pushd ${FRONTRUNNER_LOG_DIR} > /dev/null
+    # for f in {frontrunner,management}${APP_NAME}*.dbg; do
+    #   zipAndRemove "$f"
+    # done
+    # popd > /dev/null
+    ###########################################################################
+
+    if [ "$BACKGROUND" != "" ]
+    then
+        java -DAPP_NAME=$APP_NAME $JAVA_APP 2>>$FILE_NAME 1>>$FILE_NAME &
+        PID=$!
+
+        # FULL-THREAD-DUMP 5 minutes later.
+        # Difficult to utilize without logging into frontrunner_XXX.dbg file,
+        # and I don't think this is not required any more.
+        # But leave unchanged.
+        if [ "$APP_NAME" == "_server" ] || [ "$APP_NAME" == "_emergencyapp" ]
+        then
+            echo "kill -3 $PID"  | at now + 5 minutes
+            filedate=`date +%Y%m%d%H%M%S`
+        fi
+
+        redirect "\n$APP_NAME[$PID] started in background\n" true
+        wait $PID
+    else
+        echo "Starting $APP_NAME..."
+        java $JAVA_APP
+    fi
+
+    exitCode=$?
+    redirect "\n`date +%Y-%m-%d-%Hh%Mm%Ss`: $APP_NAME[$PID] has stopped. ExitCode: $exitCode" "$BACKGROUND"
+
+    ##### zipAndRemove is implemented but dropped finally in ver 3.4 ##########
+    ##### But keep the code as comment for the future.
+    # pushd ${FRONTRUNNER_LOG_DIR} > /dev/null
+    # for f in {frontrunner,management}${APP_NAME}*_${PID}.dbg; do
+    #   zipAndRemove "$f" "${PID}"
+    # done
+    # popd > /dev/null
+    ###########################################################################
+
+    # When FR server is dead, try to kill all docker processes
+    killAllDockerProcessesInServer
+
+    case "$exitCode" in
+        # 129 = kill -1 (SIGHUP)
+        "129")
+            exit 129
+            ;;
+
+        # 130 = ctrl+c (SIGINT)
+        "130")
+            exit 130
+            ;;
+
+        # 137 = kill -9 (SIGKILL)
+        "137")
+            exit 137
+            ;;
+
+        # 143 = kill (SIGTERM)
+        "143")
+            exit 143
+            ;;
+
+        # 234 is smartrain gui code to avoid autorestarts!!
+        "234")
+            exit 234
+            ;;
+
+        # 235 is PaloVerde exit code for "Remove OSGI Cache and Restart"!!
+        "235")
+            redirect "\n$APP_NAME[$PID] Removing OSGI Cache\nApplication should be restarted\n" true
+            case "$APP_NAME" in
+                "_server")
+                    rm -rf ../work/server/org.eclipse.osgi
+                    ;;
+
+                "_minemobile")
+                    rm -rf ../work/embedded/org.eclipse.osgi
+                    ;;
+
+                "_controller")
+                    rm -rf ../work/controller/org.eclipse.osgi
+                    ;;
+
+                "_emergencyapp")
+                    rm -rf ../work/emergency/org.eclipse.osgi
+                    ;;
+
+                # Unhandled workers : admin, mineview, playback, super, gpsgs
+                *)
+                    redirect "$APP_NAME: Unknown how to handle ERR($exitCode)" true
+                    ;;
+            esac
+            ;;
+
+        # 1 = class not found
+        "1")
+            # FIXME : See exit status '1' below.
+            #   If exit status is not specified, '0' (for success) will be returned.
+            #   It is not good, and exit code sould be specified.
+            #   However, '1' is used as the error of launching as 'root'.
+            exit
+            ;;
+
+        # Other exit-status code.
+        # Restart according to "$AUTO_RESTARTS"
+        *)
+            ;;
+    esac
+
+    if [ "$AUTO_RESTARTS" -gt 0 ]
+    then
+        if [ "$RESTART_COUNT" -lt "$AUTO_RESTARTS" ]
+        then
+            let RESTART_COUNT=RESTART_COUNT+1
+            redirect "\n`date +%Y-%m-%d-%Hh%Mm%Ss`: Restarting $APP_NAME ..." true
+            start
+        fi
+    else
+        # Return the last exit status.
+        exit $exitCode
+    fi
+}
+
+function killAllDockerProcessesInServer(){
+    if [[ "$APP_NAME" == "_server" ]]
+    then
+        redirect "\n`date +%Y-%m-%d-%Hh%Mm%Ss`: Try to killing all docker processes"
+        for CONTAINER_ID in $(docker ps -q); do
+            redirect "\n`date +%Y-%m-%d-%Hh%Mm%Ss`: killing docker processes: ${CONTAINER_ID}"
+            docker kill ${CONTAINER_ID}
+        done
+    fi
+}
+###############################################################################
+# validateAutoRestarts
+###############################################################################
+
+validateAutoRestarts() {
+    ERROR_MSG=""
+    echo $AUTO_RESTARTS | grep [^0-9] > /dev/null 2>&1
+    if [ "$?" -eq "0" ]
+    then
+        # If the grep found something other than 0-9 then it's not an integer.
+        ERROR_MSG="WARNING Invalid AUTO_RESTARTS value: $AUTO_RESTARTS."
+        ERROR_MSG="$ERROR_MSG This application won't be restarted automatically.\n"
+        AUTO_RESTARTS=0
+    else
+        if [ "$AUTO_RESTARTS" == "" ]
+        then
+            AUTO_RESTARTS=0
+        elif [ "$AUTO_RESTARTS" -gt "$MAX_ALLOWED_RESTARTS" ]
+        then
+            ERROR_MSG="WARNING Invalid AUTO_RESTARTS value: $AUTO_RESTARTS."
+            ERROR_MSG="$ERROR_MSG Reconfigured AUTO_RESTARTS to MAX_ALLOWED_RESTARTS: $MAX_ALLOWED_RESTARTS\n"
+            AUTO_RESTARTS=$MAX_ALLOWED_RESTARTS
+        fi
+    fi
+
+    if [ "$ERROR_MSG" != "" ]
+    then
+        redirect "\n$ERROR_MSG" true
+    fi
+    ERROR_MSG=""
+}
+
+###############################################################################
+# starter
+###############################################################################
+if [[ $EUID -eq 0 ]]; then
+    echo "FrontRunner must NOT be started as root" 1>&2
+
+    # FIXME : See exit status '1' above.
+    exit 1
+fi
+
+JAVA_APP=$1
+JAVA_APP=${JAVA_APP%%\"}
+JAVA_APP=${JAVA_APP##\"}
+
+
+initRedirectFile
+initZipAndRemoveScript
+
+redirect "\n@@@@@@@@@@@@@@@@@@@@@@@@\n"
+redirect "Script execution:\n `date +%Y-%m-%d-%Hh%Mm%Ss-%Z`\n"
+redirect "$RAIL_ENV"
+
+if [ "$BACKGROUND" != "" ]
+then
+    COMMAND="java $JAVA_APP 2>>$FILE_NAME 1>>$FILE_NAME"
+else
+    COMMAND="java $JAVA_APP"
+fi
+
+echo ""
+echo "Executing $COMMAND  "
+echo "========================================================="
+echo "."
+redirect "Command:\n $COMMAND  "
+redirect ""
+
+
+RESTART_COUNT=0
+validateAutoRestarts
+
+start
+
+###############################################################################

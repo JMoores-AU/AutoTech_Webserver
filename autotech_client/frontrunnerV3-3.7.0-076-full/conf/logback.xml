@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration scan="true" scanPeriod="30 seconds"> <!-- debug="true" will print logback stuff -->
+
+	<timestamp key="bySeconds" datePattern="yyyy-MM-dd_HH-mm-ss_z"/>
+
+	<timestamp key="byMonth" datePattern="yyyyMM" />
+	<!-- debugging purposes only: <statusListener class="ch.qos.logback.core.status.OnConsoleStatusListener"/> -->
+
+	<property name="currSuffix" value="${APP_NAME}-${HOSTNAME}%eidIfPresent"/>
+
+	<appender name="FILE"
+		class="com.mmsi.logback.rolling.MMSRollingFileAppender">
+		<file>../logs/frontrunner${currSuffix}_${bySeconds}_%pid.dbg</file>
+		<append>true</append>
+		<rollingPolicy class="com.mmsi.logback.rolling.MMSTimeBasedRollingPolicy">
+			<fileNamePattern>../logs/${byMonth}/frontrunner${currSuffix}_%d{yyyy-MM-dd_HH_z}_%pid.dbg.zip</fileNamePattern>
+		</rollingPolicy>
+		<encoder>
+			<pattern>%date{HH:mm:ss.SSS} %.-1level [%thread] %logger{0}->%F:%L - %msg%n</pattern>
+		</encoder>
+	</appender>
+
+	<appender name="ASYNC" class="ch.qos.logback.classic.AsyncAppender">
+		<appender-ref ref="FILE" />
+		<!-- the maximum capacity of the blocking queue. see mantis#51746
+			in error case where file writing stops for 10 seconds, ~180 log entries are queued
+			using queue size of 4096 to provide buffer -->
+		<queueSize>4096</queueSize>
+		<!-- do not drop events when blocking queue has low percentage capacity remaining -->
+		<discardingThreshold>0</discardingThreshold>
+		<includeCallerData>true</includeCallerData>
+	</appender>
+
+	<appender name="MANAGEMENT"
+		class="com.mmsi.logback.rolling.MMSRollingFileAppender">
+		<file>../logs/management${currSuffix}_${bySeconds}_%pid.dbg</file>
+		<append>true</append>
+		<!-- I wish we could use prudent mode to minimize the
+			number of management files on simulated environments
+			but we can't. please see more details at http://logback.qos.ch/manual/appenders.html#prudentWithRolling -->
+		<rollingPolicy class="com.mmsi.logback.rolling.MMSTimeBasedRollingPolicy">
+			<fileNamePattern>../logs/${byMonth}/management${currSuffix}_%d{yyyy-MM-dd_HH_z}_%pid.dbg.zip</fileNamePattern>
+		</rollingPolicy>
+		<encoder class="com.mmsi.logback.encoder.MMSPatternLayoutEncoder">
+			<pattern>%date{HH:mm:ss.SSS} %.-1level - %msg%n</pattern>
+			<!-- this quadruples logging throughput, in favor of losing logs if jvm dies and we didn't have time to log yet -->
+			<immediateFlush>false</immediateFlush>
+		</encoder>
+	</appender>
+
+	<appender name="EMAIL" class="ch.qos.logback.classic.net.SMTPAppender">
+		<evaluator class="ch.qos.logback.classic.boolex.OnMarkerEvaluator">
+			<marker>NOTIFY_ADMIN</marker>
+		</evaluator>
+		<SMTPHost>IP_ADDRESS</SMTPHost>
+		<to>frontrunner-3rdtier@mmsi.com</to>
+		<From>frontrunnerv3-noreply@mmsi.com</From>
+		<layout class="ch.qos.logback.classic.html.HTMLLayout" />
+	</appender>
+
+	<appender name="SIM" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%date{HH:mm:ss.SSS} %.-1level [%thread] %logger{0}->%F:%L [%X{device}]- %msg%n</pattern>
+		</encoder>
+	</appender>
+
+	<appender name="STATS"
+		class="com.mmsi.logback.rolling.MMSRollingFileAppender">
+		<file>../logs/stats${currSuffix}_${bySeconds}_%pid.csv</file>
+		<append>true</append>
+		<rollingPolicy class="com.mmsi.logback.rolling.MMSTimeBasedRollingPolicy">
+			<fileNamePattern>../logs/${byMonth}/stats${currSuffix}_%d{yyyy-MM-dd_HH_z}_%pid.csv.zip</fileNamePattern>
+		</rollingPolicy>
+		<encoder class="com.mmsi.logback.encoder.MMSPatternLayoutEncoder">
+			<pattern>%date{HH:mm:ss.SSS},%msg%n</pattern>
+			<!-- this quadruples logging throughput, in favor of losing logs if jvm dies and we didn't have time to log yet -->
+			<immediateFlush>false</immediateFlush>
+		</encoder>
+	</appender>
+
+	<appender name="INPUTEVENTS" class="com.mmsi.logback.rolling.MMSRollingFileAppender">
+		<file>../logs/input-events${currSuffix}_${bySeconds}_%pid.log</file>
+		<append>true</append>
+		<rollingPolicy class="com.mmsi.logback.rolling.MMSTimeBasedRollingPolicy">
+			<fileNamePattern>../logs/${byMonth}/input-events${currSuffix}_%d{yyyy-MM-dd_HH_z}_%pid.log.zip</fileNamePattern>
+		</rollingPolicy>
+		<encoder class="com.mmsi.logback.encoder.MMSPatternLayoutEncoder">
+			<pattern>%date{HH:mm:ss.SSS},%msg%n</pattern>
+			<!-- this quadruples logging throughput, in favor of losing logs if jvm 
+				dies and we didn't have time to log yet -->
+			<immediateFlush>false</immediateFlush>
+		</encoder>
+	</appender>
+
+	<appender name="INPUTASYNC" class="ch.qos.logback.classic.AsyncAppender">
+		<appender-ref ref="INPUTEVENTS" />
+		<!-- do not drop events when blocking queue has low percentage capacity 
+			remaining -->
+		<discardingThreshold>0</discardingThreshold>
+		<includeCallerData>true</includeCallerData>
+	</appender>
+
+	<jmxConfigurator />
+
+<!-- When additivity is false it will log just to appender-ref (MANAGEMENT in our case),
+	 otherwise it will log to appender-ref and the default appender (FILE in our case) -->
+<logger name="com.mmsi.framework.management" level="DEBUG" additivity="false">
+	<appender-ref ref="MANAGEMENT"/>
+</logger>
+
+<!-- Additivity false not to add into root setting after logging the appenders declared here. -->
+<logger name="com.mmsi.framework.noAsyncLogger" level="INFO" additivity="false">
+	<appender-ref ref="FILE"/>
+	<!-- <appender-ref ref="EMAIL" /> -->
+</logger>
+
+<logger name="com.mmsi.frontrunner.stats" level="DEBUG" additivity="false">
+	<appender-ref ref="STATS"/>
+</logger>
+
+<logger name="com.mmsi.simulation" level="INFO" additivity="false">
+	<appender-ref ref="SIM"/>
+</logger>
+
+<logger name="com.mmsi.frontrunner.inputevents" level="INFO" additivity="false">
+	<appender-ref ref="INPUTASYNC"/>
+</logger>
+
+<!-- Comment out if necessary to find out the Replica-ID of all Replicable classes -->
+<logger name="com.mmsi.framework.replicaID" level="OFF" />
+
+<!-- Log level of the following loggers should be revised -->
+<logger name="com.mmsi.frontrunner.heartbeat" level="OFF" />
+<logger name="com.mmsi.frontrunner.emergency" level="INFO" />
+<logger name="com.mmsi.frontrunner.diagnosis" level="OFF" />
+<!-- <logger name="com.mmsi.framework.exceptions" level="TRACE" /> -->
+
+	<root level="INFO">
+		<appender-ref ref="ASYNC" />
+		<appender-ref ref="EMAIL" />
+	</root>
+</configuration>

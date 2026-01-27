@@ -1,0 +1,271 @@
+{
+    "openapi": "3.0.0",
+    "servers": [{
+        "url": "{protocol}://{hostname}:{port}/{basePath}",
+        "variables": {
+            "protocol": {
+                "enum": [
+                    "http",
+                    "https",
+                    "ws"
+                ],
+                "default": "https"
+            },
+            "hostname": {
+                "default": "localhost"
+            },
+            "port": {
+                "default": "8080"
+            },
+            "basePath": {
+                "default": "api"
+            }
+        }
+    }],
+    "info": {
+        "description": "Provides endpoints to import, export, and modify FrontRunner event entities.",
+        "version": "3.4",
+        "title": "Event"
+    },
+    "paths": {
+        "/events": {
+            "get" : {
+                "tags": [
+                    "FrontRunner",
+                    "Event"
+                ],
+                "summary" : "Retrieves all events currently tracked",
+                "operationId": "getAllEvents",
+                "parameters": [
+                    {
+                        "name": "code",
+                        "in": "query",
+                        "description": "Get Events by code",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "code=0x960A"
+                        }
+                    },
+                    {
+                        "name": "priority",
+                        "in": "query",
+                        "description": "Get Events by priority",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "priority=warning or priority=critical"
+                        }
+                    },
+                    {
+                        "name": "source",
+                        "in": "query",
+                        "description": "Get Events by source",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "source=CENTRAL or source=T1"
+                        }
+                    },
+                    {
+                        "name": "active",
+                        "in": "query",
+                        "description": "Get Events by status",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "example": "active=true or active=false"
+                        }
+                    }
+                ],
+                "responses" : {
+                    "200" : {
+                        "description": "Success.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/event-response"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid filters."
+                    },
+                    "401": {
+                        "description": "Invalid Auth key."
+                    },
+                    "500": {
+                        "description": "Something went wrong. Please try again later."
+                    }
+                }
+            }
+        },
+        "/event/{event_id}": {
+            "get" : {
+                "tags": [
+                    "FrontRunner",
+                    "Event"
+                ],
+                "summary" : "Retrieves single event by ID",
+                "operationId": "getEvent",
+                "parameters": [
+                    {
+                        "name": "event_id",
+                        "in": "path",
+                        "description": "Get Events by code",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "api/event/1"
+                        }
+                    }],
+                "responses" : {
+                    "200" : {
+                        "description": "Success.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/event-response"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid filters.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/error-response"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid Auth key.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/error-response"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Something went wrong. Please try again later.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/error-response"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "modular_identity_auth": {
+                "type": "oauth2",
+                "flows": {
+                    "clientCredentials": {
+                        "tokenUrl": "/connect/token",
+                        "scopes": {
+                            "FrontRunnerEquipment_Read": "Allows user to retrieve FrontRunner Events.",
+                            "FrontRunnerEquipment_Write": "Allows user to create and delete FrontRunner Events."
+                        }
+                    }
+                }
+            }
+        },
+        "schemas": {
+            "event-response": {
+                "type": "object",
+                "properties": {
+                    "priority": {
+                        "type": "string",
+                        "description": "Priority of the message: ex. Critical, Warning, Informational, Unknown"
+                    },
+                    "source": {
+                        "type": "string",
+                        "description": "Source of the message: ex. T1, EMV2, Central."
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Description about the event:ex. No information from GNSS."
+                    },
+                    "code": {
+                        "type": "string",
+                        "description": "This is the code of the event: ex. 0x6431."
+                    },
+                    "active": {
+                        "type": "boolean",
+                        "description": "Says whether or not the event is active. Options: true or false."
+                    },
+                    "identifier": {
+                        "type": "string",
+                        "description": "Identity of the event. ex. 594405722"
+                    },
+                    "equipmentAffected": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "description": "Points out the equipment affected by this event."
+                    },
+                    "requiredActions": {
+                        "type": "string",
+                        "description": "Describes the action that is required to resolve this event."
+                    },
+                    "timeStamp": {
+                        "type": "string",
+                        "description": "Time in which this Event was registered to EventService."
+                    },
+                    "resolvedTimeStamp": {
+                        "type": "string",
+                        "description": "Time in which this Event was resolved. Empty string if it is not resolved."
+                    }
+                },
+                "required": [
+                    "priority",
+                    "source",
+                    "description",
+                    "code",
+                    "identifier",
+                    "type",
+                    "timeStamp"
+                ]
+            },
+            "error-response": {
+                "type": "object",
+                "properties": {
+                    "error": {
+                        "type": "string",
+                        "description": "Error or exception title."
+                    },
+                    "exception": {
+                        "type": "string",
+                        "description": "Exception text."
+                    }
+                }
+            }
+        }
+    }
+}

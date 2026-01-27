@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="30 seconds">
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%date{HH:mm:ss.SSS}> %msg%n</pattern>
+		</encoder>
+	</appender>
+	
+	<appender name="SIM" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%date{HH:mm:ss.SSS}> [%X{device}]- %msg%n</pattern>
+		</encoder>
+	</appender>
+	
+	<timestamp key="bySeconds" datePattern="yyyy-MM-dd_HH-mm-ss"/>
+	
+	<appender name="FILE"
+		class="ch.qos.logback.core.FileAppender">
+			<file>../logs/frontrunner_pos_${bySeconds}.dbg</file>
+		<append>true</append>
+		<encoder>
+			<pattern>%date{HH:mm:ss.SSS} -> %msg%n</pattern>
+		</encoder>
+	</appender>
+	 
+	
+<logger name="com.mmsi.driver.gps" level="DEBUG" additivity="false">
+	<appender-ref ref="FILE"/>
+</logger>
+
+<logger name="com.mmsi.simulation" level="INFO" additivity="false">
+	<appender-ref ref="SIM"/>
+</logger>
+
+	
+<logger name="com.mmsi.framework.gui.canvas" level="INFO" /> 
+	
+<logger name="com.mmsi.framework.management" level="OFF"/>
+
+	<root level="INFO">
+		<appender-ref ref="STDOUT" />
+	</root>
+	<jmxConfigurator />
+
+</configuration>

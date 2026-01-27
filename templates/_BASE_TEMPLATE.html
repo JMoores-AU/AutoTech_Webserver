@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ page_title }} - AutoTech</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='AutoTech_Dark.ico') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -19,10 +20,6 @@
             <div class="sidebar-header">
                 <div class="sidebar-logo">
                     <img src="{{ url_for('static', filename='autotech_logo.png') }}" alt="AutoTech Logo" class="sidebar-logo-img">
-                    <div>
-                        <div class="sidebar-logo-text">AutoTech</div>
-                        <div class="sidebar-logo-subtitle">Mining Equipment</div>
-                    </div>
                 </div>
             </div>
             
@@ -72,6 +69,11 @@
             <header class="top-header">
                 <h1 class="header-title">{{ page_title }}</h1>
                 <div class="header-actions">
+                    <!-- Theme Toggle -->
+                    <button id="themeToggle" class="theme-toggle-btn" title="Toggle Light/Dark Mode" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--theme-border); border-radius: var(--radius-md); background: var(--theme-bg-card); cursor: pointer; transition: all 0.2s ease;">
+                        <span class="theme-icon" id="themeIcon" style="font-size: 1.2rem;">🌙</span>
+                    </button>
+
                     <a href="{{ url_for('dashboard') }}" class="btn btn-secondary btn-sm">
                         ← Back to Dashboard
                     </a>
@@ -228,6 +230,47 @@
             }
         });
         
+        // ========================================
+        // THEME TOGGLE
+        // ========================================
+        function initTheme() {
+            const savedTheme = localStorage.getItem('autotech_theme') || 'dark';
+            applyTheme(savedTheme);
+        }
+
+        function applyTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            const icon = document.getElementById('themeIcon');
+            const favicon = document.querySelector('link[rel="icon"]');
+
+            if (theme === 'light') {
+                icon.textContent = '☀️';
+                if (favicon) favicon.href = "{{ url_for('static', filename='AutoTech_Light.ico') }}";
+            } else {
+                icon.textContent = '🌙';
+                if (favicon) favicon.href = "{{ url_for('static', filename='AutoTech_Dark.ico') }}";
+            }
+
+            localStorage.setItem('autotech_theme', theme);
+        }
+
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme') || 'dark';
+            const newTheme = current === 'dark' ? 'light' : 'dark';
+            applyTheme(newTheme);
+        }
+
+        // Initialize theme on page load
+        initTheme();
+
+        // Add event listener to toggle button
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggleBtn = document.getElementById('themeToggle');
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', toggleTheme);
+            }
+        });
+
         // ========================================
         // YOUR CUSTOM FUNCTIONS
         // ========================================

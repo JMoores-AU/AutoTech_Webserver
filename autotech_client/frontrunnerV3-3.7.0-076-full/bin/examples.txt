@@ -1,0 +1,21 @@
+Examples:
+
+   1. starts frontrunner server in current window
+       # frontrunner console server
+ 
+   2. starts frontrunner server in separate window 
+       # frontrunner start server
+ 
+   3. starts frontrunner system in standalone mode 
+       # frontrunner console standalone
+ 
+   4. starts frontrunner desktop application with a java argument
+       # frontrunner start desktop -Dfrontrunner.numberofmonitors=2
+                                   ^^java arg
+
+   5. connects to admin console
+       # frontrunner admin
+       
+   6. start frontrunner desktop emergency system in standalone mode.
+       # frontrunner console emergency
+ 
