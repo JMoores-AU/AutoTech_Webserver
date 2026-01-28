@@ -14,8 +14,11 @@ Operating constraints and expectations:
 - Production is offline/air-gapped. Git operations must work without GitHub access when needed.
 - The VERSION file at repo root tracks the current release version.
 - CHANGELOG.md tracks all changes, fixes, and features by version.
+- `.claude/CURRENT_WORK.md` tracks active work for cross-machine continuity.
 - Commit messages follow conventional commit format.
 - Tags follow semantic versioning (vX.Y.Z).
+
+**CRITICAL: Every commit MUST update `.claude/CURRENT_WORK.md`** to capture work context for Claude instances on other machines.
 
 ---
 
@@ -147,18 +150,64 @@ All notable changes to AutoTech Web Dashboard are documented here.
 - MINOR (Y): New features, backward compatible
 - PATCH (Z): Bug fixes, minor improvements
 
-### 6) Change Tracking
+### 6) Work Context Tracking (CURRENT_WORK.md)
+
+**File:** `.claude/CURRENT_WORK.md`
+
+**Purpose:** Enables Claude instances on different machines to share work context via Git. This file MUST be updated with every commit.
+
+**MANDATORY Commit Workflow:**
+1. Before committing, update `.claude/CURRENT_WORK.md`:
+   - Update "Last Updated" date
+   - Move completed items from "Active Tasks" to "Recently Completed"
+   - List files modified in this session
+   - Add any notes for the next session
+2. Stage CURRENT_WORK.md along with other changed files
+3. Include it in the commit
+
+**CURRENT_WORK.md Structure:**
+```markdown
+# Current Work Context
+**Last Updated:** YYYY-MM-DD
+**Machine:** <identifier>
+
+## Active Tasks
+- Tasks currently in progress
+
+## Recently Completed
+### YYYY-MM-DD
+- What was done today
+
+## Pending/Blocked
+- Tasks waiting on something
+
+## Files Modified This Session
+- List of files changed
+
+## Notes for Next Session
+- Context for continuing work
+```
+
+**Rules:**
+- ALWAYS update this file before committing
+- Be specific about what was done and what's pending
+- Include enough context for another Claude to continue
+- Keep "Recently Completed" entries for ~1 week, then archive or remove
+
+### 7) Change Tracking
 
 **Before making changes:**
 1. Run `git status` to see current state
 2. Run `git log --oneline -10` to see recent history
-3. Check CHANGELOG.md [Unreleased] section
+3. Read `.claude/CURRENT_WORK.md` for session context
+4. Check CHANGELOG.md [Unreleased] section
 
 **After making changes:**
-1. Stage changed files explicitly
-2. Write descriptive commit message
-3. Update CHANGELOG.md if user-facing change
-4. Consider version bump for significant changes
+1. Update `.claude/CURRENT_WORK.md` with what was done
+2. Stage changed files explicitly (including CURRENT_WORK.md)
+3. Write descriptive commit message
+4. Update CHANGELOG.md if user-facing change
+5. Consider version bump for significant changes
 
 ---
 
@@ -225,6 +274,7 @@ git log --oneline main..HEAD  # Commits since main
 **Primary:**
 - `VERSION` - Current version number
 - `CHANGELOG.md` - Change history
+- `.claude/CURRENT_WORK.md` - Cross-machine work context (UPDATE WITH EVERY COMMIT)
 - `.gitignore` - Ignored files
 
 **Configuration:**

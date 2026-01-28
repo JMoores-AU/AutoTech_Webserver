@@ -9,6 +9,8 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 - Git workflow specialist agent for version control management
+- Cross-machine work context tracking via `.claude/CURRENT_WORK.md`
+- Automatic CURRENT_WORK.md updates with every commit
 
 ### Changed
 
