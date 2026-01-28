@@ -30,8 +30,9 @@ Repository Guidelines
 
 ## Commit & Pull Request Guidelines
 - Commits: conventional style (`feat:`, `fix:`, `chore:`, `docs:`, `refactor:`, `test:`).
-- PRs: include “What/Why”, test commands/results, risks/rollout notes; attach screenshots for UI changes.
+- PRs: include "What/Why", test commands/results, risks/rollout notes; attach screenshots for UI changes.
 - Keep diffs small and behavior-preserving unless feature work is requested.
+- Use `git-workflow-specialist` agent for Git operations, versioning, and changelog updates.
 
 ## Security & Config Tips
 - Never commit secrets or `.env` contents; sanitize logs (no IP passwords/tokens).

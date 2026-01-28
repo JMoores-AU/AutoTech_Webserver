@@ -59,6 +59,7 @@ Use specialized agents for domain-specific tasks:
 
 | Task Domain | Agent | Trigger Keywords |
 |-------------|-------|------------------|
+| Git operations, versioning, changelog | `git-workflow-specialist` | git push, git pull, commit, changelog, release, version bump, tag |
 | USB detection, client install, URI handlers | `usb-client-specialist` | USB not detected, client install, launch_*.bat, URI handler, autotech-ssh/sftp/vnc |
 | PyInstaller, .spec, BUILD_WEBSERVER.bat | `pyinstaller-build-specialist` | Build fails, frozen mode, hidden imports, service install |
 | Logging infrastructure | `flask-logging-architect` | Add logging, track events, debug visibility |
