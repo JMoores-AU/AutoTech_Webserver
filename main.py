@@ -7176,16 +7176,21 @@ if __name__ == '__main__':
         try:
             from tools import frontrunner_monitor
             base_dir = os.path.dirname(os.path.abspath(__file__))
+            
+            # Check network status to determine offline mode
+            is_online = is_online_network()
+            offline_mode = not is_online
+            
             frontrunner_monitor.start_monitor(
                 hostname="10.110.19.16",
                 username="komatsu",
                 password="M0dul1r@GRM2",
-                cache_dir=base_dir
+                cache_dir=base_dir,
+                offline_mode=offline_mode
             )
-            print("[MONITOR] FrontRunner background monitor started")
-            log_background('info', 'frontrunner_monitor', 'FrontRunner monitor started')
+            mode_str = "OFFLINE" if offline_mode else "ONLINE"
+            log_background('info', 'frontrunner_monitor', f'FrontRunner monitor started in {mode_str} mode')
         except Exception as e:
-            print(f"[WARNING] Could not start FrontRunner monitor: {e}")
             log_background('warning', 'frontrunner_monitor', f'FrontRunner monitor failed to start: {e}')
 
         # Start browser in separate thread

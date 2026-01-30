@@ -569,6 +569,42 @@
             setTimeout(() => { toast.remove(); }, 5000);
         }
         
+        /**
+         * Fetch JSON with automatic error handling and login redirect.
+         * Handles 401 responses by redirecting to login page.
+         * @param {string} url - API endpoint URL
+         * @param {object} options - fetch options (method, headers, body, etc.)
+         * @returns {Promise<object>} - Parsed JSON response
+         * @throws {Error} - Throws LOGIN_REQUIRED on 401, or network error message
+         */
+        async function fetchJson(url, options = {}) {
+            try {
+                const response = await fetch(url, options);
+                
+                // Handle 401 Unauthorized - redirect to login
+                if (response.status === 401) {
+                    showToast('Session expired - redirecting to login', 'warning');
+                    setTimeout(() => {
+                        window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname);
+                    }, 1000);
+                    throw new Error('LOGIN_REQUIRED');
+                }
+                
+                // Parse JSON response
+                const data = await response.json();
+                return data;
+                
+            } catch (error) {
+                // Re-throw LOGIN_REQUIRED as-is
+                if (error.message === 'LOGIN_REQUIRED') {
+                    throw error;
+                }
+                // Log other errors and throw generic message
+                console.error('fetchJson error:', error);
+                throw new Error('Network error or invalid response');
+            }
+        }
+        
         function parsePlaybackFilename(filename) {
             const match = filename.match(/AHS_LOG_(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})_AEST\.dat/);
             if (!match) return null;
@@ -1007,7 +1043,7 @@
                         }
                     }
                 } catch (e) {
-                    console.error('Progress poll error:', e);
+                    
                 }
 
                 await new Promise(resolve => setTimeout(resolve, 1000)); // Poll every second
@@ -1095,10 +1131,9 @@
         let localFiles = [];
 
         async function refreshLocalFiles() {
-            console.log('refreshLocalFiles() called');
+            
             try {
                 const data = await fetchJson('/api/playback/local-files');
-                console.log('Local files API response:', data);
 
                 const section = document.getElementById('localFilesSection');
                 const listContainer = document.getElementById('localFilesList');
@@ -1106,13 +1141,12 @@
                 const deleteAllBtn = document.getElementById('deleteAllLocalBtn');
 
                 if (data.error) {
-                    console.log('API returned error:', data.error);
+                    
                     section.style.display = 'none';
                     return;
                 }
 
                 localFiles = data.files || [];
-                console.log(`Found ${localFiles.length} local files`);
 
                 if (localFiles.length === 0) {
                     section.style.display = 'none';
@@ -1141,10 +1175,8 @@
                     </div>`;
                 }).join('');
 
-                console.log('Local files rendered successfully');
-
             } catch (error) {
-                console.error('Error refreshing local files:', error);
+                
                 document.getElementById('localFilesSection').style.display = 'none';
             }
         }
@@ -1175,7 +1207,7 @@
                 }
             } catch (error) {
                 showToast('Error deleting file', 'error');
-                console.error(error);
+                
             }
         }
 
@@ -1244,7 +1276,6 @@
         let currentPendingFile = null;
 
         async function startRealtimeMonitor() {
-            console.log('🔴 Starting real-time playback monitor...');
 
             // Show initial "connecting" state
             document.getElementById('sidebarStatusText').textContent = 'Starting monitor...';
@@ -1258,20 +1289,17 @@
                     body: JSON.stringify({ scan_interval_seconds: 10 })
                 });
 
-                console.log('📡 Monitor start response:', data);
-
                 if (data.success || (data.error && data.error.includes('already running'))) {
-                    console.log('✅ Playback monitor started - sidebar will update every 2s');
 
                     // Poll monitor status every 2 seconds
                     monitorInterval = setInterval(updateMonitorStatus, 2000);
                     updateMonitorStatus(); // Initial update
                 } else {
-                    console.error('❌ Could not start monitor:', data.error);
+                    
                     document.getElementById('sidebarStatusText').textContent = data.error || 'Failed to start';
                 }
             } catch (err) {
-                console.error('❌ Error starting monitor:', err);
+                
                 document.getElementById('sidebarStatusText').textContent = 'Connection error';
             }
         }
@@ -1283,8 +1311,6 @@
                     fetchJson('/api/playback/monitor/status'),
                     fetchJson('/api/playback/predict-next-file')
                 ]);
-
-                console.log('📊 Monitor:', monitorData, 'Prediction:', predictionData);
 
                 // Update status badge
                 const statusBadge = document.getElementById('sidebarStatusBadge');
@@ -1399,7 +1425,7 @@
                 }
 
             } catch (err) {
-                console.error('❌ Error updating monitor status:', err);
+                
                 document.getElementById('sidebarStatusText').textContent = 'Update error';
             }
         }
@@ -1486,7 +1512,7 @@
                             break;
                         } else if (progress.status === 'downloading') {
                             btn.textContent = `⬇️ ${progress.progress}%`;
-                            console.log(`Download progress: ${progress.progress}%`);
+                            
                         }
 
                         attempts++;

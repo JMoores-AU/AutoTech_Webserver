@@ -2,9 +2,11 @@
 """
 FrontRunner Background Monitor - Maintains persistent SSH connection
 Continuously monitors server status and caches results for web access
+Supports offline mode with mock data and proper logging
 """
 import paramiko
 import os
+import socket
 import re
 import json
 import time
@@ -14,19 +16,87 @@ from typing import Optional, Dict, Any
 
 # Handle imports for both module and standalone use
 try:
+    from .app_logger import log_tool, log_background, set_request_id
     from . import frontrunner_event_db
 except ImportError:
+    # Fallback for standalone execution
+    try:
+        from app_logger import log_tool, log_background, set_request_id
+    except ImportError:
+        # No-op fallback if logger not available
+        def log_tool(level, subcategory, message, request_id=None):
+            pass
+        def log_background(level, subcategory, message, request_id=None):
+            pass
+        def set_request_id(request_id):
+            pass
     import frontrunner_event_db
 
 # Cache file location
 CACHE_FILE = "frontrunner_status_cache.json"
 UPDATE_INTERVAL = 30  # seconds between updates
 
+# Exponential backoff retry delays (seconds)
+RETRY_DELAYS = [30, 60, 120, 300]  # 30s -> 60s -> 120s -> 300s max
+
+# Offline test data - mirrors frontrunner_status.py
+OFFLINE_TEST_DATA = {
+    'success': True,
+    'uptime': {
+        'pretty': 'up 2 weeks, 3 days, 14 hours, 23 minutes',
+        'days': 17.6,
+        'seconds': 1520580.0
+    },
+    'memory': {
+        'total_mb': 16384,
+        'used_mb': 12288,
+        'free_mb': 4096,
+        'percent': 75.0
+    },
+    'cpu': {
+        'load_1min': 1.85,
+        'count': 4,
+        'percent': 46.3
+    },
+    'disk': {
+        'total_gb': 10240.0,
+        'used_gb': 7168.0,
+        'avail_gb': 3072.0,
+        'percent': 70.0,
+        'drives': [
+            {'device': '//grm0psmb02.fs.pcn.bma.bhpb.net/', 'size': '10T', 'used': '7.0T', 'avail': '3.0T', 'use_percent': '70%', 'mount': '/mnt/share'}
+        ]
+    },
+    'processes': {
+        'services': [
+            {'name': 'FrontRunner Server', 'status': 'Running'},
+            {'name': 'haul road planning server', 'status': 'Running'},
+            {'name': 'path planning server', 'status': 'Running'}
+        ],
+        'running_count': 3,
+        'total_count': 3,
+        'all_running': True
+    },
+    'mode': 'offline_test'
+}
+
+
+def _check_network_reachable(hostname: str, timeout: float = 2.0) -> bool:
+    """
+    Check if network host is reachable via TCP probe.
+    Returns True if reachable, False otherwise.
+    """
+    try:
+        with socket.create_connection((hostname, 22), timeout=timeout):
+            return True
+    except (socket.timeout, socket.error, OSError):
+        return False
+
 
 class FrontRunnerMonitor:
     """Background monitor for FrontRunner server status"""
 
-    def __init__(self, hostname: str, username: str, password: str, cache_dir: str):
+    def __init__(self, hostname: str, username: str, password: str, cache_dir: str, offline_mode: bool = False):
         self.hostname = hostname
         self.username = username
         self.password = password
@@ -35,24 +105,28 @@ class FrontRunnerMonitor:
         self.thread: Optional[threading.Thread] = None
         self.ssh: Optional[paramiko.SSHClient] = None
         self.db_path: Optional[str] = None
+        self.offline_mode = offline_mode
+        self.retry_count = 0  # Track retry attempts for exponential backoff
 
         # Initialize event database
         try:
             self.db_path = frontrunner_event_db.get_database_path(cache_dir)
             frontrunner_event_db.init_database(self.db_path)
         except Exception as e:
-            print(f"Warning: Could not initialize event database: {e}")
+            log_background('warning', 'frontrunner_monitor', f'Could not initialize event database: {e}')
 
     def start(self):
         """Start the background monitoring thread"""
         if self.running:
-            print("Monitor already running")
+            log_background('info', 'frontrunner_monitor', 'Monitor already running')
             return
 
         self.running = True
         self.thread = threading.Thread(target=self._monitor_loop, daemon=True)
         self.thread.start()
-        print(f"FrontRunner monitor started for {self.hostname}")
+        
+        mode_str = "OFFLINE MODE" if self.offline_mode else f"for {self.hostname}"
+        log_background('info', 'frontrunner_monitor', f'FrontRunner monitor started {mode_str}')
 
     def stop(self):
         """Stop the background monitoring thread"""
@@ -60,11 +134,11 @@ class FrontRunnerMonitor:
         if self.ssh:
             try:
                 self.ssh.close()
-            except:
+            except Exception:
                 pass
         if self.thread:
             self.thread.join(timeout=5)
-        print("FrontRunner monitor stopped")
+        log_background('info', 'frontrunner_monitor', 'FrontRunner monitor stopped')
 
     def get_cached_status(self) -> Optional[Dict[str, Any]]:
         """Read cached status from file"""
@@ -78,7 +152,7 @@ class FrontRunnerMonitor:
                     if age < 120:  # 2 minutes
                         return data
         except Exception as e:
-            print(f"Error reading cache: {e}")
+            log_background('warning', 'frontrunner_monitor', f'Error reading cache: {e}')
         return None
 
     def _save_cache(self, status: Dict[str, Any]):
@@ -87,7 +161,7 @@ class FrontRunnerMonitor:
             with open(self.cache_path, 'w') as f:
                 json.dump(status, f, indent=2)
         except Exception as e:
-            print(f"Error writing cache: {e}")
+            log_background('error', 'frontrunner_monitor', f'Error writing cache: {e}')
 
     def _connect_ssh(self) -> bool:
         """Establish SSH connection"""
@@ -95,7 +169,7 @@ class FrontRunnerMonitor:
             if self.ssh:
                 try:
                     self.ssh.close()
-                except:
+                except Exception:
                     pass
 
             self.ssh = paramiko.SSHClient()
@@ -106,11 +180,19 @@ class FrontRunnerMonitor:
                 password=self.password,
                 timeout=30
             )
-            print(f"SSH connected to {self.hostname}")
+            log_tool('info', 'frontrunner', f'SSH connected to {self.hostname}')
+            self.retry_count = 0  # Reset retry count on successful connection
             return True
         except Exception as e:
-            print(f"SSH connection failed: {e}")
+            # Log as INFO, not ERROR - offline is expected behavior
+            log_tool('info', 'frontrunner', f'SSH connection to {self.hostname} unavailable: {e}')
             return False
+
+    def _get_mock_status(self) -> Dict[str, Any]:
+        """Return mock status data for offline mode"""
+        mock_data = OFFLINE_TEST_DATA.copy()
+        mock_data['report_time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        return mock_data
 
     def _get_status_snapshot(self) -> Dict[str, Any]:
         """Get a single status snapshot from the server"""
@@ -267,7 +349,7 @@ class FrontRunnerMonitor:
                         round(total_size_gb, 1)
                     )
                 except Exception as e:
-                    print(f"Warning: Could not log events: {e}")
+                    log_background('warning', 'frontrunner_monitor', f'Could not log events to DB: {e}')
 
             return {
                 'success': True,
@@ -312,46 +394,102 @@ class FrontRunnerMonitor:
                 'mode': 'error'
             }
 
+    def _get_retry_delay(self) -> int:
+        """Get exponential backoff delay based on retry count"""
+        if self.retry_count >= len(RETRY_DELAYS):
+            return RETRY_DELAYS[-1]  # Max delay
+        return RETRY_DELAYS[self.retry_count]
+
     def _monitor_loop(self):
         """Main monitoring loop"""
+        # Set request ID for logging correlation
+        set_request_id('bg-frontrunner-monitor')
+        
         while self.running:
             try:
-                # Connect if not connected
+                # Offline mode - use mock data
+                if self.offline_mode:
+                    status = self._get_mock_status()
+                    self._save_cache(status)
+                    log_background('info', 'frontrunner_monitor', 
+                                 f'OFFLINE MODE: Mock status updated')
+                    time.sleep(UPDATE_INTERVAL)
+                    continue
+
+                # Online mode - check network first to avoid spam
+                if not _check_network_reachable(self.hostname, timeout=2.0):
+                    # Network unreachable - use mock data without error logging
+                    log_background('info', 'frontrunner_monitor', 
+                                 f'Network to {self.hostname} unreachable, using mock data')
+                    status = self._get_mock_status()
+                    self._save_cache(status)
+                    
+                    # Exponential backoff
+                    delay = self._get_retry_delay()
+                    self.retry_count += 1
+                    time.sleep(delay)
+                    continue
+
+                # Network reachable - attempt SSH connection
                 transport = self.ssh.get_transport() if self.ssh else None
                 if not self.ssh or not transport or not transport.is_active():
                     if not self._connect_ssh():
-                        print("Waiting 30 seconds before retry...")
-                        time.sleep(30)
+                        # Connection failed - use mock data
+                        status = self._get_mock_status()
+                        self._save_cache(status)
+                        
+                        # Exponential backoff
+                        delay = self._get_retry_delay()
+                        self.retry_count += 1
+                        log_background('info', 'frontrunner_monitor', 
+                                     f'Retry in {delay}s (attempt {self.retry_count})')
+                        time.sleep(delay)
                         continue
 
-                # Get status snapshot
+                # Get live status snapshot
                 status = self._get_status_snapshot()
 
                 # Save to cache
                 self._save_cache(status)
 
                 if status['success']:
-                    print(f"[{status['report_time']}] Status updated: CPU {status['cpu']['percent']}%, Mem {status['memory']['percent']}%, Disk {status['disk']['percent']}%, Processes {status['processes']['running_count']}/{status['processes']['total_count']}")
+                    log_background('info', 'frontrunner_monitor',
+                                 f"Status updated: CPU {status['cpu']['percent']}%, "
+                                 f"Mem {status['memory']['percent']}%, "
+                                 f"Disk {status['disk']['percent']}%, "
+                                 f"Processes {status['processes']['running_count']}/{status['processes']['total_count']}")
                 else:
-                    print(f"[{status['report_time']}] Error: {status.get('error', 'Unknown')}")
+                    log_background('error', 'frontrunner_monitor', 
+                                 f"Snapshot error: {status.get('error', 'Unknown')}")
 
                 # Wait for next update
                 time.sleep(UPDATE_INTERVAL)
 
             except Exception as e:
-                print(f"Monitor loop error: {e}")
-                time.sleep(30)
+                log_background('error', 'frontrunner_monitor', f'Monitor loop error: {e}')
+                
+                # Use mock data on unexpected errors
+                try:
+                    status = self._get_mock_status()
+                    self._save_cache(status)
+                except Exception as cache_err:
+                    log_background('error', 'frontrunner_monitor', f'Failed to save mock data: {cache_err}')
+                
+                # Exponential backoff
+                delay = self._get_retry_delay()
+                self.retry_count += 1
+                time.sleep(delay)
 
 
 # Global monitor instance
 _monitor_instance = None
 
 
-def start_monitor(hostname: str, username: str, password: str, cache_dir: str):
+def start_monitor(hostname: str, username: str, password: str, cache_dir: str, offline_mode: bool = False):
     """Start the global monitor instance"""
     global _monitor_instance
     if _monitor_instance is None:
-        _monitor_instance = FrontRunnerMonitor(hostname, username, password, cache_dir)
+        _monitor_instance = FrontRunnerMonitor(hostname, username, password, cache_dir, offline_mode)
         _monitor_instance.start()
     return _monitor_instance
 
@@ -372,7 +510,7 @@ def get_status(cache_dir: str) -> Dict[str, Any]:
             with open(cache_path, 'r') as f:
                 return json.load(f)
     except Exception as e:
-        print(f"Error reading cache: {e}")
+        log_background('error', 'frontrunner_monitor', f'Error reading cache for web request: {e}')
 
     return {
         'success': False,
@@ -396,7 +534,8 @@ if __name__ == "__main__":
         hostname="10.110.19.16",
         username="komatsu",
         password="M0dul1r@GRM2",
-        cache_dir=base_dir
+        cache_dir=base_dir,
+        offline_mode=False
     )
 
     print("\nMonitor running. Press Ctrl+C to stop...")

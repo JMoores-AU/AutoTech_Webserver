@@ -17,6 +17,9 @@ try:
 except ImportError:
     WINDOWS = False
 
+# Import logging
+from tools.app_logger import log_tool
+
 
 def get_removable_drives(include_fixed: bool = False) -> List[Dict]:
     """
@@ -29,6 +32,7 @@ def get_removable_drives(include_fixed: bool = False) -> List[Dict]:
     removable_drives = []
 
     if not WINDOWS:
+        log_tool('warning', 'usb', 'get_removable_drives called on non-Windows platform')
         return removable_drives
 
     # Windows drive type constants
@@ -68,8 +72,10 @@ def get_removable_drives(include_fixed: bool = False) -> List[Dict]:
 
             bitmask >>= 1
 
+        log_tool('info', 'usb', f'Scan complete: found {len(removable_drives)} USB/removable drives')
+
     except Exception as e:
-        print(f"Error scanning drives: {e}")
+        log_tool('error', 'usb', f'Error scanning drives: {e}')
 
     return removable_drives
 
@@ -123,9 +129,11 @@ def find_tool_on_usb(folder_name: str, file_name: str, include_fixed: bool = Tru
             override_drive = override_drive + ':'
         drive_path = f"{override_drive}\\"
         drives = [{'letter': override_drive.rstrip(':'), 'path': drive_path}] if Path(drive_path).exists() else []
+        log_tool('info', 'usb', f'Using override drive: {override_drive}')
     else:
         # Search removable drives first, then fixed drives if not found
         drives = get_removable_drives(include_fixed=include_fixed)
+        log_tool('debug', 'usb', f'Searching {len(drives)} drives for {file_name}')
     
     for drive in drives:
         # Build path to tool
@@ -137,6 +145,7 @@ def find_tool_on_usb(folder_name: str, file_name: str, include_fixed: bool = Tru
         tool_path = tool_folder / file_name
         
         if tool_path.exists():
+            log_tool('info', 'usb', f'Tool found: {file_name} on drive {drive["letter"]}: at {tool_path}')
             return {
                 'found': True,
                 'drive': drive,
@@ -145,6 +154,7 @@ def find_tool_on_usb(folder_name: str, file_name: str, include_fixed: bool = Tru
                 'file_name': file_name
             }
     
+    log_tool('warning', 'usb', f'Tool not found: {file_name} (searched {len(drives)} drives)')
     return None
 
 
@@ -163,6 +173,7 @@ def launch_tool(file_path: str, working_dir: str) -> Tuple[bool, str]:
         file_path = Path(file_path)
         
         if not file_path.exists():
+            log_tool('error', 'usb', f'Launch failed: file not found at {file_path}')
             return False, f"File not found: {file_path}"
         
         extension = file_path.suffix.lower()
@@ -175,6 +186,7 @@ def launch_tool(file_path: str, working_dir: str) -> Tuple[bool, str]:
                 shell=True,
                 creationflags=subprocess.CREATE_NEW_CONSOLE
             )
+            log_tool('info', 'usb', f'Launched batch file: {file_path.name} from {working_dir}')
             return True, f"Batch file launched: {file_path.name}"
         
         elif extension == '.exe':
@@ -184,12 +196,15 @@ def launch_tool(file_path: str, working_dir: str) -> Tuple[bool, str]:
                 cwd=working_dir,
                 creationflags=subprocess.CREATE_NEW_CONSOLE
             )
+            log_tool('info', 'usb', f'Launched executable: {file_path.name} from {working_dir}')
             return True, f"Executable launched: {file_path.name}"
         
         else:
+            log_tool('warning', 'usb', f'Unsupported file type: {extension} for {file_path}')
             return False, f"Unsupported file type: {extension}"
     
     except Exception as e:
+        log_tool('error', 'usb', f'Launch failed for {file_path}: {e}')
         return False, f"Launch failed: {str(e)}"
 
 
@@ -199,6 +214,7 @@ def scan_usb_status() -> Dict:
     Also checks fixed drives since some USB drives report as fixed.
     Returns comprehensive status.
     """
+    log_tool('info', 'usb', 'Starting USB status scan for known tools')
     drives = get_removable_drives(include_fixed=True)
     
     # Define known tools
@@ -230,5 +246,11 @@ def scan_usb_status() -> Dict:
             'found': result is not None,
             'details': result
         }
+        
+        if result:
+            log_tool('info', 'usb', f'Tool {tool_id} ({tool_info["name"]}): FOUND')
+        else:
+            log_tool('debug', 'usb', f'Tool {tool_id} ({tool_info["name"]}): NOT FOUND')
     
+    log_tool('info', 'usb', f'USB scan complete: {len(drives)} drives, {sum(1 for t in status["tools"].values() if t["found"])} tools found')
     return status
