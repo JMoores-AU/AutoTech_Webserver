@@ -10,14 +10,24 @@ Provides rotating log files for all application components:
 - security.log: Login attempts, session events, unauthorized access
 - database.log: Queries, slow queries, errors
 
-Log Format: [TIMESTAMP] [LEVEL] [CATEGORY] [SUBCATEGORY] message
+Log Format: [TIMESTAMP] [LEVEL] [CATEGORY] [SUBCATEGORY] [REQUEST_ID] message
+
+Request Correlation:
+- Every HTTP request gets a unique request_id (8-char hex)
+- request_id is automatically included in all log entries
+- Background tasks use task-specific IDs (e.g., 'bg-ptx-checker')
 """
 import os
 import sys
 import logging
+import uuid
+from contextvars import ContextVar
 from logging.handlers import RotatingFileHandler
 from datetime import datetime
 from typing import Optional
+
+# Thread-safe context variable for request_id correlation
+_request_id_ctx: ContextVar[str] = ContextVar('request_id', default='no-request')
 
 # Configuration
 MAX_LOG_SIZE = 5 * 1024 * 1024  # 5MB per log file
@@ -91,10 +101,27 @@ def get_log_level() -> int:
     return level_map.get(level_name, DEFAULT_LOG_LEVEL)
 
 
+# === Request ID Functions ===
+
+def generate_request_id() -> str:
+    """Generate a unique request ID (8-char hex for brevity)."""
+    return uuid.uuid4().hex[:8]
+
+
+def set_request_id(request_id: str) -> None:
+    """Set the request ID for the current context (call from Flask before_request)."""
+    _request_id_ctx.set(request_id)
+
+
+def get_request_id() -> str:
+    """Get the current request ID (safe to call from any thread/context)."""
+    return _request_id_ctx.get()
+
+
 def _create_formatter() -> logging.Formatter:
-    """Create consistent log formatter."""
+    """Create consistent log formatter with request_id support."""
     return logging.Formatter(
-        '[%(asctime)s.%(msecs)03d] [%(levelname)s] [%(category)s] [%(subcategory)s] %(message)s',
+        '[%(asctime)s.%(msecs)03d] [%(levelname)s] [%(category)s] [%(subcategory)s] [%(request_id)s] %(message)s',
         datefmt='%Y-%m-%d %H:%M:%S'
     )
 
@@ -158,6 +185,8 @@ class CategoryLogAdapter(logging.LoggerAdapter):
         extra = kwargs.get('extra', {})
         extra['category'] = self.extra.get('category', 'unknown')
         extra['subcategory'] = self.extra.get('subcategory', 'general')
+        if 'request_id' not in extra:
+            extra['request_id'] = get_request_id()
         kwargs['extra'] = extra
         return msg, kwargs
 
@@ -172,7 +201,7 @@ def _get_category_logger(category: str, log_file: str) -> CategoryLogAdapter:
 
 # === Public Logging Functions ===
 
-def log_server(level: str, subcategory: str, message: str) -> None:
+def log_server(level: str, subcategory: str, message: str, request_id: Optional[str] = None) -> None:
     """
     Log server events (requests, responses, startup, shutdown).
 
@@ -180,6 +209,7 @@ def log_server(level: str, subcategory: str, message: str) -> None:
         level: Log level ('debug', 'info', 'warning', 'error', 'critical')
         subcategory: Event subcategory ('request', 'response', 'startup', 'shutdown')
         message: Log message
+        request_id: Optional explicit request_id (uses context if not provided)
 
     Examples:
         log_server('info', 'request', 'GET /api/equipment_search - 10.110.19.100')
@@ -187,10 +217,14 @@ def log_server(level: str, subcategory: str, message: str) -> None:
     """
     logger = _get_logger('autotech.server', LOG_FILES['server'])
     log_func = getattr(logger, level.lower(), logger.info)
-    log_func(message, extra={'category': 'server', 'subcategory': subcategory})
+    log_func(message, extra={
+        'category': 'server',
+        'subcategory': subcategory,
+        'request_id': request_id or get_request_id()
+    })
 
 
-def log_client(level: str, subcategory: str, message: str) -> None:
+def log_client(level: str, subcategory: str, message: str, request_id: Optional[str] = None) -> None:
     """
     Log client events (registrations, verifications).
 
@@ -198,16 +232,21 @@ def log_client(level: str, subcategory: str, message: str) -> None:
         level: Log level
         subcategory: Event subcategory ('registration', 'verification', 'connection')
         message: Log message
+        request_id: Optional explicit request_id (uses context if not provided)
 
     Examples:
         log_client('info', 'registration', 'Client registered: IP=10.110.19.100, Version=v1.1.1')
     """
     logger = _get_logger('autotech.clients', LOG_FILES['clients'])
     log_func = getattr(logger, level.lower(), logger.info)
-    log_func(message, extra={'category': 'clients', 'subcategory': subcategory})
+    log_func(message, extra={
+        'category': 'clients',
+        'subcategory': subcategory,
+        'request_id': request_id or get_request_id()
+    })
 
 
-def log_tool(level: str, subcategory: str, message: str) -> None:
+def log_tool(level: str, subcategory: str, message: str, request_id: Optional[str] = None) -> None:
     """
     Log tool operations (SSH, SFTP, IP finder, PTX queries).
 
@@ -215,6 +254,7 @@ def log_tool(level: str, subcategory: str, message: str) -> None:
         level: Log level
         subcategory: Tool subcategory ('ssh', 'sftp', 'ip_finder', 'ptx', 'frontrunner')
         message: Log message
+        request_id: Optional explicit request_id (uses context if not provided)
 
     Examples:
         log_tool('info', 'ssh', 'SSH connected to 10.110.19.16')
@@ -222,10 +262,14 @@ def log_tool(level: str, subcategory: str, message: str) -> None:
     """
     logger = _get_logger('autotech.tools', LOG_FILES['tools'])
     log_func = getattr(logger, level.lower(), logger.info)
-    log_func(message, extra={'category': 'tools', 'subcategory': subcategory})
+    log_func(message, extra={
+        'category': 'tools',
+        'subcategory': subcategory,
+        'request_id': request_id or get_request_id()
+    })
 
 
-def log_background(level: str, subcategory: str, message: str) -> None:
+def log_background(level: str, subcategory: str, message: str, request_id: Optional[str] = None) -> None:
     """
     Log background task events (equipment updater, PTX checker, monitors).
 
@@ -233,16 +277,21 @@ def log_background(level: str, subcategory: str, message: str) -> None:
         level: Log level
         subcategory: Task subcategory ('ptx_checker', 'equipment_updater', 'playback_monitor', 'frontrunner_monitor')
         message: Log message
+        request_id: Optional explicit request_id (uses context if not provided)
 
     Examples:
         log_background('info', 'ptx_checker', 'Cycle complete: 45 checked, 42 online, 3 offline')
     """
     logger = _get_logger('autotech.background', LOG_FILES['background'])
     log_func = getattr(logger, level.lower(), logger.info)
-    log_func(message, extra={'category': 'background', 'subcategory': subcategory})
+    log_func(message, extra={
+        'category': 'background',
+        'subcategory': subcategory,
+        'request_id': request_id or get_request_id()
+    })
 
 
-def log_security(level: str, subcategory: str, message: str) -> None:
+def log_security(level: str, subcategory: str, message: str, request_id: Optional[str] = None) -> None:
     """
     Log security events (login attempts, session events, unauthorized access).
 
@@ -250,6 +299,7 @@ def log_security(level: str, subcategory: str, message: str) -> None:
         level: Log level
         subcategory: Event subcategory ('login', 'logout', 'session', 'unauthorized')
         message: Log message
+        request_id: Optional explicit request_id (uses context if not provided)
 
     Examples:
         log_security('info', 'login', 'Successful login from 10.110.19.100')
@@ -257,10 +307,14 @@ def log_security(level: str, subcategory: str, message: str) -> None:
     """
     logger = _get_logger('autotech.security', LOG_FILES['security'])
     log_func = getattr(logger, level.lower(), logger.info)
-    log_func(message, extra={'category': 'security', 'subcategory': subcategory})
+    log_func(message, extra={
+        'category': 'security',
+        'subcategory': subcategory,
+        'request_id': request_id or get_request_id()
+    })
 
 
-def log_database(level: str, subcategory: str, message: str) -> None:
+def log_database(level: str, subcategory: str, message: str, request_id: Optional[str] = None) -> None:
     """
     Log database events (queries, slow queries, errors).
 
@@ -268,6 +322,7 @@ def log_database(level: str, subcategory: str, message: str) -> None:
         level: Log level
         subcategory: Event subcategory ('query', 'slow_query', 'error', 'migration')
         message: Log message
+        request_id: Optional explicit request_id (uses context if not provided)
 
     Examples:
         log_database('info', 'query', 'Equipment search: 45 results in 12ms')
@@ -275,7 +330,11 @@ def log_database(level: str, subcategory: str, message: str) -> None:
     """
     logger = _get_logger('autotech.database', LOG_FILES['database'])
     log_func = getattr(logger, level.lower(), logger.info)
-    log_func(message, extra={'category': 'database', 'subcategory': subcategory})
+    log_func(message, extra={
+        'category': 'database',
+        'subcategory': subcategory,
+        'request_id': request_id or get_request_id()
+    })
 
 
 # === Utility Functions ===

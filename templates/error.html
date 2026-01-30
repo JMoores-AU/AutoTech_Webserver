@@ -58,6 +58,13 @@
             color: var(--theme-text-muted);
             margin-bottom: 32px;
         }
+        
+        .error-request-id {
+            font-size: 0.9rem;
+            color: var(--theme-text-muted);
+            margin-bottom: 32px;
+            word-break: break-all;
+        }
     </style>
 </head>
 <body>
@@ -76,6 +83,11 @@
             <p class="error-description">
                 {{ error_message }}
             </p>
+            {% if request_id %}
+            <div class="error-request-id">
+                Request ID: <strong>{{ request_id }}</strong>
+            </div>
+            {% endif %}
             <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-lg">
                 ← Return to Dashboard
             </a>

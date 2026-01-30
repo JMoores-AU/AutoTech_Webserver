@@ -3,6 +3,7 @@ import paramiko
 import os
 from datetime import datetime
 from pathlib import Path
+from tools.app_logger import log_tool
 
 GATEWAY_HOST = "10.110.19.107"
 GATEWAY_USER = "mms"
@@ -14,6 +15,7 @@ def run(password=None, offline_mode=True):
     Based on the batch script: Linux_Health_Check
     """
     if offline_mode:
+        log_tool('info', 'linux_health', "Linux health check offline mode")
         return """Linux Performance and Usage Check (Demo Mode)
 
 === SYSTEM HEALTH SUMMARY ===
@@ -41,11 +43,13 @@ ALERTS:
 Note: This is demonstration data. Enable online mode for live health monitoring."""
 
     if not password:
+        log_tool('warning', 'linux_health', "Linux health check missing password")
         return "Error: Password required for live Linux health check"
 
     try:
         # Log the activity
         log_activity("Linux_Health_Check", "Linux Health Check script")
+        log_tool('info', 'ssh', f"Linux health check connect to {GATEWAY_HOST}")
         
         result = f"""Linux Performance and Usage Check
 Connected to: {GATEWAY_HOST}
@@ -90,10 +94,13 @@ Executing health check script...
         return result
         
     except paramiko.AuthenticationException:
+        log_tool('warning', 'ssh', f"Linux health auth failed for {GATEWAY_HOST}")
         return "Error: Authentication failed. Please check your password."
     except paramiko.SSHException as e:
+        log_tool('error', 'ssh', f"Linux health SSH error for {GATEWAY_HOST}: {e}")
         return f"Error: SSH connection failed: {str(e)}"
     except Exception as e:
+        log_tool('error', 'linux_health', f"Linux health error: {e}")
         return f"Error executing health check: {str(e)}\n\nPlease check your network connection."
 
 def log_activity(script_name, description):

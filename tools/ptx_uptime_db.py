@@ -9,6 +9,7 @@ import re
 from datetime import datetime
 from typing import Optional, Dict, List, Tuple
 import logging
+from tools.app_logger import log_database
 
 logger = logging.getLogger(__name__)
 
@@ -147,10 +148,12 @@ def init_database(db_path: str) -> bool:
 
         conn.commit()
         conn.close()
+        log_database('info', 'init', f"PTX uptime DB initialized: {db_path}")
         return True
 
     except Exception as e:
         logger.error(f"Failed to initialize PTX uptime database: {e}")
+        log_database('error', 'init', f"PTX uptime DB init failed: {e}")
         return False
 
 
@@ -161,6 +164,7 @@ class PTXUptimeDB:
         self.db_path = db_path
         init_database(db_path)
         logger.info(f"PTX Uptime Database initialized at: {db_path}")
+        log_database('info', 'init', f"PTX Uptime DB ready: {db_path}")
 
     def _get_connection(self) -> sqlite3.Connection:
         """Get a database connection with row factory"""
@@ -219,10 +223,12 @@ class PTXUptimeDB:
 
             conn.commit()
             conn.close()
+            log_database('info', 'write', f"PTX uptime upserted: {equipment_id} uptime={uptime_hours}")
             return True
 
         except Exception as e:
             logger.error(f"Error upserting PTX uptime for {equipment_id}: {e}")
+            log_database('error', 'write', f"PTX uptime upsert failed: {equipment_id} - {e}")
             return False
 
     def update_status(self, equipment_id: str, status: str, ptx_type: str = None) -> bool:
@@ -246,10 +252,12 @@ class PTXUptimeDB:
 
             conn.commit()
             conn.close()
+            log_database('info', 'write', f"PTX status updated: {equipment_id} status={status}")
             return True
 
         except Exception as e:
             logger.error(f"Error updating status for {equipment_id}: {e}")
+            log_database('error', 'write', f"PTX status update failed: {equipment_id} - {e}")
             return False
 
     def log_reboot(self, equipment_id: str, ip_address: str, uptime_before: float = None,
@@ -267,10 +275,12 @@ class PTXUptimeDB:
 
             conn.commit()
             conn.close()
+            log_database('info', 'write', f"PTX reboot logged: {equipment_id} success={success}")
             return True
 
         except Exception as e:
             logger.error(f"Error logging reboot for {equipment_id}: {e}")
+            log_database('error', 'write', f"PTX reboot log failed: {equipment_id} - {e}")
             return False
 
     def get_all_uptime(self, min_hours: float = 0, order_by: str = 'uptime_hours DESC') -> List[Dict]:
@@ -322,10 +332,12 @@ class PTXUptimeDB:
                 })
 
             conn.close()
+            log_database('info', 'query', f"PTX uptime records fetched: {len(results)}")
             return results
 
         except Exception as e:
             logger.error(f"Error getting PTX uptime data: {e}")
+            log_database('error', 'query', f"PTX uptime fetch failed: {e}")
             return []
 
     def get_high_uptime(self, min_days: float = 3) -> List[Dict]:

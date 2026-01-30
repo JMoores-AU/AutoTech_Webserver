@@ -1,0 +1,229 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Logs - AutoTech</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='AutoTech_Dark.ico') }}" id="favicon">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('autotech_theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            const favicon = document.getElementById('favicon');
+            if (favicon) {
+                favicon.href = savedTheme === 'light'
+                    ? "{{ url_for('static', filename='AutoTech_Light.ico') }}"
+                    : "{{ url_for('static', filename='AutoTech_Dark.ico') }}";
+            }
+        })();
+    </script>
+    <style>
+        .logs-page {
+            min-height: 100vh;
+            background: var(--theme-bg);
+            padding: 24px;
+        }
+
+        .logs-shell {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: var(--theme-bg-card);
+            border: 1px solid var(--theme-border);
+            border-radius: var(--radius-xl);
+            padding: 24px;
+        }
+
+        .logs-header {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+        }
+
+        .logs-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--theme-text-bright);
+        }
+
+        .logs-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .logs-controls select,
+        .logs-controls input {
+            background: var(--theme-bg);
+            border: 1px solid var(--theme-border);
+            color: var(--theme-text-bright);
+            padding: 8px 10px;
+            border-radius: 8px;
+            min-width: 160px;
+        }
+
+        .logs-controls button,
+        .logs-controls a {
+            border-radius: 8px;
+            border: 1px solid var(--theme-border);
+            background: var(--theme-bg);
+            color: var(--theme-text-bright);
+            padding: 8px 12px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .logs-controls button.primary {
+            background: var(--theme-primary);
+            border-color: var(--theme-primary);
+            color: var(--theme-bg);
+        }
+
+        .logs-console {
+            background: #0f141c;
+            color: #e3e8ef;
+            border-radius: 12px;
+            padding: 16px;
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            height: 60vh;
+            overflow-y: auto;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .logs-status {
+            margin-top: 12px;
+            color: var(--theme-text-muted);
+            font-size: 0.9rem;
+        }
+
+        .logs-console .line {
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="logs-page">
+        <div class="logs-shell">
+            <div class="logs-header">
+                <div>
+                    <div class="logs-title">Admin Log Console</div>
+                    <div class="logs-status" id="log-status">Disconnected</div>
+                </div>
+                <div class="logs-controls">
+                    <label for="log-source" class="sr-only">Log source</label>
+                    <select id="log-source">
+                        {% for source in sources %}
+                        <option value="{{ source.key }}">{{ source.label }}</option>
+                        {% endfor %}
+                    </select>
+                    <input id="log-lines" type="number" min="50" max="2000" value="200" />
+                    <button id="log-connect" class="primary" type="button">Connect</button>
+                    <button id="log-disconnect" type="button">Disconnect</button>
+                    <button id="log-refresh" type="button">Reload</button>
+                    <button id="log-clear" type="button">Clear</button>
+                    <a id="log-download" href="#" download>Download</a>
+                </div>
+            </div>
+            <div class="logs-console" id="log-console"></div>
+        </div>
+    </div>
+
+    <script>
+        const sourceSelect = document.getElementById('log-source');
+        const linesInput = document.getElementById('log-lines');
+        const consoleEl = document.getElementById('log-console');
+        const statusEl = document.getElementById('log-status');
+        const downloadLink = document.getElementById('log-download');
+        let eventSource = null;
+
+        function setStatus(text) {
+            statusEl.textContent = text;
+        }
+
+        function appendLine(text) {
+            const lineEl = document.createElement('div');
+            lineEl.className = 'line';
+            lineEl.textContent = text;
+            consoleEl.appendChild(lineEl);
+            if (consoleEl.children.length > 1200) {
+                consoleEl.removeChild(consoleEl.firstChild);
+            }
+            consoleEl.scrollTop = consoleEl.scrollHeight;
+        }
+
+        function clearConsole() {
+            consoleEl.textContent = '';
+        }
+
+        function stopStream() {
+            if (eventSource) {
+                eventSource.close();
+                eventSource = null;
+            }
+            setStatus('Disconnected');
+        }
+
+        function updateDownloadLink() {
+            const source = sourceSelect.value;
+            downloadLink.href = `/api/logs/${source}/download`;
+        }
+
+        async function reloadLogs() {
+            stopStream();
+            clearConsole();
+            const source = sourceSelect.value;
+            const lines = Math.max(50, Math.min(2000, parseInt(linesInput.value || '200', 10)));
+            updateDownloadLink();
+            setStatus('Loading...');
+            try {
+                const response = await fetch(`/api/logs/${source}?lines=${lines}`);
+                const data = await response.json();
+                if (data.lines) {
+                    data.lines.forEach((line) => appendLine(line));
+                }
+                setStatus('Loaded');
+            } catch (err) {
+                setStatus('Error loading logs');
+            }
+        }
+
+        function startStream() {
+            stopStream();
+            clearConsole();
+            const source = sourceSelect.value;
+            const lines = Math.max(50, Math.min(2000, parseInt(linesInput.value || '200', 10)));
+            updateDownloadLink();
+            setStatus('Connecting...');
+            eventSource = new EventSource(`/api/logs/${source}/stream?lines=${lines}`);
+            eventSource.onmessage = (event) => {
+                try {
+                    const payload = JSON.parse(event.data);
+                    if (payload.line) {
+                        appendLine(payload.line);
+                    }
+                } catch (err) {
+                    appendLine(event.data);
+                }
+                setStatus(`Streaming ${source}`);
+            };
+            eventSource.onerror = () => {
+                setStatus('Stream error');
+            };
+        }
+
+        document.getElementById('log-connect').addEventListener('click', startStream);
+        document.getElementById('log-disconnect').addEventListener('click', stopStream);
+        document.getElementById('log-refresh').addEventListener('click', reloadLogs);
+        document.getElementById('log-clear').addEventListener('click', clearConsole);
+        sourceSelect.addEventListener('change', updateDownloadLink);
+
+        updateDownloadLink();
+    </script>
+</body>
+</html>

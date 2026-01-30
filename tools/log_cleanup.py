@@ -1,4 +1,4 @@
-"""
+﻿"""
 PTX Log Cleanup Tool - Web Interface Module
 Provides log cleanup functionality for T1 Tools Web Dashboard
 """
@@ -6,6 +6,7 @@ Provides log cleanup functionality for T1 Tools Web Dashboard
 import paramiko
 from datetime import datetime
 import json
+from tools.app_logger import log_tool
 
 
 def connect_to_equipment(ip_address):
@@ -20,6 +21,7 @@ def connect_to_equipment(ip_address):
     
     for cred in credentials:
         try:
+            log_tool('info', 'ssh', f"Log cleanup SSH connect to {ip_address} ({cred['name']})")
             ssh = paramiko.SSHClient()
             ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
             ssh.connect(
@@ -34,6 +36,7 @@ def connect_to_equipment(ip_address):
         except Exception as e:
             continue
     
+    log_tool('error', 'ssh', f"Log cleanup SSH failed for {ip_address}")
     return None, f"Could not connect to {ip_address} with any credentials"
 
 
@@ -156,6 +159,7 @@ def cleanup_logs(ip_address, folder_retention=2, file_retention=7, dry_run=True)
     Main cleanup function for web interface.
     Returns: dict with results and logs
     """
+    log_tool('info', 'log_cleanup', f"Log cleanup start for {ip_address} dry_run={dry_run}")
     results = {
         "success": False,
         "log": [],
@@ -178,7 +182,7 @@ def cleanup_logs(ip_address, folder_retention=2, file_retention=7, dry_run=True)
             results["error"] = cred_type
             return results
         
-        log(f"✓ Connected as {cred_type}")
+        log(f"âœ“ Connected as {cred_type}")
         
         # Find log directory
         log("Searching for log directory...")
@@ -188,7 +192,7 @@ def cleanup_logs(ip_address, folder_retention=2, file_retention=7, dry_run=True)
             ssh.close()
             return results
         
-        log(f"✓ Found logs: {log_path}")
+        log(f"âœ“ Found logs: {log_path}")
         
         # Get folders
         log("\nScanning folders...")
@@ -219,7 +223,7 @@ def cleanup_logs(ip_address, folder_retention=2, file_retention=7, dry_run=True)
                     log(f"Deleting: {folder} ({months_old} months old)")
                     cmd = f"cd {log_path} && rm -rf '{folder}'"
                     ssh.exec_command(cmd)
-                    log(f"  ✓ Deleted")
+                    log(f"  âœ“ Deleted")
                 results["stats"]["folders_deleted"] += 1
             else:
                 log(f"Keeping: {folder} ({months_old} months old)")
@@ -239,7 +243,7 @@ def cleanup_logs(ip_address, folder_retention=2, file_retention=7, dry_run=True)
                     log(f"Deleting: {filepath} ({days_old} days old)")
                     cmd = f"cd {log_path} && rm -f '{filepath}'"
                     ssh.exec_command(cmd)
-                    log(f"  ✓ Deleted")
+                    log(f"  âœ“ Deleted")
                 results["stats"]["broken_deleted"] += 1
         
         # Process loose files
@@ -255,7 +259,7 @@ def cleanup_logs(ip_address, folder_retention=2, file_retention=7, dry_run=True)
                     log(f"Deleting: {filepath} ({days_old} days old)")
                     cmd = f"cd {log_path} && rm -f '{filepath}'"
                     ssh.exec_command(cmd)
-                    log(f"  ✓ Deleted")
+                    log(f"  âœ“ Deleted")
                 results["stats"]["loose_deleted"] += 1
         
         # Summary
@@ -274,13 +278,14 @@ def cleanup_logs(ip_address, folder_retention=2, file_retention=7, dry_run=True)
         log(f"Total: {results['stats']['total_deleted']}")
         
         if kept_folders:
-            log(f"\n✓ Files in kept folders ({', '.join(kept_folders)}) were preserved")
+            log(f"\nâœ“ Files in kept folders ({', '.join(kept_folders)}) were preserved")
         
         ssh.close()
         results["success"] = True
         
     except Exception as e:
-        log(f"\n✗ ERROR: {str(e)}")
+        log(f"\nâœ— ERROR: {str(e)}")
+        log_tool('error', 'log_cleanup', f"Log cleanup error for {ip_address}: {e}")
         results["error"] = str(e)
     
     return results

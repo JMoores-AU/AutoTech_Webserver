@@ -8,15 +8,11 @@ Enhanced version combining new design with full functionality
 """
 
 import os
-print("RUNNING main.py:", os.path.abspath(__file__))
-
-print("### AUTOTECH SERVER STARTED FROM:", __file__)
 
 # Standard Library Imports
 import csv
 import json
 import logging
-import os
 import platform
 import re
 import shlex
@@ -29,6 +25,7 @@ import threading
 import time
 import uuid              
 import queue 
+from collections import deque
 from datetime import datetime, timedelta
 from functools import lru_cache, wraps
 from io import StringIO
@@ -38,7 +35,9 @@ from tools.log_cleanup import cleanup_logs
 from tools.app_logger import (
     init_logging, log_server, log_client, log_tool,
     log_background, log_security, log_database,
-    format_request_log, format_client_registration
+    format_request_log, format_client_registration,
+    generate_request_id, set_request_id, get_request_id,
+    get_log_directory, LOG_FILES
 )
 from tools.equipment_db import (
     get_database_path, init_database, save_equipment,
@@ -59,7 +58,6 @@ try:
     from tools import frontrunner_status as frontrunner_status_tool
 except ImportError:
     frontrunner_status_tool = None
-
 
 # Third-Party Imports
 try:
@@ -88,7 +86,7 @@ try:
 except ImportError:
     requests = None
 
-from flask import Flask, render_template, request, session, redirect, url_for, jsonify, flash, Response, make_response, send_file
+from flask import Flask, render_template, request, session, redirect, url_for, jsonify, flash, Response, make_response, send_file, stream_with_context
 from flask_cors import CORS
 
 # Configure logging
@@ -112,7 +110,6 @@ else:
     template_folder = os.path.join(BASE_DIR, 'templates')
     static_folder = os.path.join(BASE_DIR, 'static')
 
-
 def get_version():
     """Return version from VERSION file, works in frozen and dev modes."""
     if getattr(sys, 'frozen', False):
@@ -124,7 +121,6 @@ def get_version():
             return f.read().strip()
     except FileNotFoundError:
         return 'dev'
-
 
 APP_VERSION = get_version()
 
@@ -164,6 +160,16 @@ LOG_DIR = init_logging()
 log_server('info', 'startup', f'Application version: {APP_VERSION}')
 log_server('info', 'startup', f'Base directory: {BASE_DIR}')
 log_server('info', 'startup', f'Log directory: {LOG_DIR}')
+
+LOG_SOURCES = dict(LOG_FILES)
+LOG_SOURCE_LABELS = {
+    'server': 'Server',
+    'clients': 'Clients',
+    'tools': 'Tools',
+    'background': 'Background',
+    'security': 'Security',
+    'database': 'Database'
+}
 
 logger.info(f"Application Base Directory: {BASE_DIR}")
 logger.info(f"Tools Directory: {TOOLS_DIR}")
@@ -280,6 +286,11 @@ CORS(app)
 @app.before_request
 def log_request_start():
     """Log incoming requests"""
+    incoming_id = request.headers.get('X-Request-ID')
+    request_id = incoming_id.strip() if incoming_id else generate_request_id()
+    set_request_id(request_id)
+    request._request_id = request_id
+
     # Skip logging for static assets and health checks
     if request.path.startswith('/static/') or request.path == '/health':
         return
@@ -294,6 +305,8 @@ def log_request_start():
 @app.after_request
 def log_request_end(response):
     """Log request completion with status code and duration"""
+    response.headers['X-Request-ID'] = get_request_id()
+
     # Skip logging for static assets and health checks
     if request.path.startswith('/static/') or request.path == '/health':
         return response
@@ -669,7 +682,6 @@ def search_equipment(query):
         logger.error(f"Equipment search error: {e}")
         return {'found': False, 'error': str(e)}
 
-
 def parse_ip_finder_output(query, output):
     """
     Parse the output from ip_export.sh script.
@@ -816,7 +828,6 @@ def connect_to_equipment(ip_address):
     
     return None, f"Could not connect to {ip_address} with any credentials"
 
-
 def get_ptx_uptime(ip_address: str) -> dict:
     """
     Connect to PTX equipment via SSH and retrieve uptime.
@@ -927,7 +938,6 @@ def get_ptx_uptime(ip_address: str) -> dict:
                 pass
         return {'success': False, 'error': str(e)}
 
-
 def check_ptx_reachable(ip_address: str, timeout: float = 3.0) -> bool:
     """
     Quick check if PTX is reachable via ping.
@@ -950,7 +960,6 @@ def check_ptx_reachable(ip_address: str, timeout: float = 3.0) -> bool:
         except Exception:
             return False
 
-
 def ptx_uptime_checker_worker():
     """
     Background worker that checks uptime on all PTX equipment.
@@ -959,6 +968,7 @@ def ptx_uptime_checker_worker():
     """
     global ptx_uptime_checker
 
+    set_request_id('bg-ptx-checker')
     logger.info("PTX Uptime Checker started")
     log_background('info', 'ptx_checker', f'PTX Uptime Checker started (interval: {ptx_uptime_checker["interval_minutes"]} minutes)')
     ptx_uptime_checker['status'] = 'running'
@@ -1067,7 +1077,6 @@ def ptx_uptime_checker_worker():
     logger.info("PTX Uptime Checker stopped")
     log_background('info', 'ptx_checker', 'PTX Uptime Checker stopped')
 
-
 def _wait_for_interval():
     """Wait for the configured interval, checking stop event periodically."""
     global ptx_uptime_checker
@@ -1089,7 +1098,6 @@ def _wait_for_interval():
     if remaining > 0 and not ptx_uptime_checker['stop_event'].is_set():
         time.sleep(remaining)
 
-
 def playback_monitor_worker():
     """
     Background worker that maintains persistent SSH/SFTP connection to playback server.
@@ -1097,6 +1105,7 @@ def playback_monitor_worker():
     """
     global playback_monitor
 
+    set_request_id('bg-playback-monitor')
     logger.info("Playback Monitor started")
     log_background('info', 'playback_monitor', f'Playback monitor started (scan interval: {playback_monitor["scan_interval_seconds"]}s)')
     playback_monitor['status'] = 'connecting'
@@ -1335,7 +1344,6 @@ def playback_monitor_worker():
     logger.info("Playback Monitor stopped")
     log_background('info', 'playback_monitor', 'Playback monitor stopped')
 
-
 def find_log_directory(ssh):
     """
     Find the log directory path on the remote system.
@@ -1371,7 +1379,6 @@ def find_log_directory(ssh):
     
     return None, "Could not locate log directory"
 
-
 def get_folder_list(ssh, log_path):
     """Get list of monthly folders with their age."""
     cmd = f"cd {log_path} && ls -d */ 2>/dev/null | sed 's|/||'"
@@ -1401,7 +1408,6 @@ def get_folder_list(ssh, log_path):
     
     return folders
 
-
 def get_broken_logs(ssh, log_path):
     """Find 0-byte files in root directory."""
     cmd = f'cd {log_path} && find . -maxdepth 1 -type f -size 0 -printf "%p:%T@\\n"'
@@ -1425,7 +1431,6 @@ def get_broken_logs(ssh, log_path):
     
     return broken_files
 
-
 def get_loose_files(ssh, log_path):
     """Find loose log files in root directory."""
     cmd = f'cd {log_path} && find . -maxdepth 1 -type f ! -size 0 -printf "%p:%T@\\n"'
@@ -1448,7 +1453,6 @@ def get_loose_files(ssh, log_path):
             continue
     
     return loose_files
-
 
 def cleanup_logs(ip_address, folder_retention=2, file_retention=7, dry_run=True):
     """
@@ -1897,7 +1901,6 @@ def equipment_monitor(equipment_id):
                          gateway_ip=GATEWAY_IP,
                          timestamp=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
-
 @app.route('/api/linux_health_check', methods=['POST'])
 
 def api_linux_health_check():
@@ -1972,7 +1975,6 @@ def api_get_flight_recorder_ip(equipment_type):
         logger.error(f"Error calculating Flight Recorder IP for {equipment_type}: {e}")
         return jsonify({'error': str(e)}), 500
 
-
 @app.route('/api/vnc/connect', methods=['POST'])
 
 def api_vnc_connect():
@@ -2017,7 +2019,6 @@ def api_vnc_connect():
     except Exception as e:
         logger.error(f"VNC connection error: {e}")
         return jsonify({'success': False, 'message': str(e)})
-
 
 @app.route('/api/vnc/start', methods=['POST'])
 
@@ -2191,7 +2192,6 @@ def api_vnc_start():
         logger.error(f"VNC start error: {e}")
         return jsonify({'success': False, 'message': str(e)})
 
-
 @app.route('/api/tru_setup', methods=['POST'])
 
 def api_tru_setup():
@@ -2241,13 +2241,11 @@ def api_tru_setup():
         logger.error(f"TRU setup error: {e}")
         return jsonify({'success': False, 'message': str(e)})
 
-
 # VNC Workstation configuration
 VNC_WORKSTATIONS = {
     'WS1': {'ip': '10.110.22.56', 'user': 'dlog', 'password': 'gold'},
     'WS2': {'ip': '10.110.22.57', 'user': 'dlog', 'password': 'gold'}
 }
-
 
 @app.route('/api/vnc/workstation', methods=['POST'])
 def api_vnc_workstation():
@@ -2374,7 +2372,6 @@ def api_vnc_workstation():
         logger.error(f"VNC workstation error: {e}")
         return jsonify({'success': False, 'message': str(e)})
 
-
 @app.route('/api/launch-legacy', methods=['POST'])
 def api_launch_legacy():
     """
@@ -2445,7 +2442,6 @@ def api_launch_legacy():
     except Exception as e:
         logger.error(f"Legacy launch error: {e}")
         return jsonify({'success': False, 'message': str(e)})
-
 
 # ========================================
 # TOOL EXECUTION ROUTES
@@ -2644,7 +2640,6 @@ def handle_ptx_uptime():
         flash(f"PTX Uptime failed: {e}", "error")
         return redirect(url_for('dashboard'))
 
-
 def handle_frontrunner_status():
     """Handle FrontRunner Status tool"""
     try:
@@ -2693,7 +2688,6 @@ def handle_frontrunner_status():
         flash(f"FrontRunner Status failed: {e}", "error")
         return redirect(url_for('dashboard'))
 
-
 @app.route('/api/frontrunner/events')
 def api_frontrunner_events():
     """API endpoint to get FrontRunner event logs (process failures and disk warnings)"""
@@ -2722,7 +2716,6 @@ def api_frontrunner_events():
             'disk_events': []
         }), 500
 
-
 @app.route('/api/frontrunner/active-events')
 def api_frontrunner_active_events():
     """API endpoint to get currently active FrontRunner events"""
@@ -2750,7 +2743,6 @@ def api_frontrunner_active_events():
             'process_events': [],
             'disk_events': []
         }), 500
-
 
 @app.route('/ptx-uptime-csv')
 def ptx_uptime_csv():
@@ -2800,7 +2792,6 @@ def ptx_uptime_csv():
         logger.error(f"PTX Uptime CSV error: {e}")
         flash(f"CSV download failed: {e}", "error") 
         return redirect(url_for('run_tool', tool_name='PTX Uptime'))
-
 
 # ========================================
 # PTX UPTIME DATABASE API ENDPOINTS
@@ -2859,7 +2850,6 @@ def api_ptx_db_sync():
         logger.error(f"PTX DB sync error: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
-
 @app.route('/api/ptx/db/stats')
 def api_ptx_db_stats():
     """Get PTX uptime database statistics"""
@@ -2876,7 +2866,6 @@ def api_ptx_db_stats():
     except Exception as e:
         logger.error(f"PTX DB stats error: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
-
 
 @app.route('/api/ptx/db/reboot-log', methods=['POST'])
 def api_ptx_log_reboot():
@@ -2907,7 +2896,6 @@ def api_ptx_log_reboot():
         logger.error(f"PTX reboot log error: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
-
 @app.route('/api/ptx/db/reboot-history')
 def api_ptx_reboot_history():
     """Get PTX reboot history"""
@@ -2926,7 +2914,6 @@ def api_ptx_reboot_history():
     except Exception as e:
         logger.error(f"PTX reboot history error: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
-
 
 @app.route('/api/ptx/db/update-status', methods=['POST'])
 def api_ptx_update_status():
@@ -2951,7 +2938,6 @@ def api_ptx_update_status():
     except Exception as e:
         logger.error(f"PTX update status error: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
-
 
 # ========================================
 # PTX UPTIME CHECKER API ENDPOINTS
@@ -3005,7 +2991,6 @@ def api_start_ptx_uptime_checker():
         logger.error(f"Error starting PTX uptime checker: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
-
 @app.route('/api/ptx/uptime-checker/stop', methods=['POST'])
 def api_stop_ptx_uptime_checker():
     """Stop the background PTX uptime checker."""
@@ -3030,7 +3015,6 @@ def api_stop_ptx_uptime_checker():
         logger.error(f"Error stopping PTX uptime checker: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
-
 @app.route('/api/ptx/uptime-checker/status')
 def api_ptx_uptime_checker_status():
     """Get the current status of the PTX uptime checker."""
@@ -3054,7 +3038,6 @@ def api_ptx_uptime_checker_status():
     except Exception as e:
         logger.error(f"Error getting PTX uptime checker status: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
-
 
 @app.route('/api/playback/monitor/start', methods=['POST'])
 def api_start_playback_monitor():
@@ -3104,7 +3087,6 @@ def api_start_playback_monitor():
         logger.error(f"Error starting playback monitor: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
-
 @app.route('/api/playback/monitor/stop', methods=['POST'])
 def api_stop_playback_monitor():
     """Stop the background playback monitor."""
@@ -3129,7 +3111,6 @@ def api_stop_playback_monitor():
         logger.error(f"Error stopping playback monitor: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
-
 @app.route('/api/playback/monitor/status')
 def api_playback_monitor_status():
     """Get the current status of the playback monitor and cached file data."""
@@ -3151,7 +3132,6 @@ def api_playback_monitor_status():
     except Exception as e:
         logger.error(f"Error getting playback monitor status: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
-
 
 @app.route('/api/ptx/uptime-checker/check-single', methods=['POST'])
 def api_check_single_ptx_uptime():
@@ -3223,7 +3203,6 @@ def api_check_single_ptx_uptime():
     except Exception as e:
         logger.error(f"Error checking single PTX uptime: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
-
 
 # ========================================
 # USB TOOLS API ENDPOINTS
@@ -3318,7 +3297,6 @@ def api_usb_scan(tool_id):
         logger.error(f"USB scan error for {tool_id}: {e}")
         return jsonify({'found': False, 'error': str(e), 'details': {}, 'drives': []}), 500
 
-
 @app.route("/api/usb/launch/<tool_id>", methods=["POST"])
 def api_usb_launch(tool_id):
     """
@@ -3341,7 +3319,6 @@ def api_usb_launch(tool_id):
         logger.error(f"USB launch error for {tool_id}: {e}")
         return jsonify({'success': False, 'message': str(e)}), 500
 
-
 @app.route("/api/usb/status")
 def api_usb_status():
     """
@@ -3355,7 +3332,6 @@ def api_usb_status():
     except Exception as e:
         logger.error(f"USB status error: {e}")
         return jsonify({'error': str(e)}), 500
-
 
 # ========================================
 # PLAYBACK SERVER API ENDPOINTS
@@ -3413,7 +3389,6 @@ def api_playback_server_check():
         logger.error(f"Playback server check error: {e}")
         return jsonify({'connected': False, 'error': str(e)})
 
-
 @app.route("/api/playback/open-winscp", methods=["POST"])
 def api_playback_open_winscp():
     """
@@ -3466,7 +3441,6 @@ def api_playback_open_winscp():
             'success': False,
             'message': f'Error launching WinSCP: {str(e)}'
         })
-
 
 @app.route("/api/playback/local-files")
 def api_playback_local_files():
@@ -3525,7 +3499,6 @@ def api_playback_local_files():
     except Exception as e:
         logger.error(f"Local files error: {e}", exc_info=True)
         return jsonify({'error': f'Error: {str(e)}', 'files': []})
-
 
 @app.route("/api/playback/server-files")
 def api_playback_server_files():
@@ -3595,7 +3568,6 @@ def api_playback_server_files():
     except Exception as e:
         logger.error(f"Server files error: {e}")
         return jsonify({'error': str(e), 'files': []})
-
 
 @app.route("/api/playback/find-file")
 def api_playback_find_file():
@@ -3727,7 +3699,6 @@ def api_playback_find_file():
         logger.error(f"Find file error: {e}")
         return jsonify({'found': False, 'error': str(e)})
 
-
 def _download_file_thread(filename, file_size, local_path, remote_path):
     """Background thread for file download with progress tracking"""
     global download_progress
@@ -3791,7 +3762,6 @@ def _download_file_thread(filename, file_size, local_path, remote_path):
     except Exception as e:
         download_progress[filename]['status'] = 'error'
         download_progress[filename]['error'] = str(e)
-
 
 @app.route("/api/playback/download-file", methods=["POST"])
 def api_playback_download_file():
@@ -3867,7 +3837,6 @@ def api_playback_download_file():
         logger.error(f"Download file error: {e}")
         return jsonify({'success': False, 'message': str(e)})
 
-
 @app.route("/api/playback/download-progress/<filename>")
 def api_playback_download_progress(filename):
     """Get download progress for a specific file"""
@@ -3879,7 +3848,6 @@ def api_playback_download_progress(filename):
             'progress': 0,
             'error': 'Download not found'
         })
-
 
 @app.route("/api/playback/predict-next-file")
 def api_playback_predict_next_file():
@@ -4038,7 +4006,6 @@ def api_playback_predict_next_file():
     except Exception as e:
         logger.error(f"Predict next file error: {e}")
         return jsonify({'success': False, 'error': str(e)})
-
 
 @app.route("/api/playback/detect-log-files")
 def api_playback_detect_log_files():
@@ -4215,7 +4182,6 @@ def api_playback_detect_log_files():
         logger.error(f"Detect log files error: {e}")
         return jsonify({'success': False, 'error': str(e)})
 
-
 @app.route("/api/playback/find-files")
 def api_playback_find_files():
     """
@@ -4358,7 +4324,6 @@ def api_playback_find_files():
         logger.error(f"Find files error: {e}")
         return jsonify({'files': [], 'error': str(e)})
 
-
 @app.route("/api/playback/delete-file", methods=["POST"])
 def api_playback_delete_file():
     """
@@ -4398,7 +4363,6 @@ def api_playback_delete_file():
     except Exception as e:
         logger.error(f"Delete file error: {e}")
         return jsonify({'success': False, 'message': str(e)})
-
 
 # ========================================
 # PLAYBACK DIRECT DOWNLOAD (for remote PCs)
@@ -4495,7 +4459,6 @@ def download_playback_file(filename):
         logger.error(f"Playback download error: {e}")
         return str(e), 500
 
-
 @app.route("/download/camstudio")
 def download_camstudio():
     """
@@ -4534,7 +4497,6 @@ def download_camstudio():
     except Exception as e:
         logger.error(f"CamStudio download error: {e}")
         return str(e), 500
-
 
 @app.route("/download/frontrunner")
 def download_frontrunner():
@@ -4577,7 +4539,6 @@ def download_frontrunner():
     except Exception as e:
         logger.error(f"FrontRunner download error: {e}")
         return str(e), 500
-
 
 # ========================================
 # PTX EQUIPMENT MANAGEMENT APIS
@@ -4817,7 +4778,6 @@ class TerminalSession:
             except Exception:
                 self.process.kill()
 
-
 @app.route('/autotech')
 @app.route('/legacy')  # Keep legacy route for backwards compatibility
 def autotech_tools():
@@ -4826,20 +4786,17 @@ def autotech_tools():
                          online=is_online_network(),
                          gateway_ip=GATEWAY_IP)
 
-
 @app.route('/database')
 def equipment_cache_page():
     """Equipment Cache database viewer page"""
     return render_template('equip_db.html',
                          online=is_online_network())
 
-
 @app.route('/t1-tools-help')
 def t1_tools_help():
     """T1 Tools command reference page"""
     return render_template('t1_tools_help.html',
                          online=is_online_network())
-
 
 def get_autotech_client_folder():
     """
@@ -4871,7 +4828,6 @@ def get_autotech_client_folder():
                 return client_folder, None
 
     return None, "AutoTech Client folder not found. Run BUILD_WEBSERVER.bat to deploy the installer package."
-
 
 @app.route('/download-client-setup')
 def download_client_setup():
@@ -4910,7 +4866,6 @@ def download_client_setup():
         as_attachment=True,
         download_name=download_name
     )
-
 
 @app.route('/download-client-package')
 def download_client_package():
@@ -4959,7 +4914,6 @@ def download_client_package():
         as_attachment=True,
         download_name='AutoTech_Client_Package.zip'
     )
-
 
 @app.route('/live-install-client')
 def live_install_client():
@@ -5105,7 +5059,6 @@ def live_install_client():
     '''
     return html_content
 
-
 @app.route('/api/check-client-installed')
 def api_check_client_installed():
     """
@@ -5133,7 +5086,6 @@ def api_check_client_installed():
         'client_ip': client_ip,
         'user_agent': user_agent
     })
-
 
 @app.route('/api/register-client', methods=['POST'])
 def api_register_client():
@@ -5173,7 +5125,6 @@ def api_register_client():
         'client_ip': client_ip,
         'timestamp': timestamp
     })
-
 
 @app.route('/api/launch-batch-tool', methods=['POST'])
 def api_launch_batch_tool():
@@ -5255,7 +5206,6 @@ def api_launch_batch_tool():
             'success': False,
             'message': f'Error: {str(e)}'
         })
-
 
 @app.route('/api/find-equipment-ip', methods=['POST'])
 def api_find_equipment_ip():
@@ -5360,7 +5310,6 @@ def api_find_equipment_ip():
             'error': f'Error: {str(e)}'
         })
 
-
 # ========================================
 # EQUIPMENT DATABASE API ENDPOINTS
 # ========================================
@@ -5403,7 +5352,6 @@ def api_equipment_cache():
             'error': str(e)
         })
 
-
 @app.route('/api/equipment/cache/stats', methods=['GET'])
 def api_equipment_cache_stats():
     """Get statistics about the equipment cache database."""
@@ -5428,7 +5376,6 @@ def api_equipment_cache_stats():
             'success': False,
             'error': str(e)
         })
-
 
 @app.route('/api/equipment/cache/<equipment_name>', methods=['GET'])
 def api_equipment_cache_single(equipment_name):
@@ -5460,7 +5407,6 @@ def api_equipment_cache_single(equipment_name):
             'error': str(e)
         })
 
-
 # ========================================
 # EQUIPMENT DATABASE IMPORT & UPDATE API
 # ========================================
@@ -5473,6 +5419,7 @@ def background_update_worker():
     """
     global background_updater
 
+    set_request_id('bg-equipment-updater')
     # Early exit if database not initialized
     if not EQUIPMENT_DB_PATH:
         logger.error("Background updater: Database not initialized")
@@ -5557,7 +5504,6 @@ def background_update_worker():
         f'Equipment updater stopped. Processed: {background_updater["processed_count"]}, Errors: {background_updater["error_count"]}'
     )
 
-
 @app.route('/api/equipment/import-ip-list', methods=['POST'])
 def api_import_ip_list():
     """
@@ -5594,7 +5540,6 @@ def api_import_ip_list():
             'success': False,
             'error': str(e)
         })
-
 
 @app.route('/api/equipment/updater/start', methods=['POST'])
 def api_start_background_updater():
@@ -5650,7 +5595,6 @@ def api_start_background_updater():
             'error': str(e)
         })
 
-
 @app.route('/api/equipment/updater/stop', methods=['POST'])
 def api_stop_background_updater():
     """Stop the background equipment updater."""
@@ -5677,7 +5621,6 @@ def api_stop_background_updater():
             'error': str(e)
         })
 
-
 @app.route('/api/equipment/updater/status', methods=['GET'])
 def api_background_updater_status():
     """Get the current status of the background equipment updater."""
@@ -5703,7 +5646,6 @@ def api_background_updater_status():
             'error': str(e)
         })
 
-
 @app.route('/api/legacy/terminal/start', methods=['POST'])
 def api_legacy_terminal_start():
     """Start a new terminal session"""
@@ -5721,7 +5663,6 @@ def api_legacy_terminal_start():
     except Exception as e:
         logger.error(f"Terminal start error: {e}")
         return jsonify({'success': False, 'message': str(e)})
-
 
 @app.route('/api/legacy/terminal/command', methods=['POST'])
 def api_legacy_terminal_command():
@@ -5745,7 +5686,6 @@ def api_legacy_terminal_command():
         logger.error(f"Terminal command error: {e}")
         return jsonify({'success': False, 'message': str(e)})
 
-
 @app.route('/api/legacy/terminal/output', methods=['GET'])
 def api_legacy_terminal_output():
     """Get terminal output"""
@@ -5763,7 +5703,6 @@ def api_legacy_terminal_output():
     except Exception as e:
         logger.error(f"Terminal output error: {e}")
         return jsonify({'success': False, 'message': str(e)})
-
 
 @app.route('/api/legacy/terminal/stop', methods=['POST'])
 def api_legacy_terminal_stop():
@@ -6608,7 +6547,6 @@ def api_legacy_grm_script():
         logger.error(f"GRM Script API error: {e}")
         return jsonify({'success': False, 'message': str(e)}), 500
 
-
 @app.route('/api/legacy/download-file', methods=['GET'])
 def api_legacy_download_file():
     """Serve downloaded file to client browser"""
@@ -6630,7 +6568,6 @@ def api_legacy_download_file():
     except Exception as e:
         logger.error(f"File download error: {e}")
         return jsonify({'success': False, 'message': str(e)}), 500
-
 
 @app.route('/api/legacy/execute', methods=['POST'])
 def api_legacy_execute():
@@ -6821,7 +6758,6 @@ def api_cleanup_logs():
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
-
 @app.route('/api/cleanup-logs/preview', methods=['POST'])
 
 def api_cleanup_logs_preview():
@@ -6862,7 +6798,6 @@ def api_cleanup_logs_preview():
 
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
-
 
 @app.route('/api/cleanup-logs/generate-test-data', methods=['POST'])
 
@@ -6906,6 +6841,106 @@ def api_generate_test_data():
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
+# ========================================
+# ADMIN LOG VIEWER
+# ========================================
+def _resolve_log_path(source: str) -> Optional[str]:
+    if source not in LOG_SOURCES:
+        return None
+    log_dir = get_log_directory()
+    return os.path.join(log_dir, LOG_SOURCES[source])
+
+def _tail_log_lines(filepath: str, max_lines: int = 200) -> list:
+    if not os.path.exists(filepath):
+        return []
+    max_lines = max(1, min(2000, max_lines))
+    lines = deque(maxlen=max_lines)
+    with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
+        for line in f:
+            lines.append(line.rstrip('\n'))
+    return list(lines)
+
+def _stream_log_lines(filepath: str, initial_lines: int = 200):
+    def generate():
+        try:
+            if os.path.exists(filepath):
+                if initial_lines > 0:
+                    for line in _tail_log_lines(filepath, initial_lines):
+                        payload = json.dumps({"line": line})
+                        yield f"data: {payload}\n\n"
+                with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
+                    f.seek(0, os.SEEK_END)
+                    while True:
+                        line = f.readline()
+                        if line:
+                            payload = json.dumps({"line": line.rstrip('\n')})
+                            yield f"data: {payload}\n\n"
+                        else:
+                            time.sleep(0.5)
+            else:
+                payload = json.dumps({"error": "Log file not found"})
+                yield f"event: error\ndata: {payload}\n\n"
+        except GeneratorExit:
+            return
+        except Exception as e:
+            payload = json.dumps({"error": str(e)})
+            yield f"event: error\ndata: {payload}\n\n"
+    return generate()
+
+@app.route('/admin/logs')
+def admin_logs():
+    sources = [
+        {'key': key, 'label': LOG_SOURCE_LABELS.get(key, key.title())}
+        for key in LOG_SOURCES.keys()
+    ]
+    return render_template('admin_logs.html', sources=sources)
+
+@app.route('/api/logs/<source>', methods=['GET'])
+def api_logs_tail(source: str):
+    log_path = _resolve_log_path(source)
+    if not log_path:
+        return jsonify({"error": "Unknown log source", "request_id": get_request_id()}), 404
+
+    try:
+        lines = int(request.args.get('lines', 200))
+    except ValueError:
+        lines = 200
+
+    return jsonify({
+        "source": source,
+        "lines": _tail_log_lines(log_path, lines),
+        "request_id": get_request_id()
+    })
+
+@app.route('/api/logs/<source>/stream', methods=['GET'])
+def api_logs_stream(source: str):
+    log_path = _resolve_log_path(source)
+    if not log_path:
+        return jsonify({"error": "Unknown log source", "request_id": get_request_id()}), 404
+
+    try:
+        lines = int(request.args.get('lines', 200))
+    except ValueError:
+        lines = 200
+
+    headers = {
+        "Cache-Control": "no-cache",
+        "X-Accel-Buffering": "no"
+    }
+    return Response(
+        stream_with_context(_stream_log_lines(log_path, lines)),
+        mimetype='text/event-stream',
+        headers=headers
+    )
+
+@app.route('/api/logs/<source>/download', methods=['GET'])
+def api_logs_download(source: str):
+    log_path = _resolve_log_path(source)
+    if not log_path:
+        return jsonify({"error": "Unknown log source", "request_id": get_request_id()}), 404
+    if not os.path.exists(log_path):
+        return jsonify({"error": "Log file not found", "request_id": get_request_id()}), 404
+    return send_file(log_path, as_attachment=True)
 
 # ========================================
 # ERROR HANDLERS
@@ -6914,16 +6949,29 @@ def api_generate_test_data():
 @app.errorhandler(404)
 def not_found(error):
     """404 error handler"""
-    return render_template('error.html', 
-                         error_code=404,
-                         error_message="Page not found"), 404
+    request_id = get_request_id()
+    if request.path.startswith('/api/'):
+        return jsonify({"error": "Not found", "request_id": request_id}), 404
+    return render_template(
+        'error.html',
+        error_code=404,
+        error_message="Page not found",
+        request_id=request_id
+    ), 404
 
 @app.errorhandler(500)
 def internal_error(error):
     """500 error handler"""
-    return render_template('error.html',
-                         error_code=500,
-                         error_message="Internal server error"), 500
+    request_id = get_request_id()
+    log_server('error', 'exception', f"Unhandled error: {error}", request_id=request_id)
+    if request.path.startswith('/api/') or request.accept_mimetypes.accept_json:
+        return jsonify({"error": "Internal server error", "request_id": request_id}), 500
+    return render_template(
+        'error.html',
+        error_code=500,
+        error_message="Internal server error",
+        request_id=request_id
+    ), 500
 
 # ========================================
 # STARTUP AND MAIN
@@ -7108,7 +7156,6 @@ class AutoTechTrayMode:
 
             # Run the icon (blocking)
             self.icon.run()
-
 
 if __name__ == '__main__':
     # Check for --tray flag

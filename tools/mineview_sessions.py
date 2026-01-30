@@ -3,6 +3,7 @@ import paramiko
 import os
 from datetime import datetime
 from pathlib import Path
+from tools.app_logger import log_tool
 
 GATEWAY_HOST = "10.110.19.107"
 GATEWAY_USER = "mms"
@@ -14,6 +15,7 @@ def run(password=None, offline_mode=True):
     Based on the batch script: MineView_Session
     """
     if offline_mode:
+        log_tool('info', 'mineview', "MineView sessions offline mode")
         return """Live MineView Sessions (Demo Mode)
 
 === MINEVIEW SESSION REPORT ===
@@ -48,11 +50,13 @@ EQUIPMENT USAGE:
 Note: This is demonstration data. Enable online mode for live session monitoring."""
 
     if not password:
+        log_tool('warning', 'mineview', "MineView sessions missing password")
         return "Error: Password required for live MineView session monitoring"
 
     try:
         # Log the activity
         log_activity("MineView_Session", "MineView Session script")
+        log_tool('info', 'ssh', f"MineView sessions connect to {GATEWAY_HOST}")
         
         result = f"""Live MineView Sessions
 Connected to: {GATEWAY_HOST}
@@ -99,10 +103,13 @@ Retrieving active MineView sessions...
         return result
         
     except paramiko.AuthenticationException:
+        log_tool('warning', 'ssh', f"MineView sessions auth failed for {GATEWAY_HOST}")
         return "Error: Authentication failed. Please check your password."
     except paramiko.SSHException as e:
+        log_tool('error', 'ssh', f"MineView sessions SSH error for {GATEWAY_HOST}: {e}")
         return f"Error: SSH connection failed: {str(e)}"
     except Exception as e:
+        log_tool('error', 'mineview', f"MineView sessions error: {e}")
         return f"Error retrieving MineView sessions: {str(e)}\n\nPlease check your network connection."
 
 def log_activity(script_name, description):

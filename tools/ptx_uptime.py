@@ -67,7 +67,6 @@ def run(password: Optional[str] = None) -> Dict[str, Any]:
     """
     try:
         # Download from live server
-        print("Downloading PTX Uptime report from server...")
         html_content = download_ptx_uptime_report(password)
         report_mode = "live"
         
@@ -134,7 +133,6 @@ def download_ptx_uptime_report(password: Optional[str]) -> Optional[str]:
         return download_via_ssh(password)
         
     except Exception as e:
-        print(f"Error downloading PTX uptime report: {e}")
         return None
 
 def download_via_ssh(password: Optional[str]) -> Optional[str]:
@@ -150,9 +148,6 @@ def download_via_ssh(password: Optional[str]) -> Optional[str]:
         # DELETE existing cached file first
         if os.path.exists(local_file):
             os.remove(local_file)
-            print(f"[DEBUG] Deleted cached file: {local_file}")
-        
-        print(f"Connecting to {hostname} as {username}...")
         
         # Create SSH client
         ssh = paramiko.SSHClient()
@@ -165,19 +160,14 @@ def download_via_ssh(password: Optional[str]) -> Optional[str]:
             password=password,
             timeout=30
         )
-        
-        print("SSH connection established, logging download activity...")
 
         # Log download activity to server (matching .bat behavior)
         log_cmd = 'echo "$(date): PTX_Uptime_Report Download from AutoTech WebServer" >> /home/mms/Logs/Report_Download.txt'
         ssh.exec_command(log_cmd)
 
-        print("Downloading file...")
-
         # Get transport and check if it's available
         transport = ssh.get_transport()
         if transport is None:
-            print("Failed to get SSH transport")
             ssh.close()
             return None
         
@@ -191,14 +181,11 @@ def download_via_ssh(password: Optional[str]) -> Optional[str]:
         if os.path.exists(local_file):
             with open(local_file, 'r', encoding='utf-8') as f:
                 content = f.read()
-            print(f"Successfully downloaded {len(content)} characters to {local_file}")
             return content
         else:
-            print("Downloaded file not found")
             return None
             
     except Exception as e:
-        print(f"Error in SSH download: {e}")
         return None
 
 def parse_ptx_uptime_html(html_content: str) -> List[Dict[str, Any]]:
@@ -210,7 +197,6 @@ def parse_ptx_uptime_html(html_content: str) -> List[Dict[str, Any]]:
         # Find the main data table - with proper type checking
         table = soup.find('table')
         if not table or not hasattr(table, 'find_all'):
-            print("No valid table found in HTML content")
             return []
         
         # Get all data rows (skip header) - safer parsing with type checks
@@ -272,14 +258,10 @@ def parse_ptx_uptime_html(html_content: str) -> List[Dict[str, Any]]:
                     equipment_list.append(equipment)
                     
                 except Exception as e:
-                    print(f"Error parsing row: {e}")
                     continue
-        
-        print(f"Parsed {len(equipment_list)} equipment records")
         return equipment_list
         
     except Exception as e:
-        print(f"Error parsing HTML: {e}")
         return []
 
 def generate_csv_from_data(equipment_list: List[Dict[str, Any]]) -> Optional[str]:
@@ -307,7 +289,6 @@ def generate_csv_from_data(equipment_list: List[Dict[str, Any]]) -> Optional[str
         return '\n'.join(csv_lines)
         
     except Exception as e:
-        print(f"Error generating CSV: {e}")
         return None
 
 # Test function for direct execution

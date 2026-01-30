@@ -8,6 +8,7 @@ import paramiko
 import os
 from datetime import datetime
 from pathlib import Path
+from tools.app_logger import log_tool
 
 GATEWAY_HOST = "10.110.19.107"
 GATEWAY_USER = "mms"
@@ -42,6 +43,7 @@ def log_activity():
 def run(password=None, offline_mode=True):
     """Run PTX Health Check"""
     if offline_mode:
+        log_tool('info', 'ptx_health', "PTX health check offline mode")
         return f"""Welcome Embedded Health Check
 
 Enter PTX IP: 10.110.21.128
@@ -114,10 +116,12 @@ OK
 Note: This is demonstration data showing typical PTX health check results."""
 
     if not password:
+        log_tool('warning', 'ptx_health', "PTX health check missing password")
         return "Error: Password required for live PTX health check"
 
     try:
         log_activity()
+        log_tool('info', 'ssh', f"PTX health check connect to {GATEWAY_HOST}")
         
         result = f"""Welcome Embedded Health Check
 
@@ -160,4 +164,5 @@ Executing PTX health check script...
         return result
         
     except Exception as e:
+        log_tool('error', 'ptx_health', f"PTX health check error: {e}")
         return f"Error executing PTX health check: {str(e)}"
