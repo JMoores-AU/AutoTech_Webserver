@@ -8,6 +8,7 @@ Enhanced version combining new design with full functionality
 """
 
 import os
+import sqlite3
 
 # Standard Library Imports
 import csv
@@ -48,6 +49,11 @@ from tools.equipment_db import (
 from tools.ptx_uptime_db import (
     get_database_path as get_ptx_db_path,
     PTXUptimeDB
+)
+from tools.autotech_db import (
+    get_database_path as get_autotech_db_path,
+    init_database as init_autotech_db,
+    get_database_stats as get_autotech_db_stats
 )
 try:
     from tools import ptx_uptime as ptx_uptime_tool
@@ -194,6 +200,29 @@ else:
 PTX_UPTIME_DB_PATH = get_ptx_db_path(BASE_DIR)
 ptx_uptime_db = PTXUptimeDB(PTX_UPTIME_DB_PATH)
 logger.info(f"PTX Uptime Database: {PTX_UPTIME_DB_PATH}")
+
+# ========================================
+# AUTOTECH MAIN DATABASE INITIALIZATION
+# ========================================
+AUTOTECH_DB_PATH = get_autotech_db_path(BASE_DIR)
+if init_autotech_db(AUTOTECH_DB_PATH):
+    logger.info(f"AutoTech Main Database: {AUTOTECH_DB_PATH}")
+else:
+    logger.warning("Failed to initialize AutoTech main database")
+    AUTOTECH_DB_PATH = None
+
+# ========================================
+# FRONTRUNNER EVENTS DATABASE RE-INIT (schema v2 adds frontrunner_events table)
+# ========================================
+try:
+    from tools import frontrunner_event_db as _fr_event_db
+    _fr_db_path = _fr_event_db.get_database_path(BASE_DIR)
+    if _fr_event_db.init_database(_fr_db_path):
+        logger.info(f"FrontRunner Events Database: {_fr_db_path} (schema updated)")
+    else:
+        logger.warning("Failed to re-initialize FrontRunner events database")
+except Exception as _fr_err:
+    logger.warning(f"FrontRunner events DB init skipped: {_fr_err}")
 
 # IP_list.dat path for importing equipment list
 # Check multiple locations: USB legacy folder first, then local database folder
@@ -1812,6 +1841,120 @@ def api_remote_stats():
     except Exception as e:
         logger.error(f"Error getting remote stats: {e}")
         return jsonify([]), 500
+
+@app.route('/api/health')
+def api_health():
+    """
+    Health check endpoint - reports server and database status.
+    Used by infrastructure verification to confirm DB connectivity.
+    """
+    import sqlite3 as _sqlite3
+
+    databases = {}
+    all_connected = True
+
+    # Check equipment cache database
+    try:
+        if EQUIPMENT_DB_PATH and os.path.exists(EQUIPMENT_DB_PATH):
+            conn = _sqlite3.connect(EQUIPMENT_DB_PATH, timeout=2)
+            conn.execute('SELECT 1')
+            conn.close()
+            databases['equipment_cache'] = {
+                'status': 'connected',
+                'path': EQUIPMENT_DB_PATH,
+                'exists': True
+            }
+        else:
+            databases['equipment_cache'] = {
+                'status': 'not_initialized',
+                'path': str(EQUIPMENT_DB_PATH),
+                'exists': False
+            }
+            all_connected = False
+    except Exception as e:
+        databases['equipment_cache'] = {
+            'status': 'error',
+            'error': str(e),
+            'exists': EQUIPMENT_DB_PATH is not None and os.path.exists(str(EQUIPMENT_DB_PATH))
+        }
+        all_connected = False
+
+    # Check PTX uptime database
+    try:
+        if PTX_UPTIME_DB_PATH and os.path.exists(PTX_UPTIME_DB_PATH):
+            conn = _sqlite3.connect(PTX_UPTIME_DB_PATH, timeout=2)
+            conn.execute('SELECT 1')
+            conn.close()
+            databases['ptx_uptime'] = {
+                'status': 'connected',
+                'path': PTX_UPTIME_DB_PATH,
+                'exists': True
+            }
+        else:
+            databases['ptx_uptime'] = {
+                'status': 'not_initialized',
+                'path': str(PTX_UPTIME_DB_PATH),
+                'exists': False
+            }
+            all_connected = False
+    except Exception as e:
+        databases['ptx_uptime'] = {
+            'status': 'error',
+            'error': str(e),
+            'exists': PTX_UPTIME_DB_PATH is not None and os.path.exists(str(PTX_UPTIME_DB_PATH))
+        }
+        all_connected = False
+
+    # Check FrontRunner events database
+    try:
+        from tools import frontrunner_event_db as _fr_db
+        fr_db_path = _fr_db.get_database_path(BASE_DIR)
+        if fr_db_path and os.path.exists(fr_db_path):
+            conn = _sqlite3.connect(fr_db_path, timeout=2)
+            conn.execute('SELECT 1')
+            conn.close()
+            databases['frontrunner_events'] = {
+                'status': 'connected',
+                'path': fr_db_path,
+                'exists': True
+            }
+        else:
+            databases['frontrunner_events'] = {
+                'status': 'not_initialized',
+                'path': str(fr_db_path),
+                'exists': False
+            }
+            all_connected = False
+    except Exception as e:
+        databases['frontrunner_events'] = {
+            'status': 'error',
+            'error': str(e),
+            'exists': False
+        }
+        all_connected = False
+
+    db_status = 'connected' if all_connected else 'degraded'
+
+    # Read version file
+    version_path = os.path.join(BASE_DIR, 'VERSION')
+    try:
+        with open(version_path, 'r') as vf:
+            version = vf.read().strip()
+    except Exception:
+        version = 'unknown'
+
+    return jsonify({
+        'status': 'healthy',
+        'database_status': db_status,
+        'databases': databases,
+        'server': {
+            'version': version,
+            'platform': platform.system(),
+            'python_version': platform.python_version()
+        },
+        'timestamp': datetime.now().isoformat()
+    })
+
 
 @app.route('/api/network_status')
 def network_status():
@@ -5407,6 +5550,144 @@ def api_equipment_cache_single(equipment_name):
             'error': str(e)
         })
 
+
+@app.route('/api/equipment', methods=['POST'])
+def api_equipment_create():
+    """
+    Create or update an equipment record in the database.
+    Accepts JSON body with equipment_name (required) and optional fields.
+    """
+    try:
+        if not EQUIPMENT_DB_PATH:
+            return jsonify({
+                'success': False,
+                'error': 'Equipment database not initialized'
+            }), 500
+
+        data = request.get_json()
+        if not data:
+            return jsonify({
+                'success': False,
+                'error': 'Request body must be JSON'
+            }), 400
+
+        equipment_name = data.get('equipment_name') or data.get('name')
+        if not equipment_name:
+            return jsonify({
+                'success': False,
+                'error': 'equipment_name is required'
+            }), 400
+
+        result = save_equipment(
+            EQUIPMENT_DB_PATH,
+            equipment_name=equipment_name,
+            oid=data.get('oid'),
+            cid=data.get('cid'),
+            profile=data.get('profile'),
+            network_ip=data.get('network_ip'),
+            avi_ip=data.get('avi_ip'),
+            ptx_model=data.get('ptx_model'),
+            status=data.get('status')
+        )
+
+        if result:
+            log_database('info', 'equipment_create', f'Equipment created/updated: {equipment_name}')
+            return jsonify({
+                'success': True,
+                'message': f'Equipment {equipment_name} saved successfully',
+                'equipment_name': equipment_name.upper().strip()
+            }), 201
+        else:
+            return jsonify({
+                'success': False,
+                'error': f'Failed to save equipment {equipment_name}'
+            }), 500
+
+    except Exception as e:
+        logger.error(f"Error creating equipment: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+@app.route('/api/equipment/<equipment_name>', methods=['DELETE'])
+def api_equipment_delete(equipment_name):
+    """
+    Delete an equipment record from the database by name.
+    """
+    try:
+        if not EQUIPMENT_DB_PATH:
+            return jsonify({
+                'success': False,
+                'error': 'Equipment database not initialized'
+            }), 500
+
+        conn = sqlite3.connect(EQUIPMENT_DB_PATH)
+        conn.execute('PRAGMA journal_mode=WAL')
+        conn.execute('PRAGMA busy_timeout=5000')
+        cursor = conn.cursor()
+        equipment_name_upper = equipment_name.upper().strip()
+        cursor.execute('DELETE FROM equipment_cache WHERE equipment_name = ?', (equipment_name_upper,))
+        deleted = cursor.rowcount
+        conn.commit()
+        conn.close()
+
+        if deleted > 0:
+            log_database('info', 'equipment_delete', f'Equipment deleted: {equipment_name_upper}')
+            return jsonify({
+                'success': True,
+                'message': f'Equipment {equipment_name_upper} deleted'
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': f'Equipment {equipment_name_upper} not found'
+            }), 404
+
+    except Exception as e:
+        logger.error(f"Error deleting equipment {equipment_name}: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+@app.route('/api/equipment', methods=['GET'])
+def api_equipment_list():
+    """
+    Get all equipment from the database.
+    Alias for /api/equipment/cache for convenience.
+    """
+    try:
+        if not EQUIPMENT_DB_PATH:
+            return jsonify({
+                'success': False,
+                'error': 'Equipment database not initialized'
+            }), 500
+
+        limit = request.args.get('limit', 100, type=int)
+        search_term = request.args.get('search', '').strip()
+
+        if search_term:
+            equipment_list = search_equipment_db(EQUIPMENT_DB_PATH, search_term, limit)
+        else:
+            equipment_list = get_all_equipment(EQUIPMENT_DB_PATH, limit)
+
+        return jsonify({
+            'success': True,
+            'count': len(equipment_list),
+            'equipment': equipment_list
+        })
+
+    except Exception as e:
+        logger.error(f"Error listing equipment: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
 # ========================================
 # EQUIPMENT DATABASE IMPORT & UPDATE API
 # ========================================
@@ -7198,10 +7479,11 @@ if __name__ == '__main__':
         browser_thread.start()
 
         # Development server configuration
+        server_port = int(os.environ.get('AUTOTECH_PORT', 8888))
         try:
             app.run(
                 host='0.0.0.0',  # Listen on all network interfaces (allows remote access)
-                port=8888,
+                port=server_port,
                 debug=True,
                 use_reloader=False,  # Disabled - Windows caching issues. Restart manually after code changes.
                 passthrough_errors=False  # Handle errors gracefully

@@ -12,8 +12,8 @@ from typing import Optional, Dict, List, Tuple
 DB_FOLDER_NAME = "database"
 DB_FILE_NAME = "frontrunner_events.db"
 
-# Current schema version
-SCHEMA_VERSION = 1
+# Current schema version - increment when schema changes
+SCHEMA_VERSION = 2
 
 
 def get_database_path(base_dir: str) -> str:
@@ -90,6 +90,18 @@ def init_database(db_path: str) -> bool:
                 )
             ''')
 
+            # Unified frontrunner_events table (per app_spec.txt schema)
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS frontrunner_events (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    event_type TEXT NOT NULL,
+                    severity TEXT NOT NULL DEFAULT 'info',
+                    message TEXT NOT NULL,
+                    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    resolved_at DATETIME
+                )
+            ''')
+
             # Create indexes for faster queries
             cursor.execute('''
                 CREATE INDEX IF NOT EXISTS idx_process_service
@@ -99,6 +111,16 @@ def init_database(db_path: str) -> bool:
             cursor.execute('''
                 CREATE INDEX IF NOT EXISTS idx_disk_active
                 ON disk_events(is_active)
+            ''')
+
+            cursor.execute('''
+                CREATE INDEX IF NOT EXISTS idx_frontrunner_events_type
+                ON frontrunner_events(event_type)
+            ''')
+
+            cursor.execute('''
+                CREATE INDEX IF NOT EXISTS idx_frontrunner_events_timestamp
+                ON frontrunner_events(timestamp)
             ''')
 
             # Update schema version
