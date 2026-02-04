@@ -26,6 +26,8 @@ dist/
 .cache/
 .coverage
 htmlcov/
+*_cache.json
+*.cache
 
 # --- IDE / editor ---
 .vscode/
@@ -37,6 +39,7 @@ htmlcov/
 .DS_Store
 Thumbs.db
 Desktop.ini
+nul
 
 # ======================================================
 # AutoTech — RUNTIME DATA (DO NOT COMMIT)

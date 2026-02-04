@@ -500,13 +500,28 @@ if exist "check_main.py" (
     echo.
 )
 
+echo Performing deep clean (removing ALL caches)...
+echo   - Removing build/dist directories...
+if exist "build" rmdir /s /q build 2>nul
+if exist "dist" rmdir /s /q dist 2>nul
+echo   - Cleaning Python cache files...
+if exist "__pycache__" rmdir /s /q __pycache__ 2>nul
+if exist "tools\__pycache__" rmdir /s /q tools\__pycache__ 2>nul
+del /s /q *.pyc 2>nul >nul
+echo   - Removing application cache files...
+del /q *_cache.json 2>nul >nul
+del /q *.log 2>nul >nul
+del /q nul 2>nul >nul
+echo   [OK] Deep clean complete - NO cached data will be bundled
+echo.
+
 echo Building with PyInstaller...
-echo [1/2] Building AutoTech.exe...
-python -m PyInstaller AutoTech.spec --noconfirm
+echo [1/2] Building AutoTech.exe (using --clean to prevent archive corruption)...
+python -m PyInstaller AutoTech.spec --noconfirm --clean
 echo.
 
 echo [2/2] Building AutoTech_Tray.exe...
-python -m PyInstaller AutoTech_Tray.spec --noconfirm
+python -m PyInstaller AutoTech_Tray.spec --noconfirm --clean
 echo.
 
 if exist "dist\AutoTech.exe" (
@@ -1023,24 +1038,42 @@ goto MENU
 :CLEAN
 cls
 echo ============================================
-echo  Cleaning Build Folders...
+echo  Deep Clean (Remove ALL Caches)
 echo ============================================
+echo.
+echo This will remove:
+echo   - build\ and dist\ directories
+echo   - Python cache files (__pycache__, *.pyc)
+echo   - Application cache files (*_cache.json, *.log)
 echo.
 
 if exist "build" (
-    rmdir /s /q build
+    rmdir /s /q build 2>nul
     echo Removed: build\
 )
 if exist "dist" (
-    rmdir /s /q dist
+    rmdir /s /q dist 2>nul
     echo Removed: dist\
 )
 if exist "__pycache__" (
-    rmdir /s /q __pycache__
+    rmdir /s /q __pycache__ 2>nul
     echo Removed: __pycache__\
 )
+if exist "tools\__pycache__" (
+    rmdir /s /q tools\__pycache__ 2>nul
+    echo Removed: tools\__pycache__\
+)
+
+echo Removing .pyc files...
+del /s /q *.pyc 2>nul >nul
+
+echo Removing application cache files...
+del /q *_cache.json 2>nul >nul
+del /q *.log 2>nul >nul
+del /q nul 2>nul >nul
+
 echo.
-echo [DONE] Clean complete!
+echo [DONE] Deep clean complete - all caches removed!
 echo.
 pause
 goto MENU
@@ -1097,14 +1130,23 @@ if %GIT_AVAILABLE%==1 (
 )
 echo.
 
-echo [4/8] Cleaning old builds...
-if exist "build" rmdir /s /q build
-if exist "dist" rmdir /s /q dist
-echo   [OK] Clean complete
+echo [4/8] Deep cleaning (removing ALL caches)...
+echo   - Removing build/dist directories...
+if exist "build" rmdir /s /q build 2>nul
+if exist "dist" rmdir /s /q dist 2>nul
+echo   - Cleaning Python cache files...
+if exist "__pycache__" rmdir /s /q __pycache__ 2>nul
+if exist "tools\__pycache__" rmdir /s /q tools\__pycache__ 2>nul
+del /s /q *.pyc 2>nul >nul
+echo   - Removing application cache files...
+del /q *_cache.json 2>nul >nul
+del /q *.log 2>nul >nul
+del /q nul 2>nul >nul
+echo   [OK] Deep clean complete - NO cached data will be bundled
 echo.
 
 echo [5/8] Building executable...
-python -m PyInstaller AutoTech.spec --noconfirm
+python -m PyInstaller AutoTech.spec --noconfirm --clean
 echo.
 
 if not exist "dist\AutoTech.exe" (
