@@ -49,6 +49,7 @@ echo    11. Build Executable
 echo    12. Test Executable
 echo    13. Full Build Pipeline (USB Deploy)
 echo    18. Build Client USB (sync autotech_client)
+echo    19. Build ONEDIR (no archive, repeatable prod)
 echo.
 echo  UTILITIES
 echo    14. Create Backup
@@ -74,6 +75,7 @@ if "%choice%"=="11" goto BUILD
 if "%choice%"=="12" goto TESTEXE
 if "%choice%"=="13" goto FULLBUILD
 if "%choice%"=="18" goto BUILDCLIENTUSB
+if "%choice%"=="19" goto BUILDONEDIR
 if "%choice%"=="14" goto BACKUP
 if "%choice%"=="15" goto CLEAN
 if "%choice%"=="16" goto SETUPGIT
@@ -81,6 +83,64 @@ if "%choice%"=="17" goto END
 
 echo Invalid option. Press any key to try again...
 pause >nul
+goto MENU
+
+:: ============================================
+:: BUILD ONEDIR (no archive; repeatable prod)
+:: ============================================
+:BUILDONEDIR
+cls
+echo ============================================
+echo  Building ONEDIR Executable (no archive)
+echo ============================================
+echo.
+echo Soft winds carry code ^
+echo Zips removed, bytes walk freely ^
+echo Logins breathe again
+echo.
+
+echo Running pre-build checks...
+if exist "check_main.py" (
+    python check_main.py main.py >nul 2>&1
+    if %ERRORLEVEL% NEQ 0 (
+        echo [ERROR] Pre-build verification failed!
+        echo Run option 4 for details.
+        pause
+        goto MENU
+    )
+    echo [OK] Pre-build checks passed
+    echo.
+)
+
+echo Deep cleaning build artifacts...
+if exist "build" rmdir /s /q build 2>nul
+if exist "dist" rmdir /s /q dist 2>nul
+if exist "__pycache__" rmdir /s /q __pycache__ 2>nul
+if exist "tools\__pycache__" rmdir /s /q tools\__pycache__ 2>nul
+if exist "app\__pycache__" rmdir /s /q app\__pycache__ 2>nul
+if exist "app\blueprints\__pycache__" rmdir /s /q app\blueprints\__pycache__ 2>nul
+del /s /q *.pyc 2>nul >nul
+del /q *_cache.json 2>nul >nul
+del /q *.log 2>nul >nul
+echo [OK] Clean slate ready
+echo.
+
+echo Building with PyInstaller (onedir, no UPX, no archive)...
+python -m PyInstaller AutoTech.spec --noconfirm --clean --onedir --noupx --debug noarchive
+echo.
+
+if exist "dist\AutoTech\AutoTech.exe" (
+    echo [SUCCESS] ONEDIR build complete!
+    echo Folder: dist\AutoTech\
+    echo.
+    echo NEXT: Copy the entire dist\AutoTech folder to the production host
+    echo       and point the service/shortcut to dist\AutoTech\AutoTech.exe
+    echo.
+) else (
+    echo [ERROR] ONEDIR build failed! Check errors above.
+)
+echo.
+pause
 goto MENU
 
 
@@ -507,6 +567,8 @@ if exist "dist" rmdir /s /q dist 2>nul
 echo   - Cleaning Python cache files...
 if exist "__pycache__" rmdir /s /q __pycache__ 2>nul
 if exist "tools\__pycache__" rmdir /s /q tools\__pycache__ 2>nul
+if exist "app\__pycache__" rmdir /s /q app\__pycache__ 2>nul
+if exist "app\blueprints\__pycache__" rmdir /s /q app\blueprints\__pycache__ 2>nul
 del /s /q *.pyc 2>nul >nul
 echo   - Removing application cache files...
 del /q *_cache.json 2>nul >nul
@@ -532,10 +594,16 @@ if exist "dist\AutoTech.exe" (
     )
     echo.
 
-    :: Copy to USB if detected
+    :: Copy to USB if detected - prefer drives that already have \AutoTech structure
     set "USB_DRIVE="
-    for %%D in (D E F G H I J K L) do (
-        if exist "%%D:\AutoTech" set "USB_DRIVE=%%D:"
+    for %%D in (D E F G H I J K L M N O P Q R S T U V W X Y Z) do (
+        if exist "%%D:\AutoTech" if not defined USB_DRIVE set "USB_DRIVE=%%D:"
+    )
+    :: Fallback: if no \AutoTech found, use drive-type scan (DriveType 2/3/4, non-system)
+    if not defined USB_DRIVE (
+        for /f "usebackq delims=" %%D in (`powershell -NoLogo -NoProfile -Command "$sys=$env:SystemDrive; Get-CimInstance Win32_LogicalDisk | Where-Object { $_.DriveType -in 2,3,4 -and $_.DeviceID -ne $sys } | Select-Object -ExpandProperty DeviceID"` ) do (
+            if not defined USB_DRIVE set "USB_DRIVE=%%D"
+        )
     )
 
     if defined USB_DRIVE (
@@ -710,10 +778,11 @@ echo   - T1 Tools Legacy
 echo   - CamStudio USB
 echo.
 
-:: Enumerate removable/fixed (non-system) drives using PowerShell to avoid network shares
+:: Enumerate removable/fixed/remote (non-system) drives using PowerShell
+:: DriveType 2=Removable, 3=Fixed, 4=Remote (includes RDP-redirected USB drives)
 set "USB_DRIVE="
 set "DRIVE_LIST="
-for /f "usebackq delims=" %%D in (`powershell -NoLogo -NoProfile -Command "Get-CimInstance Win32_LogicalDisk | Where-Object { $_.DriveType -in 2,3 } | Select-Object -ExpandProperty DeviceID"` ) do (
+for /f "usebackq delims=" %%D in (`powershell -NoLogo -NoProfile -Command "$sys=$env:SystemDrive; Get-CimInstance Win32_LogicalDisk | Where-Object { $_.DriveType -in 2,3,4 -and $_.DeviceID -ne $sys } | Select-Object -ExpandProperty DeviceID"` ) do (
     set "DRIVE_LIST=!DRIVE_LIST! %%D"
     if not defined USB_DRIVE set "USB_DRIVE=%%D"
 )
@@ -801,10 +870,10 @@ if exist "autotech_client\AutoTech\" (
     ) else (
         echo        - [WARN] tools\WinSCP.exe missing!
     )
-    if exist "%USB_DRIVE%\AutoTech\tools\vncviewer_5.3.2.exe" (
-        echo        - tools\vncviewer_5.3.2.exe
+    if exist "%USB_DRIVE%\AutoTech\tools\vncviewer.exe" (
+        echo        - tools\vncviewer.exe
     ) else (
-        echo        - [WARN] tools\vncviewer missing!
+        echo        - [WARN] tools\vncviewer.exe missing!
     )
     if exist "%USB_DRIVE%\AutoTech\scripts\launch_putty.bat" (
         echo        - scripts\launch_*.bat present
@@ -1137,6 +1206,8 @@ if exist "dist" rmdir /s /q dist 2>nul
 echo   - Cleaning Python cache files...
 if exist "__pycache__" rmdir /s /q __pycache__ 2>nul
 if exist "tools\__pycache__" rmdir /s /q tools\__pycache__ 2>nul
+if exist "app\__pycache__" rmdir /s /q app\__pycache__ 2>nul
+if exist "app\blueprints\__pycache__" rmdir /s /q app\blueprints\__pycache__ 2>nul
 del /s /q *.pyc 2>nul >nul
 echo   - Removing application cache files...
 del /q *_cache.json 2>nul >nul
@@ -1159,8 +1230,13 @@ echo.
 
 echo [6/8] Deploying to USB...
 set "USB_DRIVE="
-for %%D in (D E F G H I J K L) do (
-    if exist "%%D:\AutoTech" set "USB_DRIVE=%%D:"
+for %%D in (D E F G H I J K L M N O P Q R S T U V W X Y Z) do (
+    if exist "%%D:\AutoTech" if not defined USB_DRIVE set "USB_DRIVE=%%D:"
+)
+if not defined USB_DRIVE (
+    for /f "usebackq delims=" %%D in (`powershell -NoLogo -NoProfile -Command "$sys=$env:SystemDrive; Get-CimInstance Win32_LogicalDisk | Where-Object { $_.DriveType -in 2,3,4 -and $_.DeviceID -ne $sys } | Select-Object -ExpandProperty DeviceID"` ) do (
+        if not defined USB_DRIVE set "USB_DRIVE=%%D"
+    )
 )
 
 if defined USB_DRIVE (
