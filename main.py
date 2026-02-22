@@ -50,6 +50,7 @@ from tools.ptx_uptime_db import (
     get_database_path as get_ptx_db_path,
     PTXUptimeDB
 )
+from tools.fleet_monitor_db import FleetMonitorDB
 from tools.autotech_db import (
     get_database_path as get_autotech_db_path,
     init_database as init_autotech_db,
@@ -100,64 +101,31 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # ========================================
-# APPLICATION BASE DIRECTORY
+# PHASE 1: IMPORT FROM APP MODULES
 # ========================================
-if getattr(sys, 'frozen', False):
-    # Running as PyInstaller executable
-    BASE_DIR = os.path.dirname(sys.executable)
-    # PyInstaller extracts to temp folder, but we bundled templates/static
-    # sys._MEIPASS is added by PyInstaller at runtime (not available during linting)
-    meipass = getattr(sys, '_MEIPASS', BASE_DIR)  # type: ignore
-    template_folder = os.path.join(meipass, 'templates')
-    static_folder = os.path.join(meipass, 'static')
-else:
-    # Running as Python script
-    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    template_folder = os.path.join(BASE_DIR, 'templates')
-    static_folder = os.path.join(BASE_DIR, 'static')
-
-def get_version():
-    """Return version from VERSION file, works in frozen and dev modes."""
-    if getattr(sys, 'frozen', False):
-        version_path = os.path.join(getattr(sys, '_MEIPASS', BASE_DIR), 'VERSION')
-    else:
-        version_path = os.path.join(BASE_DIR, 'VERSION')
-    try:
-        with open(version_path, 'r') as f:
-            return f.read().strip()
-    except FileNotFoundError:
-        return 'dev'
-
-APP_VERSION = get_version()
-
-TOOLS_DIR = os.path.join(BASE_DIR, 'AutoTech', 'tools')
-PLINK_PATH = os.path.join(TOOLS_DIR, 'plink.exe')
-VNC_VIEWER_PATH = os.path.join(TOOLS_DIR, 'vncviewer_5.3.2.exe')
-
-# AutoTech Client tools path (for T1 Legacy scripts)
-# USB: E:\AutoTech\autotech_client\tools  |  Dev: project\autotech_client\tools
-CLIENT_TOOLS_DIR = os.path.join(BASE_DIR, 'AutoTech', 'autotech_client', 'tools')
-if not os.path.exists(CLIENT_TOOLS_DIR):
-    # Fallback to dev structure
-    CLIENT_TOOLS_DIR = os.path.join(BASE_DIR, 'autotech_client', 'tools')
-CLIENT_PLINK_PATH = os.path.join(CLIENT_TOOLS_DIR, 'plink.exe')
-
-AUTO_TECH_CLIENT_DIR = os.environ.get('AUTOTECH_CLIENT_DIR', r"C:\AutoTech_Client")
-AUTO_TECH_CLIENT_PLINK = os.path.join(AUTO_TECH_CLIENT_DIR, 'plink.exe')
-
-PLINK_CANDIDATES = [
-    AUTO_TECH_CLIENT_PLINK,
-    CLIENT_PLINK_PATH,
-    PLINK_PATH,
-]
-
-def resolve_plink_path():
-    """Return the first plink.exe that exists from the preferred locations."""
-    for candidate in PLINK_CANDIDATES:
-        if candidate and os.path.exists(candidate):
-            logger.debug(f"Using plink from: {candidate}")
-            return candidate
-    return None
+from app.config import (
+    BASE_DIR, TEMPLATE_FOLDER, STATIC_FOLDER,
+    TOOLS_DIR, PLINK_PATH, VNC_VIEWER_PATH,
+    CLIENT_TOOLS_DIR, CLIENT_PLINK_PATH,
+    AUTO_TECH_CLIENT_DIR, AUTO_TECH_CLIENT_PLINK, PLINK_CANDIDATES,
+    GATEWAY_IP, PTX_BASE_IP, PROBE_PORT,
+    SERVERS, MMS_SERVER, PLAYBACK_SERVER,
+    TOOL_LIST, EQUIPMENT_PROFILES, MOCK_EQUIPMENT_DB,
+    IP_LIST_PATH, FLEET_DATA_PATH, resolve_data_path,
+    APP_VERSION, get_version,
+)
+import app.state as state
+from app.utils import (
+    login_required, is_online_network, resolve_plink_path,
+    get_autotech_client_folder, connect_to_equipment,
+    check_ptx_reachable, get_ptx_uptime,
+    search_equipment, parse_ip_finder_output,
+)
+from app.background_tasks import (
+    ptx_uptime_checker_worker, playback_monitor_worker,
+    background_update_worker, fleet_monitor_worker,
+    probe_equipment_health, format_uptime_hours, open_browser,
+)
 
 # ========================================
 # INITIALIZE LOGGING INFRASTRUCTURE
@@ -181,8 +149,8 @@ logger.info(f"Application Base Directory: {BASE_DIR}")
 logger.info(f"Tools Directory: {TOOLS_DIR}")
 logger.info(f"Client Tools Directory: {CLIENT_TOOLS_DIR}")
 logger.info(f"AutoTech Client Directory: {AUTO_TECH_CLIENT_DIR}")
-logger.info(f"Template Folder: {template_folder}")
-logger.info(f"Static Folder: {static_folder}")
+logger.info(f"Template Folder: {TEMPLATE_FOLDER}")
+logger.info(f"Static Folder: {STATIC_FOLDER}")
 
 # ========================================
 # EQUIPMENT DATABASE INITIALIZATION
@@ -193,13 +161,12 @@ if init_database(EQUIPMENT_DB_PATH):
 else:
     logger.warning("Failed to initialize equipment database - caching disabled")
     EQUIPMENT_DB_PATH = None
+state.EQUIPMENT_DB_PATH = EQUIPMENT_DB_PATH  # Share with blueprints/background tasks
 
 # ========================================
 # PTX UPTIME DATABASE INITIALIZATION
 # ========================================
-PTX_UPTIME_DB_PATH = get_ptx_db_path(BASE_DIR)
-ptx_uptime_db = PTXUptimeDB(PTX_UPTIME_DB_PATH)
-logger.info(f"PTX Uptime Database: {PTX_UPTIME_DB_PATH}")
+logger.info(f"PTX Uptime Database initialized (managed by app.state)")
 
 # ========================================
 # AUTOTECH MAIN DATABASE INITIALIZATION
@@ -224,13 +191,57 @@ try:
 except Exception as _fr_err:
     logger.warning(f"FrontRunner events DB init skipped: {_fr_err}")
 
-# IP_list.dat path for importing equipment list
-# Check multiple locations: USB legacy folder first, then local database folder
-_ip_list_candidates = [
-    os.path.join(BASE_DIR, 'T1_Tools_Legacy', 'bin', 'IP_list.dat'),  # USB: E:\T1_Tools_Legacy\bin\
-    os.path.join(BASE_DIR, 'database', 'IP_list.dat'),                 # Local dev: project\database\
-]
-IP_LIST_PATH = next((p for p in _ip_list_candidates if os.path.exists(p)), _ip_list_candidates[-1])
+# ========================================
+# DIG FLEET MONITOR DATABASE
+# ========================================
+# IP_LIST_PATH, FLEET_DATA_PATH, resolve_data_path imported from app.config
+# fleet_monitor_db managed by app.state
+
+def ensure_fleet_config():
+    """Ensure the fleet layout config exists with a default if missing."""
+    default_layout = {
+        "columns": [
+            {
+                "id": "lh_north", "title": "Load & Haul North",
+                "main": "GR17 PreStrip9", "back": "GR18 PreStrip10",
+                "phone": "4940 4258", "comms": "Normal Auto Truck | Shovel comms",
+                "color": "#f7a224", "equipment": ["EXD69", "EXD99", "SHE33"]
+            },
+            {
+                "id": "lh_central", "title": "Load & Haul Central",
+                "main": "GR15 PreStrip7", "back": "GR16 PreStrip8",
+                "phone": "4940 4259", "comms": "Normal Auto Truck | Shovel comms",
+                "color": "#73c05c", "equipment": ["EXD265", "EXD81", "EXD57"]
+            },
+            {
+                "id": "lh_south", "title": "Load & Haul South",
+                "main": "GR13 PreStrip5", "back": "GR14 PreStrip6",
+                "phone": "4940 4252", "comms": "Normal Auto Truck | Shovel comms",
+                "color": "#f7e127", "equipment": ["EXD82", "EXD66", "EXD67", "EXD68", "SHE32"]
+            }
+        ]
+    }
+    
+    try:
+        # If file exists, try to load it to ensure it's valid JSON
+        if os.path.exists(FLEET_DATA_PATH):
+            with open(FLEET_DATA_PATH, 'r') as f:
+                json.load(f)
+            logger.info(f"Fleet config verified at {FLEET_DATA_PATH}")
+        else:
+            raise FileNotFoundError("Config missing")
+    except (FileNotFoundError, json.JSONDecodeError, Exception):
+        logger.warning(f"Fleet config missing or invalid at {FLEET_DATA_PATH}, creating default...")
+        try:
+            os.makedirs(os.path.dirname(FLEET_DATA_PATH), exist_ok=True)
+            with open(FLEET_DATA_PATH, 'w') as f:
+                json.dump(default_layout, f, indent=2)
+            logger.info("Default fleet layout created successfully")
+        except Exception as e:
+            logger.error(f"CRITICAL: Failed to create fleet config: {e}")
+
+# Initialize config
+ensure_fleet_config()
 
 # Auto-import IP_list.dat on startup if database is empty
 if EQUIPMENT_DB_PATH and os.path.exists(IP_LIST_PATH):
@@ -244,65 +255,22 @@ if EQUIPMENT_DB_PATH and os.path.exists(IP_LIST_PATH):
             logger.warning(f"Auto-import failed: {_import_result['errors']}")
 
 # ========================================
-# BACKGROUND EQUIPMENT UPDATER STATE
+# LOCAL ALIASES TO SHARED STATE
 # ========================================
-# Controls the background process that updates equipment details one at a time
-background_updater = {
-    'running': False,
-    'thread': None,
-    'stop_event': threading.Event(),
-    'current_equipment': None,
-    'processed_count': 0,
-    'error_count': 0,
-    'last_update': None,
-    'delay_seconds': 5,  # Delay between equipment lookups to avoid system load
-    'status': 'stopped'
-}
-
-# ========================================
-# PTX UPTIME CHECKER STATE
-# ========================================
-# Background process that checks uptime on all PTX equipment every 30 minutes
-ptx_uptime_checker = {
-    'running': False,
-    'thread': None,
-    'stop_event': threading.Event(),
-    'current_equipment': None,
-    'total_equipment': 0,
-    'checked_count': 0,
-    'online_count': 0,
-    'offline_count': 0,
-    'error_count': 0,
-    'last_cycle_start': None,
-    'last_cycle_end': None,
-    'next_cycle': None,
-    'interval_minutes': 30,  # Check every 30 minutes
-    'status': 'stopped'  # stopped, running, waiting, error
-}
-
-# ========================================
-# PLAYBACK MONITOR STATE
-# ========================================
-# Persistent SSH connection to playback server for real-time file monitoring
-playback_monitor = {
-    'running': False,
-    'thread': None,
-    'stop_event': threading.Event(),
-    'ssh_client': None,
-    'sftp_client': None,
-    'connected': False,
-    'last_scan': None,
-    'log_files': [],  # Current .log files detected
-    'dat_files': [],  # Recent .dat files
-    'pending_file': None,  # File being written (from .log files)
-    'last_error': None,
-    'reconnect_count': 0,
-    'status': 'stopped',  # stopped, connecting, connected, monitoring, error
-    'scan_interval_seconds': 10  # Scan playback folder every 10 seconds
-}
+# These alias the dicts in app.state so routes in main.py still work unchanged.
+# Mutable objects — both names point to the same dict in memory.
+background_updater = state.background_updater
+ptx_uptime_checker = state.ptx_uptime_checker
+playback_monitor = state.playback_monitor
+fleet_monitor_updater = state.fleet_monitor_updater
+download_progress = state.download_progress
+active_tru_connections = state.active_tru_connections
+terminal_sessions = state.terminal_sessions
+ptx_uptime_db = state.ptx_uptime_db
+fleet_monitor_db = state.fleet_monitor_db
 
 # NOW we can create the Flask app
-app = Flask(__name__, template_folder=template_folder, static_folder=static_folder)
+app = Flask(__name__, template_folder=TEMPLATE_FOLDER, static_folder=STATIC_FOLDER)
 app.secret_key = "komatsu-t1-tools-secret-key-change-in-production"
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 app.jinja_env.auto_reload = True
@@ -370,149 +338,12 @@ def add_no_cache_headers(resp):
         resp.headers['Expires'] = '0'
     return resp
 
-# Global download progress tracking
-# Format: {filename: {'status': 'downloading'|'complete'|'error', 'progress': 0-100, 'local_path': str, 'total_size': int, 'error': str}}
-download_progress = {}
-
-# Extended tool list with all functionality
-TOOL_LIST = [
-    "IP Finder",
-    "Playback Tools",
-    "PTX Uptime",
-    "FrontRunner Status",
-    "Mineview Sessions",
-    "KOA Data Check",
-    "Speed Limit Data",
-    "Component Tracking",
-    "Watchdog Deploy",
-    "Linux Health", 
-    "PTX Health Check",
-    "AVI/MM2 Reboot",
-    "VNC Viewer",
-    "Flight Recorder",
-    "Equipment Monitor",
-    "Network Scanner",
-    "System Diagnostics",
-    "Log Viewer"
-]
-
-# Equipment profiles with Flight Recorder support
-EQUIPMENT_PROFILES = {
-    'K830E': {'has_flight_recorder': True, 'ptx_offset': 1},
-    'K930E': {'has_flight_recorder': True, 'ptx_offset': 1},
-    'Other': {'has_flight_recorder': False, 'ptx_offset': 0}
-}
-
-# Network configuration - FIXED: Use consistent IP reference
-GATEWAY_IP = "10.110.19.107"  # CORRECTED from 10.110.19.1
-PTX_BASE_IP = "10.110.19.107"
-PROBE_PORT = 22
-
-# Mock equipment database for testing
-MOCK_EQUIPMENT_DB = {
-    'RD111': {
-        'OID': 'RD111',
-        'profile': 'K930E',
-        'ptx_model': 'PTX10',
-        'ptx_ip': '10.110.20.110',
-        'avi_ip': '10.111.21.112',
-        'flight_recorder_ip': '10.110.20.111',
-        'vehicle_status': 'Online',
-        'ptxc_found': False,
-        'ssh_status': 'Connected'
-    },
-    'RD190': {
-        'OID': 'RD190',
-        'profile': 'K830E',
-        'ptx_model': 'PTXC',
-        'ptx_ip': '10.110.19.190',
-        'avi_ip': '10.111.19.191',
-        'flight_recorder_ip': '10.110.19.191',
-        'vehicle_status': 'Online',
-        'ptxc_found': True,
-        'ssh_status': 'Connected'
-    },
-    'AHG135': {
-        'OID': 'AHG135',
-        'profile': 'PTX10',
-        'ptx_model': 'PTX10',
-        'ptx_ip': '10.110.19.135',
-        'avi_ip': None,
-        'flight_recorder_ip': None,
-        'vehicle_status': 'Online',
-        'ptxc_found': False,
-        'ssh_status': 'Connected'
-    },
-    'TEST1': {
-        'OID': 'TEST1',
-        'profile': 'K830E',
-        'ptx_model': 'PTXC',
-        'ptx_ip': '10.110.20.201',
-        'avi_ip': '10.111.20.202',
-        'flight_recorder_ip': '10.110.20.202',
-        'vehicle_status': 'Online',
-        'ptxc_found': True,
-        'ssh_status': 'Connected',
-        'health': {
-            'cpu_usage': '85.30%',
-            'memory_usage': '78.45%',
-            'uptime': '45 days, 12 hours',
-            'disk_usage': '/dev/mmcblk0p3  5.6G  4.2G  1.1G  79% /media/realroot/home',
-            'disk_percent': '79%'
-        }
-    },
-    'TEST2': {
-        'OID': 'TEST2',
-        'profile': 'K930E',
-        'ptx_model': 'PTX10',
-        'ptx_ip': '10.110.21.150',
-        'avi_ip': '10.111.21.151',
-        'flight_recorder_ip': '10.110.21.151',
-        'vehicle_status': 'Degraded',
-        'ptxc_found': False,
-        'ssh_status': 'Connected',
-        'health': {
-            'cpu_usage': '22.10%',
-            'memory_usage': '65.20%',
-            'uptime': '2 hours, 15 minutes',
-            'disk_usage': '/dev/sda1  20G  8.5G  10G  46% /home',
-            'disk_percent': '46%'
-        }
-    }
-}
-
-# Server list for health monitoring
-SERVERS = [
-    {"name": "FrontRunner", "ip": "10.110.19.16", "port": 22},
-    {"name": "Dispatch", "ip": "10.110.19.11", "port": 80},
-    {"name": "OMS", "ip": "10.110.19.13", "port": 443},
-    {"name": "BaseStation", "ip": "10.110.19.18", "port": 8002},
-    {"name": "Monitor", "ip": "10.110.19.19", "port": 8002}
-]
-
-# MMS Server for IP Finder queries
-MMS_SERVER = {
-    'ip': '10.110.19.107',
-    'port': 22,
-    'user': 'mms',
-    'password': 'komatsu',  # Default password
-    'script': '/home/mms/bin/remote_check/Random/MySQL/ip_export.sh'
-}
-
-# Global variable to track active TRU connections
-active_tru_connections = {}
-
 # ========================================
 # AUTHENTICATION AND UTILITY FUNCTIONS
 # ========================================
-
-def login_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if not session.get('authenticated'):
-            return jsonify({'error': 'Authentication required'}), 401
-        return f(*args, **kwargs)
-    return decorated_function
+# login_required, TOOL_LIST, EQUIPMENT_PROFILES, GATEWAY_IP, PTX_BASE_IP,
+# PROBE_PORT, MOCK_EQUIPMENT_DB, SERVERS, MMS_SERVER imported from app.config / app.utils
+# download_progress, active_tru_connections aliased from app.state above
 
 def print_startup_banner():
     """Display startup information"""
@@ -543,35 +374,7 @@ def print_startup_banner():
 # ========================================
 # NETWORK MODE DETECTION AND UTILITIES
 # ========================================
-
-@lru_cache(maxsize=1)
-def is_online_network() -> bool:
-    """True on closed network; False on laptop/dev."""
-    if os.getenv("T1_OFFLINE", "").strip() == "1":
-        print("[MODE] Forced OFFLINE via T1_OFFLINE")
-        return False
-    if os.getenv("T1_FORCE_ONLINE", "").strip() == "1":
-        print("[MODE] Forced ONLINE via T1_FORCE_ONLINE")
-        return True
-
-    try:
-        with socket.create_connection((GATEWAY_IP, PROBE_PORT), timeout=1.5):
-            print(f"[MODE] ONLINE tcp {GATEWAY_IP}:{PROBE_PORT}")
-            return True
-    except Exception as e:
-        print(f"[MODE] TCP probe failed: {e}")
-
-    if ping3:
-        try:
-            rtt = ping3.ping(GATEWAY_IP, timeout=1)
-            ok = rtt is not None
-            print(f"[MODE] ICMP {'ONLINE' if ok else 'OFFLINE'} rtt={rtt}")
-            return ok
-        except Exception as e:
-            print(f"[MODE] ICMP error: {e}")
-            return False
-    
-    return False
+# is_online_network imported from app.utils above
 
 def check_network_connectivity():
     """Check if we can reach the network"""
@@ -639,177 +442,7 @@ def find_ip_address(hostname):
 # ========================================
 # EQUIPMENT SEARCH AND MANAGEMENT
 # ========================================
-
-def search_equipment(query):
-    """
-    Search for equipment by name or IP via SSH to MMS server.
-    In offline mode, returns mock/simulated data.
-    """
-    query = query.strip().upper()
-    
-    # Check if query is in mock database first (for testing)
-    if query in MOCK_EQUIPMENT_DB:
-        equipment = MOCK_EQUIPMENT_DB[query].copy()
-        equipment['found'] = True
-        equipment['search_method'] = 'database'
-        return equipment
-    
-    # If offline, return simulated data
-    if not is_online_network():
-        return {
-            'OID': query,
-            'profile': 'Simulated',
-            'ptx_model': 'PTX10',
-            'ptx_ip': f'10.110.19.{len(query) * 10 % 255}',
-            'avi_ip': None,
-            'flight_recorder_ip': None,
-            'vehicle_status': 'Simulated',
-            'ptxc_found': False,
-            'ssh_status': 'Simulated',
-            'found': True,
-            'search_method': 'simulation'
-        }
-    
-    # Online mode - query MMS server via SSH
-    if not paramiko:
-        return {'found': False, 'error': 'SSH library not available'}
-    
-    try:
-        ssh = paramiko.SSHClient()
-        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        
-        ssh.connect(
-            MMS_SERVER['ip'],
-            port=MMS_SERVER['port'],
-            username=MMS_SERVER['user'],
-            password=MMS_SERVER['password'],
-            timeout=10
-        )
-        
-        # Run the ip_export.sh script
-        command = f"{MMS_SERVER['script']} {query}"
-        stdin, stdout, stderr = ssh.exec_command(command, timeout=15)
-        
-        output = stdout.read().decode('utf-8', errors='ignore')
-        error = stderr.read().decode('utf-8', errors='ignore')
-        
-        ssh.close()
-        
-        if error and 'not found' in error.lower():
-            return {'found': False, 'error': f'Equipment not found: {query}'}
-        
-        # Parse the output
-        return parse_ip_finder_output(query, output)
-        
-    except paramiko.AuthenticationException:
-        logger.error("MMS server authentication failed")
-        return {'found': False, 'error': 'Authentication failed'}
-    except paramiko.SSHException as e:
-        logger.error(f"SSH connection error: {e}")
-        return {'found': False, 'error': f'Connection failed: {str(e)}'}
-    except Exception as e:
-        logger.error(f"Equipment search error: {e}")
-        return {'found': False, 'error': str(e)}
-
-def parse_ip_finder_output(query, output):
-    """
-    Parse the output from ip_export.sh script.
-    
-    Example output:
-    +--------+-------------+----------+--------------+
-    | _OID_  | _CID_       | _profile | network_ip   |
-    +--------+-------------+----------+--------------+
-    | GRD155 | eqmt_grader | CAT 24M  | 10.110.21.36 |
-    +--------+-------------+----------+--------------+
-    
-    PTX IP is: 10.110.21.36
-    Vehicle is Online.
-    
-    PTXC Found.
-    
-    AVI IP is : 10.111.218.82
-    """
-    result = {
-        'OID': query,
-        'profile': 'Unknown',
-        'ptx_model': 'PTX10',
-        'ptx_ip': None,
-        'avi_ip': None,
-        'vehicle_status': 'Unknown',
-        'ptxc_found': False,
-        'found': False,
-        'search_method': 'mms_server'
-    }
-    
-    if not output or not output.strip():
-        return result
-    
-    lines = output.strip().split('\n')
-    
-    # Parse table data - look for the data row (not header, not border)
-    for line in lines:
-        # Skip border lines and header
-        if line.startswith('+') or '_OID_' in line:
-            continue
-        # Data row starts with | and contains actual data
-        if line.startswith('|') and '|' in line[1:]:
-            parts = [p.strip() for p in line.split('|') if p.strip()]
-            if len(parts) >= 4 and parts[0].upper() == query:
-                result['OID'] = parts[0]
-                result['cid'] = parts[1] if len(parts) > 1 else None
-                result['profile'] = parts[2] if len(parts) > 2 else 'Unknown'
-                result['network_ip'] = parts[3] if len(parts) > 3 else None
-                result['found'] = True
-                break
-    
-    # Parse additional fields from output
-    for line in lines:
-        line = line.strip()
-        
-        # PTX IP
-        if line.lower().startswith('ptx ip is:'):
-            ip_match = re.search(r'(\d+\.\d+\.\d+\.\d+)', line)
-            if ip_match:
-                result['ptx_ip'] = ip_match.group(1)
-        
-        # Vehicle status
-        if 'vehicle is' in line.lower():
-            if 'online' in line.lower():
-                result['vehicle_status'] = 'Online'
-            elif 'offline' in line.lower():
-                result['vehicle_status'] = 'Offline'
-        
-        # PTXC Found
-        if 'ptxc found' in line.lower():
-            result['ptxc_found'] = True
-            result['ptx_model'] = 'PTXC'
-        
-        # AVI IP (handles "AVI IP is : 10.111.219.27" or "AVI IP is: 10.111.219.27")
-        if 'avi ip' in line.lower() and 'is' in line.lower():
-            ip_match = re.search(r'(\d+\.\d+\.\d+\.\d+)', line)
-            if ip_match:
-                result['avi_ip'] = ip_match.group(1)
-    
-    # If no PTX IP found in extra lines, use network_ip from table
-    if not result['ptx_ip'] and result.get('network_ip'):
-        result['ptx_ip'] = result['network_ip']
-
-    # If AVI IP not found from MMS, try to get it from equipment cache database
-    if not result['avi_ip'] and EQUIPMENT_DB_PATH:
-        try:
-            cached = get_equipment(EQUIPMENT_DB_PATH, query)
-            if cached and cached.get('avi_ip'):
-                result['avi_ip'] = cached['avi_ip']
-        except Exception as e:
-            logger.debug(f"Could not get cached AVI IP for {query}: {e}")
-
-    # Calculate flight recorder IP for supported profiles
-    if result['profile'] in ['K830E', 'K930E'] and result['ptx_ip']:
-        parts = result['ptx_ip'].split('.')
-        if len(parts) == 4:
-            result['flight_recorder_IP'] = f"{parts[0]}.{parts[1]}.{parts[2]}.{int(parts[3]) + 1}"
-
-    return result
+# search_equipment, parse_ip_finder_output imported from app.utils above
 
 def get_flight_recorder_ip(equipment_type):
     """Calculate Flight Recorder IP for supported equipment"""
@@ -826,552 +459,8 @@ def get_flight_recorder_ip(equipment_type):
 # ========================================
 # PTX LOG CLEANUP
 # ========================================
-
-def connect_to_equipment(ip_address):
-    """
-    Try to connect to equipment using both credential sets.
-    Returns: (ssh_client, credential_name) or (None, error_message)
-    """
-    credentials = [
-        {"user": "dlog", "password": "gold", "name": "PTXC"},
-        {"user": "mms", "password": "modular", "name": "PTX10"}
-    ]
-    
-    for cred in credentials:
-        try:
-            if paramiko is None:
-                return None, "paramiko library not available"
-            ssh = paramiko.SSHClient()
-            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            ssh.connect(
-                hostname=ip_address,
-                username=cred['user'],
-                password=cred['password'],
-                timeout=10,
-                look_for_keys=False,
-                allow_agent=False
-            )
-            return ssh, cred['name']
-        except Exception as e:
-            continue
-    
-    return None, f"Could not connect to {ip_address} with any credentials"
-
-def get_ptx_uptime(ip_address: str) -> dict:
-    """
-    Connect to PTX equipment via SSH and retrieve uptime.
-    Uses dlog/gold credentials first (PTXC), then mms/modular (PTX10).
-
-    Returns dict with:
-        - success: bool
-        - uptime_hours: float (hours since last reboot)
-        - uptime_raw: str (raw uptime output)
-        - ptx_type: str (PTXC or PTX10 based on which credential worked)
-        - error: str (if failed)
-    """
-    if not paramiko:
-        return {'success': False, 'error': 'paramiko library not available'}
-
-    # PTX credentials - try PTXC first as it's more common
-    credentials = [
-        {"user": "dlog", "password": "gold", "name": "PTXC"},
-        {"user": "mms", "password": "modular", "name": "PTX10"}
-    ]
-
-    ssh = None
-    ptx_type = None
-
-    # Try to connect with each credential set
-    for cred in credentials:
-        try:
-            ssh = paramiko.SSHClient()
-            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            ssh.connect(
-                hostname=ip_address,
-                username=cred['user'],
-                password=cred['password'],
-                timeout=10,
-                look_for_keys=False,
-                allow_agent=False
-            )
-            ptx_type = cred['name']
-            logger.debug(f"Connected to {ip_address} with {cred['name']} credentials")
-            break
-        except Exception as e:
-            if ssh:
-                try:
-                    ssh.close()
-                except Exception:
-                    pass
-            ssh = None
-            continue
-
-    if not ssh:
-        return {'success': False, 'error': f'Could not connect to {ip_address}'}
-
-    try:
-        # Run uptime command
-        stdin, stdout, stderr = ssh.exec_command("uptime", timeout=15)
-        uptime_output = stdout.read().decode('utf-8', errors='ignore').strip()
-        error_output = stderr.read().decode('utf-8', errors='ignore').strip()
-
-        ssh.close()
-
-        if error_output and not uptime_output:
-            return {'success': False, 'error': f'Uptime command error: {error_output}'}
-
-        if not uptime_output:
-            return {'success': False, 'error': 'No uptime output received'}
-
-        # Parse uptime output
-        # Examples:
-        # " 10:30:01 up 5 days, 3:45, 1 user, load average: 0.00, 0.01, 0.05"
-        # " 10:30:01 up 3:45, 1 user, load average: 0.00, 0.01, 0.05" (less than 1 day)
-        # " 10:30:01 up 45 min, 1 user, load average: 0.00, 0.01, 0.05" (less than 1 hour)
-
-        uptime_hours = 0.0
-
-        # Pattern for "X days, H:MM" or "X day, H:MM"
-        days_hours_match = re.search(r'up\s+(\d+)\s+days?,\s+(\d+):(\d+)', uptime_output)
-        if days_hours_match:
-            days = int(days_hours_match.group(1))
-            hours = int(days_hours_match.group(2))
-            minutes = int(days_hours_match.group(3))
-            uptime_hours = (days * 24) + hours + (minutes / 60)
-        else:
-            # Pattern for "H:MM" (no days)
-            hours_match = re.search(r'up\s+(\d+):(\d+)', uptime_output)
-            if hours_match:
-                hours = int(hours_match.group(1))
-                minutes = int(hours_match.group(2))
-                uptime_hours = hours + (minutes / 60)
-            else:
-                # Pattern for "X min"
-                min_match = re.search(r'up\s+(\d+)\s+min', uptime_output)
-                if min_match:
-                    minutes = int(min_match.group(1))
-                    uptime_hours = minutes / 60
-
-        return {
-            'success': True,
-            'uptime_hours': round(uptime_hours, 2),
-            'uptime_raw': uptime_output,
-            'ptx_type': ptx_type
-        }
-
-    except Exception as e:
-        if ssh:
-            try:
-                ssh.close()
-            except Exception:
-                pass
-        return {'success': False, 'error': str(e)}
-
-def check_ptx_reachable(ip_address: str, timeout: float = 3.0) -> bool:
-    """
-    Quick check if PTX is reachable via ping.
-    Returns True if reachable, False otherwise.
-    """
-    if ping3:
-        try:
-            result = ping3.ping(ip_address, timeout=int(timeout))
-            return result is not None
-        except Exception:
-            return False
-    else:
-        # Fallback to socket check on SSH port
-        try:
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.settimeout(timeout)
-            result = sock.connect_ex((ip_address, 22))
-            sock.close()
-            return result == 0
-        except Exception:
-            return False
-
-def ptx_uptime_checker_worker():
-    """
-    Background worker that checks uptime on all PTX equipment.
-    Runs continuously, checking all equipment then waiting for next cycle.
-    Skips equipment that is offline (not pingable).
-    """
-    global ptx_uptime_checker
-
-    set_request_id('bg-ptx-checker')
-    logger.info("PTX Uptime Checker started")
-    log_background('info', 'ptx_checker', f'PTX Uptime Checker started (interval: {ptx_uptime_checker["interval_minutes"]} minutes)')
-    ptx_uptime_checker['status'] = 'running'
-
-    while not ptx_uptime_checker['stop_event'].is_set():
-        try:
-            # Get all equipment from PTX uptime database
-            equipment_list = ptx_uptime_db.get_all_uptime(min_hours=0)
-
-            if not equipment_list:
-                logger.warning("PTX Uptime Checker: No equipment in database")
-                ptx_uptime_checker['status'] = 'waiting'
-                # Wait for interval then try again
-                _wait_for_interval()
-                continue
-
-            ptx_uptime_checker['total_equipment'] = len(equipment_list)
-            ptx_uptime_checker['checked_count'] = 0
-            ptx_uptime_checker['online_count'] = 0
-            ptx_uptime_checker['offline_count'] = 0
-            ptx_uptime_checker['error_count'] = 0
-            ptx_uptime_checker['last_cycle_start'] = datetime.now().isoformat()
-            ptx_uptime_checker['status'] = 'running'
-
-            logger.info(f"PTX Uptime Checker: Starting cycle for {len(equipment_list)} equipment")
-
-            for equipment in equipment_list:
-                if ptx_uptime_checker['stop_event'].is_set():
-                    break
-
-                equipment_id = equipment.get('equipment_id')
-                ip_address = equipment.get('ip')
-
-                if not equipment_id or not ip_address:
-                    ptx_uptime_checker['error_count'] += 1
-                    continue
-
-                ptx_uptime_checker['current_equipment'] = equipment_id
-
-                # Check if equipment is reachable first (quick ping)
-                if not check_ptx_reachable(ip_address, timeout=2.0):
-                    logger.debug(f"PTX Uptime Checker: {equipment_id} ({ip_address}) is offline - skipping")
-                    ptx_uptime_checker['offline_count'] += 1
-                    ptx_uptime_checker['checked_count'] += 1
-                    # Update status in database
-                    ptx_uptime_db.update_status(equipment_id, 'offline')
-                    continue
-
-                # Equipment is reachable - get uptime via SSH
-                result = get_ptx_uptime(ip_address)
-
-                if result['success']:
-                    # Update database with new uptime
-                    ptx_type = result.get('ptx_type') or 'PTX'
-                    ptx_uptime_db.upsert_uptime(
-                        equipment_id=equipment_id,
-                        ip_address=ip_address,
-                        uptime_hours=result['uptime_hours'],
-                        last_check=datetime.now().strftime('%a %b %d %H:%M:%S %Z %Y'),
-                        last_check_timestamp=int(time.time()),
-                        ptx_type=ptx_type
-                    )
-                    ptx_uptime_db.update_status(equipment_id, 'online', ptx_type)
-                    ptx_uptime_checker['online_count'] += 1
-                    logger.debug(f"PTX Uptime Checker: {equipment_id} uptime={result['uptime_hours']:.1f}h")
-                else:
-                    # Could ping but SSH failed - mark as error but still reachable
-                    ptx_uptime_db.update_status(equipment_id, 'unknown')
-                    ptx_uptime_checker['error_count'] += 1
-                    logger.warning(f"PTX Uptime Checker: {equipment_id} SSH error: {result.get('error')}")
-
-                ptx_uptime_checker['checked_count'] += 1
-
-                # Small delay between checks to avoid overwhelming network
-                time.sleep(0.5)
-
-            ptx_uptime_checker['last_cycle_end'] = datetime.now().isoformat()
-            ptx_uptime_checker['current_equipment'] = None
-
-            logger.info(
-                f"PTX Uptime Checker: Cycle complete - "
-                f"Online: {ptx_uptime_checker['online_count']}, "
-                f"Offline: {ptx_uptime_checker['offline_count']}, "
-                f"Errors: {ptx_uptime_checker['error_count']}"
-            )
-            log_background(
-                'info',
-                'ptx_checker',
-                f"Cycle complete: Checked={ptx_uptime_checker['checked_count']}, "
-                f"Online={ptx_uptime_checker['online_count']}, "
-                f"Offline={ptx_uptime_checker['offline_count']}, "
-                f"Errors={ptx_uptime_checker['error_count']}"
-            )
-
-            # Wait for next cycle
-            _wait_for_interval()
-
-        except Exception as e:
-            logger.error(f"PTX Uptime Checker error: {e}")
-            ptx_uptime_checker['status'] = 'error'
-            time.sleep(60)  # Wait 1 minute before retrying on error
-
-    ptx_uptime_checker['running'] = False
-    ptx_uptime_checker['status'] = 'stopped'
-    ptx_uptime_checker['current_equipment'] = None
-    logger.info("PTX Uptime Checker stopped")
-    log_background('info', 'ptx_checker', 'PTX Uptime Checker stopped')
-
-def _wait_for_interval():
-    """Wait for the configured interval, checking stop event periodically."""
-    global ptx_uptime_checker
-
-    interval_seconds = ptx_uptime_checker['interval_minutes'] * 60
-    ptx_uptime_checker['next_cycle'] = (
-        datetime.now() + timedelta(seconds=interval_seconds)
-    ).isoformat()
-    ptx_uptime_checker['status'] = 'waiting'
-
-    # Check stop event every 10 seconds during wait
-    for _ in range(interval_seconds // 10):
-        if ptx_uptime_checker['stop_event'].is_set():
-            break
-        time.sleep(10)
-
-    # Handle remaining seconds
-    remaining = interval_seconds % 10
-    if remaining > 0 and not ptx_uptime_checker['stop_event'].is_set():
-        time.sleep(remaining)
-
-def playback_monitor_worker():
-    """
-    Background worker that maintains persistent SSH/SFTP connection to playback server.
-    Monitors playback folder for .log files and .dat files in real-time.
-    """
-    global playback_monitor
-
-    set_request_id('bg-playback-monitor')
-    logger.info("Playback Monitor started")
-    log_background('info', 'playback_monitor', f'Playback monitor started (scan interval: {playback_monitor["scan_interval_seconds"]}s)')
-    playback_monitor['status'] = 'connecting'
-
-    while not playback_monitor['stop_event'].is_set():
-        try:
-            # Only run if online
-            if not is_online_network():
-                playback_monitor['status'] = 'offline'
-                playback_monitor['connected'] = False
-                time.sleep(30)
-                continue
-
-            if not paramiko:
-                logger.error("Playback Monitor: Paramiko not available")
-                playback_monitor['status'] = 'error'
-                playback_monitor['last_error'] = 'SSH library not available'
-                time.sleep(60)
-                continue
-
-            # Establish SSH connection if not connected
-            if not playback_monitor['connected'] or not playback_monitor['ssh_client']:
-                try:
-                    logger.info(f"Playback Monitor: Connecting to {PLAYBACK_SERVER['ip']}...")
-
-                    ssh = paramiko.SSHClient()
-                    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-
-                    ssh.connect(
-                        PLAYBACK_SERVER['ip'],
-                        port=PLAYBACK_SERVER['port'],
-                        username=PLAYBACK_SERVER['user'],
-                        password=PLAYBACK_SERVER['password'],
-                        timeout=15,
-                        banner_timeout=30
-                    )
-
-                    sftp = ssh.open_sftp()
-
-                    playback_monitor['ssh_client'] = ssh
-                    playback_monitor['sftp_client'] = sftp
-                    playback_monitor['connected'] = True
-                    playback_monitor['reconnect_count'] += 1
-                    playback_monitor['last_error'] = None
-                    playback_monitor['status'] = 'monitoring'
-
-                    logger.info(f"Playback Monitor: Connected successfully (reconnect #{playback_monitor['reconnect_count']})")
-
-                except Exception as conn_err:
-                    logger.error(f"Playback Monitor: Connection failed: {conn_err}")
-                    playback_monitor['status'] = 'error'
-                    playback_monitor['last_error'] = str(conn_err)
-                    playback_monitor['connected'] = False
-
-                    # Clean up partial connections
-                    if playback_monitor['sftp_client']:
-                        try:
-                            playback_monitor['sftp_client'].close()
-                        except:
-                            pass
-                        playback_monitor['sftp_client'] = None
-
-                    if playback_monitor['ssh_client']:
-                        try:
-                            playback_monitor['ssh_client'].close()
-                        except:
-                            pass
-                        playback_monitor['ssh_client'] = None
-
-                    # Wait before retry
-                    time.sleep(30)
-                    continue
-
-            # Monitor the playback folder
-            sftp = playback_monitor['sftp_client']
-
-            try:
-                # List files in playback folder
-                file_list = sftp.listdir_attr(PLAYBACK_SERVER['path'])
-                playback_monitor['last_scan'] = datetime.now().isoformat()
-
-                # Separate .log and .dat files
-                log_files = []
-                dat_files = []
-
-                for f in file_list:
-                    fname = f.filename
-
-                    # Auxiliary .log files (EVENTS, INDEX, CACHE)
-                    if fname.startswith('AHS_') and fname.endswith('_AEST.log'):
-                        if 'EVENTS_' in fname or 'INDEX_' in fname or 'CACHE_' in fname:
-                            log_files.append({
-                                'name': fname,
-                                'mtime': f.st_mtime,
-                                'size': f.st_size
-                            })
-
-                    # Playback .dat files
-                    elif fname.startswith('AHS_LOG_') and fname.endswith('.dat'):
-                        dat_files.append({
-                            'name': fname,
-                            'mtime': f.st_mtime,
-                            'size': f.st_size
-                        })
-
-                # Sort by modification time (most recent first)
-                log_files.sort(key=lambda x: x['mtime'], reverse=True)
-                dat_files.sort(key=lambda x: x['mtime'], reverse=True)
-
-                # Store results
-                playback_monitor['log_files'] = log_files[:10]  # Keep most recent 10
-                playback_monitor['dat_files'] = dat_files[:20]  # Keep most recent 20
-
-                # Extract pending file info from most recent .log file
-                if log_files:
-                    most_recent_log = log_files[0]['name']
-
-                    try:
-                        # Extract timestamp from log file
-                        parts = most_recent_log.split('_')
-                        date_part = None
-                        time_part = None
-
-                        for i in range(len(parts) - 2):
-                            if len(parts[i]) == 8 and parts[i].isdigit():
-                                date_part = parts[i]
-                                time_part = parts[i + 1]
-                                break
-
-                        if date_part and time_part:
-                            predicted_dat = f"AHS_LOG_{date_part}_{time_part}_AEST.dat"
-
-                            # Check if .dat file exists and get its size
-                            dat_exists = False
-                            dat_size = 0
-                            dat_ready = False
-
-                            for f in dat_files:
-                                if f['name'] == predicted_dat:
-                                    dat_exists = True
-                                    dat_size = f['size']
-                                    dat_ready = dat_size > 50 * 1024 * 1024  # >50MB = ready
-                                    break
-
-                            # Calculate time elapsed since .log files appeared
-                            try:
-                                year = int(date_part[0:4])
-                                month = int(date_part[4:6])
-                                day = int(date_part[6:8])
-                                hour = int(time_part[0:2])
-                                minute = int(time_part[2:4])
-                                second = int(time_part[4:6])
-                                dt = datetime(year, month, day, hour, minute, second)
-
-                                now = datetime.now()
-                                elapsed_seconds = int((now - dt).total_seconds())
-
-                                # Estimate: .dat ready 2 minutes after .log files
-                                estimated_ready_time = dt + timedelta(minutes=2)
-                                countdown_seconds = int((estimated_ready_time - now).total_seconds())
-                            except:
-                                elapsed_seconds = 0
-                                countdown_seconds = 120
-
-                            playback_monitor['pending_file'] = {
-                                'log_file': most_recent_log,
-                                'predicted_dat': predicted_dat,
-                                'dat_exists': dat_exists,
-                                'dat_size': dat_size,
-                                'dat_size_mb': round(dat_size / (1024 * 1024), 1),
-                                'dat_ready': dat_ready,
-                                'timestamp': f"{date_part}_{time_part}",
-                                'elapsed_seconds': elapsed_seconds,
-                                'countdown_seconds': max(0, countdown_seconds)
-                            }
-                        else:
-                            playback_monitor['pending_file'] = None
-
-                    except Exception as parse_err:
-                        logger.warning(f"Playback Monitor: Could not parse log file: {parse_err}")
-                        playback_monitor['pending_file'] = None
-                else:
-                    playback_monitor['pending_file'] = None
-
-                playback_monitor['status'] = 'monitoring'
-
-            except Exception as scan_err:
-                logger.error(f"Playback Monitor: Scan error: {scan_err}")
-                playback_monitor['status'] = 'error'
-                playback_monitor['last_error'] = str(scan_err)
-                playback_monitor['connected'] = False
-
-                # Close connection and reconnect
-                try:
-                    playback_monitor['sftp_client'].close()
-                    playback_monitor['ssh_client'].close()
-                except:
-                    pass
-
-                playback_monitor['sftp_client'] = None
-                playback_monitor['ssh_client'] = None
-
-                time.sleep(10)
-                continue
-
-            # Wait before next scan (respect stop event)
-            scan_interval = playback_monitor['scan_interval_seconds']
-            for _ in range(scan_interval):
-                if playback_monitor['stop_event'].is_set():
-                    break
-                time.sleep(1)
-
-        except Exception as e:
-            logger.error(f"Playback Monitor: Unexpected error: {e}")
-            playback_monitor['status'] = 'error'
-            playback_monitor['last_error'] = str(e)
-            playback_monitor['connected'] = False
-            time.sleep(30)
-
-    # Cleanup on stop
-    if playback_monitor['sftp_client']:
-        try:
-            playback_monitor['sftp_client'].close()
-        except:
-            pass
-
-    if playback_monitor['ssh_client']:
-        try:
-            playback_monitor['ssh_client'].close()
-        except:
-            pass
-
-    playback_monitor['running'] = False
-    playback_monitor['connected'] = False
-    playback_monitor['status'] = 'stopped'
-    logger.info("Playback Monitor stopped")
-    log_background('info', 'playback_monitor', 'Playback monitor stopped')
+# connect_to_equipment, get_ptx_uptime, check_ptx_reachable imported from app.utils
+# ptx_uptime_checker_worker, _wait_for_interval, playback_monitor_worker imported from app.background_tasks
 
 def find_log_directory(ssh):
     """
@@ -2140,22 +1229,28 @@ def api_vnc_connect():
                 'simulated': True
             })
         
-        # Try to launch VNC viewer (Windows)
+        # Try to launch VNC viewer from USB tools directory
         import subprocess
-        vnc_path = r"C:\Program Files\RealVNC\VNC Viewer\vncviewer.exe"
-        
+        vnc_path = VNC_VIEWER_PATH
+
+        if not os.path.exists(vnc_path):
+            return jsonify({
+                'success': False,
+                'message': f'VNC viewer not found at {vnc_path}. Ensure USB is connected with AutoTech tools.',
+                'vnc_url': f'vnc://{ip}:{port}'
+            })
+
         try:
-            subprocess.Popen([vnc_path, f"{ip}:{port}"], 
+            subprocess.Popen([vnc_path, '-WarnUnencrypted=0', f"{ip}:{port}"],
                            creationflags=subprocess.CREATE_NEW_CONSOLE)
             return jsonify({
                 'success': True,
                 'message': f'VNC viewer launched for {ip}:{port}'
             })
-        except FileNotFoundError:
-            # VNC viewer not installed, return info for browser fallback
+        except Exception as e:
             return jsonify({
                 'success': False,
-                'message': 'VNC viewer not found. Use browser VNC client.',
+                'message': f'Failed to launch VNC viewer: {e}',
                 'vnc_url': f'vnc://{ip}:{port}'
             })
         
@@ -3471,23 +2566,94 @@ def api_usb_status():
         from tools.usb_tools import scan_usb_status
         status = scan_usb_status()
         return jsonify(status)
-        
+
     except Exception as e:
         logger.error(f"USB status error: {e}")
         return jsonify({'error': str(e)}), 500
+
+@app.route('/usb_tool')
+def usb_tool_page():
+    """AutoTech Client USB management page."""
+    return render_template('usb_tool.html',
+                         tool_name='AutoTech Client USB',
+                         tool_id='client',
+                         tool_icon='💾',
+                         tool_display_name='AutoTech Client Package',
+                         tool_description='USB installer and client management tools',
+                         tool_folder='autotech_client',
+                         tool_file='Install_AutoTech_Client.bat',
+                         online=is_online_network(),
+                         gateway_ip=GATEWAY_IP,
+                         timestamp=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+
+@app.route('/api/usb/scan')
+def api_usb_scan_all():
+    """
+    Scan all USB drives for AutoTech client package (no specific tool required).
+    Returns USB drive status from usb_tools.scan_usb_status().
+    """
+    try:
+        from tools.usb_tools import scan_usb_status
+        status = scan_usb_status()
+        return jsonify(status)
+    except Exception as e:
+        logger.error(f"USB scan error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/client/installer')
+def api_client_installer():
+    """
+    Download AutoTech Client installer batch file.
+    Serves Install_AutoTech_Client.bat from the autotech_client folder.
+    """
+    client_folder, error = get_autotech_client_folder()
+    if error or not client_folder:
+        return jsonify({'error': error or 'AutoTech Client folder not found'}), 404
+    installer_path = os.path.join(client_folder, 'Install_AutoTech_Client.bat')
+    if not os.path.exists(installer_path):
+        return jsonify({'error': 'Install_AutoTech_Client.bat not found in client folder'}), 404
+    return send_file(installer_path, as_attachment=True, download_name='Install_AutoTech_Client.bat')
+
+@app.route('/api/client/test')
+def api_client_test():
+    """
+    Test AutoTech Client installation status.
+    Checks Windows registry for URI handler registrations and
+    C:\\AutoTech_Client\\scripts\\ for launcher files.
+    """
+    try:
+        import winreg
+    except ImportError:
+        return jsonify({'error': 'winreg not available (Windows only)'}), 500
+
+    protocols = ['autotech-ssh', 'autotech-sftp', 'autotech-vnc', 'autotech-script']
+    handlers = {}
+    for protocol in protocols:
+        try:
+            key = winreg.OpenKey(winreg.HKEY_CLASSES_ROOT, protocol)
+            winreg.CloseKey(key)
+            handlers[protocol] = True
+        except (FileNotFoundError, OSError):
+            handlers[protocol] = False
+
+    install_dir = r'C:\AutoTech_Client\scripts'
+    launchers = {}
+    for script in ['launch_putty.bat', 'launch_winscp.bat', 'launch_vnc.bat', 'launch_script.bat']:
+        launchers[script] = os.path.exists(os.path.join(install_dir, script))
+
+    all_installed = all(handlers.values()) and all(launchers.values())
+    return jsonify({
+        'handlers': handlers,
+        'launchers': launchers,
+        'install_dir': install_dir,
+        'all_installed': all_installed
+    })
 
 # ========================================
 # PLAYBACK SERVER API ENDPOINTS
 # ========================================
 
-# Playback server configuration
-PLAYBACK_SERVER = {
-    'ip': '10.110.19.16',
-    'port': 22,
-    'user': 'komatsu',
-    'password': 'M0dul1r@GRM2',
-    'path': '/var/log/frontrunner/frontrunnerV3-3.7.0-076-full/playback/'
-}
+# PLAYBACK_SERVER imported from app.config above
 
 @app.route("/api/playback/server-check")
 def api_playback_server_check():
@@ -4770,8 +3936,7 @@ def api_ptx_status():
 # ========================================
 # T1 LEGACY TOOLS
 # ========================================
-
-terminal_sessions = {}
+# terminal_sessions aliased from app.state above
 
 class TerminalSession:
     """Manages a T1_Tools.bat terminal session (legacy tool)"""
@@ -4941,36 +4106,7 @@ def t1_tools_help():
     return render_template('t1_tools_help.html',
                          online=is_online_network())
 
-def get_autotech_client_folder():
-    """
-    Find the autotech_client folder - checks multiple locations.
-    USB structure: E:/AutoTech/autotech_client (inside AutoTech folder)
-    Dev structure: project_root/autotech_client
-    Returns (folder_path, error_message) tuple.
-    """
-    import string
-
-    # Check 1: USB structure - E:\AutoTech\autotech_client (AutoTech.exe is at E:\)
-    # When running as EXE, BASE_DIR is E:\ so check E:\AutoTech\autotech_client
-    usb_client_folder = os.path.join(BASE_DIR, "AutoTech", "autotech_client")
-    if os.path.exists(usb_client_folder):
-        return usb_client_folder, None
-
-    # Check 2: Dev environment - autotech_client is inside project folder
-    local_client_folder = os.path.join(BASE_DIR, "autotech_client")
-    if os.path.exists(local_client_folder):
-        return local_client_folder, None
-
-    # Check 3: Search USB drives for AutoTech\autotech_client
-    for drive_letter in string.ascii_uppercase[3:12]:  # D: through L:
-        drive = f"{drive_letter}:\\"
-        if os.path.exists(drive):
-            # Check for AutoTech\autotech_client structure
-            client_folder = os.path.join(drive, "AutoTech", "autotech_client")
-            if os.path.exists(client_folder):
-                return client_folder, None
-
-    return None, "AutoTech Client folder not found. Run BUILD_WEBSERVER.bat to deploy the installer package."
+# get_autotech_client_folder imported from app.utils above
 
 @app.route('/download-client-setup')
 def download_client_setup():
@@ -5208,11 +4344,13 @@ def api_check_client_installed():
     Returns server version for comparison.
     Also returns client IP for tracking purposes.
     """
-    # Get server version
+    # Get server version - check AutoTech/scripts/VERSION first, then folder root
     server_version = None
     server_version_file, _ = get_autotech_client_folder()
     if server_version_file:
-        version_path = os.path.join(server_version_file, "VERSION")
+        version_path = os.path.join(server_version_file, "AutoTech", "scripts", "VERSION")
+        if not os.path.exists(version_path):
+            version_path = os.path.join(server_version_file, "VERSION")
         if os.path.exists(version_path):
             try:
                 with open(version_path, 'r') as f:
@@ -5692,98 +4830,7 @@ def api_equipment_list():
 # EQUIPMENT DATABASE IMPORT & UPDATE API
 # ========================================
 
-def background_update_worker():
-    """
-    Background worker that updates equipment details one at a time.
-    Uses the search_equipment function to query MMS server and updates the database.
-    Runs with delays between lookups to avoid bogging down the system.
-    """
-    global background_updater
-
-    set_request_id('bg-equipment-updater')
-    # Early exit if database not initialized
-    if not EQUIPMENT_DB_PATH:
-        logger.error("Background updater: Database not initialized")
-        background_updater['status'] = 'error'
-        background_updater['running'] = False
-        return
-
-    db_path = EQUIPMENT_DB_PATH  # Local variable with guaranteed str type
-
-    logger.info("Background equipment updater started")
-    log_background('info', 'equipment_updater', 'Equipment updater started')
-    background_updater['status'] = 'running'
-    background_updater['processed_count'] = 0
-    background_updater['error_count'] = 0
-
-    while not background_updater['stop_event'].is_set():
-        try:
-            # Get one equipment that needs updating
-            equipment_list = get_equipment_needing_update(db_path, limit=1)
-
-            if not equipment_list:
-                logger.info("Background updater: No more equipment needs updating")
-                background_updater['status'] = 'complete'
-                break
-
-            equipment = equipment_list[0]
-            equipment_name = equipment['equipment_name']
-            background_updater['current_equipment'] = equipment_name
-
-            logger.info(f"Background updater: Looking up {equipment_name}")
-
-            # Query MMS server for live data
-            result = search_equipment(equipment_name)
-
-            if result.get('found'):
-                # Update database with live data
-                save_equipment(
-                    db_path,
-                    equipment_name=equipment_name,
-                    cid=result.get('cid'),
-                    profile=result.get('profile'),
-                    network_ip=result.get('ptx_ip') or result.get('network_ip'),
-                    avi_ip=result.get('avi_ip'),
-                    ptx_model=result.get('ptx_model'),
-                    status=result.get('vehicle_status', '').lower() if result.get('vehicle_status') else None
-                )
-                background_updater['processed_count'] += 1
-                logger.info(f"Background updater: Updated {equipment_name}")
-            else:
-                # Equipment not found on MMS - still update timestamp to prevent infinite loop
-                # Mark as 'not_found' status so we don't keep retrying
-                save_equipment(
-                    db_path,
-                    equipment_name=equipment_name,
-                    status='not_found'
-                )
-                background_updater['error_count'] += 1
-                logger.warning(f"Background updater: Could not find {equipment_name} - marked as not_found")
-
-            background_updater['last_update'] = datetime.now().isoformat()
-
-            # Delay before next lookup to avoid system load
-            delay = background_updater['delay_seconds']
-            for _ in range(delay * 10):  # Check stop event every 100ms
-                if background_updater['stop_event'].is_set():
-                    break
-                time.sleep(0.1)
-
-        except Exception as e:
-            logger.error(f"Background updater error: {e}")
-            background_updater['error_count'] += 1
-            time.sleep(5)  # Wait before retrying on error
-
-    background_updater['running'] = False
-    background_updater['current_equipment'] = None
-    if background_updater['status'] != 'complete':
-        background_updater['status'] = 'stopped'
-    logger.info("Background equipment updater stopped")
-    log_background(
-        'info',
-        'equipment_updater',
-        f'Equipment updater stopped. Processed: {background_updater["processed_count"]}, Errors: {background_updater["error_count"]}'
-    )
+# background_update_worker imported from app.background_tasks above
 
 @app.route('/api/equipment/import-ip-list', methods=['POST'])
 def api_import_ip_list():
@@ -7224,6 +6271,144 @@ def api_logs_download(source: str):
     return send_file(log_path, as_attachment=True)
 
 # ========================================
+# DIG FLEET MONITOR ROUTES
+# ========================================
+
+# ========================================
+# DIG FLEET MONITOR ROUTES
+# ========================================
+
+# format_uptime_hours, probe_equipment_health, fleet_monitor_worker imported from app.background_tasks above
+
+@app.route('/dig_fleet_monitor')
+def dig_fleet_monitor():
+    """Dig Fleet Monitor page"""
+    return render_template('dig_fleet_monitor.html',
+                         page_title="Dig Fleet Monitor",
+                         online=is_online_network(),
+                         gateway_ip=GATEWAY_IP,
+                         timestamp=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+
+@app.route('/api/fleet_data')
+def api_fleet_data():
+    """Get fleet data with health info from SQL DB - Non-blocking & Failure Resilient"""
+    try:
+        data = None
+        # Load layout with a complete fallback if the file is missing/locked
+        if os.path.exists(FLEET_DATA_PATH):
+            try:
+                with open(FLEET_DATA_PATH, 'r') as f:
+                    data = json.load(f)
+            except Exception as read_err:
+                logger.error(f"Fleet Monitor: Error reading layout file: {read_err}")
+        
+        if not data:
+            logger.warning("Fleet Monitor: Using safety fallback layout")
+            data = {
+                "columns": [
+                    {"id": "lh_north", "title": "Load & Haul North", "main": "GR17", "back": "GR18", "phone": "4258", "comms": "Auto Truck", "color": "#f7a224", "equipment": ["EXD69", "EXD99"]},
+                    {"id": "lh_central", "title": "Load & Haul Central", "main": "GR15", "back": "GR16", "phone": "4259", "comms": "Auto Truck", "color": "#73c05c", "equipment": ["EXD265", "EXD81"]},
+                    {"id": "lh_south", "title": "Load & Haul South", "main": "GR13", "back": "GR14", "phone": "4252", "comms": "Auto Truck", "color": "#f7e127", "equipment": ["EXD82", "EXD66"]}
+                ]
+            }
+            
+        # Get latest cached health from SQL
+        health_data = {}
+        try:
+            health_data = fleet_monitor_db.get_latest_health()
+        except Exception as db_err:
+            logger.error(f"Fleet Monitor: SQL error: {db_err}")
+            
+        # Merge health data into each equipment
+        for column in data['columns']:
+            detailed = []
+            for eq_id in column['equipment']:
+                health = health_data.get(eq_id)
+                
+                if not health:
+                    # Trigger background probe if online
+                    if is_online_network():
+                        threading.Thread(target=probe_equipment_health, args=(eq_id,), daemon=True).start()
+                    
+                    detailed.append({
+                        'id': eq_id, 'uptime': 'Pending', 'uptime_hours': 0,
+                        'mem_usage': '--%', 'mem_usage_raw': 0, 'last_updated': None
+                    })
+                else:
+                    detailed.append({
+                        'id': eq_id,
+                        'uptime': format_uptime_hours(health['uptime_hours']),
+                        'uptime_hours': health['uptime_hours'],
+                        'mem_usage': f"{health['mem_usage']}%",
+                        'mem_usage_raw': health['mem_usage'],
+                        'last_updated': health['last_updated']
+                    })
+            column['equipment_detailed'] = detailed
+            
+        return jsonify(data)
+    except Exception as e:
+        logger.error(f"CRITICAL Fleet Monitor API Failure: {e}")
+        # Universal emergency response - MUST return a valid JSON structure to prevent JS crash
+        return jsonify({
+            "columns": [{"id": "emergency", "title": "SYSTEM ERROR", "main": "-", "back": "-", "phone": "-", "comms": str(e), "color": "#ff0000", "equipment": [], "equipment_detailed": []}]
+        })
+
+@app.route('/api/fleet_data/refresh', methods=['POST'])
+def api_fleet_data_refresh():
+    """Manually trigger a re-probe of all equipment (Non-blocking)"""
+    try:
+        if not os.path.exists(FLEET_DATA_PATH):
+            return jsonify({'success': False, 'error': 'No layout'}), 404
+            
+        with open(FLEET_DATA_PATH, 'r') as f:
+            data = json.load(f)
+        
+        # Trigger background threads for all units
+        for col in data['columns']:
+            for eq_id in col['equipment']:
+                threading.Thread(target=probe_equipment_health, args=(eq_id,), daemon=True).start()
+        
+        return jsonify({'success': True, 'message': 'Refresh tasks queued'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/fleet_data/save', methods=['POST'])
+def api_fleet_data_save():
+    """Save updated fleet layout and trigger immediate probe for new items"""
+    try:
+        data = request.get_json()
+        if not data or 'columns' not in data:
+            return jsonify({'success': False, 'error': 'Invalid data'}), 400
+            
+        save_data = {'columns': []}
+        all_ids = []
+        for col in data['columns']:
+            eq_ids = [eq['id'] if isinstance(eq, dict) else eq for eq in col['equipment']]
+            all_ids.extend(eq_ids)
+            save_data['columns'].append({
+                'id': col['id'],
+                'title': col['title'],
+                'main': col['main'],
+                'back': col['back'],
+                'phone': col['phone'],
+                'comms': col['comms'],
+                'color': col.get('color', '#9e9e9e'),
+                'equipment': eq_ids
+            })
+            
+        with open(FLEET_DATA_PATH, 'w') as f:
+            json.dump(save_data, f, indent=2)
+            
+        for eq_id in all_ids:
+            probe_equipment_health(eq_id)
+            
+        log_database('info', 'fleet_data', f'Fleet layout updated and probed by {request.remote_addr}')
+        return jsonify({'success': True})
+    except Exception as e:
+        logger.error(f"Error saving fleet data: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+# ========================================
 # ERROR HANDLERS
 # ========================================
 
@@ -7258,33 +6443,7 @@ def internal_error(error):
 # STARTUP AND MAIN
 # ========================================
 
-def open_browser():
-    """Open browser to the application URL after a short delay"""
-    time.sleep(2)  # Wait for Flask to start
-    try:
-        if platform.system() == "Windows":
-            # Try Edge first, fallback to default browser
-            edge_paths = [
-                r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
-                r"C:\Program Files\Microsoft\Edge\Application\msedge.exe"
-            ]
-            
-            edge_found = False
-            for edge_path in edge_paths:
-                if os.path.exists(edge_path):
-                    subprocess.Popen([edge_path, "http://localhost:8888"])
-                    edge_found = True
-                    break
-            
-            if not edge_found:
-                # Fallback to default browser
-                import webbrowser
-                webbrowser.open("http://localhost:8888")
-        else:
-            import webbrowser
-            webbrowser.open("http://localhost:8888")
-    except Exception as e:
-        print(f"Failed to open browser: {e}")
+# open_browser imported from app.background_tasks above
 
 # ========================================
 # SYSTEM TRAY MODE
@@ -7458,25 +6617,25 @@ if __name__ == '__main__':
             from tools import frontrunner_monitor
             base_dir = os.path.dirname(os.path.abspath(__file__))
             
-            # Check network status to determine offline mode
-            is_online = is_online_network()
-            offline_mode = not is_online
-            
             frontrunner_monitor.start_monitor(
                 hostname="10.110.19.16",
                 username="komatsu",
                 password="M0dul1r@GRM2",
                 cache_dir=base_dir,
-                offline_mode=offline_mode
+                offline_mode=False  # monitor handles reachability each cycle
             )
-            mode_str = "OFFLINE" if offline_mode else "ONLINE"
-            log_background('info', 'frontrunner_monitor', f'FrontRunner monitor started in {mode_str} mode')
+            log_background('info', 'frontrunner_monitor', 'FrontRunner monitor started (dynamic online/offline)')
         except Exception as e:
             log_background('warning', 'frontrunner_monitor', f'FrontRunner monitor failed to start: {e}')
 
         # Start browser in separate thread
         browser_thread = threading.Thread(target=open_browser, daemon=True)
         browser_thread.start()
+
+        # Start Dig Fleet Monitor background worker
+        fleet_monitor_updater['thread'] = threading.Thread(target=fleet_monitor_worker, daemon=True)
+        fleet_monitor_updater['thread'].start()
+        fleet_monitor_updater['running'] = True
 
         # Development server configuration
         server_port = int(os.environ.get('AUTOTECH_PORT', 8888))
