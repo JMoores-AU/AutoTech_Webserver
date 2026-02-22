@@ -22,8 +22,8 @@ from tools.fleet_monitor_db import FleetMonitorDB
 # ========================================
 # SINGLETON DATABASE INSTANCES
 # ========================================
-_ptx_uptime_db_path = get_ptx_db_path(BASE_DIR)
-ptx_uptime_db = PTXUptimeDB(_ptx_uptime_db_path)
+PTX_UPTIME_DB_PATH = get_ptx_db_path(BASE_DIR)
+ptx_uptime_db = PTXUptimeDB(PTX_UPTIME_DB_PATH)
 fleet_monitor_db = FleetMonitorDB(BASE_DIR)
 
 # Equipment DB path — None until main.py calls init_database() and sets this.

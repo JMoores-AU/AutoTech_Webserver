@@ -170,6 +170,10 @@
                     </a>
                     
                     {% if logged_in %}
+                    <a href="/dig_fleet_monitor" class="nav-item">
+                        <span class="nav-item-icon">📡</span>
+                        <span>Dig Fleet Monitor</span>
+                    </a>
                     <a href="{{ url_for('run_tool', tool_name='IP Finder') }}" class="nav-item">
                         <span class="nav-item-icon">🔍</span>
                         <span>IP Finder</span>
@@ -191,6 +195,11 @@
                         <span>Equipment Database</span>
                     </a>
                     {% else %}
+                    <div class="nav-item disabled">
+                        <span class="nav-item-icon">📡</span>
+                        <span>Dig Fleet Monitor</span>
+                        <span class="nav-item-badge">🔒</span>
+                    </div>
                     <div class="nav-item disabled">
                         <span class="nav-item-icon">🔍</span>
                         <span>IP Finder</span>
@@ -268,7 +277,7 @@
                     </button>
 
                     {% if logged_in %}
-                        <a href="{{ url_for('logout') }}" class="btn btn-secondary btn-sm">Logout</a>
+                        <a href="{{ url_for('auth.logout') }}" class="btn btn-secondary btn-sm">Logout</a>
                     {% else %}
                         <button class="btn btn-primary btn-sm" onclick="openLoginModal()">Login</button>
                     {% endif %}

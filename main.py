@@ -268,6 +268,7 @@ active_tru_connections = state.active_tru_connections
 terminal_sessions = state.terminal_sessions
 ptx_uptime_db = state.ptx_uptime_db
 fleet_monitor_db = state.fleet_monitor_db
+PTX_UPTIME_DB_PATH = state.PTX_UPTIME_DB_PATH
 
 # NOW we can create the Flask app
 app = Flask(__name__, template_folder=TEMPLATE_FOLDER, static_folder=STATIC_FOLDER)
@@ -276,6 +277,16 @@ app.config['TEMPLATES_AUTO_RELOAD'] = True
 app.jinja_env.auto_reload = True
 
 CORS(app)
+
+# ========================================
+# BLUEPRINT REGISTRATION
+# ========================================
+from app.blueprints.auth import bp as auth_bp
+from app.blueprints.info_pages import bp as info_pages_bp
+from app.blueprints.downloads import bp as downloads_bp
+app.register_blueprint(auth_bp)
+app.register_blueprint(info_pages_bp)
+app.register_blueprint(downloads_bp)
 
 # ========================================
 # REQUEST/RESPONSE LOGGING MIDDLEWARE
@@ -849,32 +860,7 @@ def cleanup_logs_test_mode(folder_retention=2, file_retention=7, dry_run=True):
 
     return results
 
-# ========================================
-# AUTHENTICATION ROUTES
-# ========================================
-
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    """Simple login form"""
-    if request.method == 'POST':
-        password = request.form.get('password')
-        if password == 'komatsu':
-            session['authenticated'] = True
-            session['password'] = password
-            log_security('info', 'login', f'Successful login from {request.remote_addr}')
-            return redirect(url_for('dashboard'))
-        else:
-            log_security('warning', 'login', f'Failed login attempt from {request.remote_addr}')
-            return render_template('login.html', error='Invalid password')
-
-    return render_template('login.html')
-
-@app.route('/logout')
-def logout():
-    """Logout and clear session"""
-    log_security('info', 'logout', f'User logged out from {request.remote_addr}')
-    session.clear()
-    return redirect(url_for('login'))
+# /login and /logout moved to app/blueprints/auth.py
 
 # ========================================
 # MAIN DASHBOARD ROUTES
@@ -3768,86 +3754,7 @@ def download_playback_file(filename):
         logger.error(f"Playback download error: {e}")
         return str(e), 500
 
-@app.route("/download/camstudio")
-def download_camstudio():
-    """
-    Provide CamStudio portable as a downloadable zip.
-    """
-    try:
-        # Look for CamStudio on USB drive
-        from tools.usb_tools import find_tool_on_usb
-        result = find_tool_on_usb("CamStudio_USB", "CamStudioPortable.exe")
-
-        if not result:
-            return "CamStudio not found on server USB", 404
-
-        # Zip the folder
-        import tempfile
-        import zipfile
-
-        camstudio_folder = Path(result['folder_path'])
-
-        with tempfile.NamedTemporaryFile(delete=False, suffix='.zip') as tmp_file:
-            zip_path = tmp_file.name
-
-            with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
-                for file in camstudio_folder.rglob('*'):
-                    if file.is_file():
-                        arcname = file.relative_to(camstudio_folder.parent)
-                        zipf.write(file, arcname)
-
-            return send_file(
-                zip_path,
-                as_attachment=True,
-                download_name='CamStudio_Portable.zip',
-                mimetype='application/zip'
-            )
-
-    except Exception as e:
-        logger.error(f"CamStudio download error: {e}")
-        return str(e), 500
-
-@app.route("/download/frontrunner")
-def download_frontrunner():
-    """
-    Provide FrontRunner V3.7.0 portable package as zip.
-    """
-    try:
-        # Look for FrontRunner folder on USB drive
-        from tools.usb_tools import find_tool_on_usb
-        result = find_tool_on_usb("frontrunnerV3-3.7.0-076-full", "V3.7.0 Playback Tool.bat")
-
-        if not result:
-            return "FrontRunner package not found on server USB", 404
-
-        # Zip the folder (excluding playback subfolder to reduce size)
-        import tempfile
-        import zipfile
-
-        frontrunner_folder = Path(result['folder_path'])
-
-        with tempfile.NamedTemporaryFile(delete=False, suffix='.zip') as tmp_file:
-            zip_path = tmp_file.name
-
-            with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
-                for file in frontrunner_folder.rglob('*'):
-                    if file.is_file():
-                        # Skip playback folder (too large, users download .dat files separately)
-                        if 'playback' in file.parts:
-                            continue
-                        arcname = file.relative_to(frontrunner_folder.parent)
-                        zipf.write(file, arcname)
-
-            return send_file(
-                zip_path,
-                as_attachment=True,
-                download_name='FrontRunner_V3.7.0_Portable.zip',
-                mimetype='application/zip'
-            )
-
-    except Exception as e:
-        logger.error(f"FrontRunner download error: {e}")
-        return str(e), 500
+# /download/camstudio, /download/frontrunner moved to app/blueprints/downloads.py
 
 # ========================================
 # PTX EQUIPMENT MANAGEMENT APIS
@@ -4086,25 +3993,7 @@ class TerminalSession:
             except Exception:
                 self.process.kill()
 
-@app.route('/autotech')
-@app.route('/legacy')  # Keep legacy route for backwards compatibility
-def autotech_tools():
-    """AutoTech Tools page with IP Finder only"""
-    return render_template('t1_legacy.html',
-                         online=is_online_network(),
-                         gateway_ip=GATEWAY_IP)
-
-@app.route('/database')
-def equipment_cache_page():
-    """Equipment Cache database viewer page"""
-    return render_template('equip_db.html',
-                         online=is_online_network())
-
-@app.route('/t1-tools-help')
-def t1_tools_help():
-    """T1 Tools command reference page"""
-    return render_template('t1_tools_help.html',
-                         online=is_online_network())
+# /autotech, /legacy, /database, /t1-tools-help moved to app/blueprints/info_pages.py
 
 # get_autotech_client_folder imported from app.utils above
 
