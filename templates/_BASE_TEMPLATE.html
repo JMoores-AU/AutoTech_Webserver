@@ -28,9 +28,14 @@
                 <div class="nav-section">
                     <div class="nav-section-title">Main</div>
 
-                    <a href="{{ url_for('dashboard') }}" class="nav-item">
+                    <a href="{{ url_for('dashboard.dashboard') }}" class="nav-item">
                         <span class="nav-item-icon">📊</span>
                         <span>Dashboard</span>
+                    </a>
+
+                    <a href="/dig_fleet_monitor" class="nav-item">
+                        <span class="nav-item-icon">📡</span>
+                        <span>Dig Fleet Monitor</span>
                     </a>
 
                     <a href="{{ url_for('run_tool', tool_name='IP Finder') }}" class="nav-item">
@@ -74,7 +79,7 @@
                         <span class="theme-icon" id="themeIcon" style="font-size: 1.2rem;">🌙</span>
                     </button>
 
-                    <a href="{{ url_for('dashboard') }}" class="btn btn-secondary btn-sm">
+                    <a href="{{ url_for('dashboard.dashboard') }}" class="btn btn-secondary btn-sm">
                         ← Back to Dashboard
                     </a>
                 </div>
@@ -82,91 +87,7 @@
             
             <!-- Content Container -->
             <div class="content-container">
-                
-                <!-- ========================================
-                     SECTION: Example Card Section
-                     ======================================== -->
-                <section class="mb-5">
-                    <div class="section-header">
-                        <h2 class="section-title">
-                            <span class="section-title-icon">📋</span>
-                            Section Title
-                        </h2>
-                        <button class="btn btn-ghost btn-sm" onclick="someAction()">
-                            🔄 Action Button
-                        </button>
-                    </div>
-                    
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">
-                                <span class="card-title-icon">🔧</span>
-                                Card Title
-                            </h3>
-                        </div>
-                        <div class="card-body">
-                            <!-- Card content goes here -->
-                            <p class="text-muted">Card body content.</p>
-                        </div>
-                        <div class="card-footer">
-                            <!-- Optional footer -->
-                            <button class="btn btn-primary">Primary Action</button>
-                        </div>
-                    </div>
-                </section>
-                
-                <!-- ========================================
-                     SECTION: Grid Example
-                     ======================================== -->
-                <section class="mb-5">
-                    <div class="section-header">
-                        <h2 class="section-title">
-                            <span class="section-title-icon">📊</span>
-                            Grid Section
-                        </h2>
-                    </div>
-                    
-                    <div class="tools-grid">
-                        <!-- Repeat this card pattern -->
-                        <div class="tool-card">
-                            <span class="tool-card-icon">🔧</span>
-                            <span class="tool-card-title">Item Title</span>
-                            <span class="tool-card-description">Brief description here.</span>
-                        </div>
-                        <!-- More cards... -->
-                    </div>
-                </section>
-                
-                <!-- ========================================
-                     SECTION: Info Display
-                     ======================================== -->
-                <section>
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">
-                                <span class="card-title-icon">ℹ️</span>
-                                Information
-                            </h3>
-                        </div>
-                        <div class="card-body">
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px;">
-                                <div>
-                                    <div class="text-muted mb-1">Label 1</div>
-                                    <div class="text-bright">Value 1</div>
-                                </div>
-                                <div>
-                                    <div class="text-muted mb-1">Label 2</div>
-                                    <div class="text-bright">Value 2</div>
-                                </div>
-                                <div>
-                                    <div class="text-muted mb-1">Label 3</div>
-                                    <div class="text-bright" style="font-family: monospace;">10.110.19.107</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-                
+                {% block content %}{% endblock %}
             </div>
         </main>
         

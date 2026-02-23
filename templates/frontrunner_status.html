@@ -375,7 +375,8 @@
             <nav class="sidebar-nav">
                 <div class="nav-section">
                     <div class="nav-section-title">Main</div>
-                    <a href="{{ url_for('dashboard') }}" class="nav-item"><span class="nav-item-icon">📊</span><span>Dashboard</span></a>
+                    <a href="{{ url_for('dashboard.dashboard') }}" class="nav-item"><span class="nav-item-icon">📊</span><span>Dashboard</span></a>
+                    <a href="/dig_fleet_monitor" class="nav-item"><span class="nav-item-icon">📡</span><span>Dig Fleet Monitor</span></a>
                     <a href="{{ url_for('run_tool', tool_name='IP Finder') }}" class="nav-item"><span class="nav-item-icon">🔍</span><span>IP Finder</span></a>
                     <a href="{{ url_for('run_tool', tool_name='PTX Uptime') }}" class="nav-item"><span class="nav-item-icon">⏱️</span><span>PTX Uptime</span></a>
                     <a href="{{ url_for('run_tool', tool_name='FrontRunner Status') }}" class="nav-item active"><span class="nav-item-icon">🖥️</span><span>FrontRunner Status</span></a>
@@ -393,7 +394,7 @@
             <header class="top-header">
                 <h1 class="header-title">FrontRunner Status</h1>
                 <div class="header-actions">
-                    <a href="{{ url_for('dashboard') }}" class="btn btn-secondary btn-sm">← Dashboard</a>
+                    <a href="{{ url_for('dashboard.dashboard') }}" class="btn btn-secondary btn-sm">← Dashboard</a>
                 </div>
             </header>
 

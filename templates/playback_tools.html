@@ -268,7 +268,8 @@
             <nav class="sidebar-nav">
                 <div class="nav-section">
                     <div class="nav-section-title">Main</div>
-                    <a href="{{ url_for('dashboard') }}" class="nav-item"><span class="nav-item-icon">📊</span><span>Dashboard</span></a>
+                    <a href="{{ url_for('dashboard.dashboard') }}" class="nav-item"><span class="nav-item-icon">📊</span><span>Dashboard</span></a>
+                    <a href="/dig_fleet_monitor" class="nav-item"><span class="nav-item-icon">📡</span><span>Dig Fleet Monitor</span></a>
                     <a href="{{ url_for('run_tool', tool_name='Playback Tools') }}" class="nav-item active"><span class="nav-item-icon">▶️</span><span>Playback Tools</span></a>
                 </div>
             </nav>
@@ -312,7 +313,7 @@
                 <h1 class="header-title">Playback Tools</h1>
                 <div class="header-actions">
                     <button class="btn btn-secondary btn-sm" onclick="refreshAll()">🔄 Refresh All</button>
-                    <a href="{{ url_for('dashboard') }}" class="btn btn-secondary btn-sm">← Dashboard</a>
+                    <a href="{{ url_for('dashboard.dashboard') }}" class="btn btn-secondary btn-sm">← Dashboard</a>
                 </div>
             </header>
             

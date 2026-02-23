@@ -164,7 +164,7 @@
                 <div class="nav-section">
                     <div class="nav-section-title">Main</div>
                     
-                    <a href="{{ url_for('dashboard') }}" class="nav-item active">
+                    <a href="{{ url_for('dashboard.dashboard') }}" class="nav-item active">
                         <span class="nav-item-icon">📊</span>
                         <span>Dashboard</span>
                     </a>
@@ -383,7 +383,7 @@
                 </h3>
                 <button class="modal-close" onclick="closeLoginModal()">&times;</button>
             </div>
-            <form method="POST" action="{{ url_for('dashboard') }}">
+            <form method="POST" action="{{ url_for('dashboard.dashboard') }}">
                 <div class="modal-body">
                     <div class="form-group">
                         <label class="form-label" for="password">Enter Password</label>

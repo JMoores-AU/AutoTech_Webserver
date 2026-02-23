@@ -19,7 +19,7 @@ def login():
             session['authenticated'] = True
             session['password'] = password
             log_security('info', 'login', f'Successful login from {request.remote_addr}')
-            return redirect(url_for('dashboard'))
+            return redirect(url_for('dashboard.dashboard'))
         else:
             log_security('warning', 'login', f'Failed login attempt from {request.remote_addr}')
             return render_template('login.html', error='Invalid password')
