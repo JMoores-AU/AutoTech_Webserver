@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -283,7 +283,7 @@
                         <span class="nav-item-icon">📊</span>
                         <span>Dashboard</span>
                     </a>
-                    <a href="{{ url_for('run_tool', tool_name='IP Finder') }}" class="nav-item">
+                    <a href="{{ url_for('dashboard.run_tool', tool_name='IP Finder') }}" class="nav-item">
                         <span class="nav-item-icon">🔍</span>
                         <span>IP Finder</span>
                     </a>
@@ -299,11 +299,11 @@
 
                 <div class="nav-section">
                     <div class="nav-section-title">USB Tools</div>
-                    <a href="{{ url_for('run_tool', tool_name='CamStudio USB') }}" class="nav-item {{ 'active' if tool_name == 'CamStudio USB' else '' }}">
+                    <a href="{{ url_for('dashboard.run_tool', tool_name='CamStudio USB') }}" class="nav-item {{ 'active' if tool_name == 'CamStudio USB' else '' }}">
                         <span class="nav-item-icon">🎬</span>
                         <span>CamStudio USB</span>
                     </a>
-                    <a href="{{ url_for('run_tool', tool_name='Playback USB') }}" class="nav-item {{ 'active' if tool_name == 'Playback USB' else '' }}">
+                    <a href="{{ url_for('dashboard.run_tool', tool_name='Playback USB') }}" class="nav-item {{ 'active' if tool_name == 'Playback USB' else '' }}">
                         <span class="nav-item-icon">▶️</span>
                         <span>Playback USB</span>
                     </a>

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -691,8 +691,8 @@
                                             <span class="nav-item-icon">📡</span>
                                             <span>Dig Fleet Monitor</span>
                                         </a>
-                                        <a href="{{ url_for('run_tool', tool_name='IP Finder') }}" class="nav-item"><span class="nav-item-icon">🔍</span><span>IP Finder</span></a>
-                    <a href="{{ url_for('run_tool', tool_name='PTX Uptime') }}" class="nav-item active"><span class="nav-item-icon">⏱️</span><span>PTX Uptime</span></a>
+                                        <a href="{{ url_for('dashboard.run_tool', tool_name='IP Finder') }}" class="nav-item"><span class="nav-item-icon">🔍</span><span>IP Finder</span></a>
+                    <a href="{{ url_for('dashboard.run_tool', tool_name='PTX Uptime') }}" class="nav-item active"><span class="nav-item-icon">⏱️</span><span>PTX Uptime</span></a>
                 </div>
             </nav>
             <div class="sidebar-footer">
@@ -849,7 +849,7 @@
                     <a href="{{ url_for('ptx_uptime_csv') }}" class="action-btn btn-download">
                         📥 Download CSV Report
                     </a>
-                    <a href="{{ url_for('run_tool', tool_name='PTX Uptime') }}?refresh={{ range(1000, 9999) | random }}" class="action-btn btn-refresh">
+                    <a href="{{ url_for('dashboard.run_tool', tool_name='PTX Uptime') }}?refresh={{ range(1000, 9999) | random }}" class="action-btn btn-refresh">
                         🔄 Refresh Data
                     </a>
                 </div>

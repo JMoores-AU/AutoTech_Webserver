@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -377,9 +377,9 @@
                     <div class="nav-section-title">Main</div>
                     <a href="{{ url_for('dashboard.dashboard') }}" class="nav-item"><span class="nav-item-icon">📊</span><span>Dashboard</span></a>
                     <a href="/dig_fleet_monitor" class="nav-item"><span class="nav-item-icon">📡</span><span>Dig Fleet Monitor</span></a>
-                    <a href="{{ url_for('run_tool', tool_name='IP Finder') }}" class="nav-item"><span class="nav-item-icon">🔍</span><span>IP Finder</span></a>
-                    <a href="{{ url_for('run_tool', tool_name='PTX Uptime') }}" class="nav-item"><span class="nav-item-icon">⏱️</span><span>PTX Uptime</span></a>
-                    <a href="{{ url_for('run_tool', tool_name='FrontRunner Status') }}" class="nav-item active"><span class="nav-item-icon">🖥️</span><span>FrontRunner Status</span></a>
+                    <a href="{{ url_for('dashboard.run_tool', tool_name='IP Finder') }}" class="nav-item"><span class="nav-item-icon">🔍</span><span>IP Finder</span></a>
+                    <a href="{{ url_for('dashboard.run_tool', tool_name='PTX Uptime') }}" class="nav-item"><span class="nav-item-icon">⏱️</span><span>PTX Uptime</span></a>
+                    <a href="{{ url_for('dashboard.run_tool', tool_name='FrontRunner Status') }}" class="nav-item active"><span class="nav-item-icon">🖥️</span><span>FrontRunner Status</span></a>
                 </div>
             </nav>
             <div class="sidebar-footer">
@@ -590,7 +590,7 @@
 
                 <!-- Action Buttons -->
                 <div class="actions-row">
-                    <a href="{{ url_for('run_tool', tool_name='FrontRunner Status') }}?refresh={{ range(1000, 9999) | random }}"
+                    <a href="{{ url_for('dashboard.run_tool', tool_name='FrontRunner Status') }}?refresh={{ range(1000, 9999) | random }}"
                        class="action-btn btn-refresh">
                         🔄 Refresh Data
                     </a>
