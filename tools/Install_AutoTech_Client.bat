@@ -73,8 +73,8 @@ mkdir "%INSTALL_PATH%\temp" 2>nul
 echo   [OK] Created temp folder
 echo.
 
-:: Step 2: Copy launch scripts only (portable tools stay on USB)
-echo [2/4] Installing minimal launchers...
+:: Step 2: Copy launch scripts and plink.exe
+echo [2/4] Installing launchers and plink...
 if exist "%INSTALL_PATH%\scripts" rmdir /s /q "%INSTALL_PATH%\scripts" 2>nul
 mkdir "%INSTALL_PATH%\scripts"
 if exist "%INSTALLER_DIR%AutoTech\scripts\launch_*.bat" (
@@ -84,10 +84,28 @@ if exist "%INSTALLER_DIR%AutoTech\scripts\launch_*.bat" (
     echo   [WARNING] Launch scripts not found at %INSTALLER_DIR%AutoTech\scripts\
 )
 
-if exist "%INSTALLER_DIR%AutoTech\scripts\VERSION" (
-    copy /Y "%INSTALLER_DIR%AutoTech\scripts\VERSION" "%INSTALL_PATH%\" >nul 2>&1
+:: Verify each launcher was copied
+if not exist "%INSTALL_PATH%\scripts\launch_putty.bat"  echo   [WARN] launch_putty.bat copy failed
+if not exist "%INSTALL_PATH%\scripts\launch_winscp.bat" echo   [WARN] launch_winscp.bat copy failed
+if not exist "%INSTALL_PATH%\scripts\launch_vnc.bat"    echo   [WARN] launch_vnc.bat copy failed
+if not exist "%INSTALL_PATH%\scripts\launch_script.bat" echo   [WARN] launch_script.bat copy failed
+
+:: Copy plink.exe locally — MMS scripts call C:\AutoTech_Client\plink.exe directly.
+:: plink is small (~600KB); GUI tools (PuTTY/WinSCP/VNC) remain on USB.
+if exist "%INSTALLER_DIR%AutoTech\tools\plink.exe" (
+    copy /Y "%INSTALLER_DIR%AutoTech\tools\plink.exe" "%INSTALL_PATH%\" >nul 2>&1
+    echo   [OK] plink.exe installed (required by MMS scripts)
+) else (
+    echo   [WARN] plink.exe not found on USB - MMS scripts may fail without it
 )
-echo   [OK] Launchers installed; all tools/scripts run from X:\AutoTech\
+
+if exist "%INSTALLER_DIR%AutoTech\scripts\VERSION" (
+    copy /Y "%INSTALLER_DIR%AutoTech\scripts\VERSION" "%INSTALL_PATH%\VERSION" >nul 2>&1
+    echo   [OK] VERSION file installed
+) else (
+    echo   [INFO] No VERSION file found on USB - skipping
+)
+echo   [OK] Launchers installed; GUI tools (PuTTY/WinSCP/VNC) run from USB
 echo.
 
 :: Step 3: Register URI handlers
@@ -123,15 +141,64 @@ echo [4/4] Creating Start Menu shortcuts...
 set "START_MENU=%ProgramData%\Microsoft\Windows\Start Menu\Programs\AutoTech Client"
 mkdir "%START_MENU%" 2>nul
 
-:: Create shortcuts using PowerShell (available on all modern Windows)
-powershell -Command "$ws = New-Object -ComObject WScript.Shell; $s = $ws.CreateShortcut('%START_MENU%\T1 Legacy Tools.lnk'); $s.TargetPath = '%INSTALL_PATH%\mms_scripts\T1_Tools.bat'; $s.WorkingDirectory = '%INSTALL_PATH%\mms_scripts'; $s.Save()" 2>nul
-powershell -Command "$ws = New-Object -ComObject WScript.Shell; $s = $ws.CreateShortcut('%START_MENU%\IP Finder.lnk'); $s.TargetPath = '%INSTALL_PATH%\mms_scripts\IP_Finder.bat'; $s.WorkingDirectory = '%INSTALL_PATH%\mms_scripts'; $s.Save()" 2>nul
+:: T1 Legacy Tools shortcut — launches via launch_script.bat (auto-finds USB drive)
+:: IP Finder and other tools are accessed through the AutoTech web interface
+powershell -Command "$ws = New-Object -ComObject WScript.Shell; $s = $ws.CreateShortcut('%START_MENU%\T1 Legacy Tools.lnk'); $s.TargetPath = '%INSTALL_PATH%\scripts\launch_script.bat'; $s.Arguments = '\"autotech-script://t1-tools\"'; $s.WorkingDirectory = '%INSTALL_PATH%\scripts'; $s.Save()" 2>nul
 
 if exist "%START_MENU%\T1 Legacy Tools.lnk" (
-    echo   [OK] Start Menu shortcuts created
+    echo   [OK] T1 Legacy Tools shortcut created
 ) else (
     echo   [INFO] Shortcuts skipped (PowerShell not available)
 )
+echo.
+
+:: ============================================
+:: POST-INSTALL VERIFICATION
+:: ============================================
+echo ============================================
+echo   VERIFYING INSTALLATION...
+echo ============================================
+echo.
+
+:: Check launcher files
+echo [CHECK] Launcher scripts:
+set "LAUNCH_OK=1"
+if exist "%INSTALL_PATH%\scripts\launch_putty.bat"  (echo   [OK]   launch_putty.bat) else (echo   [FAIL] launch_putty.bat MISSING & set "LAUNCH_OK=0")
+if exist "%INSTALL_PATH%\scripts\launch_winscp.bat" (echo   [OK]   launch_winscp.bat) else (echo   [FAIL] launch_winscp.bat MISSING & set "LAUNCH_OK=0")
+if exist "%INSTALL_PATH%\scripts\launch_vnc.bat"    (echo   [OK]   launch_vnc.bat) else (echo   [FAIL] launch_vnc.bat MISSING & set "LAUNCH_OK=0")
+if exist "%INSTALL_PATH%\scripts\launch_script.bat" (echo   [OK]   launch_script.bat) else (echo   [FAIL] launch_script.bat MISSING & set "LAUNCH_OK=0")
+if exist "%INSTALL_PATH%\plink.exe"                 (echo   [OK]   plink.exe) else (echo   [WARN] plink.exe MISSING - MMS scripts will not work & set "LAUNCH_OK=0")
+if exist "%INSTALL_PATH%\VERSION"                   (echo   [OK]   VERSION file) else (echo   [INFO] No VERSION file)
+echo.
+
+:: Check URI handler registry keys
+echo [CHECK] URI handlers:
+set "REG_OK=1"
+reg query "HKCR\autotech-ssh" >nul 2>&1
+if %ERRORLEVEL%==0 (echo   [OK]   autotech-ssh://) else (echo   [FAIL] autotech-ssh:// NOT registered & set "REG_OK=0")
+reg query "HKCR\autotech-sftp" >nul 2>&1
+if %ERRORLEVEL%==0 (echo   [OK]   autotech-sftp://) else (echo   [FAIL] autotech-sftp:// NOT registered & set "REG_OK=0")
+reg query "HKCR\autotech-vnc" >nul 2>&1
+if %ERRORLEVEL%==0 (echo   [OK]   autotech-vnc://) else (echo   [FAIL] autotech-vnc:// NOT registered & set "REG_OK=0")
+reg query "HKCR\autotech-script" >nul 2>&1
+if %ERRORLEVEL%==0 (echo   [OK]   autotech-script://) else (echo   [FAIL] autotech-script:// NOT registered & set "REG_OK=0")
+echo.
+
+:: Check which USB tools are accessible from this drive
+echo [CHECK] USB tools at %INSTALLER_DIR%AutoTech\tools\:
+if exist "%INSTALLER_DIR%AutoTech\tools\putty.exe"     (echo   [OK]   putty.exe) else (echo   [WARN] putty.exe not found on USB)
+if exist "%INSTALLER_DIR%AutoTech\tools\WinSCP.exe"    (echo   [OK]   WinSCP.exe) else (echo   [WARN] WinSCP.exe not found on USB)
+if exist "%INSTALLER_DIR%AutoTech\tools\vncviewer.exe" (echo   [OK]   vncviewer.exe) else (echo   [WARN] vncviewer.exe not found on USB)
+echo.
+
+:: Summary
+echo ============================================
+if "%LAUNCH_OK%"=="1" if "%REG_OK%"=="1" (
+    echo   STATUS: ALL CHECKS PASSED
+) else (
+    echo   STATUS: SOME CHECKS FAILED - see above
+)
+echo ============================================
 echo.
 
 :: Success!
@@ -143,8 +210,7 @@ echo AutoTech Client installed to:
 echo   %INSTALL_PATH%
 echo.
 echo Start Menu shortcuts:
-echo   - T1 Legacy Tools
-echo   - IP Finder
+echo   - T1 Legacy Tools (launches via USB - USB must be plugged in)
 echo.
 echo Custom URI handlers registered:
 echo   - autotech-ssh://

@@ -21,10 +21,10 @@ REM Special handler for T1 Tools
 REM ========================================
 if /i "!SCRIPT_NAME!"=="t1-tools" goto :LAUNCH_T1_TOOLS
 
-REM Locate AutoTech client on USB (tools and scripts stay on USB)
+REM Locate AutoTech client on USB (tools and scripts stay on USB) - first match wins
 set "USB_BASE="
-for %%D in (E D F G H I J K L M N O P Q R S T U V W X Y Z) do (
-    if exist "%%D:\AutoTech\scripts\mms_scripts\!SCRIPT_NAME!" set "USB_BASE=%%D:\AutoTech"
+for %%D in (D E F G H I J K L M N O P Q R S T U V W X Y Z) do (
+    if not defined USB_BASE if exist "%%D:\AutoTech\scripts\mms_scripts\!SCRIPT_NAME!" set "USB_BASE=%%D:\AutoTech"
 )
 
 if "%USB_BASE%"=="" (
@@ -68,8 +68,8 @@ REM ========================================
 REM T1 Tools Launch Handler
 REM ========================================
 :LAUNCH_T1_TOOLS
-REM Try USB drive first (E:\T1_Tools_Legacy\bin\T1_Tools.bat)
-for %%D in (E D F G H I J K L M N O P Q R S T U V W X Y Z C) do (
+REM Scan USB drives D-Z for T1_Tools_Legacy (first match wins, no C: drive)
+for %%D in (D E F G H I J K L M N O P Q R S T U V W X Y Z) do (
     if exist "%%D:\T1_Tools_Legacy\bin\T1_Tools.bat" (
         start "T1 Tools" cmd /k "cd /d %%D:\T1_Tools_Legacy\bin && T1_Tools.bat"
         goto :END

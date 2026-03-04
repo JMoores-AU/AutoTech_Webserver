@@ -40,10 +40,10 @@ for /f "tokens=1,2 delims=:" %%a in ("!HOSTPORT!") do (
 REM Default port if not specified
 if "!PORT!"=="" set "PORT=22"
 
-REM Locate AutoTech client on USB (tools stay on USB)
+REM Locate AutoTech client on USB (tools stay on USB) - first match wins
 set "WINSCP_CMD="
-for %%D in (E D F G H I J K L M N O P Q R S T U V W X Y Z) do (
-    if exist "%%D:\AutoTech\tools\WinSCP.exe" set "WINSCP_CMD=%%D:\AutoTech\tools\WinSCP.exe"
+for %%D in (D E F G H I J K L M N O P Q R S T U V W X Y Z) do (
+    if not defined WINSCP_CMD if exist "%%D:\AutoTech\tools\WinSCP.exe" set "WINSCP_CMD=%%D:\AutoTech\tools\WinSCP.exe"
 )
 
 if "%WINSCP_CMD%"=="" (

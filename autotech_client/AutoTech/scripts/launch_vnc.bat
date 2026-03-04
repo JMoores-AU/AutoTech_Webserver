@@ -36,13 +36,15 @@ if errorlevel 1 set "PORTDISP=0"
 
 REM Locate AutoTech client on USB (preferred) or local
 set "VNC_CMD="
-for %%D in (E D F G H I J K L M N O P Q R S T U V W X Y Z C) do (
-    if exist "%%D:\AutoTech\tools\vncviewer_5.3.2.exe" set "VNC_CMD=%%D:\AutoTech\tools\vncviewer_5.3.2.exe"
+for %%D in (D E F G H I J K L M N O P Q R S T U V W X Y Z) do (
+    if not defined VNC_CMD if exist "%%D:\AutoTech\tools\vncviewer.exe" set "VNC_CMD=%%D:\AutoTech\tools\vncviewer.exe"
 )
-if "%VNC_CMD%"=="" if exist "C:\AutoTech\tools\vncviewer_5.3.2.exe" set "VNC_CMD=C:\AutoTech\tools\vncviewer_5.3.2.exe"
 
 if "%VNC_CMD%"=="" (
-    echo [ERROR] vncviewer_5.3.2.exe not found. Plug in the AutoTech USB and reinstall client.
+    echo [ERROR] vncviewer.exe not found on any USB drive.
+    echo Drives scanned: D through Z
+    echo Expected path:  X:\AutoTech\tools\vncviewer.exe
+    echo Please plug in the AutoTech USB drive and try again.
     pause
     exit /b 1
 )
