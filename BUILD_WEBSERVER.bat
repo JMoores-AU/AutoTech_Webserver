@@ -48,7 +48,7 @@ echo    10. Pre-Build Checklist
 echo    11. Build Executable
 echo    12. Test Executable
 echo    13. Full Build Pipeline (USB Deploy)
-echo    18. Build Client USB (sync autotech_client)
+echo    18. Build USB (server + client tools, version-matched)
 echo    19. Build ONEDIR (no archive, repeatable prod)
 echo.
 echo  UTILITIES
@@ -74,7 +74,7 @@ if "%choice%"=="10" goto PREBUILD
 if "%choice%"=="11" goto BUILD
 if "%choice%"=="12" goto TESTEXE
 if "%choice%"=="13" goto FULLBUILD
-if "%choice%"=="18" goto BUILDCLIENTUSB
+if "%choice%"=="18" (call BUILD_USB.bat & goto MENU)
 if "%choice%"=="19" goto BUILDONEDIR
 if "%choice%"=="14" goto BACKUP
 if "%choice%"=="15" goto CLEAN
@@ -494,10 +494,10 @@ if exist "check_main.py" (
 )
 
 echo [4/6] Checking if templates exist...
-if exist "templates\enhanced_index.html" (
-    echo   [OK] enhanced_index.html found
+if exist "templates\main_dashboard.html" (
+    echo   [OK] main_dashboard.html found
 ) else (
-    echo   [ERROR] enhanced_index.html missing!
+    echo   [ERROR] main_dashboard.html missing!
     set checklist_pass=0
 )
 
@@ -663,8 +663,8 @@ if exist "dist\AutoTech.exe" (
         echo [USB] Deploying client structure from autotech_client/...
 
         :: Copy Install_AutoTech_Client.bat to USB root
-        if exist "Install_AutoTech_Client.bat" (
-            copy /Y "Install_AutoTech_Client.bat" "!USB_DRIVE!\" >nul
+        if exist "autotech_client\Install_AutoTech_Client.bat" (
+            copy /Y "autotech_client\Install_AutoTech_Client.bat" "!USB_DRIVE!\" >nul
             echo   [OK] Install_AutoTech_Client.bat
         )
 
@@ -767,12 +767,15 @@ echo ============================================
 echo  Build Client USB (autotech_client -> USB root)
 echo ============================================
 echo.
-echo This option creates a complete client USB package with:
-echo   - Install_AutoTech_Client.bat (installer)
+echo This option creates a complete USB package with:
+echo   - AutoTech.exe (server executable - run from USB)
+echo   - Start_AutoTech_Server.bat (server launcher)
+echo   - Install_AutoTech_Client.bat (client installer)
 echo   - AutoTech\tools\ (putty, WinSCP, VNC, plink, pscp)
 echo   - AutoTech\scripts\ (launch_*.bat scripts)
 echo   - AutoTech\scripts\mms_scripts\ (MMS batch scripts)
-echo   - VERSION file
+echo   - VERSION file (server + client versions matched)
+echo   - database\ (pre-populated databases)
 echo   - Frontrunner playback tools
 echo   - T1 Tools Legacy
 echo   - CamStudio USB
@@ -828,9 +831,10 @@ echo ============================================
 echo  SYNCING CLIENT USB PACKAGE
 echo ============================================
 echo.
+set "USB_OK=1"
 
 :: Copy VERSION from repo root to USB root (canonical version)
-echo [1/7] Copying VERSION file...
+echo [1/9] Copying VERSION file...
 if exist "VERSION" (
     copy /Y "VERSION" "%USB_DRIVE%\\" >nul
     for /f %%v in ('type "VERSION"') do echo   [OK] VERSION %%v copied to USB root
@@ -840,7 +844,7 @@ if exist "VERSION" (
 echo.
 
 :: Copy Install_AutoTech_Client.bat to USB root
-echo [2/7] Copying installer...
+echo [2/9] Copying installer...
 if exist "autotech_client\Install_AutoTech_Client.bat" (
     copy /Y "autotech_client\Install_AutoTech_Client.bat" "%USB_DRIVE%\\" >nul
     echo   [OK] Install_AutoTech_Client.bat
@@ -850,7 +854,7 @@ if exist "autotech_client\Install_AutoTech_Client.bat" (
 echo.
 
 :: Sync AutoTech folder (tools, scripts, mms_scripts, database)
-echo [3/7] Syncing AutoTech folder (tools, scripts, database)...
+echo [3/9] Syncing AutoTech folder (tools, scripts, database)...
 if exist "autotech_client\AutoTech\" (
     where robocopy >nul 2>&1
     if %ERRORLEVEL% EQU 0 (
@@ -890,8 +894,22 @@ if exist "autotech_client\AutoTech\" (
 )
 echo.
 
+:: Stamp server VERSION into AutoTech\scripts\VERSION so client+server versions always match
+echo [4/9] Stamping server version into AutoTech\scripts\VERSION...
+if exist "VERSION" (
+    if exist "%USB_DRIVE%\AutoTech\scripts\" (
+        copy /Y "VERSION" "%USB_DRIVE%\AutoTech\scripts\VERSION" >nul 2>&1
+        echo   [OK] AutoTech\scripts\VERSION stamped
+    ) else (
+        echo   [WARN] USB\AutoTech\scripts\ not found - version stamp skipped
+    )
+) else (
+    echo   [WARN] No VERSION file at repo root - version stamp skipped
+)
+echo.
+
 :: Sync Frontrunner playback folder
-echo [4/7] Syncing Frontrunner playback tools...
+echo [5/9] Syncing Frontrunner playback tools...
 if exist "autotech_client\frontrunnerV3-3.7.0-076-full\" (
     where robocopy >nul 2>&1
     if %ERRORLEVEL% EQU 0 (
@@ -906,7 +924,7 @@ if exist "autotech_client\frontrunnerV3-3.7.0-076-full\" (
 echo.
 
 :: Sync T1 Tools Legacy
-echo [5/7] Syncing T1 Tools Legacy...
+echo [6/9] Syncing T1 Tools Legacy...
 if exist "autotech_client\T1_Tools_Legacy\" (
     where robocopy >nul 2>&1
     if %ERRORLEVEL% EQU 0 (
@@ -921,7 +939,7 @@ if exist "autotech_client\T1_Tools_Legacy\" (
 echo.
 
 :: Sync CamStudio USB
-echo [6/7] Syncing CamStudio USB tools...
+echo [7/9] Syncing CamStudio USB tools...
 if exist "autotech_client\CamStudio_USB\" (
     where robocopy >nul 2>&1
     if %ERRORLEVEL% EQU 0 (
@@ -936,7 +954,7 @@ if exist "autotech_client\CamStudio_USB\" (
 echo.
 
 :: Sync AT Monitor
-echo [7/7] Syncing AT Monitor...
+echo [8/9] Syncing AT Monitor...
 if exist "autotech_client\AT Monitor V3.7.0\" (
     where robocopy >nul 2>&1
     if %ERRORLEVEL% EQU 0 (
@@ -950,13 +968,42 @@ if exist "autotech_client\AT Monitor V3.7.0\" (
 )
 echo.
 
+:: Copy AutoTech.exe server executable and launcher to USB root
+echo [9/9] Copying server executable and database...
+if exist "dist\AutoTech.exe" (
+    copy /Y "dist\AutoTech.exe" "%USB_DRIVE%\AutoTech.exe" >nul 2>&1
+    if exist "%USB_DRIVE%\AutoTech.exe" (
+        echo   [OK] AutoTech.exe copied
+    ) else (
+        echo   [ERROR] Failed to copy AutoTech.exe to USB
+        set "USB_OK=0"
+    )
+) else (
+    echo   [WARN] dist\AutoTech.exe not found - run option 11 ^(Build^) first
+    echo   [WARN] USB will have client tools only, no server executable
+)
+if exist "autotech_client\Start_AutoTech_Server.bat" (
+    copy /Y "autotech_client\Start_AutoTech_Server.bat" "%USB_DRIVE%\Start_AutoTech_Server.bat" >nul 2>&1
+    echo   [OK] Start_AutoTech_Server.bat copied
+)
+:: Copy database folder (pre-populated data for server-on-USB)
+if exist "database\" (
+    where robocopy >nul 2>&1
+    if %ERRORLEVEL% EQU 0 (
+        robocopy "database" "%USB_DRIVE%\database" /E /COPY:DAT /R:2 /W:1 /NFL /NDL /NP /XF "*.pyc" >nul
+    ) else (
+        if not exist "%USB_DRIVE%\database" mkdir "%USB_DRIVE%\database" 2>nul
+        xcopy "database\*.*" "%USB_DRIVE%\database\" /E /I /Q /Y /D >nul
+    )
+    echo   [OK] database\ folder synced
+)
+echo.
+
 :: Final verification
 echo ============================================
 echo  VERIFYING USB PACKAGE
 echo ============================================
 echo.
-set "USB_OK=1"
-
 :: Check required files
 if not exist "%USB_DRIVE%\Install_AutoTech_Client.bat" (
     echo [ERROR] Missing: Install_AutoTech_Client.bat
@@ -991,31 +1038,58 @@ if not exist "%USB_DRIVE%\AutoTech\scripts\mms_scripts\T1_Tools.bat" (
     echo [OK] AutoTech\scripts\mms_scripts\ (MMS scripts)
 )
 
+:: Check server executable
+if not exist "%USB_DRIVE%\AutoTech.exe" (
+    echo [WARN] Missing: AutoTech.exe (server - run option 11 first, then rerun option 18)
+) else (
+    echo [OK] AutoTech.exe (server executable)
+)
+
+:: Verify version consistency (for /f at depth 0 to avoid CMD block-parser quote issues)
+set "VER_ROOT="
+set "VER_CLIENT="
+if exist "%USB_DRIVE%\VERSION" for /f "usebackq" %%a in ("%USB_DRIVE%\VERSION") do set "VER_ROOT=%%a"
+if exist "%USB_DRIVE%\AutoTech\scripts\VERSION" for /f "usebackq" %%b in ("%USB_DRIVE%\AutoTech\scripts\VERSION") do set "VER_CLIENT=%%b"
+if defined VER_ROOT if defined VER_CLIENT (
+    if "!VER_ROOT!"=="!VER_CLIENT!" (
+        echo [OK] Version match: !VER_ROOT!
+    ) else (
+        echo [WARN] Version mismatch: root=!VER_ROOT! client=!VER_CLIENT!
+    )
+)
+
 echo.
 echo ============================================
 if "!USB_OK!"=="1" (
-    echo  CLIENT USB BUILD COMPLETE!
+    echo  USB BUILD COMPLETE!
 ) else (
-    echo  CLIENT USB BUILD INCOMPLETE - CHECK ERRORS ABOVE
+    echo  USB BUILD INCOMPLETE - CHECK ERRORS ABOVE
 )
 echo ============================================
 echo.
 echo Target: %USB_DRIVE%\
 echo.
 echo USB Structure:
-echo   %USB_DRIVE%\Install_AutoTech_Client.bat  (run on client PC)
+echo   %USB_DRIVE%\AutoTech.exe                 (server - double-click to run)
+echo   %USB_DRIVE%\Start_AutoTech_Server.bat    (server launcher with browser open)
+echo   %USB_DRIVE%\Install_AutoTech_Client.bat  (client installer - run as admin)
 echo   %USB_DRIVE%\VERSION
-echo   %USB_DRIVE%\AutoTech\tools\             (putty, WinSCP, VNC)
-echo   %USB_DRIVE%\AutoTech\scripts\           (launch_*.bat)
-echo   %USB_DRIVE%\AutoTech\scripts\mms_scripts\  (MMS batch scripts)
-echo   %USB_DRIVE%\AutoTech\database\          (optional DBs)
-echo   %USB_DRIVE%\frontrunnerV3-3.7.0-076-full\  (playback tools)
-echo   %USB_DRIVE%\T1_Tools_Legacy\            (legacy T1 tools)
-echo   %USB_DRIVE%\CamStudio_USB\              (screen recording)
-echo   %USB_DRIVE%\AT Monitor V3.7.0\          (AT Monitor)
+echo   %USB_DRIVE%\database\                    (server databases)
+echo   %USB_DRIVE%\AutoTech\tools\              (putty, WinSCP, VNC)
+echo   %USB_DRIVE%\AutoTech\scripts\            (launch_*.bat)
+echo   %USB_DRIVE%\AutoTech\scripts\mms_scripts\   (MMS batch scripts)
+echo   %USB_DRIVE%\frontrunnerV3-3.7.0-076-full\   (playback tools)
+echo   %USB_DRIVE%\T1_Tools_Legacy\             (legacy T1 tools)
+echo   %USB_DRIVE%\CamStudio_USB\               (screen recording)
+echo   %USB_DRIVE%\AT Monitor V3.7.0\           (AT Monitor)
 echo.
-echo USAGE: On client PC, right-click Install_AutoTech_Client.bat
-echo        and select "Run as administrator"
+echo SERVER USAGE:
+echo   Double-click: %USB_DRIVE%\AutoTech.exe
+echo   Or run:       %USB_DRIVE%\Start_AutoTech_Server.bat
+echo   Dashboard:    http://localhost:8888
+echo.
+echo CLIENT INSTALL:
+echo   Right-click Install_AutoTech_Client.bat and select Run as administrator
 echo.
 echo Rerun this option anytime to refresh the USB.
 echo.
@@ -1265,8 +1339,8 @@ if defined USB_DRIVE (
     )
 
     :: Deploy client structure from autotech_client/ (represents USB root)
-    if exist "Install_AutoTech_Client.bat" (
-        copy /Y "Install_AutoTech_Client.bat" "!USB_DRIVE!\" >nul
+    if exist "autotech_client\Install_AutoTech_Client.bat" (
+        copy /Y "autotech_client\Install_AutoTech_Client.bat" "!USB_DRIVE!\" >nul
         echo   [OK] Install_AutoTech_Client.bat
     )
 

@@ -43,10 +43,11 @@ a = Analysis(
     win_no_prefer_redirects=False,
     win_private_assemblies=False,
     cipher=block_cipher,
-    noarchive=False,
+    # Avoid archived bytecode to remove zlib decompression at runtime.
+    noarchive=True,
 )
 
-pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
+pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher, compressed=False)
 
 exe = EXE(
     pyz,
@@ -59,7 +60,9 @@ exe = EXE(
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
-    upx=True,
+    # UPX compression disabled: causes zlib.error when Flask loads form data
+    # due to archive corruption during compression/decompression cycle
+    upx=False,
     upx_exclude=[],
     runtime_tmpdir=None,
     console=True,  # Keep True to see startup messages and errors
