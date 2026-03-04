@@ -17,12 +17,14 @@ import time
 from datetime import datetime, timedelta
 
 import app.state as state
-from app.config import FLEET_DATA_PATH, PLAYBACK_SERVER
+import app.config as config # Import app.config as config
 from app.utils import (
     check_ptx_reachable,
     get_ptx_uptime,
-    is_online_network,
-    search_equipment,
+    connect_to_equipment,
+    is_online_network as is_online_network_func, # Alias to avoid name conflict
+    search_equipment as _search_equipment,       # Private alias — avoids parameter name collision
+    _resolve_tool_executable_path # Import directly from app.utils
 )
 
 logger = logging.getLogger(__name__)
@@ -528,73 +530,147 @@ def background_update_worker():
 # DIG FLEET MONITOR WORKER
 # ========================================
 
-def probe_equipment_health(equipment_id):
+def _ssh_health_probe(ssh) -> dict:
     """
-    Main health probe logic for Dig Fleet Monitor.
-    - Field/Prod: Actually SSH to units.
-    - Dev/Office: Generate mock data with variety.
+    Run uptime and free -m on an open SSH connection.
+    Returns dict with uptime_hours (float) and mem_usage (int %) or raises on failure.
+    """
+    import re
+
+    # Uptime
+    _, stdout, _ = ssh.exec_command("uptime", timeout=10)
+    uptime_raw = stdout.read().decode('utf-8', errors='ignore').strip()
+
+    uptime_hours = 0.0
+    m = re.search(r'up\s+(\d+)\s+days?,\s+(\d+):(\d+)', uptime_raw)
+    if m:
+        uptime_hours = int(m.group(1)) * 24 + int(m.group(2)) + int(m.group(3)) / 60
+    else:
+        m = re.search(r'up\s+(\d+):(\d+)', uptime_raw)
+        if m:
+            uptime_hours = int(m.group(1)) + int(m.group(2)) / 60
+        else:
+            m = re.search(r'up\s+(\d+)\s+min', uptime_raw)
+            if m:
+                uptime_hours = int(m.group(1)) / 60
+
+    # Memory — free -m gives plain integers
+    _, stdout, _ = ssh.exec_command("free -m", timeout=10)
+    mem_raw = stdout.read().decode('utf-8', errors='ignore')
+
+    mem_usage = 0
+    for line in mem_raw.splitlines():
+        if line.lower().startswith('mem:'):
+            parts = line.split()
+            if len(parts) >= 3:
+                total = int(parts[1])
+                used = int(parts[2])
+                if total > 0:
+                    mem_usage = round((used / total) * 100)
+            break
+
+    return {'uptime_hours': round(uptime_hours, 2), 'mem_usage': mem_usage}
+
+
+def probe_equipment_health(equipment_id, mock_equipment_db: dict = None,
+                           mms_server_config: dict = None,
+                           equipment_profiles: dict = None,
+                           is_online_func: callable = None,
+                           search_equipment_func: callable = None):
+    """
+    Health probe for Dig Fleet Monitor.
+
+    IP lookup order (no MMS involved by default):
+      1. equipment_info cache in fleet_monitor.db (populated from IP_list.dat on startup)
+      2. MMS server SSH — only if equipment not in cache and MMS is reachable (fallback)
+
+    Once the PTX IP is known, this server SSHes directly to the unit,
+    runs uptime + free -m in a single connection, and stores the result.
+    The detected PTX model (PTXC / PTXC (New OS) / PTX10) is cached so
+    credential detection only happens once per unit.
     """
     import random
-    from tools import ip_finder
+
+    if mock_equipment_db is None:     mock_equipment_db   = config.MOCK_EQUIPMENT_DB
+    if mms_server_config is None:     mms_server_config   = config.MMS_SERVER
+    if is_online_func is None:        is_online_func      = is_online_network_func
+    if search_equipment_func is None: search_equipment_func = _search_equipment
 
     fleet_db = state.fleet_monitor_db
 
-    # DEV/OFFICE MODE: Show all states for demo purposes
-    if not is_online_network():
+    # ----------------------------------------------------------------
+    # DEV/OFFICE MODE — no route to the mining network
+    # ----------------------------------------------------------------
+    if not is_online_func(config.GATEWAY_IP, config.PROBE_PORT):
         states = ['green', 'yellow', 'red']
-        idx = sum(ord(c) for c in equipment_id) % 3
-        state_name = states[idx]
-
+        state_name = states[sum(ord(c) for c in equipment_id) % 3]
         if state_name == 'green':
-            uptime = random.uniform(1, 23)
-            mem = random.randint(20, 69)
+            uptime, mem = random.uniform(1, 23), random.randint(20, 69)
         elif state_name == 'yellow':
-            uptime = random.uniform(24, 35)
-            mem = random.randint(70, 79)
+            uptime, mem = random.uniform(24, 35), random.randint(70, 79)
         else:
-            uptime = random.uniform(37, 200)
-            mem = random.randint(81, 95)
-
+            uptime, mem = random.uniform(37, 200), random.randint(81, 95)
         fleet_db.update_health(equipment_id, uptime, mem)
         return
 
-    # PRODUCTION/FIELD MODE: Actual SSH probe
+    # ----------------------------------------------------------------
+    # PRODUCTION MODE — SSH directly to the PTX
+    # ----------------------------------------------------------------
+    if not paramiko:
+        logger.error("Fleet Monitor: paramiko not available")
+        return
+
     try:
-        info = search_equipment(equipment_id)
-        ptx_ip = info.get('ptx_ip')
-        ptx_model = info.get('ptx_model', 'PTX10')
+        # 1. Resolve PTX IP from equipment_cache.db (kept current by IP Finder searches)
+        from tools.equipment_db import get_equipment, save_equipment
+        eq_db_path = state.EQUIPMENT_DB_PATH
+        cached = get_equipment(eq_db_path, equipment_id) if eq_db_path else None
+        ptx_ip = cached.get('network_ip') if cached else None
+        avi_ip = cached.get('avi_ip') if cached else None
+        cached_model = cached.get('ptx_model') if cached else None
 
         if not ptx_ip:
-            logger.warning(f"Fleet Monitor: No IP for {equipment_id}")
+            # Fallback: query MMS to discover the IP, saves result to equipment_cache.db
+            logger.info(f"Fleet Monitor: {equipment_id} not in equipment_cache, querying MMS")
+            info = search_equipment_func(equipment_id, mock_equipment_db, mms_server_config, is_online_func)
+            ptx_ip = info.get('ptx_ip')
+            if not ptx_ip:
+                logger.warning(f"Fleet Monitor: No IP found for {equipment_id}")
+                return
+            avi_ip = info.get('avi_ip')
+            cached_model = info.get('ptx_model')
+            # MMS result is already saved to equipment_cache.db by search_equipment()
+
+        # 2. Connect directly to the PTX — auto-detects PTXC / PTXC (New OS) / PTX10
+        ssh, detected_model = connect_to_equipment(ptx_ip)
+        if not ssh:
+            logger.warning(f"Fleet Monitor: Cannot connect to {equipment_id} ({ptx_ip}): {detected_model}")
             return
 
-        uptime_result = get_ptx_uptime(ptx_ip)
+        # Update equipment_cache.db with detected model if it changed or wasn't set
+        if detected_model and detected_model != cached_model and eq_db_path:
+            save_equipment(eq_db_path, equipment_name=equipment_id, ptx_model=detected_model)
 
-        if ptx_model == 'PTXC':
-            user, pw = 'dlog', 'gold'
-        else:
-            user, pw = 'mms', 'modular'
-
-        health_result = ip_finder.check_linux_health(ptx_ip, user, pw)
-
-        if uptime_result['success'] and health_result['success']:
-            uptime_hours = uptime_result['uptime_hours']
-            mem_str = health_result['memory_usage'].replace('%', '')
+        # 3. Run health commands on the same open connection
+        try:
+            result = _ssh_health_probe(ssh)
+        finally:
             try:
-                mem_usage = int(float(mem_str))
+                ssh.close()
             except Exception:
-                mem_usage = 0
+                pass
 
-            fleet_db.update_health(equipment_id, uptime_hours, mem_usage)
-            logger.info(f"Fleet Monitor: Probed {equipment_id} -> {uptime_hours}h, {mem_usage}%")
-        else:
-            logger.warning(f"Fleet Monitor: Probe failed for {equipment_id}")
+        fleet_db.update_health(equipment_id, result['uptime_hours'], result['mem_usage'])
+        logger.info(
+            f"Fleet Monitor: {equipment_id} ({detected_model}) "
+            f"-> {result['uptime_hours']}h uptime, {result['mem_usage']}% mem"
+        )
 
     except Exception as e:
-        logger.error(f"Error probing {equipment_id}: {e}")
+        logger.error(f"Fleet Monitor: Error probing {equipment_id}: {e}")
 
 
-def fleet_monitor_worker():
+def fleet_monitor_worker(fleet_data_path: str, gateway_ip: str, probe_port: int, mock_equipment_db: dict, mms_server_config: dict, equipment_profiles: dict):
     """Background worker for Dig Fleet Monitor - runs every 30 mins."""
     updater = state.fleet_monitor_updater
 
@@ -602,10 +678,11 @@ def fleet_monitor_worker():
     logger.info("Fleet Monitor background worker started")
     log_background('info', 'fleet_monitor', 'Fleet Monitor background worker started')
 
+
     while not updater['stop_event'].is_set():
         try:
-            if os.path.exists(FLEET_DATA_PATH):
-                with open(FLEET_DATA_PATH, 'r') as f:
+            if os.path.exists(fleet_data_path):
+                with open(fleet_data_path, 'r') as f:
                     data = json.load(f)
 
                 all_ids = []
@@ -617,8 +694,11 @@ def fleet_monitor_worker():
                     for eq_id in all_ids:
                         if updater['stop_event'].is_set():
                             break
-                        probe_equipment_health(eq_id)
-                        if is_online_network():
+                        probe_equipment_health(
+                            eq_id, mock_equipment_db, mms_server_config,
+                            equipment_profiles, is_online_network_func, _search_equipment
+                        )
+                        if is_online_network_func(gateway_ip, probe_port):
                             time.sleep(1)
 
                     updater['last_run'] = datetime.now().isoformat()

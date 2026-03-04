@@ -51,6 +51,9 @@ def api_fleet_data():
             logger.warning("Fleet Monitor: Using safety fallback layout")
             data = {
                 "columns": [
+                    {"id": "extraction", "title": "Extraction", "main": "GR1 Mining1", "back": "GR6 Mining2",
+                     "phone": "4940 4777", "comms": "Normal Auto Truck | Shovel comms",
+                     "color": "#8d97a5", "equipment": []},
                     {"id": "lh_north", "title": "Load & Haul North", "main": "GR17", "back": "GR18",
                      "phone": "4258", "comms": "Auto Truck", "color": "#f7a224", "equipment": ["EXD69", "EXD99"]},
                     {"id": "lh_central", "title": "Load & Haul Central", "main": "GR15", "back": "GR16",
@@ -142,8 +145,9 @@ def api_fleet_data_save():
         with open(FLEET_DATA_PATH, 'w') as f:
             json.dump(save_data, f, indent=2)
 
+        # Non-blocking probe so save returns immediately (SSH calls can take 30s+ each)
         for eq_id in all_ids:
-            probe_equipment_health(eq_id)
+            threading.Thread(target=probe_equipment_health, args=(eq_id,), daemon=True).start()
 
         log_database('info', 'fleet_data', f'Fleet layout updated and probed by {request.remote_addr}')
         return jsonify({'success': True})

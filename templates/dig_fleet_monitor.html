@@ -1,0 +1,708 @@
+{% extends "_BASE_TEMPLATE.html" %}
+
+{% block content %}
+<div class="dig-fleet-page">
+    <div class="header-actions-bar">
+        <button id="lockToggle" class="btn btn-secondary">
+            <span class="lock-icon">🔒</span> <span class="lock-text">Unlock to Edit</span>
+        </button>
+        <button id="refreshHealth" class="btn btn-secondary">
+            🔄 Refresh Health
+        </button>
+        <button id="saveLayout" class="btn btn-primary hidden">
+            💾 Save Layout
+        </button>
+        <button id="addEquipmentBtn" class="btn btn-vnc hidden">
+            ➕ Add Equipment
+        </button>
+    </div>
+
+    <div class="fleet-grid" id="fleetGrid">
+        <div style="grid-column: 1 / -1; text-align: center; padding: 100px;">
+            <div class="loading-spinner" style="margin: 0 auto 20px;"></div>
+            <p class="text-muted">Loading fleet layout and health data...</p>
+        </div>
+    </div>
+</div>
+
+<!-- Extraction (Equipment Detail) Modal -->
+<div class="modal-overlay" id="extractionModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 class="modal-title" id="extractionModalTitle">Equipment Details</h3>
+            <button class="modal-close" onclick="closeExtractionModal()">&times;</button>
+        </div>
+        <div class="modal-body" id="extractionModalBody">
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeExtractionModal()">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- Add Equipment Modal -->
+<div class="modal-overlay" id="addEquipModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 class="modal-title">Add Equipment</h3>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label class="form-label">Equipment ID</label>
+                <input type="text" id="newEquipId" class="form-input" placeholder="e.g. EXD69">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Target Column</label>
+                <select id="targetColumn" class="form-input">
+                    <!-- Options will be injected -->
+                </select>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+            <button class="btn btn-primary" onclick="confirmAddEquipment()">Add</button>
+        </div>
+    </div>
+</div>
+
+<style>
+    .dig-fleet-page {
+        background-color: #f0f0f0;
+        min-height: 100vh;
+        padding: 40px;
+        font-family: 'Arial Black', 'Arial', sans-serif;
+        color: #333;
+    }
+
+    [data-theme="dark"] .dig-fleet-page {
+        background-color: #1a1a1a;
+        color: #fff;
+    }
+
+    .pdf-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #ccc;
+    }
+
+    .header-left .update-text {
+        color: #e67e22;
+        font-size: 2.2rem;
+        font-weight: 900;
+    }
+
+    .header-left .title-text {
+        color: #2c3e50;
+        font-size: 2.2rem;
+        font-weight: 900;
+    }
+
+    .header-right .live-text {
+        color: #c0392b;
+        font-size: 2.2rem;
+        font-weight: 900;
+    }
+
+    .header-right .date-text {
+        color: #2c3e50;
+        font-size: 2.2rem;
+        font-weight: 900;
+    }
+
+    [data-theme="dark"] .title-text, 
+    [data-theme="dark"] .date-text {
+        color: #ecf0f1;
+    }
+
+    .header-actions-bar {
+        margin-bottom: 20px;
+        display: flex;
+        gap: 10px;
+    }
+
+    .fleet-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 15px;
+        align-items: stretch;
+    }
+
+    .fleet-column {
+        border-radius: 35px;
+        padding: 15px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        min-height: 600px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .column-title {
+        color: white;
+        text-align: center;
+        font-size: 2.4rem;
+        font-weight: 900;
+        padding: 15px 0;
+        line-height: 1.1;
+        height: 120px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .info-box {
+        background-color: white;
+        border-radius: 20px;
+        padding: 12px;
+        text-align: center;
+        font-size: 1.1rem;
+        font-weight: bold;
+        color: #333;
+        min-height: 50px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        border: 2px solid transparent;
+    }
+
+    .info-box .label {
+        font-size: 0.8rem;
+        color: #777;
+        text-transform: uppercase;
+        margin-bottom: 2px;
+    }
+
+    .equipment-container {
+        background-color: white;
+        border-radius: 25px;
+        padding: 15px;
+        flex: 1;
+        min-height: 200px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    /* Dark mode overrides — fleet monitor uses hardcoded light colours by design
+       (it mimics a physical noticeboard), so only the container backgrounds
+       need to adapt; the column cards keep their mine-site colours. */
+    [data-theme="dark"] .info-box {
+        background-color: #2d2d2d;
+        color: #f0f0f0;
+        border-color: rgba(255,255,255,0.08);
+    }
+    [data-theme="dark"] .info-box .label { color: #aaa; }
+
+    [data-theme="dark"] .equipment-container {
+        background-color: #2d2d2d;
+    }
+
+    [data-theme="dark"] .equipment-tile {
+        background-color: #3a3a3a;
+        border-color: #555;
+    }
+    [data-theme="dark"] .equip-id { color: #f0f0f0; }
+    [data-theme="dark"] .equip-stats { color: #ccc; border-top-color: rgba(255,255,255,0.1); }
+    [data-theme="dark"] .stat-val { color: #fff; }
+    [data-theme="dark"] .equipment-tile:hover { border-color: #60a5fa; }
+
+    /* Health colours stay vivid in dark mode */
+    [data-theme="dark"] .health-green { background-color: #14532d !important; border-color: #16a34a !important; }
+    [data-theme="dark"] .health-green .equip-id { color: #86efac; }
+    [data-theme="dark"] .health-yellow { background-color: #713f12 !important; border-color: #ca8a04 !important; }
+    [data-theme="dark"] .health-yellow .equip-id { color: #fde047; }
+    [data-theme="dark"] .health-red { background-color: #7f1d1d !important; border-color: #dc2626 !important; }
+    [data-theme="dark"] .health-red .equip-id { color: #fca5a5; }
+
+    .equipment-tile {
+        background-color: #f8f9fa;
+        border: 2px solid #ddd;
+        border-radius: 15px;
+        padding: 10px;
+        position: relative;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .equipment-tile:hover {
+        border-color: #3498db;
+        transform: scale(1.02);
+    }
+
+    .editing .equipment-tile {
+        cursor: grab;
+    }
+
+    .editing .equipment-tile:active {
+        cursor: grabbing;
+    }
+
+    .equip-id {
+        font-size: 1.3rem;
+        font-weight: 900;
+        color: #2c3e50;
+        text-align: center;
+        margin-bottom: 5px;
+    }
+
+    .equip-stats {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 15px;
+        font-size: 0.8rem;
+        color: #444;
+        border-top: 1px solid rgba(0,0,0,0.1);
+        padding-top: 8px;
+        text-align: center;
+    }
+
+    .stat-val {
+        font-weight: 900;
+        color: #000;
+    }
+
+    /* Health Colors */
+    .health-green {
+        background-color: #d4edda !important;
+        border-color: #28a745 !important;
+    }
+    .health-green .equip-id { color: #155724; }
+
+    .health-yellow {
+        background-color: #fff3cd !important;
+        border-color: #ffc107 !important;
+    }
+    .health-yellow .equip-id { color: #856404; }
+
+    .health-red {
+        background-color: #f8d7da !important;
+        border-color: #dc3545 !important;
+    }
+    .health-red .equip-id { color: #721c24; }
+
+    .remove-btn {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        width: 24px;
+        height: 24px;
+        background: #e74c3c;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        font-size: 14px;
+        cursor: pointer;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .editing .remove-btn {
+        display: flex;
+    }
+
+    .pdf-footer {
+        margin-top: 30px;
+        padding: 15px;
+        background-color: #8d97a5;
+        color: white;
+        border-radius: 15px;
+        text-align: center;
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
+
+    .sortable-ghost {
+        opacity: 0.3;
+        border: 2px dashed #3498db;
+    }
+
+    @media (max-width: 1400px) {
+        .header-left .update-text, .header-left .title-text, .header-right .live-text, .header-right .date-text {
+            font-size: 1.5rem;
+        }
+        .column-title { font-size: 1.8rem; }
+    }
+
+    @media (max-width: 1100px) {
+        .fleet-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+</style>
+
+<!-- Load local Sortable library for offline operation -->
+<script src="{{ url_for('static', filename='sortable.min.js') }}"></script>
+
+<script>
+    let fleetData = null;
+    let isEditing = false;
+    let sortables = [];
+    let colMetaMap = {}; // stores column metadata keyed by col.id
+
+    // Helper to check if Sortable is actually loaded
+    function getSortable() {
+        if (typeof Sortable === 'undefined') {
+            console.error('SortableJS not loaded. Drag and drop disabled.');
+            return null;
+        }
+        return Sortable;
+    }
+
+    async function loadFleetData() {
+        try {
+            const response = await fetch('/api/fleet_data');
+            if (!response.ok) {
+                const err = await response.json();
+                throw new Error(err.error || 'Server error');
+            }
+            fleetData = await response.json();
+            renderFleet();
+        } catch (error) {
+            console.error('Error loading fleet data:', error);
+            document.getElementById('fleetGrid').innerHTML = `
+                <div style="grid-column: 1 / -1; text-align: center; padding: 50px; background: rgba(239, 68, 68, 0.1); border: 1px solid var(--status-offline); border-radius: var(--radius-lg);">
+                    <h3 style="color: var(--status-offline); margin-bottom: 10px;">⚠️ Connection Error</h3>
+                    <p class="text-muted">${error.message}</p>
+                    <button class="btn btn-secondary mt-3" onclick="loadFleetData()">🔄 Try Again</button>
+                </div>
+            `;
+            showToast('Failed to load fleet data', 'error');
+        }
+    }
+
+    function renderFleet() {
+        const grid = document.getElementById('fleetGrid');
+        grid.innerHTML = '';
+        
+        // Safety destroy
+        sortables.forEach(s => {
+            try { s.destroy(); } catch(e) {}
+        });
+        sortables = [];
+
+        const targetColSelect = document.getElementById('targetColumn');
+        targetColSelect.innerHTML = '';
+
+        if (!fleetData || !fleetData.columns) return;
+
+        const sortableLib = getSortable();
+
+        colMetaMap = {}; // reset on each render
+
+        fleetData.columns.forEach(col => {
+            colMetaMap[col.id] = col; // store metadata for saveLayout
+
+            const option = document.createElement('option');
+            option.value = col.id;
+            option.textContent = col.title;
+            targetColSelect.appendChild(option);
+
+            const colEl = document.createElement('div');
+            colEl.className = 'fleet-column';
+            colEl.style.backgroundColor = col.color;
+            colEl.dataset.colId = col.id;
+            
+            colEl.innerHTML = `
+                <div class="column-title">${col.title}</div>
+
+                <div class="info-box">
+                    <span class="label">Main</span>
+                    <span>${col.main}</span>
+                </div>
+                
+                <div class="info-box">
+                    <span class="label">Back</span>
+                    <span>${col.back}</span>
+                </div>
+                
+                <div class="info-box">
+                    <span class="label">PH</span>
+                    <span>${col.phone}</span>
+                </div>
+                
+                <div class="info-box" style="font-size: 0.9rem;">
+                    ${col.comms}
+                </div>
+                
+                <div class="equipment-container" id="list-${col.id}" data-col-id="${col.id}">
+                    <!-- Tiles -->
+                </div>
+            `;
+
+            grid.appendChild(colEl);
+
+            const container = colEl.querySelector('.equipment-container');
+            
+            col.equipment_detailed.forEach(eq => {
+                try {
+                    const eqEl = document.createElement('div');
+                    eqEl.className = 'equipment-tile';
+                    eqEl.dataset.id = eq.id;
+                    
+                    // Health Color Logic
+                    let healthClass = 'health-green';
+                    const hrs = eq.uptime_hours || 0;
+                    const mem = eq.mem_usage_raw || 0;
+
+                    if (hrs > 36 || mem > 80) {
+                        healthClass = 'health-red';
+                    } else if (hrs >= 24 || mem >= 70) {
+                        healthClass = 'health-yellow';
+                    }
+                    
+                    if (eq.uptime === 'Pending' || !eq.last_updated) healthClass = ''; 
+                    
+                    // CRITICAL FIX: Only add if not empty to prevent DOMTokenList error
+                    if (healthClass) {
+                        eqEl.classList.add(healthClass);
+                    }
+
+                    const updatedTime = eq.last_updated ? new Date(eq.last_updated).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Pending';
+                    
+                    eqEl.innerHTML = `
+                        <button class="remove-btn" onclick="removeEquipment('${eq.id}')">&times;</button>
+                        <div class="equip-id">${eq.id}</div>
+                        <div class="equip-stats">
+                            <div>UPTIME: <span class="stat-val">${eq.uptime || 'Pending'}</span></div>
+                            <div>MEM: <span class="stat-val">${eq.mem_usage || '--%'}</span></div>
+                        </div>
+                        <div style="font-size: 0.55rem; color: rgba(0,0,0,0.4); text-align: center; margin-top: 8px; font-weight: bold;">
+                            CHECKED: ${updatedTime}
+                        </div>
+                    `;
+
+                    // Tap tile to open detail modal (view mode only)
+                    eqEl.addEventListener('click', function(e) {
+                        if (e.target.classList.contains('remove-btn')) return;
+                        if (isEditing) return;
+                        openExtractionModal(eq);
+                    });
+
+                    container.appendChild(eqEl);
+                } catch (tileErr) {
+                    console.error('Error rendering tile for:', eq.id, tileErr);
+                }
+            });
+
+            // Initialize Sortable if available
+            if (sortableLib) {
+                const sortable = new sortableLib(container, {
+                    group: 'fleet',
+                    animation: 150,
+                    disabled: !isEditing,
+                    ghostClass: 'sortable-ghost',
+                });
+                sortables.push(sortable);
+            }
+        });
+
+        if (isEditing) document.getElementById('fleetGrid').classList.add('editing');
+    }
+
+    function toggleEdit() {
+        isEditing = !isEditing;
+        const btn = document.getElementById('lockToggle');
+        const saveBtn = document.getElementById('saveLayout');
+        const addBtn = document.getElementById('addEquipmentBtn');
+        const lockIcon = btn.querySelector('.lock-icon');
+        const lockText = btn.querySelector('.lock-text');
+
+        if (isEditing) {
+            lockIcon.textContent = '🔓';
+            lockText.textContent = 'Lock Layout';
+            btn.classList.replace('btn-secondary', 'btn-warning');
+            saveBtn.classList.remove('hidden');
+            addBtn.classList.remove('hidden');
+            document.getElementById('fleetGrid').classList.add('editing');
+        } else {
+            lockIcon.textContent = '🔒';
+            lockText.textContent = 'Unlock to Edit';
+            btn.classList.replace('btn-warning', 'btn-secondary');
+            saveBtn.classList.add('hidden');
+            addBtn.classList.add('hidden');
+            document.getElementById('fleetGrid').classList.remove('editing');
+            loadFleetData(); // Reset to saved state
+        }
+
+        sortables.forEach(s => s.option('disabled', !isEditing));
+    }
+
+    async function saveLayout() {
+        const columns = [];
+        document.querySelectorAll('.fleet-column').forEach(colEl => {
+            const colId = colEl.dataset.colId;
+            const meta = colMetaMap[colId] || {};
+            const listEl = colEl.querySelector('.equipment-container');
+
+            const equipment = [];
+            listEl.querySelectorAll('.equipment-tile').forEach(eqEl => {
+                equipment.push(eqEl.dataset.id);
+            });
+
+            columns.push({
+                id:     colId,
+                title:  meta.title  || colId,
+                main:   meta.main   || '',
+                back:   meta.back   || '',
+                phone:  meta.phone  || '',
+                comms:  meta.comms  || '',
+                color:  meta.color  || '#9e9e9e',
+                equipment: equipment
+            });
+        });
+
+        try {
+            const response = await fetch('/api/fleet_data/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ columns })
+            });
+
+            if (response.ok) {
+                showToast('Layout saved', 'success');
+                toggleEdit();
+                loadFleetData();
+            }
+        } catch (error) {
+            showToast('Save failed', 'error');
+        }
+    }
+
+    function removeEquipment(id) {
+        if (!isEditing) return;
+        document.querySelector(`.equipment-tile[data-id="${id}"]`)?.remove();
+    }
+
+    function openAddModal() {
+        document.getElementById('addEquipModal').classList.add('active');
+        document.getElementById('newEquipId').focus();
+    }
+
+    function closeModal() {
+        document.getElementById('addEquipModal').classList.remove('active');
+    }
+
+    function confirmAddEquipment() {
+        const id = document.getElementById('newEquipId').value.trim().toUpperCase();
+        const colId = document.getElementById('targetColumn').value;
+        if (!id) return;
+
+        const container = document.getElementById(`list-${colId}`);
+        const eqEl = document.createElement('div');
+        eqEl.className = 'equipment-tile';
+        eqEl.dataset.id = id;
+        eqEl.innerHTML = `
+            <button class="remove-btn" onclick="removeEquipment('${id}')">&times;</button>
+            <div class="equip-id">${id}</div>
+            <div class="equip-stats">
+                <div>UPTIME: <span class="stat-val">Pending</span></div>
+                <div>MEM: <span class="stat-val">--%</span></div>
+            </div>
+            <div style="font-size: 0.55rem; color: rgba(0,0,0,0.4); text-align: center; margin-top: 8px; font-weight: bold;">
+                CHECKED: New
+            </div>
+        `;
+        container.appendChild(eqEl);
+        closeModal();
+        document.getElementById('newEquipId').value = '';
+    }
+
+    async function refreshHealth() {
+        const btn = document.getElementById('refreshHealth');
+        btn.disabled = true;
+        btn.textContent = '⏳ Refreshing...';
+        
+        try {
+            const response = await fetch('/api/fleet_data/refresh', { method: 'POST' });
+            if (response.ok) {
+                await loadFleetData();
+                showToast('Health data refreshed', 'success');
+            }
+        } catch (error) {
+            showToast('Refresh failed', 'error');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = '🔄 Refresh Health';
+        }
+    }
+
+    function openExtractionModal(eq) {
+        const healthLabel = eq.uptime === 'Pending' || !eq.last_updated ? 'Pending'
+            : (eq.uptime_hours > 36 || eq.mem_usage_raw > 80) ? '🔴 Critical'
+            : (eq.uptime_hours >= 24 || eq.mem_usage_raw >= 70) ? '🟡 Caution'
+            : '🟢 Healthy';
+
+        const lastUpdated = eq.last_updated
+            ? new Date(eq.last_updated).toLocaleString([], {dateStyle:'short', timeStyle:'short'})
+            : 'Not yet checked';
+
+        document.getElementById('extractionModalTitle').textContent = eq.id;
+        document.getElementById('extractionModalBody').innerHTML = `
+            <div style="display:grid;gap:12px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(0,0,0,0.08);border-radius:6px;">
+                    <span style="font-weight:700;font-size:0.85rem;">Status</span>
+                    <span style="font-weight:700;">${healthLabel}</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(0,0,0,0.08);border-radius:6px;">
+                    <span style="font-weight:700;font-size:0.85rem;">Uptime</span>
+                    <span>${eq.uptime || 'Pending'}</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(0,0,0,0.08);border-radius:6px;">
+                    <span style="font-weight:700;font-size:0.85rem;">Memory</span>
+                    <span>${eq.mem_usage || '--%'}</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(0,0,0,0.08);border-radius:6px;">
+                    <span style="font-weight:700;font-size:0.85rem;">Last Checked</span>
+                    <span style="font-size:0.85rem;">${lastUpdated}</span>
+                </div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;">
+                    <a href="/equipment_monitor/${eq.id}" target="_blank"
+                       style="flex:1;text-align:center;padding:10px;background:#2563eb;color:#fff;border-radius:6px;text-decoration:none;font-weight:700;font-size:0.9rem;">
+                        🔍 Open IP Finder
+                    </a>
+                    <button onclick="triggerProbe('${eq.id}')"
+                            style="flex:1;padding:10px;background:#16a34a;color:#fff;border:none;border-radius:6px;font-weight:700;font-size:0.9rem;cursor:pointer;">
+                        🔄 Refresh Health
+                    </button>
+                </div>
+            </div>
+        `;
+        document.getElementById('extractionModal').classList.add('active');
+    }
+
+    function closeExtractionModal() {
+        document.getElementById('extractionModal').classList.remove('active');
+    }
+
+    async function triggerProbe(equipmentId) {
+        // Fire a single-unit refresh via the fleet refresh endpoint (reloads all, simple approach)
+        showToast(`Queuing refresh for ${equipmentId}…`, 'info');
+        closeExtractionModal();
+        try {
+            await fetch('/api/fleet_data/refresh', { method: 'POST' });
+            setTimeout(() => loadFleetData(), 8000); // Give probe time to complete
+        } catch(e) {
+            showToast('Refresh request failed', 'error');
+        }
+    }
+
+    // Close extraction modal on overlay click
+    document.getElementById('extractionModal').addEventListener('click', function(e) {
+        if (e.target === this) closeExtractionModal();
+    });
+
+    document.getElementById('lockToggle').addEventListener('click', toggleEdit);
+    document.getElementById('refreshHealth').addEventListener('click', refreshHealth);
+    document.getElementById('saveLayout').addEventListener('click', saveLayout);
+    document.getElementById('addEquipmentBtn').addEventListener('click', openAddModal);
+
+    loadFleetData();
+    setInterval(() => { if (!isEditing) loadFleetData(); }, 60000);
+</script>
+{% endblock %}

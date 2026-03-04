@@ -1,0 +1,60 @@
+{
+  "columns": [
+    {
+      "id": "extraction",
+      "title": "Extraction",
+      "main": "GR1 Mining1",
+      "back": "GR6 Mining2",
+      "phone": "4940 4777",
+      "comms": "Normal Auto Truck | Shovel comms",
+      "color": "#8d97a5",
+      "equipment": [
+        "All Coal Eq"
+      ]
+    },
+    {
+      "id": "lh_north",
+      "title": "Load & Haul North",
+      "main": "GR17 PreStrip9",
+      "back": "GR18 PreStrip10",
+      "phone": "4940 4258",
+      "comms": "Normal Auto Truck | Shovel comms",
+      "color": "#f7a224",
+      "equipment": [
+        "EXD69",
+        "EXD99",
+        "SHE33"
+      ]
+    },
+    {
+      "id": "lh_central",
+      "title": "Load & Haul Central",
+      "main": "GR15 PreStrip7",
+      "back": "GR16 PreStrip8",
+      "phone": "4940 4259",
+      "comms": "Normal Auto Truck | Shovel comms",
+      "color": "#73c05c",
+      "equipment": [
+        "EXD265",
+        "EXD81",
+        "EXD57"
+      ]
+    },
+    {
+      "id": "lh_south",
+      "title": "Load & Haul South",
+      "main": "GR13 PreStrip5",
+      "back": "GR14 PreStrip6",
+      "phone": "4940 4252",
+      "comms": "Normal Auto Truck | Shovel comms",
+      "color": "#f7e127",
+      "equipment": [
+        "EXD82",
+        "EXD66",
+        "EXD67",
+        "EXD68",
+        "SHE32"
+      ]
+    }
+  ]
+}

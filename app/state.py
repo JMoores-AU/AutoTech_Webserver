@@ -112,6 +112,17 @@ download_progress = {}
 _network_status_cache = {"ts": 0.0, "online": False}
 
 # ========================================
+# PTX DB SYNC STATE
+# ========================================
+# Tracks background sync triggered from the PTX Uptime page
+ptx_db_sync = {
+    'running': False,
+    'last_result': None,   # dict: {success, records_added, records_updated, error}
+    'started_at': None,
+    'finished_at': None,
+}
+
+# ========================================
 # ACTIVE TRU CONNECTIONS
 # ========================================
 active_tru_connections = {}
