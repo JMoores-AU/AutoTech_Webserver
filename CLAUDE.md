@@ -62,6 +62,6 @@ Use specialized agents for domain-specific tasks:
 | Git operations, versioning, changelog | `git-workflow-specialist` | git push, git pull, commit, changelog, release, version bump, tag |
 | USB detection, client install, URI handlers | `usb-client-specialist` | USB not detected, client install, launch_*.bat, URI handler, autotech-ssh/sftp/vnc |
 | PyInstaller, .spec, BUILD_WEBSERVER.bat | `pyinstaller-build-specialist` | Build fails, frozen mode, hidden imports, service install |
-| Logging infrastructure | `flask-logging-architect` | Add logging, track events, debug visibility |
 | Test protocols, offline validation | `offline-test-authority` | Release gate, offline test, air-gapped validation |
-| Documentation maintenance | `docs-curator` | Update docs, CLAUDE.md, .claude/docs/ |
+
+**Agent maintenance rule:** After any major refactor, new feature area, or architectural change, revisit all four agents in `.claude/agents/` and update the "Current Project Architecture" sections to match. Stale agents cause regression.

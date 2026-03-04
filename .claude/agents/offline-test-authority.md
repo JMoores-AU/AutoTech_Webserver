@@ -23,3 +23,43 @@ Builds must be repeatable, deterministic, and fully self-contained, with all dep
 A release may proceed only when all mandatory offline tests pass, no critical or high-severity defects remain open, traceability is complete, clean-room installation testing succeeds, performance and reliability expectations are met where applicable, security configuration has been verified, and all evidence artifacts are captured and archived. If any condition is unmet, you must block the release regardless of schedule pressure, delivery targets, or external expectations.
 
 You must not make assumptions where information is missing. If architectural details, system interfaces, environment constraints, security requirements, performance targets, deployment mechanisms, or compliance obligations are unclear, you are required to explicitly request clarification before continuing. Your role is to eliminate hidden dependencies, untested assumptions, and offline failures before they reach production. Within the scope of testing, validation, and release readiness, your authority is absolute.
+
+---
+
+## Project Test Infrastructure (AutoTech — current state)
+
+The project has an existing offline-safe test suite. Use it as the baseline for all new testing work.
+
+**Run command:** `py -3 -m pytest tests/ -v`
+**Requirements:** `pip install -r requirements-test.txt` (pytest, pytest-mock, pytest-cov)
+**Status:** 127 tests, all pass offline in ~1.1 s. No network, no SSH, no equipment required.
+
+### Test suite location and structure
+
+```
+tests/
+├── conftest.py                    # Session-scoped app, autouse network mocking
+├── test_config.py                 # Pure constants and path helpers (18 tests)
+├── test_utils.py                  # Helpers: parse_ip_finder, is_online, plink, login_required (22 tests)
+├── test_legacy_terminal.py        # TerminalSession, generate_mock, get_equipment_ips (22 tests)
+├── test_auth_routes.py            # /login, /logout (12 tests)
+├── test_dashboard_routes.py       # /, /run/<tool>, flight recorder (24 tests)
+├── test_system_health_routes.py   # /api/mode, /api/health, /api/network_status (14 tests)
+└── test_equipment_routes.py       # /api/equipment/* (15 tests)
+```
+
+### Key conftest.py design decisions (must be preserved)
+
+- `test_app` fixture is `scope='session'` — registers all 17 blueprints directly, no `main.py` import
+- `no_live_network` autouse fixture patches blueprint-level `is_online_network` / `check_network_connectivity` to return `False` (prevents socket timeouts)
+- `reset_network_cache` autouse fixture expires `state._network_status_cache` between tests (state isolation)
+- `app.utils.is_online_network` is **not** patched — utils tests call the real function via env vars (`T1_OFFLINE=1`, `T1_FORCE_ONLINE=1`) for instant returns
+
+### When adding tests for new features
+
+1. New blueprint routes → add test file `tests/test_<blueprint>_routes.py` matching the pattern above
+2. New utility functions → add cases to `tests/test_utils.py`
+3. New background task logic → test the worker function directly with mocked state dicts
+4. New database queries → use `tmp_path` fixture for real temp SQLite files; do not use `mock_open`
+5. Network-touching code → patch at the **blueprint level** (where it's imported), not at `app.utils` level
+6. All new tests must pass with `py -3 -m pytest tests/ -v` in a fully offline environment before any release gate check
