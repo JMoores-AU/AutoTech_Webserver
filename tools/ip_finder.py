@@ -79,12 +79,10 @@ def parse_ip_finder_output(raw: str) -> Dict[str, object]:
     result['ptx_model']  = "PTXC" if result['ptxc_found'] else "PTX10"
     return result
 
-import os, subprocess, socket, time
+import os, subprocess, socket, time, sys, shutil # Import shutil for shutil.which
 
-# --- local tools (adjust if needed) ---
-PLINK = r"C:\Komatsu_Tier1\T1_Tools\tools\plink.exe"
-VNC   = r"C:\Komatsu_Tier1\T1_Tools\tools\VNC\vncviewer.exe"
-# --------------------------------------
+# NOTE: _resolve_tool_executable_path is now passed as an argument to functions that need it
+# to avoid circular imports with app.config. It is no longer imported globally here.
 
 def _free_local_port(start=5901, end=5999):
     for p in range(start, end+1):
@@ -96,7 +94,7 @@ def _free_local_port(start=5901, end=5999):
                 continue
     raise RuntimeError("No free local port for VNC tunnel")
 
-def ip_finder_to_vnc(query: str, gateway_password: str, offline_mode: bool) -> Dict[str, object]:
+def ip_finder_to_vnc(query: str, gateway_password: str, offline_mode: bool, resolve_tool_path_func: callable = None) -> Dict[str, object]:
     raw = run(query, gateway_password, offline_mode=offline_mode)
     info = parse_ip_finder_output(raw)
 
@@ -111,10 +109,14 @@ def ip_finder_to_vnc(query: str, gateway_password: str, offline_mode: bool) -> D
     else:
         ssh_user, ssh_pass = "mms", "modular"
 
+    # Resolve PLINK and VNC paths using the passed function
+    _PLINK = resolve_tool_path_func("plink.exe") if resolve_tool_path_func else "plink.exe"
+    _VNC = resolve_tool_path_func("vncviewer.exe") if resolve_tool_path_func else "vncviewer.exe"
+
     # Pick a local port and build tunnel
     lport = _free_local_port()
     tunnel_cmd = [
-        PLINK, "-v", "-ssh",
+        _PLINK, "-v", "-ssh",
         "-l", ssh_user, "-pw", ssh_pass,
         "-L", f"{lport}:localhost:5900",
         ptx_ip, "-batch", "vncserver && sleep 10"
@@ -127,7 +129,7 @@ def ip_finder_to_vnc(query: str, gateway_password: str, offline_mode: bool) -> D
     time.sleep(5)
 
     # Launch VNC viewer
-    subprocess.Popen([VNC, f"127.0.0.1:{lport}"])
+    subprocess.Popen([_VNC, f"127.0.0.1:{lport}"])
 
     return {
         "ok": True,
@@ -311,7 +313,7 @@ def get_avi_credentials():
         "password": "root"  # or your AVI password
     }
 
-def check_linux_health(ptx_ip, ssh_user="dlog", ssh_password="gold", timeout=15):
+def check_linux_health(ptx_ip, ssh_user="dlog", ssh_password="gold", timeout=15, resolve_tool_path_func: callable = None):
     """
     Run Linux health check on PTX/Server via SSH
     Returns CPU, Memory, Uptime, and Disk usage stats
@@ -367,8 +369,8 @@ def check_linux_health(ptx_ip, ssh_user="dlog", ssh_password="gold", timeout=15)
             stdin, stdout, stderr = ssh_client.exec_command(uptime_cmd, timeout=5)
             uptime_raw = stdout.read().decode('utf-8').strip()
 
-        # Disk Usage - get /home or / partition
-        disk_cmd = "df -h | grep -E '(/home|/media/realroot/home|/$)' | head -1"
+        # Disk Usage - target /media/realroot/home specifically, fall back to /home or /
+        disk_cmd = "df -h /media/realroot/home 2>/dev/null | tail -1 || df -h /home 2>/dev/null | tail -1 || df -h / 2>/dev/null | tail -1"
         stdin, stdout, stderr = ssh_client.exec_command(disk_cmd, timeout=5)
         disk_usage = stdout.read().decode('utf-8').strip()
 

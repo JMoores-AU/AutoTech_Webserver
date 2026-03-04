@@ -45,33 +45,30 @@ def get_version():
 APP_VERSION = get_version()
 
 # ========================================
-# TOOL PATHS
+# TOOL PATHS (Will be populated in main.py after app.utils is loaded)
 # ========================================
-TOOLS_DIR = os.path.join(BASE_DIR, 'AutoTech', 'tools')
-PLINK_PATH = os.path.join(TOOLS_DIR, 'plink.exe')
-VNC_VIEWER_PATH = os.path.join(TOOLS_DIR, 'vncviewer.exe')
-
-# AutoTech Client tools path (for T1 Legacy scripts)
-# USB: E:\AutoTech\autotech_client\tools  |  Dev: project\autotech_client\tools
-CLIENT_TOOLS_DIR = os.path.join(BASE_DIR, 'AutoTech', 'autotech_client', 'tools')
-if not os.path.exists(CLIENT_TOOLS_DIR):
-    # Fallback to dev structure
-    CLIENT_TOOLS_DIR = os.path.join(BASE_DIR, 'autotech_client', 'tools')
-CLIENT_PLINK_PATH = os.path.join(CLIENT_TOOLS_DIR, 'plink.exe')
+TOOLS_DIR = os.path.join(BASE_DIR, 'T1_Tools_Web', 'tools')
+PLINK_PATH = None
+VNC_VIEWER_PATH = None
+WINSCP_PATH = None
+CLIENT_TOOLS_DIR = None # Will be set in main.py or a dedicated init function
+CLIENT_PLINK_PATH = None
 
 AUTO_TECH_CLIENT_DIR = os.environ.get('AUTOTECH_CLIENT_DIR', r"C:\AutoTech_Client")
 AUTO_TECH_CLIENT_PLINK = os.path.join(AUTO_TECH_CLIENT_DIR, 'plink.exe')
 
 PLINK_CANDIDATES = [
     AUTO_TECH_CLIENT_PLINK,
-    CLIENT_PLINK_PATH,
-    PLINK_PATH,
+    # Other candidates can be added here or dynamically resolved
 ]
+
+# VNC Viewer name for dynamic path resolution in playback blueprint
+VNC_VIEWER_NAME = "vncviewer.exe"
 
 # ========================================
 # NETWORK CONFIGURATION
 # ========================================
-GATEWAY_IP = "10.110.19.107"  # CORRECTED from 10.110.19.1
+GATEWAY_IP = "10.110.19.107"
 PTX_BASE_IP = "10.110.19.107"
 PROBE_PORT = 22
 
@@ -99,7 +96,8 @@ PLAYBACK_SERVER = {
     'port': 22,
     'user': 'komatsu',
     'password': 'M0dul1r@GRM2',
-    'path': '/var/log/frontrunner/frontrunnerV3-3.7.0-076-full/playback/'
+    'path': '/var/log/frontrunner/frontrunnerV3-3.7.0-076-full/playback/',
+    'winscp_path': None # Will be populated later
 }
 
 # ========================================
@@ -143,7 +141,6 @@ MOCK_EQUIPMENT_DB = {
         'avi_ip': '10.111.21.112',
         'flight_recorder_ip': '10.110.20.111',
         'vehicle_status': 'Online',
-        'ptxc_found': False,
         'ssh_status': 'Connected'
     },
     'RD190': {
@@ -154,7 +151,6 @@ MOCK_EQUIPMENT_DB = {
         'avi_ip': '10.111.19.191',
         'flight_recorder_ip': '10.110.19.191',
         'vehicle_status': 'Online',
-        'ptxc_found': True,
         'ssh_status': 'Connected'
     },
     'AHG135': {
@@ -165,7 +161,6 @@ MOCK_EQUIPMENT_DB = {
         'avi_ip': None,
         'flight_recorder_ip': None,
         'vehicle_status': 'Online',
-        'ptxc_found': False,
         'ssh_status': 'Connected'
     },
     'TEST1': {
@@ -176,7 +171,6 @@ MOCK_EQUIPMENT_DB = {
         'avi_ip': '10.111.20.202',
         'flight_recorder_ip': '10.110.20.202',
         'vehicle_status': 'Online',
-        'ptxc_found': True,
         'ssh_status': 'Connected',
         'health': {
             'cpu_usage': '85.30%',
@@ -194,7 +188,6 @@ MOCK_EQUIPMENT_DB = {
         'avi_ip': '10.111.21.151',
         'flight_recorder_ip': '10.110.21.151',
         'vehicle_status': 'Degraded',
-        'ptxc_found': False,
         'ssh_status': 'Connected',
         'health': {
             'cpu_usage': '22.10%',
@@ -225,7 +218,8 @@ FLEET_DATA_PATH = resolve_data_path(BASE_DIR, 'fleet_data.json')
 # IP_list.dat path for importing equipment list
 # Check multiple locations: USB legacy folder first, then local database folder
 _ip_list_candidates = [
-    os.path.join(BASE_DIR, 'T1_Tools_Legacy', 'bin', 'IP_list.dat'),  # USB: E:\T1_Tools_Legacy\bin\
+    os.path.join(BASE_DIR, 'T1_Tools_Legacy', 'bin', 'IP_list.dat'),  # USB: X:\T1_Tools_Legacy\bin\
+    os.path.join(BASE_DIR, 'AutoTech', 'database', 'IP_list.dat'),    # USB frozen: X:\AutoTech\database\
     os.path.join(BASE_DIR, 'database', 'IP_list.dat'),                 # Local dev: project\database\
 ]
 IP_LIST_PATH = next((p for p in _ip_list_candidates if os.path.exists(p)), _ip_list_candidates[-1])

@@ -26,6 +26,9 @@ from logging.handlers import RotatingFileHandler
 from datetime import datetime
 from typing import Optional
 
+# Import BASE_DIR and resolve_data_path from app.config
+from app.config import BASE_DIR, resolve_data_path
+
 # Thread-safe context variable for request_id correlation
 _request_id_ctx: ContextVar[str] = ContextVar('request_id', default='no-request')
 
@@ -54,34 +57,31 @@ _initialized = False
 def get_log_directory() -> str:
     """
     Get the log directory path, creating it if necessary.
-    Supports dev, frozen exe, service, and USB deployment modes.
-
-    Directory structure:
-    - USB: E:\\AutoTech\\database\\logs
-    - Dev: project\\database\\logs
+    Leverages resolve_data_path from app.config for consistent path resolution.
     """
     global _log_dir
 
     if _log_dir and os.path.exists(_log_dir):
         return _log_dir
 
-    # Determine base directory based on execution context
-    if getattr(sys, 'frozen', False):
-        # Running as PyInstaller executable
-        base_dir = os.path.dirname(sys.executable)
-    else:
-        # Running as Python script
-        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    # Use the centralized data path resolver from app.config
+    _log_dir = resolve_data_path(BASE_DIR, LOG_FOLDER_NAME)
+    
+    try:
+        os.makedirs(_log_dir, exist_ok=True)
+    except OSError as e:
+        # Log this error to stderr as file logging might not be working yet
+        print(f"CRITICAL ERROR: Failed to create log directory '{_log_dir}': {e}", file=sys.stderr)
+        # Fallback to current working directory as a last resort, but this is a serious problem
+        _log_dir = os.path.join(os.getcwd(), LOG_FOLDER_NAME)
+        try:
+            os.makedirs(_log_dir, exist_ok=True)
+            print(f"WARNING: Falling back to log directory: '{_log_dir}'", file=sys.stderr)
+        except OSError as e_fallback:
+            print(f"CRITICAL ERROR: Fallback log directory also failed: {e_fallback}", file=sys.stderr)
+            # If even the fallback fails, set it to a dummy path to prevent further errors
+            _log_dir = os.devnull # Redirect to null device
 
-    # Try USB structure first (E:\AutoTech\database\logs)
-    usb_db_folder = os.path.join(base_dir, "AutoTech", "database")
-    if os.path.exists(os.path.join(base_dir, "AutoTech")):
-        _log_dir = os.path.join(usb_db_folder, LOG_FOLDER_NAME)
-    else:
-        # Fallback to dev structure (project\database\logs)
-        _log_dir = os.path.join(base_dir, "database", LOG_FOLDER_NAME)
-
-    os.makedirs(_log_dir, exist_ok=True)
     return _log_dir
 
 
@@ -162,11 +162,14 @@ def _get_logger(name: str, log_file: str) -> logging.Logger:
     logger.addHandler(file_handler)
 
     # Add console handler for development (not in frozen exe or service)
+    # The root logger (configured by logging.basicConfig in main.py) handles console output.
     # Check if running in service mode by looking for specific markers
     is_service = os.environ.get('AUTOTECH_SERVICE_MODE', '').strip() == '1'
     is_frozen = getattr(sys, 'frozen', False)
 
-    if not is_service:
+    # Only add console handler if not a service (and not handled by root logger if frozen)
+    # This ensures logs appear in console during development but not when run as a service/frozen app with default console setup.
+    if not is_service and not is_frozen and not any(isinstance(h, logging.StreamHandler) for h in logger.handlers):
         console_handler = logging.StreamHandler(sys.stdout)
         console_handler.setLevel(get_log_level())
         console_handler.setFormatter(_create_formatter())

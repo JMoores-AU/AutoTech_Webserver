@@ -95,11 +95,10 @@ logger = logging.getLogger(__name__)
 # ========================================
 from app.config import (
     BASE_DIR, TEMPLATE_FOLDER, STATIC_FOLDER,
-    TOOLS_DIR, PLINK_PATH, VNC_VIEWER_PATH,
-    CLIENT_TOOLS_DIR, CLIENT_PLINK_PATH,
+    TOOLS_DIR,
     AUTO_TECH_CLIENT_DIR, AUTO_TECH_CLIENT_PLINK, PLINK_CANDIDATES,
     GATEWAY_IP, PTX_BASE_IP, PROBE_PORT,
-    SERVERS, MMS_SERVER, PLAYBACK_SERVER,
+    SERVERS, MMS_SERVER, PLAYBACK_SERVER, VNC_VIEWER_NAME,
     TOOL_LIST, EQUIPMENT_PROFILES, MOCK_EQUIPMENT_DB,
     IP_LIST_PATH, FLEET_DATA_PATH, resolve_data_path,
     APP_VERSION, get_version,
@@ -108,7 +107,7 @@ import app.state as state
 from app.utils import (
     login_required, is_online_network, check_network_connectivity,
     resolve_plink_path, get_autotech_client_folder, connect_to_equipment,
-    check_ptx_reachable, get_ptx_uptime,
+    check_ptx_reachable, get_ptx_uptime, _resolve_tool_executable_path,
     search_equipment, parse_ip_finder_output,
 )
 from app.background_tasks import (
@@ -116,6 +115,38 @@ from app.background_tasks import (
     background_update_worker, fleet_monitor_worker,
     probe_equipment_health, format_uptime_hours, open_browser,
 )
+
+# ========================================
+# DYNAMICALLY POPULATE APP.CONFIG TOOL PATHS
+# ========================================
+from app.config import (
+    BASE_DIR, AUTO_TECH_CLIENT_DIR, AUTO_TECH_CLIENT_PLINK, PLINK_CANDIDATES,
+    PLAYBACK_SERVER # Only import necessary mutable objects for modification
+)
+
+# Dynamically populate app.config tool paths using _resolve_tool_executable_path from app.utils
+import app.config as config # Import app.config as config to modify its attributes
+
+config.PLINK_PATH = _resolve_tool_executable_path("plink.exe", sub_dir="AutoTech/tools")
+config.VNC_VIEWER_PATH = _resolve_tool_executable_path("vncviewer.exe", sub_dir="AutoTech/tools")
+config.WINSCP_PATH = _resolve_tool_executable_path("WinSCP.exe", sub_dir="AutoTech/tools/WinSCP")
+
+# Client tools path for T1 Legacy scripts (this is part of app.config)
+CLIENT_TOOLS_DIR_RESOLVED = os.path.join(BASE_DIR, 'AutoTech', 'autotech_client', 'tools')
+if not os.path.exists(CLIENT_TOOLS_DIR_RESOLVED):
+    CLIENT_TOOLS_DIR_RESOLVED = os.path.join(BASE_DIR, 'autotech_client', 'tools')
+config.CLIENT_TOOLS_DIR = CLIENT_TOOLS_DIR_RESOLVED # Update config's CLIENT_TOOLS_DIR
+
+config.CLIENT_PLINK_PATH = _resolve_tool_executable_path("plink.exe", sub_dir="autotech_client/tools")
+
+config.PLAYBACK_SERVER['winscp_path'] = config.WINSCP_PATH # Use resolved path
+
+# Update PLINK_CANDIDATES with resolved paths (modifies the list in app.config)
+config.PLINK_CANDIDATES[:] = [
+    config.AUTO_TECH_CLIENT_PLINK,
+    config.CLIENT_PLINK_PATH,
+    config.PLINK_PATH,
+]
 
 # ========================================
 # INITIALIZE LOGGING INFRASTRUCTURE
@@ -127,9 +158,9 @@ log_server('info', 'startup', f'Log directory: {LOG_DIR}')
 
 
 logger.info(f"Application Base Directory: {BASE_DIR}")
-logger.info(f"Tools Directory: {TOOLS_DIR}")
-logger.info(f"Client Tools Directory: {CLIENT_TOOLS_DIR}")
-logger.info(f"AutoTech Client Directory: {AUTO_TECH_CLIENT_DIR}")
+logger.info(f"PLINK Path: {config.PLINK_PATH}") # Use PLINK_PATH as a representation of general tools dir
+logger.info(f"Client Tools Directory: {config.CLIENT_TOOLS_DIR}")
+logger.info(f"AutoTech Client Directory: {config.AUTO_TECH_CLIENT_DIR}")
 logger.info(f"Template Folder: {TEMPLATE_FOLDER}")
 logger.info(f"Static Folder: {STATIC_FOLDER}")
 
@@ -182,6 +213,12 @@ def ensure_fleet_config():
     """Ensure the fleet layout config exists with a default if missing."""
     default_layout = {
         "columns": [
+            {
+                "id": "extraction", "title": "Extraction",
+                "main": "GR1 Mining1", "back": "GR6 Mining2",
+                "phone": "4940 4777", "comms": "Normal Auto Truck | Shovel comms",
+                "color": "#8d97a5", "equipment": []
+            },
             {
                 "id": "lh_north", "title": "Load & Haul North",
                 "main": "GR17 PreStrip9", "back": "GR18 PreStrip10",
@@ -367,6 +404,8 @@ def add_no_cache_headers(resp):
 
 def print_startup_banner():
     """Display startup information"""
+    import app.config as config # Import config locally to avoid circular dependencies
+
     # Get server IP address
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -379,8 +418,8 @@ def print_startup_banner():
     print("\n" + "="*60)
     print("AUTOTECH WEB DASHBOARD - ENHANCED VERSION")
     print("="*60)
-    print(f"Network Mode: {'ONLINE' if is_online_network() else 'OFFLINE'}")
-    print(f"Gateway IP: {GATEWAY_IP}")
+    print(f"Network Mode: {'ONLINE' if is_online_network(config.GATEWAY_IP, config.PROBE_PORT) else 'OFFLINE'}")
+    print(f"Gateway IP: {config.GATEWAY_IP}")
     print(f"Server IP: {server_ip}")
     print(f"\nAccess from this PC:     http://localhost:8888")
     print(f"Access from other PCs:   http://{server_ip}:8888")
@@ -608,7 +647,7 @@ if __name__ == '__main__':
 
         # Log server startup
         log_server('info', 'startup', f'Server starting on port 8888')
-        log_server('info', 'startup', f'Network mode: {"ONLINE" if is_online_network() else "OFFLINE"}')
+        log_server('info', 'startup', f'Network mode: {"ONLINE" if is_online_network(config.GATEWAY_IP, config.PROBE_PORT) else "OFFLINE"}')
 
         # Start FrontRunner background monitor
         try:
@@ -631,7 +670,14 @@ if __name__ == '__main__':
         browser_thread.start()
 
         # Start Dig Fleet Monitor background worker
-        fleet_monitor_updater['thread'] = threading.Thread(target=fleet_monitor_worker, daemon=True)
+        fleet_monitor_updater['thread'] = threading.Thread(
+            target=fleet_monitor_worker,
+            args=(
+                config.FLEET_DATA_PATH, config.GATEWAY_IP, config.PROBE_PORT,
+                config.MOCK_EQUIPMENT_DB, config.MMS_SERVER, config.EQUIPMENT_PROFILES
+            ),
+            daemon=True
+        )
         fleet_monitor_updater['thread'].start()
         fleet_monitor_updater['running'] = True
 
