@@ -254,6 +254,63 @@
         .toast.success { border-left: 4px solid var(--status-online); }
         .toast.error { border-left: 4px solid var(--status-offline); }
         .toast.info { border-left: 4px solid var(--status-info); }
+
+        /* TRU Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: var(--theme-bg-card);
+            border: 1px solid var(--theme-border);
+            border-radius: var(--radius-lg);
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+            border-bottom: 1px solid var(--theme-border);
+        }
+        .modal-header h3 { margin: 0; color: var(--theme-text-bright); }
+        .modal-close { background: none; border: none; color: var(--theme-text-muted); font-size: 1.5rem; cursor: pointer; }
+        .modal-body { padding: 20px; }
+        .tru-info-grid { display: grid; gap: 12px; margin-bottom: 20px; }
+        .tru-info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: var(--theme-bg);
+            border-radius: var(--radius-sm);
+        }
+        .tru-info-row label { color: var(--theme-text-muted); font-size: 0.85rem; }
+        .tru-info-row span { font-family: 'Consolas', monospace; color: var(--theme-text-bright); }
+        .tru-instructions {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: var(--radius-md);
+            padding: 16px;
+        }
+        .tru-instructions h4 { margin: 0 0 12px 0; color: #10b981; font-size: 0.9rem; }
+        .tru-instructions ol { margin: 0; padding-left: 20px; color: var(--theme-text); font-size: 0.85rem; }
+        .tru-instructions li { margin-bottom: 8px; }
+        .modal-footer {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            padding: 20px;
+            border-top: 1px solid var(--theme-border);
+        }
     </style>
 </head>
 <body>
@@ -293,6 +350,7 @@
         const equipmentId = config.equipment_id;
         let currentEquipment = null;
         let healthCheckInterval = null;
+        let truConnected = false;
 
         function showToast(message, type = 'info') {
             const container = document.getElementById('toastContainer');
@@ -560,8 +618,157 @@
             showToast('Opening Flight Recorder in new tab', 'success');
         }
 
-        function openTRU(equipmentId, ptxIp) {
-            showToast('TRU Access: ' + equipmentId, 'info');
+        async function openTRU(eqId, ptxIp) {
+            if (!ptxIp) { showToast('No PTX IP available', 'error'); return; }
+
+            const truBtn = document.querySelector('.btn-tru');
+            truBtn.disabled = true;
+            truBtn.innerHTML = '<span class="spinner"></span> Connecting...';
+
+            try {
+                const response = await fetch('/api/tru_setup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ equipment_ip: ptxIp, equipment_name: eqId })
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    truConnected = true;
+                    updateTRUStatus(true, eqId);
+                    showTRUModal(data);
+                    const label = data.simulated ? 'TRU simulated (offline)' : 'GNSS tunnels open';
+                    showToast(label, data.simulated ? 'info' : 'success');
+                } else {
+                    showToast(data.message || 'TRU connection failed', 'error');
+                }
+            } catch (error) {
+                showToast('TRU connection error', 'error');
+            } finally {
+                truBtn.disabled = false;
+                truBtn.innerHTML = '🚛 TRU Access';
+            }
+        }
+
+        async function disconnectTRU() {
+            try {
+                const response = await fetch('/api/tru_disconnect', { method: 'POST' });
+                const data = await response.json();
+                showToast(data.success ? 'TRU tunnel disconnected' : (data.message || 'Disconnect failed'),
+                          data.success ? 'info' : 'error');
+            } catch (e) {
+                showToast('Disconnect error', 'error');
+            }
+            truConnected = false;
+            updateTRUStatus(false);
+            closeTRUModal();
+        }
+
+        function updateTRUStatus(active, eqName) {
+            let banner = document.getElementById('truStatusBanner');
+            if (!active) {
+                if (banner) banner.remove();
+                return;
+            }
+            if (!banner) {
+                const actionsDiv = document.querySelector('.actions-section');
+                if (!actionsDiv) return;
+                banner = document.createElement('div');
+                banner.id = 'truStatusBanner';
+                banner.style.cssText = 'display:flex;align-items:center;justify-content:space-between;background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.4);border-radius:6px;padding:8px 12px;margin-bottom:10px;font-size:0.85rem;';
+                actionsDiv.parentNode.insertBefore(banner, actionsDiv);
+            }
+            banner.innerHTML = `
+                <span style="color:#10b981;">🚛 TRU tunnel active \u2014 ${eqName || equipmentId}</span>
+                <button onclick="disconnectTRU()" style="background:#dc2626;color:#fff;border:none;border-radius:4px;padding:4px 10px;cursor:pointer;font-size:0.8rem;">🔌 Disconnect</button>
+            `;
+        }
+
+        function showTRUModal(data) {
+            const existing = document.getElementById('truModal');
+            if (existing) existing.remove();
+
+            const ports  = data.ports || { gnss1: 5001, gnss2: 5002, test_gnss: 5003 };
+            const p1     = ports.gnss1     || 5001;
+            const p2     = ports.gnss2     || 5002;
+            const p3     = ports.test_gnss || 5003;
+            const ptxTag = data.ptx_type
+                ? `<span style="font-size:0.75rem;background:#1e40af;color:#fff;padding:2px 7px;border-radius:4px;margin-left:6px;">${data.ptx_type}</span>`
+                : '';
+            const truNote = data.tru_launched
+                ? '<p style="color:#10b981;margin:8px 0 0;">✅ TRU.exe launched automatically</p>'
+                : '<p style="color:#f59e0b;margin:8px 0 0;">⚠️ TRU.exe not found — launch manually</p>';
+            const simBanner = data.simulated
+                ? '<div style="background:#374151;border-left:3px solid #f59e0b;padding:6px 10px;margin-bottom:10px;font-size:0.8rem;color:#fbbf24;">Offline mode — tunnels simulated</div>'
+                : '';
+
+            const modal = document.createElement('div');
+            modal.id = 'truModal';
+            modal.className = 'modal-overlay';
+            modal.onclick = (e) => { if (e.target === modal) closeTRUModal(); };
+
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>🛩️ TRU Tunnel Active ${ptxTag}</h3>
+                        <button class="modal-close" onclick="closeTRUModal()">×</button>
+                    </div>
+                    <div class="modal-body">
+                        ${simBanner}
+                        <div class="tru-info-grid">
+                            <div class="tru-info-row">
+                                <label>Equipment</label>
+                                <span>${data.equipment_name || 'Unknown'}</span>
+                            </div>
+                            <div class="tru-info-row">
+                                <label>PTX IP</label>
+                                <span>${data.ip_address || 'N/A'}</span>
+                            </div>
+                            <div class="tru-info-row">
+                                <label>GNSS 1 <span style="font-size:0.7rem;color:#9ca3af;">(.101)</span></label>
+                                <span>localhost:${p1}</span>
+                                <button class="btn-copy" onclick="copyToClipboard('localhost:${p1}')">📋</button>
+                            </div>
+                            <div class="tru-info-row">
+                                <label>GNSS 2 <span style="font-size:0.7rem;color:#9ca3af;">(.102)</span></label>
+                                <span>localhost:${p2}</span>
+                                <button class="btn-copy" onclick="copyToClipboard('localhost:${p2}')">📋</button>
+                            </div>
+                            <div class="tru-info-row">
+                                <label>Test GNSS <span style="font-size:0.7rem;color:#9ca3af;">(.103)</span></label>
+                                <span>localhost:${p3}</span>
+                                <button class="btn-copy" onclick="copyToClipboard('localhost:${p3}')">📋</button>
+                            </div>
+                        </div>
+                        <div class="tru-instructions">
+                            <h4>📋 TRU Configuration</h4>
+                            <ol>
+                                <li>In TRU, set connection type to <strong>TCP/IP</strong></li>
+                                <li>Enter the localhost port for each GNSS receiver:
+                                    <ul style="margin-top:4px;">
+                                        <li><strong>GNSS 1:</strong> localhost:${p1}</li>
+                                        <li><strong>GNSS 2:</strong> localhost:${p2}</li>
+                                        <li><strong>Test GNSS:</strong> localhost:${p3}</li>
+                                    </ul>
+                                </li>
+                                <li>Only one tunnel can run at a time — disconnect when done</li>
+                            </ol>
+                            ${truNote}
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="display:flex;gap:8px;justify-content:flex-end;">
+                        <button class="action-btn" style="background:#dc2626;" onclick="disconnectTRU()">🔌 Disconnect Tunnel</button>
+                        <button class="action-btn btn-tru" onclick="closeTRUModal()">✅ Keep Open</button>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(modal);
+        }
+
+        function closeTRUModal() {
+            const modal = document.getElementById('truModal');
+            if (modal) modal.remove();
         }
 
         // Load equipment data on page load
@@ -569,9 +776,12 @@
             loadEquipmentData();
         });
 
-        // Clean up on page unload
+        // Clean up health monitoring and TRU tunnels on page unload
         window.addEventListener('beforeunload', () => {
             if (healthCheckInterval) clearInterval(healthCheckInterval);
+            if (truConnected) {
+                navigator.sendBeacon('/api/tru_disconnect', '');
+            }
         });
     </script>
 </body>

@@ -302,7 +302,7 @@
                         </button>
                     </div>
                     <small style="color: var(--theme-text-muted);">
-                        <strong>Installation:</strong> Run <code>E:\AutoTech\autotech_client\Install_AutoTech_Client.bat</code> as Administrator
+                        <strong>Installation:</strong> Run <code>Install_AutoTech_Client.bat</code> from the AutoTech USB drive root as Administrator
                         <br>
                         <strong>⚠️ IMPORTANT:</strong> Each remote PC must run the installer individually. The web server is shared, but tools run locally.
                     </small>
@@ -592,7 +592,7 @@
                 const response = await fetch('/api/check-client-installed');
                 if (response.ok) {
                     const data = await response.json();
-                    latestServerVersion = data.server_version || latestServerVersion;
+                    latestServerVersion = (data.server_version || latestServerVersion).replace(/^v/, '');
                 } else {
                     console.warn('Client check response not OK:', response.status);
                 }
@@ -678,7 +678,7 @@
                     await registerClientInstallation(false);
                     alert(
                         '⚠️ AutoTech Client URI handler did not fire.\n\n' +
-                        'Please re-run E:\\AutoTech\\autotech_client\\Install_AutoTech_Client.bat as Administrator,\n' +
+                        'Please run Install_AutoTech_Client.bat from the AutoTech USB drive root as Administrator,\n' +
                         'restart your browser, and try again.'
                     );
                 }
