@@ -46,60 +46,28 @@ bp = Blueprint('ptx_uptime', __name__, url_prefix='')
 # ==============================================================================
 
 def handle_ptx_uptime():
-    """Handle PTX Uptime tool with enhanced functionality."""
+    """Handle PTX Uptime tool — renders immediately from DB, JS triggers background sync."""
     try:
         online = is_online_network()
-        force_sync = request.args.get('sync', 'false').lower() == 'true' or 'refresh' in request.args
 
         ptx_uptime_db = state.ptx_uptime_db
 
+        # Determine whether JS should auto-trigger a background sync on page load
         db_count = ptx_uptime_db.get_record_count()
         last_live_sync = ptx_uptime_db.get_sync_metadata('last_live_sync')
-        needs_live_sync = online and (force_sync or db_count == 0)
-        if online and last_live_sync and not force_sync:
-            try:
-                last_sync_dt = datetime.fromisoformat(last_live_sync)
-                needs_live_sync = needs_live_sync or (datetime.now() - last_sync_dt) > timedelta(minutes=10)
-            except ValueError:
-                needs_live_sync = True
-
-        if needs_live_sync and ptx_uptime_tool:
-            logger.info("Syncing PTX uptime database from live report")
-            result = ptx_uptime_tool.run(password=MMS_SERVER['password'])
-            if result.get('success'):
-                existing_ids = {row['equipment_id'] for row in ptx_uptime_db.get_all_uptime(min_hours=0)}
-                added = 0
-                updated = 0
-                for equipment in result.get('equipment_list', []):
-                    equipment_id = equipment.get('equipment_id')
-                    ip_address = equipment.get('ip')
-                    if not equipment_id or not ip_address:
-                        continue
-                    if equipment_id in existing_ids:
-                        updated += 1
-                    else:
-                        added += 1
-                        existing_ids.add(equipment_id)
-
-                    ts = equipment.get('timestamp') or 0
-                    if not ts and ptx_uptime_tool:
-                        ts = ptx_uptime_tool.parse_last_check_timestamp(equipment.get('last_check'))
-                    if not ts:
-                        ts = int(time.time())
-
-                    ptx_uptime_db.upsert_uptime(
-                        equipment_id=equipment_id,
-                        ip_address=ip_address,
-                        uptime_hours=equipment.get('uptime_hours', 0),
-                        last_check=equipment.get('last_check'),
-                        last_check_timestamp=ts
-                    )
-                ptx_uptime_db.set_sync_metadata('last_live_sync', datetime.now().isoformat())
-                ptx_uptime_db.set_sync_metadata('last_live_path', result.get('file_path', ''))
-                if force_sync:
-                    flash(f"Database synced: {added} added, {updated} updated", "success")
+        auto_sync = False
+        if online:
+            if db_count == 0 or not last_live_sync:
+                auto_sync = True
             else:
-                logger.warning(f"Live PTX uptime sync failed: {result.get('error')}")
+                try:
+                    last_sync_dt = datetime.fromisoformat(last_live_sync)
+                    auto_sync = (datetime.now() - last_sync_dt) > timedelta(minutes=10)
+                except ValueError:
+                    auto_sync = True
+        # ?refresh= param forces a sync via JS (same as auto_sync=True)
+        if 'refresh' in request.args or request.args.get('sync', '').lower() == 'true':
+            auto_sync = online
 
         high_uptime_equipment = ptx_uptime_db.get_high_uptime(min_days=3)
         statistics = ptx_uptime_db.get_statistics()
@@ -149,7 +117,8 @@ def handle_ptx_uptime():
             'high_uptime_equipment': high_uptime_equipment,
             'statistics': statistics,
             'last_sync': last_sync,
-            'mode': 'reference' if not online else 'live'
+            'mode': 'reference' if not online else 'live',
+            'auto_sync': auto_sync,
         }
 
         return render_template('ptx_uptime.html', **ptx_data)
@@ -204,6 +173,81 @@ def handle_frontrunner_status():
 
 
 # ==============================================================================
+# BACKGROUND SYNC HELPER
+# ==============================================================================
+
+def _run_ptx_sync_background():
+    """Background thread worker for PTX DB sync. Updates state.ptx_db_sync when done."""
+    try:
+        ptx_uptime_db = state.ptx_uptime_db
+        added = 0
+        updated = 0
+
+        if is_online_network() and ptx_uptime_tool:
+            result = ptx_uptime_tool.run(password=MMS_SERVER['password'])
+            if not result.get('success'):
+                state.ptx_db_sync['last_result'] = {
+                    'success': False,
+                    'error': result.get('error', 'Live sync failed')
+                }
+                return
+
+            existing_ids = {row['equipment_id'] for row in ptx_uptime_db.get_all_uptime(min_hours=0)}
+            for equipment in result.get('equipment_list', []):
+                equipment_id = equipment.get('equipment_id')
+                ip_address = equipment.get('ip')
+                if not equipment_id or not ip_address:
+                    continue
+                if equipment_id in existing_ids:
+                    updated += 1
+                else:
+                    added += 1
+                    existing_ids.add(equipment_id)
+
+                ts = equipment.get('timestamp') or 0
+                if not ts and ptx_uptime_tool:
+                    ts = ptx_uptime_tool.parse_last_check_timestamp(equipment.get('last_check'))
+                if not ts:
+                    ts = int(time.time())
+
+                ptx_uptime_db.upsert_uptime(
+                    equipment_id=equipment_id,
+                    ip_address=ip_address,
+                    uptime_hours=equipment.get('uptime_hours', 0),
+                    last_check=equipment.get('last_check'),
+                    last_check_timestamp=ts
+                )
+            ptx_uptime_db.set_sync_metadata('last_live_sync', datetime.now().isoformat())
+            ptx_uptime_db.set_sync_metadata('last_live_path', result.get('file_path', ''))
+
+        else:
+            report_path = os.path.join(BASE_DIR, 'backups', 'PTX_Uptime_Report.html')
+            if not os.path.exists(report_path):
+                state.ptx_db_sync['last_result'] = {
+                    'success': False,
+                    'error': 'Offline and no PTX_Uptime_Report.html found',
+                }
+                return
+            updated, added = ptx_uptime_db.sync_from_html_report(report_path)
+
+        state.ptx_db_sync['last_result'] = {
+            'success': True,
+            'records_added': added,
+            'records_updated': updated,
+            'total_records': ptx_uptime_db.get_record_count(),
+            'sync_time': datetime.now().isoformat(),
+        }
+        logger.info(f"PTX DB sync complete: {added} added, {updated} updated")
+
+    except Exception as e:
+        logger.error(f"Background PTX DB sync error: {e}")
+        state.ptx_db_sync['last_result'] = {'success': False, 'error': str(e)}
+    finally:
+        state.ptx_db_sync['running'] = False
+        state.ptx_db_sync['finished_at'] = datetime.now().isoformat()
+
+
+# ==============================================================================
 # ROUTES
 # ==============================================================================
 
@@ -216,7 +260,7 @@ def ptx_uptime_csv():
 
         if not equipment_data:
             flash("No PTX uptime data available. Please sync the database first.", "warning")
-            return redirect(url_for('run_tool', tool_name='PTX Uptime'))
+            return redirect(url_for('dashboard.run_tool', tool_name='PTX Uptime'))
 
         output = io.StringIO()
         writer = csv.writer(output)
@@ -245,62 +289,43 @@ def ptx_uptime_csv():
     except Exception as e:
         logger.error(f"PTX Uptime CSV error: {e}")
         flash(f"CSV download failed: {e}", "error")
-        return redirect(url_for('run_tool', tool_name='PTX Uptime'))
+        return redirect(url_for('dashboard.run_tool', tool_name='PTX Uptime'))
 
 
 @bp.route('/api/ptx/db/sync', methods=['POST'])
 def api_ptx_db_sync():
-    """Sync PTX uptime database from HTML report."""
+    """Start async PTX uptime database sync. Returns immediately; poll /status for result."""
     try:
-        ptx_uptime_db = state.ptx_uptime_db
+        if state.ptx_db_sync['running']:
+            return jsonify({'success': True, 'message': 'Sync already in progress', 'already_running': True})
 
-        if is_online_network() and ptx_uptime_tool:
-            result = ptx_uptime_tool.run(password=MMS_SERVER['password'])
-            if not result.get('success'):
-                return jsonify({'success': False, 'error': result.get('error', 'Live sync failed')}), 500
+        state.ptx_db_sync['running'] = True
+        state.ptx_db_sync['started_at'] = datetime.now().isoformat()
+        state.ptx_db_sync['finished_at'] = None
+        state.ptx_db_sync['last_result'] = None
 
-            existing_ids = {row['equipment_id'] for row in ptx_uptime_db.get_all_uptime(min_hours=0)}
-            added = 0
-            updated = 0
-            for equipment in result.get('equipment_list', []):
-                equipment_id = equipment.get('equipment_id')
-                ip_address = equipment.get('ip')
-                if not equipment_id or not ip_address:
-                    continue
-                if equipment_id in existing_ids:
-                    updated += 1
-                else:
-                    added += 1
-                    existing_ids.add(equipment_id)
-                ptx_uptime_db.upsert_uptime(
-                    equipment_id=equipment_id,
-                    ip_address=ip_address,
-                    uptime_hours=equipment.get('uptime_hours', 0),
-                    last_check=equipment.get('last_check'),
-                    last_check_timestamp=0
-                )
-            ptx_uptime_db.set_sync_metadata('last_live_sync', datetime.now().isoformat())
-            ptx_uptime_db.set_sync_metadata('last_live_path', result.get('file_path', ''))
-        else:
-            report_path = os.path.join(BASE_DIR, 'backups', 'PTX_Uptime_Report.html')
-            if not os.path.exists(report_path):
-                return jsonify({
-                    'success': False,
-                    'error': 'PTX Uptime Report HTML not found',
-                    'path': report_path
-                }), 404
-            updated, added = ptx_uptime_db.sync_from_html_report(report_path)
-
-        return jsonify({
-            'success': True,
-            'records_added': added,
-            'records_updated': updated,
-            'total_records': ptx_uptime_db.get_record_count(),
-            'sync_time': datetime.now().isoformat()
-        })
+        threading.Thread(target=_run_ptx_sync_background, daemon=True).start()
+        return jsonify({'success': True, 'message': 'Sync started'})
 
     except Exception as e:
         logger.error(f"PTX DB sync error: {e}")
+        state.ptx_db_sync['running'] = False
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@bp.route('/api/ptx/db/sync/status')
+def api_ptx_db_sync_status():
+    """Return current PTX DB sync state for the browser to poll."""
+    try:
+        sync = state.ptx_db_sync
+        return jsonify({
+            'success': True,
+            'running': sync['running'],
+            'last_result': sync['last_result'],
+            'started_at': sync['started_at'],
+            'finished_at': sync['finished_at'],
+        })
+    except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
 

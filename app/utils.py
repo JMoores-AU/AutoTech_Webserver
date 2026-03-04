@@ -15,14 +15,18 @@ import socket
 import string
 import sys
 import time
+import shutil # Import shutil for shutil.which
 from functools import wraps
+from typing import Optional # Import Optional
 
 import app.state as state
 from app.config import (
-    AUTO_TECH_CLIENT_DIR, BASE_DIR, EQUIPMENT_PROFILES,
-    GATEWAY_IP, MOCK_EQUIPMENT_DB, MMS_SERVER,
-    PLINK_CANDIDATES, PROBE_PORT
+    BASE_DIR, GATEWAY_IP, PROBE_PORT, PLINK_CANDIDATES,
+    MOCK_EQUIPMENT_DB, MMS_SERVER,
 )
+
+# AUTO_TECH_CLIENT_DIR defined locally so tests can monkeypatch without touching app.config
+AUTO_TECH_CLIENT_DIR = os.environ.get('AUTOTECH_CLIENT_DIR', r"C:\AutoTech_Client")
 
 logger = logging.getLogger(__name__)
 
@@ -36,6 +40,35 @@ try:
     import ping3
 except ImportError:
     ping3 = None
+
+
+def _resolve_tool_executable_path(tool_name: str, sub_dir: str = "tools") -> Optional[str]:
+    """
+    Resolves the full path to an executable tool, prioritizing:
+    1. Bundled location (e.g., BASE_DIR/AutoTech/tools/tool_name)
+    2. Dev location (e.g., BASE_DIR/tools/tool_name)
+    3. System PATH
+    """
+    # 1. Try bundled location (for PyInstaller/USB deployment structure)
+    bundled_path = os.path.join(BASE_DIR, "AutoTech", sub_dir, tool_name)
+    if os.path.exists(bundled_path):
+        logger.debug(f"Found {tool_name} in bundled path: {bundled_path}")
+        return bundled_path
+
+    # 2. Fallback to development structure (if not using 'AutoTech' prefix or for dev)
+    dev_path = os.path.join(BASE_DIR, sub_dir, tool_name)
+    if os.path.exists(dev_path):
+        logger.debug(f"Found {tool_name} in dev path: {dev_path}")
+        return dev_path
+    
+    # 3. Check system PATH
+    found_in_path = shutil.which(tool_name)
+    if found_in_path:
+        logger.debug(f"Found {tool_name} in system PATH: {found_in_path}")
+        return found_in_path
+
+    logger.warning(f"Executable tool '{tool_name}' not found in any expected location or system PATH.")
+    return None
 
 
 # ========================================
@@ -58,13 +91,37 @@ def login_required(f):
 # NETWORK MODE DETECTION
 # ========================================
 
-def is_online_network(force_refresh: bool = False, ttl_seconds: int = 30) -> bool:
+def check_network_connectivity(gateway_ip: str = None, probe_port: int = None) -> bool:
+    """Fresh (uncached) gateway ping — used by dashboard and status routes."""
+    if gateway_ip is None:
+        gateway_ip = GATEWAY_IP
+    if probe_port is None:
+        probe_port = PROBE_PORT
+    try:
+        if ping3:
+            result = ping3.ping(gateway_ip, timeout=2)
+            return result is not None
+        else:
+            try:
+                with socket.create_connection((gateway_ip, probe_port), timeout=2):
+                    return True
+            except Exception:
+                return False
+    except Exception:
+        return False
+
+
+def is_online_network(gateway_ip: str = None, probe_port: int = None, force_refresh: bool = False, ttl_seconds: int = 30) -> bool:
     """
     Live-ish network probe with a short TTL cache so UI and background
     processes can see changes without hammering the gateway.
     Reads/writes state._network_status_cache so the cache is shared across
     all callers (routes, background tasks, blueprints).
     """
+    if gateway_ip is None:
+        gateway_ip = GATEWAY_IP
+    if probe_port is None:
+        probe_port = PROBE_PORT
     now = time.time()
     cache = state._network_status_cache
     if not force_refresh and (now - cache["ts"]) < ttl_seconds:
@@ -79,15 +136,15 @@ def is_online_network(force_refresh: bool = False, ttl_seconds: int = 30) -> boo
     else:
         online = False
         try:
-            with socket.create_connection((GATEWAY_IP, PROBE_PORT), timeout=1.5):
-                print(f"[MODE] ONLINE tcp {GATEWAY_IP}:{PROBE_PORT}")
+            with socket.create_connection((gateway_ip, probe_port), timeout=1.5):
+                print(f"[MODE] ONLINE tcp {gateway_ip}:{probe_port}")
                 online = True
         except Exception as e:
             print(f"[MODE] TCP probe failed: {e}")
 
         if not online and ping3:
             try:
-                rtt = ping3.ping(GATEWAY_IP, timeout=1)
+                rtt = ping3.ping(gateway_ip, timeout=1)
                 online = rtt is not None
                 print(f"[MODE] ICMP {'ONLINE' if online else 'OFFLINE'} rtt={rtt}")
             except Exception as e:
@@ -102,11 +159,19 @@ def is_online_network(force_refresh: bool = False, ttl_seconds: int = 30) -> boo
 # PATH HELPERS
 # ========================================
 
-def resolve_plink_path():
-    """Return the first plink.exe that exists from the preferred locations."""
-    for candidate in PLINK_CANDIDATES:
+def resolve_plink_path() -> Optional[str]:
+    """
+    Return the first plink.exe that exists.
+    Checks config.PLINK_PATH first (resolved from USB/dev structure at startup),
+    then falls back to static PLINK_CANDIDATES.
+    """
+    import app.config as _config  # late import to avoid circular dependency at module load
+    candidates = []
+    if getattr(_config, 'PLINK_PATH', None):
+        candidates.append(_config.PLINK_PATH)
+    candidates.extend(PLINK_CANDIDATES)
+    for candidate in candidates:
         if candidate and os.path.exists(candidate):
-            logger.debug(f"Using plink from: {candidate}")
             return candidate
     return None
 
@@ -115,17 +180,17 @@ def get_autotech_client_folder():
     """
     Find the autotech_client folder — checks multiple locations.
     USB structure: option 18 copies autotech_client/ contents to USB root,
-      so Install_AutoTech_Client.bat is at X:\\, AutoTech\\ is at X:\\AutoTech\\
+      so Install_AutoTech_Client.bat is at X:\, AutoTech\ is at X:\AutoTech\\
     Dev structure: project_root/autotech_client
     Returns (folder_path, error_message) tuple.
     """
-    # Check 0: Frozen EXE running from USB root (X:\\AutoTech.exe)
-    # Option 18 copies Install_AutoTech_Client.bat directly to USB root (X:\\)
+    # Check 0: Frozen EXE running from USB root (X:\AutoTech.exe)
+    # Option 18 copies Install_AutoTech_Client.bat directly to USB root (X:\)
     if getattr(sys, 'frozen', False):
         if os.path.exists(os.path.join(BASE_DIR, 'Install_AutoTech_Client.bat')):
             return BASE_DIR, None
 
-    # Check 1: USB structure - E:\\AutoTech\\autotech_client (AutoTech.exe is at E:\\)
+    # Check 1: USB structure - E:\AutoTech\autotech_client (AutoTech.exe is at E:\)
     usb_client_folder = os.path.join(BASE_DIR, "AutoTech", "autotech_client")
     if os.path.exists(usb_client_folder):
         return usb_client_folder, None
@@ -135,7 +200,7 @@ def get_autotech_client_folder():
     if os.path.exists(local_client_folder):
         return local_client_folder, None
 
-    # Check 3: Search USB drives for AutoTech\\autotech_client
+    # Check 3: Search USB drives for AutoTech\autotech_client
     for drive_letter in string.ascii_uppercase[3:]:  # D: through Z:
         drive = f"{drive_letter}:\\"
         if os.path.exists(drive):
@@ -150,10 +215,31 @@ def get_autotech_client_folder():
 # SSH / EQUIPMENT CONNECTIVITY
 # ========================================
 
-def connect_to_equipment(ip_address):
+def _detect_ptx_model_from_arch(ssh) -> str:
+    """
+    Run 'uname -m' on an active SSH session to distinguish PTXC (New OS) from PTX10.
+    Both use mms/modular credentials, but PTXC (New OS) is ARM (armv7l) and PTX10 is x86_64.
+    Returns 'PTXC (New OS)' or 'PTX10'.
+    """
+    try:
+        stdin, stdout, stderr = ssh.exec_command("uname -m", timeout=5)
+        arch = stdout.read().decode('utf-8', errors='ignore').strip()
+        if 'arm' in arch.lower():
+            return 'PTXC (New OS)'
+    except Exception:
+        pass
+    return 'PTX10'
+
+
+def connect_to_equipment(ip_address, mms_server_config: dict = None):
     """
     Try to connect to equipment using both credential sets.
     Returns: (ssh_client, credential_name) or (None, error_message)
+
+    credential_name is one of:
+      'PTXC'         - old PTXC (dlog/gold login)
+      'PTXC (New OS)'- new PTXC OS (mms/modular login, ARM architecture)
+      'PTX10'        - PTX10 (mms/modular login, x86_64 architecture)
     """
     credentials = [
         {"user": "dlog", "password": "gold", "name": "PTXC"},
@@ -174,6 +260,8 @@ def connect_to_equipment(ip_address):
                 look_for_keys=False,
                 allow_agent=False
             )
+            if cred['user'] == 'mms':
+                return ssh, _detect_ptx_model_from_arch(ssh)
             return ssh, cred['name']
         except Exception:
             continue
@@ -207,13 +295,14 @@ def check_ptx_reachable(ip_address: str, timeout: float = 3.0) -> bool:
 def get_ptx_uptime(ip_address: str) -> dict:
     """
     Connect to PTX equipment via SSH and retrieve uptime.
-    Uses dlog/gold credentials first (PTXC), then mms/modular (PTX10).
+    Uses dlog/gold credentials first (PTXC), then mms/modular.
+    For mms connections, runs 'uname -m' to distinguish PTXC (New OS) from PTX10.
 
     Returns dict with:
         - success: bool
         - uptime_hours: float (hours since last reboot)
         - uptime_raw: str (raw uptime output)
-        - ptx_type: str (PTXC or PTX10 based on which credential worked)
+        - ptx_type: str — one of 'PTXC', 'PTXC (New OS)', 'PTX10'
         - error: str (if failed)
     """
     import re
@@ -255,6 +344,10 @@ def get_ptx_uptime(ip_address: str) -> dict:
 
     if not ssh:
         return {'success': False, 'error': f'Could not connect to {ip_address}'}
+
+    # Distinguish PTXC (New OS) from PTX10 — both use mms/modular but differ by CPU architecture
+    if ptx_type == 'PTX10':
+        ptx_type = _detect_ptx_model_from_arch(ssh)
 
     try:
         stdin, stdout, stderr = ssh.exec_command("uptime", timeout=15)
@@ -391,22 +484,28 @@ def parse_ip_finder_output(query, output):
     return result
 
 
-def search_equipment(query):
+def search_equipment(query, mock_equipment_db: dict = None, mms_server_config: dict = None, is_online_func=None) -> dict:
     """
     Search for equipment by name or IP via SSH to MMS server.
     In offline mode, returns mock/simulated data.
     """
+    if mock_equipment_db is None:
+        mock_equipment_db = MOCK_EQUIPMENT_DB
+    if mms_server_config is None:
+        mms_server_config = MMS_SERVER
+    if is_online_func is None:
+        is_online_func = is_online_network
     query = query.strip().upper()
 
     # Check if query is in mock database first (for testing)
-    if query in MOCK_EQUIPMENT_DB:
-        equipment = MOCK_EQUIPMENT_DB[query].copy()
+    if query in mock_equipment_db:
+        equipment = mock_equipment_db[query].copy()
         equipment['found'] = True
         equipment['search_method'] = 'database'
         return equipment
 
     # If offline, return simulated data
-    if not is_online_network():
+    if not is_online_func():
         return {
             'OID': query,
             'profile': 'Simulated',
@@ -430,14 +529,14 @@ def search_equipment(query):
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
         ssh.connect(
-            MMS_SERVER['ip'],
-            port=MMS_SERVER['port'],
-            username=MMS_SERVER['user'],
-            password=MMS_SERVER['password'],
+            mms_server_config['ip'],
+            port=mms_server_config['port'],
+            username=mms_server_config['user'],
+            password=mms_server_config['password'],
             timeout=10
         )
 
-        command = f"{MMS_SERVER['script']} {query}"
+        command = f"{mms_server_config['script']} {query}"
         stdin, stdout, stderr = ssh.exec_command(command, timeout=15)
 
         output = stdout.read().decode('utf-8', errors='ignore')
@@ -448,7 +547,33 @@ def search_equipment(query):
         if error and 'not found' in error.lower():
             return {'found': False, 'error': f'Equipment not found: {query}'}
 
-        return parse_ip_finder_output(query, output)
+        result = parse_ip_finder_output(query, output)
+
+        # Refine PTXC detection: MMS script says 'PTXC Found' for both old and new PTXC.
+        # SSH directly to the PTX IP to distinguish them by credentials + architecture.
+        if result.get('ptxc_found') and result.get('ptx_ip'):
+            ptx_ip = result['ptx_ip']
+            try:
+                # Try old PTXC (dlog) first — short timeout to avoid blocking
+                _ptx_ssh = paramiko.SSHClient()
+                _ptx_ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+                _ptx_ssh.connect(ptx_ip, username='dlog', password='gold',
+                                 timeout=4, look_for_keys=False, allow_agent=False)
+                result['ptx_model'] = 'PTXC'
+                _ptx_ssh.close()
+            except Exception:
+                # dlog failed — try mms/modular and check CPU architecture
+                try:
+                    _ptx_ssh = paramiko.SSHClient()
+                    _ptx_ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+                    _ptx_ssh.connect(ptx_ip, username='mms', password='modular',
+                                     timeout=4, look_for_keys=False, allow_agent=False)
+                    result['ptx_model'] = _detect_ptx_model_from_arch(_ptx_ssh)
+                    _ptx_ssh.close()
+                except Exception:
+                    pass  # Leave as 'PTXC' if direct SSH unavailable
+
+        return result
 
     except paramiko.AuthenticationException:
         logger.error("MMS server authentication failed")
