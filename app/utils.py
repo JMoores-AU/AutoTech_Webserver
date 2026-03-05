@@ -506,12 +506,13 @@ def search_equipment(query, mock_equipment_db: dict = None, mms_server_config: d
 
     # If offline, return simulated data
     if not is_online_func():
+        _seed = len(query)
         return {
             'OID': query,
             'profile': 'Simulated',
             'ptx_model': 'PTX10',
-            'ptx_ip': f'10.110.19.{len(query) * 10 % 255}',
-            'avi_ip': None,
+            'ptx_ip': f'10.110.19.{_seed * 10 % 255}',
+            'avi_ip': f'10.111.19.{(_seed * 10 + 1) % 255}',
             'flight_recorder_ip': None,
             'vehicle_status': 'Simulated',
             'ptxc_found': False,
