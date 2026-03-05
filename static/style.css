@@ -284,6 +284,7 @@ a:hover {
 /* Sidebar Footer */
 .sidebar-footer {
     padding: 16px;
+    padding-bottom: 58px;
     border-top: 1px solid var(--theme-border);
 }
 

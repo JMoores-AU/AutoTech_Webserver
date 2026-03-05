@@ -204,11 +204,49 @@ def system_status():
     except Exception:
         pass
 
+    import app.state as state
     return jsonify({
         'running_as_service': running_as_service,
         'active_connections': active_connections,
+        'server_start_time': state.SERVER_START_TIME.isoformat(),
         'timestamp': datetime.now().isoformat()
     })
+
+
+@bp.route('/api/comms_ping', methods=['POST'])
+def api_comms_ping():
+    """
+    Comms Info: ping AVI from server, then ping PTX/GNSS from AVI via SSH.
+    POST body: { "avi_ip": "10.x.x.x" }
+    """
+    try:
+        from tools.ip_finder import check_avi_status
+
+        data = request.get_json()
+        avi_ip = data.get('avi_ip', '').strip()
+
+        if not avi_ip:
+            return jsonify({'success': False, 'error': 'AVI IP required'}), 400
+
+        result = check_avi_status(avi_ip)
+
+        # Flatten into a simpler shape for the frontend
+        devices = result.get('internal_devices', {})
+        return jsonify({
+            'success': True,
+            'avi': {
+                'ip': avi_ip,
+                'status': result.get('status', 'Unknown'),
+                'ping_time': result.get('response_time')
+            },
+            'ptx':    devices.get('ptx',    {'ip': '192.168.0.100', 'status': 'Unknown', 'ping_time': None}),
+            'gnss_1': devices.get('gnss_1', {'ip': '192.168.0.101', 'status': 'Unknown', 'ping_time': None}),
+            'gnss_2': devices.get('gnss_2', {'ip': '192.168.0.102', 'status': 'Unknown', 'ping_time': None}),
+        })
+
+    except Exception as e:
+        logger.error(f"Comms ping error: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 
 @bp.route('/api/linux_health_check', methods=['POST'])

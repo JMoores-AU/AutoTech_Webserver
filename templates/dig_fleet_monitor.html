@@ -450,9 +450,9 @@
                     const hrs = eq.uptime_hours || 0;
                     const mem = eq.mem_usage_raw || 0;
 
-                    if (hrs > 36 || mem > 80) {
+                    if (mem > 80) {
                         healthClass = 'health-red';
-                    } else if (hrs >= 24 || mem >= 70) {
+                    } else if (mem >= 70) {
                         healthClass = 'health-yellow';
                     }
                     
@@ -463,7 +463,7 @@
                         eqEl.classList.add(healthClass);
                     }
 
-                    const updatedTime = eq.last_updated ? new Date(eq.last_updated).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Pending';
+                    const updatedTime = eq.last_updated ? new Date(eq.last_updated.replace(' ', 'T')).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Pending';
                     
                     eqEl.innerHTML = `
                         <button class="remove-btn" onclick="removeEquipment('${eq.id}')">&times;</button>
@@ -634,13 +634,20 @@
 
     function openExtractionModal(eq) {
         const healthLabel = eq.uptime === 'Pending' || !eq.last_updated ? 'Pending'
-            : (eq.uptime_hours > 36 || eq.mem_usage_raw > 80) ? '🔴 Critical'
-            : (eq.uptime_hours >= 24 || eq.mem_usage_raw >= 70) ? '🟡 Caution'
+            : (eq.mem_usage_raw > 80) ? '🔴 Critical'
+            : (eq.mem_usage_raw >= 70) ? '🟡 Caution'
             : '🟢 Healthy';
 
         const lastUpdated = eq.last_updated
-            ? new Date(eq.last_updated).toLocaleString([], {dateStyle:'short', timeStyle:'short'})
+            ? new Date(eq.last_updated.replace(' ', 'T') + 'Z').toLocaleString([], {dateStyle:'short', timeStyle:'short', hour12: false})
             : 'Not yet checked';
+
+        const showReboot = (healthLabel === '🔴 Critical' || healthLabel === '🟡 Caution') && eq.ptx_ip;
+        const rebootBtn = showReboot ? `
+            <button onclick="rebootEquipment('${eq.id}', '${eq.ptx_ip}')"
+                    style="width:100%;padding:10px;background:#c0392b;color:#fff;border:none;border-radius:6px;font-weight:700;font-size:0.9rem;cursor:pointer;margin-top:4px;">
+                🔌 Reboot PTX
+            </button>` : '';
 
         document.getElementById('extractionModalTitle').textContent = eq.id;
         document.getElementById('extractionModalBody').innerHTML = `
@@ -671,6 +678,7 @@
                         🔄 Refresh Health
                     </button>
                 </div>
+                ${rebootBtn}
             </div>
         `;
         document.getElementById('extractionModal').classList.add('active');
@@ -689,6 +697,37 @@
             setTimeout(() => loadFleetData(), 8000); // Give probe time to complete
         } catch(e) {
             showToast('Refresh request failed', 'error');
+        }
+    }
+
+    async function rebootEquipment(equipmentId, ptxIp) {
+        const confirmed = confirm(
+            `Reboot ${equipmentId}?\n\nThis will restart the PTX at ${ptxIp}.\nThe unit will be offline for ~2 minutes.`
+        );
+        if (!confirmed) return;
+
+        closeExtractionModal();
+        showToast(`Sending reboot to ${equipmentId}...`, 'info');
+
+        try {
+            const response = await fetch('/api/ptx_reboot', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ equipment_id: equipmentId, ip_address: ptxIp })
+            });
+            const data = await response.json();
+            showToast(data.message, data.success ? 'success' : 'error');
+
+            if (data.success) {
+                setTimeout(() => {
+                    showToast(`Checking ${equipmentId} health after reboot...`, 'info');
+                    fetch('/api/fleet_data/refresh', { method: 'POST' })
+                        .then(() => setTimeout(() => loadFleetData(), 10000))
+                        .catch(() => loadFleetData());
+                }, 120000); // 2 minutes for unit to reboot
+            }
+        } catch (err) {
+            showToast('Reboot request failed: ' + err.message, 'error');
         }
     }
 

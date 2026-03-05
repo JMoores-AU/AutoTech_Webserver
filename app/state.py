@@ -14,8 +14,14 @@ NEVER do:
 """
 
 import threading
+from datetime import datetime
 
 from app.config import BASE_DIR
+
+# ========================================
+# SERVER START TIME
+# ========================================
+SERVER_START_TIME = datetime.now()
 from tools.ptx_uptime_db import PTXUptimeDB, get_database_path as get_ptx_db_path
 from tools.fleet_monitor_db import FleetMonitorDB
 

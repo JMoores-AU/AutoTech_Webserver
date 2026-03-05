@@ -13,7 +13,7 @@ from datetime import datetime
 from flask import (Blueprint, flash, jsonify, redirect,
                    render_template, request, session, url_for)
 
-from app.config import EQUIPMENT_PROFILES, GATEWAY_IP, PTX_BASE_IP, TOOL_LIST
+from app.config import APP_VERSION, EQUIPMENT_PROFILES, GATEWAY_IP, PTX_BASE_IP, TOOL_LIST
 from app.utils import check_network_connectivity, is_online_network, search_equipment
 
 logger = logging.getLogger(__name__)
@@ -46,7 +46,8 @@ def dashboard():
         'network_status': 'Online' if network_online else 'Offline',
         'gateway_ip': GATEWAY_IP,
         'timestamp': now,
-        'equipment_count': len(EQUIPMENT_PROFILES)
+        'equipment_count': len(EQUIPMENT_PROFILES),
+        'app_version': APP_VERSION,
     }
 
     # CRITICAL: Always use main_dashboard.html, never index.html

@@ -128,11 +128,44 @@
         }
         .btn-copy:hover { background: rgba(59, 130, 246, 0.25); }
 
+        /* Comms ping indicators */
+        .ping-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--theme-border);
+            font-size: 0.85rem;
+        }
+        .ping-row:last-child { border-bottom: none; }
+        .ping-row .ping-label { color: var(--theme-text-muted); }
+        .ping-row .ping-ip { font-family: 'Consolas', monospace; font-size: 0.8rem; color: var(--theme-text-muted); margin-left: 6px; }
+        .ping-indicator {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-weight: 600;
+            font-size: 0.82rem;
+        }
+        .ping-dot {
+            width: 9px; height: 9px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .ping-dot.online  { background: #22c55e; box-shadow: 0 0 6px rgba(34,197,94,0.5); }
+        .ping-dot.offline { background: #ef4444; }
+        .ping-dot.checking { background: #94a3b8; animation: pulse-dot 1s infinite; }
+        @keyframes pulse-dot { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+        .ping-ms { font-size: 0.75rem; font-weight: 400; color: var(--theme-text-muted); margin-left: 2px; }
+
         /* Health Stats */
         .health-stats-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 12px;
+        }
+        @media (max-width: 700px) {
+            .health-stats-grid { grid-template-columns: repeat(2, 1fr); }
         }
 
         .health-stat {
@@ -468,12 +501,23 @@
                                 ` : ''}
                             </div>
 
-                            <div class="info-section" id="healthSection">
-                                <h3>🏥 System Health <span class="refresh-indicator" id="healthRefreshTimer"></span></h3>
-                                <div id="healthStats">
-                                    <div style="text-align: center; padding: 12px; color: var(--theme-text-muted); font-size: 0.85rem;">
-                                        Loading health data...
+                            <div class="info-section" id="commsSection">
+                                <h3>📡 Comms Info <span id="commsPingStatus" style="font-size:0.7rem;font-weight:normal;margin-left:8px;color:var(--theme-text-muted);">— via AVI</span></h3>
+                                <div id="commsStats">
+                                    <div style="text-align:center;padding:12px;color:var(--theme-text-muted);font-size:0.85rem;">
+                                        Waiting for ping...
                                     </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- PTX Health — full width below the info grid -->
+                        <div class="info-section" id="healthSection" style="margin-bottom:24px;">
+                            <h3>🏥 PTX Health <span class="refresh-indicator" id="healthRefreshTimer" style="font-size:0.7rem;font-weight:normal;margin-left:8px;"></span></h3>
+                            <div id="healthStats">
+                                <div style="text-align: center; padding: 12px; color: var(--theme-text-muted); font-size: 0.85rem;">
+                                    Loading health data...
                                 </div>
                             </div>
                         </div>
@@ -503,6 +547,9 @@
             if (data.ptx_ip) {
                 startHealthMonitoring(data.ptx_ip, ptxModel);
             }
+
+            // Render comms section (mock visual — backend TBD)
+            renderCommsMock(data.avi_ip);
         }
 
         function getFlightRecorderIP(ptxIP) {
@@ -511,6 +558,84 @@
             if (parts.length !== 4) return null;
             return `${parts[0]}.${parts[1]}.${parts[2]}.${parseInt(parts[3]) + 1}`;
         }
+
+        // ── Comms Info ───────────────────────────────────────────────────────
+        function renderCommsMock(avi_ip) {
+            const el = document.getElementById('commsStats');
+            const statusEl = document.getElementById('commsPingStatus');
+            if (!el) return;
+
+            const displayAviIp = avi_ip || '10.110.x.x';
+            const isDemo = !avi_ip;
+
+            if (statusEl) statusEl.textContent = isDemo ? '— demo mode' : `— via ${displayAviIp}`;
+
+            const hosts = [
+                { label: 'AVI',    ip: displayAviIp,    state: 'checking', ms: null },
+                { label: 'PTX',    ip: '192.168.0.100', state: 'checking', ms: null },
+                { label: 'GNSS 1', ip: '192.168.0.101', state: 'checking', ms: null },
+                { label: 'GNSS 2', ip: '192.168.0.102', state: 'checking', ms: null },
+            ];
+
+            function row(h) {
+                const dot    = `<span class="ping-dot ${h.state}"></span>`;
+                const text   = h.state === 'checking' ? 'Checking...'
+                             : h.state === 'online'   ? `Online${h.ms != null ? ` <span class="ping-ms">${h.ms}ms</span>` : ''}`
+                             : 'Offline';
+                const colour = h.state === 'online' ? '#22c55e' : h.state === 'offline' ? '#ef4444' : 'var(--theme-text-muted)';
+                return `<div class="ping-row">
+                    <span class="ping-label">${h.label}<span class="ping-ip">${h.ip}</span></span>
+                    <span class="ping-indicator" style="color:${colour}">${dot}${text}</span>
+                </div>`;
+            }
+
+            el.innerHTML = hosts.map(row).join('');
+
+            if (isDemo) {
+                const mockResults = [
+                    { state: 'online',  ms: 3    },
+                    { state: 'online',  ms: 12   },
+                    { state: 'offline', ms: null },
+                    { state: 'online',  ms: 14   },
+                ];
+                hosts.forEach((h, i) => {
+                    setTimeout(() => {
+                        hosts[i] = { ...hosts[i], ...mockResults[i] };
+                        el.innerHTML = hosts.map(row).join('');
+                    }, 700 + i * 500);
+                });
+                return;
+            }
+
+            fetch('/api/comms_ping', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ avi_ip })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (!data.success) {
+                    hosts.forEach((h, i) => { hosts[i] = { ...h, state: 'offline' }; });
+                    if (statusEl) statusEl.textContent = `— error: ${data.error || 'unreachable'}`;
+                } else {
+                    const aviState = data.avi.status === 'Connected' ? 'online' : 'offline';
+                    const ptxState = data.ptx.status  === 'Online'   ? 'online' : 'offline';
+                    const g1State  = data.gnss_1.status === 'Online' ? 'online' : 'offline';
+                    const g2State  = data.gnss_2.status === 'Online' ? 'online' : 'offline';
+                    hosts[0] = { ...hosts[0], state: aviState, ms: data.avi.ping_time };
+                    hosts[1] = { ...hosts[1], state: ptxState, ms: data.ptx.ping_time };
+                    hosts[2] = { ...hosts[2], ip: data.gnss_1.ip || '192.168.0.101', state: g1State, ms: data.gnss_1.ping_time };
+                    hosts[3] = { ...hosts[3], ip: data.gnss_2.ip || '192.168.0.102', state: g2State, ms: data.gnss_2.ping_time };
+                }
+                el.innerHTML = hosts.map(row).join('');
+            })
+            .catch(() => {
+                hosts.forEach((h, i) => { hosts[i] = { ...h, state: 'offline' }; });
+                el.innerHTML = hosts.map(row).join('');
+                if (statusEl) statusEl.textContent = '— unreachable';
+            });
+        }
+        // ── End Comms Info ────────────────────────────────────────────────────
 
         // Health monitoring functions
         async function fetchHealthCheck(ptx_ip, ptx_model) {

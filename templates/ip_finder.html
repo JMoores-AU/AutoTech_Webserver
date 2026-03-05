@@ -137,6 +137,36 @@
             border-bottom: 1px solid var(--theme-border);
         }
         .info-row:last-child { border-bottom: none; }
+
+        /* Comms ping indicators */
+        .ping-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--theme-border);
+            font-size: 0.85rem;
+        }
+        .ping-row:last-child { border-bottom: none; }
+        .ping-row .ping-label { color: var(--theme-text-muted); }
+        .ping-row .ping-ip { font-family: 'Consolas', monospace; font-size: 0.8rem; color: var(--theme-text-muted); margin-left: 6px; }
+        .ping-indicator {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-weight: 600;
+            font-size: 0.82rem;
+        }
+        .ping-dot {
+            width: 9px; height: 9px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .ping-dot.online  { background: #22c55e; box-shadow: 0 0 6px rgba(34,197,94,0.5); }
+        .ping-dot.offline { background: #ef4444; }
+        .ping-dot.checking { background: #94a3b8; animation: pulse-dot 1s infinite; }
+        @keyframes pulse-dot { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+        .ping-ms { font-size: 0.75rem; font-weight: 400; color: var(--theme-text-muted); margin-left: 2px; }
         
         .info-label {
             font-size: 0.85rem;
@@ -165,8 +195,11 @@
         /* Health Stats */
         .health-stats-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 12px;
+        }
+        @media (max-width: 700px) {
+            .health-stats-grid { grid-template-columns: repeat(2, 1fr); }
         }
 
         .health-stat {
@@ -413,6 +446,26 @@
             </header>
             
             <div class="content-container">
+                <!-- Landing State (shown before any search) -->
+                <div id="landingState">
+
+                    <!-- Recent searches -->
+                    <div id="recentSearchesBlock" style="display:none;margin-bottom:28px;">
+                        <div style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.6px;color:var(--theme-text-muted);margin-bottom:14px;font-weight:600;">Recent Searches</div>
+                        <div id="recentSearchesTiles" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;"></div>
+                    </div>
+
+                    <!-- Stats row -->
+                    <div id="landingStats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:32px;"></div>
+
+                    <!-- Search hint — vertically aligned to sidebar search box via JS -->
+                    <div id="searchHint" style="display:inline-flex;align-items:center;gap:10px;padding:10px 16px;background:var(--theme-bg-card);border:1px solid var(--theme-primary,#3b82f6);border-radius:var(--radius-md);margin-bottom:28px;max-width:360px;opacity:0.85;">
+                        <span style="font-size:1.4rem;line-height:1;">👈</span>
+                        <span style="font-size:0.9rem;color:var(--theme-text);">Use the <strong>Search Equipment</strong> box in the sidebar to look up any equipment ID or PTX IP address.</span>
+                    </div>
+
+                </div>
+
                 <!-- Results Section -->
                 <div class="results-section" id="resultsSection">
                     <!-- Results will be populated here -->
@@ -545,11 +598,83 @@
             return `${parts[0]}.${parts[1]}.${parts[2]}.${parseInt(parts[3]) + 1}`;
         }
         
+        // ── Landing state ────────────────────────────────────────────────────────
+        const RECENT_KEY = 'ipfinder_recent';
+
+        function getRecent() {
+            try { return JSON.parse(localStorage.getItem(RECENT_KEY) || '[]'); } catch { return []; }
+        }
+
+        function saveRecent(query) {
+            let recent = getRecent().filter(q => q.toLowerCase() !== query.toLowerCase());
+            recent.unshift(query);
+            recent = recent.slice(0, 5);
+            localStorage.setItem(RECENT_KEY, JSON.stringify(recent));
+        }
+
+        function renderLanding() {
+            // Recent searches
+            const recent = getRecent();
+            const tilesEl = document.getElementById('recentSearchesTiles');
+            const block = document.getElementById('recentSearchesBlock');
+            if (recent.length > 0) {
+                block.style.display = 'block';
+                tilesEl.innerHTML = recent.map((q, i) => `
+                    <button onclick="quickSearch('${q}')"
+                        style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding:18px 20px;background:var(--theme-bg-card);border:1px solid var(--theme-border);border-radius:var(--radius-md);color:var(--theme-text);cursor:pointer;text-align:left;width:100%;transition:border-color 0.15s,transform 0.1s;"
+                        onmouseover="this.style.borderColor='var(--theme-primary,#3b82f6)';this.style.transform='translateY(-2px)'"
+                        onmouseout="this.style.borderColor='var(--theme-border)';this.style.transform='translateY(0)'">
+                        <span style="font-size:0.7rem;color:var(--theme-text-muted);text-transform:uppercase;letter-spacing:0.4px;">#${i + 1} Recent</span>
+                        <span style="font-size:1.3rem;font-weight:800;letter-spacing:0.5px;">${q}</span>
+                        <span style="font-size:0.75rem;color:var(--theme-text-muted);">Click to search →</span>
+                    </button>`).join('');
+            }
+
+            // Stats from equipment DB
+            fetch('/api/equipment_profiles')
+                .then(r => r.json())
+                .then(data => {
+                    const total = Object.keys(data).length;
+                    const statsEl = document.getElementById('landingStats');
+                    statsEl.innerHTML = `
+                        <div style="padding:20px 24px;background:var(--theme-bg-card);border:1px solid var(--theme-border);border-radius:var(--radius-md);text-align:center;">
+                            <div style="font-size:2.2rem;font-weight:800;color:var(--theme-text-bright);">${total}</div>
+                            <div style="font-size:0.75rem;color:var(--theme-text-muted);margin-top:6px;text-transform:uppercase;letter-spacing:0.4px;">Equipment in DB</div>
+                        </div>
+                        <div style="padding:20px 24px;background:var(--theme-bg-card);border:1px solid var(--theme-border);border-radius:var(--radius-md);text-align:center;">
+                            <div style="font-size:2.2rem;font-weight:800;color:var(--theme-text-bright);">${recent.length}</div>
+                            <div style="font-size:0.75rem;color:var(--theme-text-muted);margin-top:6px;text-transform:uppercase;letter-spacing:0.4px;">Recent Searches</div>
+                        </div>`;
+
+                    // Align hint with sidebar search box AFTER stats have rendered
+                    requestAnimationFrame(() => {
+                        const input = document.getElementById('searchInput');
+                        const hint = document.getElementById('searchHint');
+                        if (input && hint) {
+                            const offset = input.getBoundingClientRect().top - hint.getBoundingClientRect().top;
+                            if (offset > 0) hint.style.marginTop = (parseFloat(hint.style.marginTop) || 0) + offset + 'px';
+                        }
+                    });
+                })
+                .catch(() => {});
+        }
+
+        function quickSearch(query) {
+            document.getElementById('searchInput').value = query;
+            searchEquipment({ preventDefault: () => {} });
+        }
+
+        // ── End landing state ─────────────────────────────────────────────────
+
         async function searchEquipment(event) {
             event.preventDefault();
 
             const query = document.getElementById('searchInput').value.trim();
             if (!query) return;
+
+            // Hide landing, save to recent
+            document.getElementById('landingState').style.display = 'none';
+            saveRecent(query);
 
             // Silently close any active TRU tunnel before searching new equipment
             if (truConnected) {
@@ -558,7 +683,7 @@
                 updateTRUStatus(false);
                 closeTRUModal();
             }
-            
+
             const resultsSection = document.getElementById('resultsSection');
             const searchBtn = document.getElementById('searchBtn');
             
@@ -686,12 +811,23 @@
                                 ` : ''}
                             </div>
 
-                            <div class="info-section" id="healthSection">
-                                <h3>🏥 System Health <span class="refresh-indicator" id="healthRefreshTimer" style="font-size: 0.7rem; font-weight: normal; margin-left: 8px;"></span></h3>
-                                <div id="healthStats">
-                                    <div style="text-align: center; padding: 12px; color: var(--theme-text-muted); font-size: 0.85rem;">
-                                        Loading health data...
+                            <div class="info-section" id="commsSection">
+                                <h3>📡 Comms Info <span id="commsPingStatus" style="font-size:0.7rem;font-weight:normal;margin-left:8px;color:var(--theme-text-muted);">— via AVI</span></h3>
+                                <div id="commsStats">
+                                    <div style="text-align:center;padding:12px;color:var(--theme-text-muted);font-size:0.85rem;">
+                                        ${data.avi_ip ? 'Waiting for ping...' : 'No AVI IP — cannot probe'}
                                     </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- PTX Health — full width below the info grid -->
+                        <div class="info-section" id="healthSection" style="margin-bottom:24px;">
+                            <h3>🏥 PTX Health <span class="refresh-indicator" id="healthRefreshTimer" style="font-size: 0.7rem; font-weight: normal; margin-left: 8px;"></span></h3>
+                            <div id="healthStats">
+                                <div style="text-align: center; padding: 12px; color: var(--theme-text-muted); font-size: 0.85rem;">
+                                    Loading health data...
                                 </div>
                             </div>
                         </div>
@@ -724,6 +860,9 @@
             if (data.ptx_ip) {
                 startHealthMonitoring(data.ptx_ip, ptxModel);
             }
+
+            // Render comms section (mock visual — backend not yet wired)
+            renderCommsMock(data.avi_ip);
 
             // Show popout button in header
             const popoutBtn = document.getElementById('popoutBtn');
@@ -1259,6 +1398,89 @@
             }
         }
 
+        // ── Comms Info ───────────────────────────────────────────────────────
+        function renderCommsMock(avi_ip) {
+            const el = document.getElementById('commsStats');
+            const statusEl = document.getElementById('commsPingStatus');
+            if (!el) return;
+
+            const displayAviIp = avi_ip || '10.110.x.x';
+            const isDemo = !avi_ip;
+
+            if (statusEl) statusEl.textContent = isDemo ? '— demo mode' : `— via ${displayAviIp}`;
+
+            const hosts = [
+                { label: 'AVI',    ip: displayAviIp,    state: 'checking', ms: null },
+                { label: 'PTX',    ip: '192.168.0.100', state: 'checking', ms: null },
+                { label: 'GNSS 1', ip: '192.168.0.101', state: 'checking', ms: null },
+                { label: 'GNSS 2', ip: '192.168.0.102', state: 'checking', ms: null },
+            ];
+
+            function row(h) {
+                const dot    = `<span class="ping-dot ${h.state}"></span>`;
+                const text   = h.state === 'checking' ? 'Checking...'
+                             : h.state === 'online'   ? `Online${h.ms != null ? ` <span class="ping-ms">${h.ms}ms</span>` : ''}`
+                             : 'Offline';
+                const colour = h.state === 'online' ? '#22c55e' : h.state === 'offline' ? '#ef4444' : 'var(--theme-text-muted)';
+                return `<div class="ping-row">
+                    <span class="ping-label">${h.label}<span class="ping-ip">${h.ip}</span></span>
+                    <span class="ping-indicator" style="color:${colour}">${dot}${text}</span>
+                </div>`;
+            }
+
+            el.innerHTML = hosts.map(row).join('');
+
+            if (isDemo) {
+                // No AVI IP — animate mock results for dev visibility
+                const mockResults = [
+                    { state: 'online',  ms: 3    },
+                    { state: 'online',  ms: 12   },
+                    { state: 'offline', ms: null },
+                    { state: 'online',  ms: 14   },
+                ];
+                hosts.forEach((h, i) => {
+                    setTimeout(() => {
+                        hosts[i] = { ...hosts[i], ...mockResults[i] };
+                        el.innerHTML = hosts.map(row).join('');
+                    }, 700 + i * 500);
+                });
+                return;
+            }
+
+            // Real mode — call backend
+            fetch('/api/comms_ping', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ avi_ip })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (!data.success) {
+                    hosts[0] = { ...hosts[0], state: 'offline' };
+                    hosts[1] = { ...hosts[1], state: 'offline' };
+                    hosts[2] = { ...hosts[2], state: 'offline' };
+                    hosts[3] = { ...hosts[3], state: 'offline' };
+                    if (statusEl) statusEl.textContent = `— error: ${data.error || 'unreachable'}`;
+                } else {
+                    const aviState  = data.avi.status === 'Connected' ? 'online' : 'offline';
+                    const ptxState  = data.ptx.status  === 'Online'   ? 'online' : 'offline';
+                    const g1State   = data.gnss_1.status === 'Online' ? 'online' : 'offline';
+                    const g2State   = data.gnss_2.status === 'Online' ? 'online' : 'offline';
+                    hosts[0] = { ...hosts[0], state: aviState, ms: data.avi.ping_time };
+                    hosts[1] = { ...hosts[1], state: ptxState, ms: data.ptx.ping_time };
+                    hosts[2] = { ...hosts[2], ip: data.gnss_1.ip || '192.168.0.101', state: g1State, ms: data.gnss_1.ping_time };
+                    hosts[3] = { ...hosts[3], ip: data.gnss_2.ip || '192.168.0.102', state: g2State, ms: data.gnss_2.ping_time };
+                }
+                el.innerHTML = hosts.map(row).join('');
+            })
+            .catch(() => {
+                hosts.forEach((h, i) => { hosts[i] = { ...h, state: 'offline' }; });
+                el.innerHTML = hosts.map(row).join('');
+                if (statusEl) statusEl.textContent = '— unreachable';
+            });
+        }
+        // ── End Comms Info ────────────────────────────────────────────────────
+
         async function startHealthMonitoring(ptx_ip, ptx_model) {
             // Clear any existing interval
             if (healthCheckInterval) {
@@ -1315,9 +1537,10 @@
             showToast('Equipment monitor opened in new tab', 'success');
         }
 
-        // Focus search input on load
+        // Focus search input on load and render landing state
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('searchInput').focus();
+            renderLanding();
         });
     </script>
 </body>

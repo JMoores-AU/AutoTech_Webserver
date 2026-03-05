@@ -46,11 +46,26 @@ def api_ptx_reboot():
                 'details': 'Offline testing mode - reboot simulated'
             })
 
-        # Real reboot implementation would go here
+        from app.utils import connect_to_equipment
+
+        ssh, ptx_type = connect_to_equipment(ip_address)
+        if not ssh:
+            return jsonify({'success': False, 'message': f'Cannot connect to {equipment_id}: {ptx_type}'}), 500
+
+        try:
+            ssh.exec_command("sudo reboot", timeout=10)
+        except Exception:
+            pass  # Connection drops immediately on reboot — this is expected
+        finally:
+            try:
+                ssh.close()
+            except Exception:
+                pass
+
         return jsonify({
-            'success': False,
-            'message': 'PTX reboot functionality requires paramiko library',
-            'details': 'Install paramiko for SSH functionality'
+            'success': True,
+            'message': f'Reboot command sent to {equipment_id} ({ptx_type})',
+            'ptx_type': ptx_type
         })
 
     except Exception as e:

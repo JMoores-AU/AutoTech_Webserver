@@ -18,6 +18,7 @@ import app.state as state
 from app.background_tasks import format_uptime_hours, probe_equipment_health
 from app.config import FLEET_DATA_PATH, GATEWAY_IP
 from app.utils import is_online_network
+from tools.equipment_db import get_equipment
 from tools.app_logger import log_database
 
 logger = logging.getLogger(__name__)
@@ -73,16 +74,20 @@ def api_fleet_data():
             detailed = []
             for eq_id in column['equipment']:
                 health = health_data.get(eq_id)
+                cached = get_equipment(state.EQUIPMENT_DB_PATH, eq_id) if state.EQUIPMENT_DB_PATH else None
+                ptx_ip = cached.get('network_ip') if cached else None
+
                 if not health:
                     if is_online_network():
                         threading.Thread(target=probe_equipment_health, args=(eq_id,), daemon=True).start()
                     detailed.append({
-                        'id': eq_id, 'uptime': 'Pending', 'uptime_hours': 0,
+                        'id': eq_id, 'ptx_ip': ptx_ip, 'uptime': 'Pending', 'uptime_hours': 0,
                         'mem_usage': '--%', 'mem_usage_raw': 0, 'last_updated': None
                     })
                 else:
                     detailed.append({
                         'id': eq_id,
+                        'ptx_ip': ptx_ip,
                         'uptime': format_uptime_hours(health['uptime_hours']),
                         'uptime_hours': health['uptime_hours'],
                         'mem_usage': f"{health['mem_usage']}%",

@@ -9,7 +9,12 @@
       "comms": "Normal Auto Truck | Shovel comms",
       "color": "#8d97a5",
       "equipment": [
-        "All Coal Eq"
+        "EL20",
+        "EL21",
+        "EL22",
+        "EXD48",
+        "EXD49",
+        "EXD53"
       ]
     },
     {
