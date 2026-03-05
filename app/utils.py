@@ -479,7 +479,7 @@ def parse_ip_finder_output(query, output):
     if result['profile'] in ['K830E', 'K930E'] and result['ptx_ip']:
         parts = result['ptx_ip'].split('.')
         if len(parts) == 4:
-            result['flight_recorder_IP'] = f"{parts[0]}.{parts[1]}.{parts[2]}.{int(parts[3]) + 1}"
+            result['flight_recorder_ip'] = f"{parts[0]}.{parts[1]}.{parts[2]}.{int(parts[3]) + 1}"
 
     return result
 
