@@ -143,9 +143,11 @@ config.PLAYBACK_SERVER['winscp_path'] = config.WINSCP_PATH # Use resolved path
 
 # Update PLINK_CANDIDATES with resolved paths (modifies the list in app.config)
 config.PLINK_CANDIDATES[:] = [
-    config.AUTO_TECH_CLIENT_PLINK,
-    config.CLIENT_PLINK_PATH,
-    config.PLINK_PATH,
+    config.AUTO_TECH_CLIENT_PLINK,                                        # C:\AutoTech_Client\plink.exe
+    config.CLIENT_PLINK_PATH,                                             # resolved autotech_client/tools path
+    config.PLINK_PATH,                                                    # resolved AutoTech/tools path
+    os.path.join(BASE_DIR, 'autotech_client', 'AutoTech', 'tools', 'plink.exe'),  # dev structure
+    os.path.join(BASE_DIR, 'legacy_batch_scripts', 'tools', 'plink.exe'),          # legacy dev fallback
 ]
 
 # ========================================
@@ -307,6 +309,7 @@ from app.blueprints.log_cleanup import bp as log_cleanup_bp
 from app.blueprints.admin_logs import bp as admin_logs_bp
 from app.blueprints.ptx_reboot import bp as ptx_reboot_bp
 from app.blueprints.vnc import bp as vnc_bp
+from app.blueprints.tru import bp as tru_bp
 from app.blueprints.usb_client import bp as usb_client_bp
 from app.blueprints.system_health import bp as system_health_bp
 from app.blueprints.fleet_monitor import bp as fleet_monitor_bp
@@ -320,6 +323,7 @@ app.register_blueprint(log_cleanup_bp)
 app.register_blueprint(admin_logs_bp)
 app.register_blueprint(ptx_reboot_bp)
 app.register_blueprint(vnc_bp)
+app.register_blueprint(tru_bp)
 app.register_blueprint(usb_client_bp)
 app.register_blueprint(system_health_bp)
 app.register_blueprint(fleet_monitor_bp)

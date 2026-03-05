@@ -844,7 +844,7 @@
                                 🛩️ Flight Recorder
                             </button>
                             ` : ''}
-                            <button class="action-btn btn-tru" ${!data.ptx_ip ? 'disabled' : ''} onclick="openTRU('${data.OID}', '${data.ptx_ip}')">
+                            <button class="action-btn btn-tru" ${!data.ptx_ip && !data.avi_ip ? 'disabled' : ''} onclick="openTRU('${data.OID}', '${data.ptx_ip || ''}', '${data.avi_ip || ''}')">
                                 🚛 TRU Access
                             </button>
                             <button class="action-btn btn-cleanup" ${!data.ptx_ip ? 'disabled' : ''} onclick="openCleanupModal('${data.ptx_ip}', '${data.OID}')">
@@ -982,18 +982,19 @@
             showToast('Opening Flight Recorder', 'info');
         }
         
-        async function openTRU(equipmentId, ptxIP) {
-            if (!ptxIP) { showToast('No PTX IP available', 'error'); return; }
+        async function openTRU(equipmentId, ptxIP, aviIP) {
+            if (!ptxIP && !aviIP) { showToast('No IP available for TRU', 'error'); return; }
 
             const truBtn = document.querySelector('.btn-tru');
             truBtn.disabled = true;
-            truBtn.innerHTML = '<span class="spinner"></span> Connecting...';
+            const via = aviIP ? `via AVI ${aviIP}` : `direct to PTX`;
+            truBtn.innerHTML = `<span class="spinner"></span> Connecting ${via}...`;
 
             try {
                 const response = await fetch('/api/tru_setup', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ equipment_ip: ptxIP, equipment_name: equipmentId })
+                    body: JSON.stringify({ equipment_ip: ptxIP, avi_ip: aviIP, equipment_name: equipmentId })
                 });
 
                 const data = await response.json();
@@ -1049,6 +1050,8 @@
             `;
         }
 
+        let truStatusInterval = null;
+
         function showTRUModal(data) {
             const existing = document.getElementById('truModal');
             if (existing) existing.remove();
@@ -1057,12 +1060,14 @@
             const p1     = ports.gnss1     || 5001;
             const p2     = ports.gnss2     || 5002;
             const p3     = ports.test_gnss || 5003;
-            const ptxTag = data.ptx_type   ? `<span style="font-size:0.75rem;background:#1e40af;color:#fff;padding:2px 7px;border-radius:4px;margin-left:6px;">${data.ptx_type}</span>` : '';
+            const ptxTag = data.ptx_type
+                ? `<span style="font-size:0.75rem;background:#1e40af;color:#fff;padding:2px 7px;border-radius:4px;margin-left:6px;">${data.ptx_type}</span>`
+                : '';
             const truNote = data.tru_launched
                 ? '<p style="color:#10b981;margin:8px 0 0;">✅ TRU.exe launched automatically</p>'
                 : '<p style="color:#f59e0b;margin:8px 0 0;">⚠️ TRU.exe not found — launch manually</p>';
             const simBanner = data.simulated
-                ? '<div style="background:#374151;border-left:3px solid #f59e0b;padding:6px 10px;margin-bottom:10px;font-size:0.8rem;color:#fbbf24;">Offline mode — tunnels simulated</div>'
+                ? '<div style="background:#374151;border-left:3px solid #f59e0b;padding:6px 10px;margin-bottom:10px;font-size:0.8rem;color:#fbbf24;">⚠️ Offline mode — tunnels simulated</div>'
                 : '';
 
             const modal = document.createElement('div');
@@ -1085,24 +1090,44 @@
                             </div>
                             <div class="tru-info-row">
                                 <label>PTX IP</label>
-                                <span>${data.ip_address || 'N/A'}</span>
+                                <span style="font-family:'Consolas',monospace;">${data.ip_address || 'N/A'}</span>
                             </div>
                             <div class="tru-info-row">
+                                <label>SSH Gateway</label>
+                                <span style="font-family:'Consolas',monospace;">
+                                    ${data.avi_ip
+                                        ? `${data.avi_ip} <span style="color:#10b981;font-size:0.75rem;">(AVI)</span>`
+                                        : `${data.ip_address || 'N/A'} <span style="color:#f59e0b;font-size:0.75rem;">(PTX direct)</span>`}
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Live tunnel health -->
+                        <div style="margin:16px 0 8px;font-size:0.8rem;font-weight:600;color:var(--theme-text-muted);text-transform:uppercase;letter-spacing:0.5px;">
+                            Tunnel Status <span id="truLastPoll" style="font-weight:normal;font-size:0.7rem;margin-left:6px;"></span>
+                        </div>
+                        <div id="truTunnelStatus" style="background:var(--theme-bg);border-radius:var(--radius-sm);padding:8px 12px;">
+                            <div style="color:var(--theme-text-muted);font-size:0.85rem;padding:4px 0;">Checking tunnel health...</div>
+                        </div>
+
+                        <div class="tru-info-grid" style="margin-top:16px;">
+                            <div class="tru-info-row">
                                 <label>GNSS 1 <span style="font-size:0.7rem;color:#9ca3af;">(.101)</span></label>
-                                <span>localhost:${p1}</span>
+                                <span style="font-family:'Consolas',monospace;">localhost:${p1}</span>
                                 <button class="btn-copy" onclick="copyToClipboard('localhost:${p1}')">📋</button>
                             </div>
                             <div class="tru-info-row">
                                 <label>GNSS 2 <span style="font-size:0.7rem;color:#9ca3af;">(.102)</span></label>
-                                <span>localhost:${p2}</span>
+                                <span style="font-family:'Consolas',monospace;">localhost:${p2}</span>
                                 <button class="btn-copy" onclick="copyToClipboard('localhost:${p2}')">📋</button>
                             </div>
                             <div class="tru-info-row">
                                 <label>Test GNSS <span style="font-size:0.7rem;color:#9ca3af;">(.103)</span></label>
-                                <span>localhost:${p3}</span>
+                                <span style="font-family:'Consolas',monospace;">localhost:${p3}</span>
                                 <button class="btn-copy" onclick="copyToClipboard('localhost:${p3}')">📋</button>
                             </div>
                         </div>
+
                         <div class="tru-instructions">
                             <h4>📋 TRU Configuration</h4>
                             <ol>
@@ -1127,9 +1152,59 @@
             `;
 
             document.body.appendChild(modal);
+
+            // Start polling tunnel health
+            pollTRUStatus();
+            truStatusInterval = setInterval(pollTRUStatus, 5000);
+        }
+
+        async function pollTRUStatus() {
+            const statusEl = document.getElementById('truTunnelStatus');
+            const pollEl   = document.getElementById('truLastPoll');
+            if (!statusEl) {
+                clearInterval(truStatusInterval);
+                return;
+            }
+            try {
+                const r = await fetch('/api/tru_status');
+                const data = await r.json();
+                if (pollEl) pollEl.textContent = '· updated ' + new Date().toLocaleTimeString([], {hour12: false});
+
+                if (!data.success || data.count === 0) {
+                    statusEl.innerHTML = '<div style="color:#ef4444;font-size:0.85rem;padding:4px 0;">⚠️ No active tunnel found — process may have died</div>';
+                    return;
+                }
+
+                const conn = Object.values(data.connections)[0];
+                const ps   = conn.ports_status || {};
+                const portLabels = { gnss1: 'GNSS 1', gnss2: 'GNSS 2', test_gnss: 'Test GNSS' };
+
+                let html = '';
+                if (!conn.alive) {
+                    html = '<div style="color:#ef4444;font-size:0.85rem;padding:4px 0;">🔴 Tunnel process died — reconnect</div>';
+                } else {
+                    for (const [key, label] of Object.entries(portLabels)) {
+                        const ps_entry = ps[key] || {};
+                        const listening = ps_entry.listening;
+                        const port = ps_entry.port || (key === 'gnss1' ? 5001 : key === 'gnss2' ? 5002 : 5003);
+                        const dot   = listening ? '🟢' : '🔴';
+                        const state = listening ? '<span style="color:#22c55e;font-weight:600;">Listening</span>' : '<span style="color:#ef4444;">Not listening</span>';
+                        html += `<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--theme-border);font-size:0.85rem;">
+                            <span>${dot} ${label} <span style="font-family:'Consolas',monospace;color:var(--theme-text-muted);font-size:0.8rem;">localhost:${port}</span></span>
+                            ${state}
+                        </div>`;
+                    }
+                }
+                statusEl.innerHTML = html || '<div style="color:var(--theme-text-muted);font-size:0.85rem;">No port data</div>';
+
+            } catch (e) {
+                if (statusEl) statusEl.innerHTML = '<div style="color:#ef4444;font-size:0.85rem;padding:4px 0;">Failed to check tunnel status</div>';
+            }
         }
 
         function closeTRUModal() {
+            clearInterval(truStatusInterval);
+            truStatusInterval = null;
             const modal = document.getElementById('truModal');
             if (modal) modal.remove();
         }
