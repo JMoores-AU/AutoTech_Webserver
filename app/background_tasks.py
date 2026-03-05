@@ -14,6 +14,7 @@ import os
 import platform
 import subprocess
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta
 
 import app.state as state
@@ -60,22 +61,72 @@ def format_uptime_hours(total_hours):
 # PTX UPTIME CHECKER WORKER
 # ========================================
 
+# Scale: SSH thread concurrency drops as online count rises to protect PTX SSH daemons.
+# Tiers drop in steps of 50 online equipment.
+_WORKER_SCALE = [
+    (500, 5),
+    (450, 6),
+    (400, 7),
+    (350, 8),
+    (300, 10),
+    (250, 12),
+    (200, 14),
+    (150, 16),
+    (100, 18),
+    (0,   20),
+]
+
+def _get_max_workers(online_count):
+    """Return SSH thread pool size based on how many units are online."""
+    for threshold, workers in _WORKER_SCALE:
+        if online_count >= threshold:
+            return workers
+    return 20
+
+
+def _ping_equipment(equipment):
+    """Ping a single unit. Returns (equipment_id, ip, reachable)."""
+    equipment_id = equipment.get('equipment_id')
+    ip = equipment.get('ip')
+    if not equipment_id or not ip:
+        return (equipment_id, ip, False)
+    reachable = check_ptx_reachable(ip, timeout=2.0)
+    return (equipment_id, ip, reachable)
+
+
+def _ssh_check_equipment(equipment_id, ip, ptx_db):
+    """SSH to one unit, read uptime, write to DB. Returns status string."""
+    result = get_ptx_uptime(ip)
+    if result['success']:
+        ptx_type = result.get('ptx_type') or 'PTX'
+        ptx_db.upsert_uptime(
+            equipment_id=equipment_id,
+            ip_address=ip,
+            uptime_hours=result['uptime_hours'],
+            last_check=datetime.now().strftime('%a %b %d %H:%M:%S AEST %Y'),
+            last_check_timestamp=int(time.time()),
+            ptx_type=ptx_type,
+        )
+        ptx_db.update_status(equipment_id, 'online', ptx_type)
+        return 'online'
+    else:
+        ptx_db.update_status(equipment_id, 'unknown')
+        logger.debug(f"PTX checker SSH error {equipment_id}: {result.get('error')}")
+        return 'error'
+
+
 def _wait_for_interval():
-    """Wait for the configured interval, checking stop event periodically."""
+    """Wait for the configured interval, checking stop event every 10 seconds."""
     checker = state.ptx_uptime_checker
     interval_seconds = checker['interval_minutes'] * 60
     checker['next_cycle'] = (
         datetime.now() + timedelta(seconds=interval_seconds)
     ).isoformat()
     checker['status'] = 'waiting'
-
-    # Check stop event every 10 seconds during wait
     for _ in range(interval_seconds // 10):
         if checker['stop_event'].is_set():
             break
         time.sleep(10)
-
-    # Handle remaining seconds
     remaining = interval_seconds % 10
     if remaining > 0 and not checker['stop_event'].is_set():
         time.sleep(remaining)
@@ -83,99 +134,99 @@ def _wait_for_interval():
 
 def ptx_uptime_checker_worker():
     """
-    Background worker that checks uptime on all PTX equipment.
-    Runs continuously, checking all equipment then waiting for next cycle.
-    Skips equipment that is offline (not pingable).
+    Background worker — hourly PTX uptime sweep.
+
+    Cycle:
+      Phase 1 — Parallel ping all equipment (50 threads, ICMP only, fast).
+      Phase 2 — Scale SSH concurrency from online count using _WORKER_SCALE.
+      Phase 3 — ThreadPoolExecutor SSH checks on reachable units only.
+      Phase 4 — Sleep until next 1hr cycle.
     """
     checker = state.ptx_uptime_checker
     ptx_db = state.ptx_uptime_db
 
     set_request_id('bg-ptx-checker')
-    logger.info("PTX Uptime Checker started")
+    logger.info("PTX Uptime Checker started (threaded, 1hr cycle)")
     log_background('info', 'ptx_checker',
-                   f'PTX Uptime Checker started (interval: {checker["interval_minutes"]} minutes)')
-    checker['status'] = 'running'
+                   f'PTX Uptime Checker started (interval: {checker["interval_minutes"]} min)')
 
     while not checker['stop_event'].is_set():
         try:
             equipment_list = ptx_db.get_all_uptime(min_hours=0)
 
             if not equipment_list:
-                logger.warning("PTX Uptime Checker: No equipment in database")
+                logger.warning("PTX Uptime Checker: No equipment in database — waiting")
                 checker['status'] = 'waiting'
                 _wait_for_interval()
                 continue
 
-            checker['total_equipment'] = len(equipment_list)
+            total = len(equipment_list)
+            checker['total_equipment'] = total
             checker['checked_count'] = 0
             checker['online_count'] = 0
             checker['offline_count'] = 0
             checker['error_count'] = 0
             checker['last_cycle_start'] = datetime.now().isoformat()
-            checker['status'] = 'running'
+            checker['status'] = 'pinging'
 
-            logger.info(f"PTX Uptime Checker: Starting cycle for {len(equipment_list)} equipment")
+            logger.info(f"PTX checker: Phase 1 — pinging {total} units")
 
-            for equipment in equipment_list:
-                if checker['stop_event'].is_set():
-                    break
+            # --- Phase 1: parallel ping ---
+            online_units = []   # [(equipment_id, ip)]
+            with ThreadPoolExecutor(max_workers=50) as ping_pool:
+                futures = {ping_pool.submit(_ping_equipment, eq): eq for eq in equipment_list}
+                for future in as_completed(futures):
+                    if checker['stop_event'].is_set():
+                        break
+                    equipment_id, ip, reachable = future.result()
+                    if reachable:
+                        online_units.append((equipment_id, ip))
+                    else:
+                        checker['offline_count'] += 1
+                        checker['checked_count'] += 1
+                        if equipment_id:
+                            ptx_db.update_status(equipment_id, 'offline')
 
-                equipment_id = equipment.get('equipment_id')
-                ip_address = equipment.get('ip')
+            online_count = len(online_units)
+            max_workers = _get_max_workers(online_count)
+            checker['online_count'] = 0  # reset — incremented during SSH phase
+            checker['ssh_workers'] = max_workers
+            checker['status'] = 'checking'
 
-                if not equipment_id or not ip_address:
-                    checker['error_count'] += 1
-                    continue
+            logger.info(
+                f"PTX checker: Phase 2 — {online_count}/{total} online, "
+                f"using {max_workers} SSH threads"
+            )
+            log_background('info', 'ptx_checker',
+                           f'Ping complete: {online_count} online, {checker["offline_count"]} offline, '
+                           f'SSH workers={max_workers}')
 
-                checker['current_equipment'] = equipment_id
-
-                if not check_ptx_reachable(ip_address, timeout=2.0):
-                    logger.debug(f"PTX Uptime Checker: {equipment_id} ({ip_address}) is offline - skipping")
-                    checker['offline_count'] += 1
+            # --- Phase 2: threaded SSH ---
+            with ThreadPoolExecutor(max_workers=max_workers) as ssh_pool:
+                futures = {
+                    ssh_pool.submit(_ssh_check_equipment, eid, ip, ptx_db): eid
+                    for eid, ip in online_units
+                }
+                for future in as_completed(futures):
+                    if checker['stop_event'].is_set():
+                        break
+                    status = future.result()
                     checker['checked_count'] += 1
-                    ptx_db.update_status(equipment_id, 'offline')
-                    continue
-
-                result = get_ptx_uptime(ip_address)
-
-                if result['success']:
-                    ptx_type = result.get('ptx_type') or 'PTX'
-                    ptx_db.upsert_uptime(
-                        equipment_id=equipment_id,
-                        ip_address=ip_address,
-                        uptime_hours=result['uptime_hours'],
-                        last_check=datetime.now().strftime('%a %b %d %H:%M:%S %Z %Y'),
-                        last_check_timestamp=int(time.time()),
-                        ptx_type=ptx_type
-                    )
-                    ptx_db.update_status(equipment_id, 'online', ptx_type)
-                    checker['online_count'] += 1
-                    logger.debug(f"PTX Uptime Checker: {equipment_id} uptime={result['uptime_hours']:.1f}h")
-                else:
-                    ptx_db.update_status(equipment_id, 'unknown')
-                    checker['error_count'] += 1
-                    logger.warning(f"PTX Uptime Checker: {equipment_id} SSH error: {result.get('error')}")
-
-                checker['checked_count'] += 1
-                time.sleep(0.5)
+                    if status == 'online':
+                        checker['online_count'] += 1
+                    else:
+                        checker['error_count'] += 1
 
             checker['last_cycle_end'] = datetime.now().isoformat()
             checker['current_equipment'] = None
 
-            logger.info(
-                f"PTX Uptime Checker: Cycle complete - "
-                f"Online: {checker['online_count']}, "
-                f"Offline: {checker['offline_count']}, "
-                f"Errors: {checker['error_count']}"
+            summary = (
+                f"Cycle complete: total={total}, online={checker['online_count']}, "
+                f"offline={checker['offline_count']}, errors={checker['error_count']}, "
+                f"ssh_workers={max_workers}"
             )
-            log_background(
-                'info',
-                'ptx_checker',
-                f"Cycle complete: Checked={checker['checked_count']}, "
-                f"Online={checker['online_count']}, "
-                f"Offline={checker['offline_count']}, "
-                f"Errors={checker['error_count']}"
-            )
+            logger.info(f"PTX checker: {summary}")
+            log_background('info', 'ptx_checker', summary)
 
             _wait_for_interval()
 

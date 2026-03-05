@@ -182,10 +182,10 @@ def test_equipment_search_mock_entry(client):
     """Known mock entry is returned without any SSH/network calls."""
     resp = client.post(
         '/api/equipment_search',
-        json={'query': 'RD111'},
+        json={'query': 'DEV_K930E'},
         content_type='application/json',
     )
     assert resp.status_code == 200
     data = resp.get_json()
     assert data.get('found') is True
-    assert data.get('OID') == 'RD111'
+    assert data.get('OID') == 'DEV_K930E'

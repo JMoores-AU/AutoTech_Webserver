@@ -506,9 +506,19 @@ class PTXUptimeDB:
                     ip = ip.strip()
                     last_check = last_check.strip()
 
-                    # Check if exists
-                    cursor.execute('SELECT id FROM ptx_uptime WHERE equipment_id = ?', (equipment_id,))
+                    # Check if exists and whether DB has fresher data (e.g. post-reboot zero)
+                    cursor.execute(
+                        'SELECT id, last_check_timestamp FROM ptx_uptime WHERE equipment_id = ?',
+                        (equipment_id,)
+                    )
                     exists = cursor.fetchone()
+
+                    # Skip if DB timestamp is newer than the HTML report timestamp.
+                    # This prevents a stale MMS report from overwriting a reboot-zeroed uptime.
+                    if exists and exists['last_check_timestamp'] and exists['last_check_timestamp'] > timestamp:
+                        logger.debug(f"Skipping {equipment_id}: DB ts={exists['last_check_timestamp']} > HTML ts={timestamp}")
+                        records_updated += 1  # Count as processed, not skipped entirely
+                        continue
 
                     # Upsert
                     self.upsert_uptime(

@@ -497,15 +497,13 @@ def search_equipment(query, mock_equipment_db: dict = None, mms_server_config: d
         is_online_func = is_online_network
     query = query.strip().upper()
 
-    # Check if query is in mock database first (for testing)
-    if query in mock_equipment_db:
-        equipment = mock_equipment_db[query].copy()
-        equipment['found'] = True
-        equipment['search_method'] = 'database'
-        return equipment
-
-    # If offline, return simulated data
+    # If offline, check mock database then return simulated data
     if not is_online_func():
+        if query in mock_equipment_db:
+            equipment = mock_equipment_db[query].copy()
+            equipment['found'] = True
+            equipment['search_method'] = 'database'
+            return equipment
         _seed = len(query)
         return {
             'OID': query,

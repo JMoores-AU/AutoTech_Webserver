@@ -785,49 +785,6 @@
                     </div>
                 </div>
 
-                {% if online %}
-                <!-- Uptime Checker Status - Auto-runs in background -->
-                <div class="checker-controls" id="checkerControls">
-                    <div class="checker-header">
-                        <h3>🔄 Live Uptime Checker</h3>
-                        <span class="checker-status" id="checkerStatus">Loading...</span>
-                    </div>
-                    <div class="checker-info">
-                        <div class="checker-stat">
-                            <span class="checker-label">Current:</span>
-                            <span class="checker-value" id="checkerCurrent">--</span>
-                        </div>
-                        <div class="checker-stat">
-                            <span class="checker-label">Progress:</span>
-                            <span class="checker-value" id="checkerProgress">-- / --</span>
-                        </div>
-                        <div class="checker-stat">
-                            <span class="checker-label">Online:</span>
-                            <span class="checker-value checker-online" id="checkerOnline">--</span>
-                        </div>
-                        <div class="checker-stat">
-                            <span class="checker-label">Offline:</span>
-                            <span class="checker-value checker-offline" id="checkerOffline">--</span>
-                        </div>
-                        <div class="checker-stat">
-                            <span class="checker-label">Errors:</span>
-                            <span class="checker-value checker-error" id="checkerErrors">--</span>
-                        </div>
-                        <div class="checker-stat">
-                            <span class="checker-label">Interval:</span>
-                            <span class="checker-value" id="checkerInterval">30 min</span>
-                        </div>
-                        <div class="checker-stat">
-                            <span class="checker-label">Next Cycle:</span>
-                            <span class="checker-value" id="checkerNextCycle">--</span>
-                        </div>
-                    </div>
-                    <div class="checker-footer">
-                        <span class="checker-note">Uptime checker runs automatically every 30 minutes. Skips offline equipment.</span>
-                    </div>
-                </div>
-                {% endif %}
-
                 <!-- Filter Section -->
                 <div class="filter-section">
                     <div class="filter-container">
@@ -841,6 +798,16 @@
                         </select>
                         <span id="shownCount" class="count-display"></span>
                     </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="actions-row">
+                    <a href="{{ url_for('ptx_uptime.ptx_uptime_csv') }}" class="action-btn btn-download">
+                        📥 Download CSV Report
+                    </a>
+                    <button onclick="triggerManualSync()" class="action-btn btn-refresh">
+                        🔄 Refresh Data
+                    </button>
                 </div>
 
                 <!-- Equipment Table -->
@@ -897,15 +864,6 @@
                     </div>
                 </div>
 
-                <!-- Action Buttons -->
-                <div class="actions-row">
-                    <a href="{{ url_for('ptx_uptime.ptx_uptime_csv') }}" class="action-btn btn-download">
-                        📥 Download CSV Report
-                    </a>
-                    <button onclick="triggerManualSync()" class="action-btn btn-refresh">
-                        🔄 Refresh Data
-                    </button>
-                </div>
             </div>
         </main>
     </div>
@@ -1299,60 +1257,6 @@
         }
         {% endif %}
 
-        {% if online %}
-        // Uptime Checker Status Polling
-        function updateCheckerStatus() {
-            fetch('/api/ptx/uptime-checker/status')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Update status badge
-                        const statusEl = document.getElementById('checkerStatus');
-                        if (statusEl) {
-                            statusEl.textContent = data.status.charAt(0).toUpperCase() + data.status.slice(1);
-                            statusEl.className = 'checker-status ' + data.status;
-                        }
-
-                        // Update current equipment
-                        const currentEl = document.getElementById('checkerCurrent');
-                        if (currentEl) {
-                            currentEl.textContent = data.current_equipment || '--';
-                        }
-
-                        // Update progress
-                        const progressEl = document.getElementById('checkerProgress');
-                        if (progressEl) {
-                            progressEl.textContent = `${data.checked_count} / ${data.total_equipment}`;
-                        }
-
-                        // Update counts
-                        document.getElementById('checkerOnline').textContent = data.online_count;
-                        document.getElementById('checkerOffline').textContent = data.offline_count;
-                        document.getElementById('checkerErrors').textContent = data.error_count;
-                        document.getElementById('checkerInterval').textContent = data.interval_minutes + ' min';
-
-                        // Update next cycle
-                        const nextEl = document.getElementById('checkerNextCycle');
-                        if (nextEl && data.next_cycle) {
-                            const nextTime = new Date(data.next_cycle);
-                            nextEl.textContent = nextTime.toLocaleTimeString();
-                        } else if (nextEl && data.status === 'running') {
-                            nextEl.textContent = 'In progress...';
-                        } else if (nextEl) {
-                            nextEl.textContent = '--';
-                        }
-                    }
-                })
-                .catch(err => {
-                    console.error('[CHECKER] Status fetch error:', err);
-                    const statusEl = document.getElementById('checkerStatus');
-                    if (statusEl) {
-                        statusEl.textContent = 'Error';
-                        statusEl.className = 'checker-status error';
-                    }
-                });
-        }
-        {% endif %}
 
         // Initialize when page loads
         document.addEventListener('DOMContentLoaded', function() {
@@ -1404,9 +1308,6 @@
                 checkStoredRebootStatus();
             }, 1000);
 
-            // Start polling uptime checker status
-            updateCheckerStatus();
-            setInterval(updateCheckerStatus, 5000);  // Poll every 5 seconds
             {% else %}
             logTest('System ready for testing - use buttons above to test functions', 'primary');
             {% endif %}

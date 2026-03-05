@@ -6,9 +6,12 @@ PTX equipment management API routes:
 """
 
 import logging
+import time
+from datetime import datetime
 
 from flask import Blueprint, jsonify, request
 
+import app.state as state
 from app.utils import is_online_network
 
 logger = logging.getLogger(__name__)
@@ -26,6 +29,25 @@ except ImportError:
 bp = Blueprint('ptx_reboot', __name__, url_prefix='')
 
 
+def _zero_uptime(equipment_id, ip_address, ptx_type=None):
+    """Immediately zero uptime in DB after a reboot so equipment drops off the high-uptime list."""
+    try:
+        db = state.ptx_uptime_db
+        if db and equipment_id and ip_address:
+            db.upsert_uptime(
+                equipment_id=equipment_id,
+                ip_address=ip_address,
+                uptime_hours=0.0,
+                last_check=datetime.now().strftime('%a %b %d %H:%M:%S AEST %Y'),
+                last_check_timestamp=int(time.time()),
+                ptx_type=ptx_type,
+            )
+            db.update_status(equipment_id, 'rebooted', ptx_type)
+            logger.info(f"Zeroed uptime for {equipment_id} after reboot")
+    except Exception as e:
+        logger.warning(f"Could not zero uptime for {equipment_id}: {e}")
+
+
 @bp.route("/api/ptx_reboot", methods=["POST"])
 def api_ptx_reboot():
     """Reboot PTX equipment via SSH"""
@@ -39,6 +61,7 @@ def api_ptx_reboot():
     try:
         # Simulate reboot in offline mode
         if not is_online_network() or not paramiko:
+            _zero_uptime(equipment_id, ip_address)
             return jsonify({
                 'success': True,
                 'message': f'SIMULATED: Reboot command sent to {equipment_id}',
@@ -62,6 +85,7 @@ def api_ptx_reboot():
             except Exception:
                 pass
 
+        _zero_uptime(equipment_id, ip_address, ptx_type)
         return jsonify({
             'success': True,
             'message': f'Reboot command sent to {equipment_id} ({ptx_type})',

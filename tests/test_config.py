@@ -153,7 +153,7 @@ def test_mock_equipment_db_has_ptx_ip():
 def test_mock_equipment_db_known_entries():
     from app.config import MOCK_EQUIPMENT_DB
     # The plan spec lists these entries
-    for expected in ('RD111', 'RD190', 'TEST1', 'TEST2'):
+    for expected in ('DEV_K930E', 'DEV_K830E', 'DEV_AHG_PTXC', 'DEV_AHG_PTX10', 'DEV_AHG_PTXCNEW'):
         assert expected in MOCK_EQUIPMENT_DB, f"Expected {expected} in MOCK_EQUIPMENT_DB"
 
 

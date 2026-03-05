@@ -217,6 +217,8 @@
     [data-theme="dark"] .health-yellow .equip-id { color: #fde047; }
     [data-theme="dark"] .health-red { background-color: #7f1d1d !important; border-color: #dc2626 !important; }
     [data-theme="dark"] .health-red .equip-id { color: #fca5a5; }
+    [data-theme="dark"] .health-grey { background-color: #1f2937 !important; border-color: #4b5563 !important; }
+    [data-theme="dark"] .health-grey .equip-id { color: #9ca3af; }
 
     .equipment-tile {
         background-color: #f8f9fa;
@@ -284,6 +286,12 @@
         border-color: #dc3545 !important;
     }
     .health-red .equip-id { color: #721c24; }
+
+    .health-grey {
+        background-color: #e2e3e5 !important;
+        border-color: #6c757d !important;
+    }
+    .health-grey .equip-id { color: #383d41; }
 
     .remove-btn {
         position: absolute;
@@ -446,24 +454,28 @@
                     eqEl.dataset.id = eq.id;
                     
                     // Health Color Logic
-                    let healthClass = 'health-green';
-                    const hrs = eq.uptime_hours || 0;
                     const mem = eq.mem_usage_raw || 0;
+                    let healthClass = 'health-green';
 
-                    if (mem > 80) {
-                        healthClass = 'health-red';
-                    } else if (mem >= 70) {
-                        healthClass = 'health-yellow';
+                    if (eq.uptime === 'Pending' || !eq.last_updated) {
+                        healthClass = '';  // Pending — no data yet
+                    } else {
+                        const ageMinutes = (Date.now() - new Date(eq.last_updated.replace(' ', 'T') + 'Z').getTime()) / 60000;
+                        if (ageMinutes > 45) {
+                            healthClass = 'health-grey';  // Offline — missed probe cycle
+                        } else if (mem > 90) {
+                            healthClass = 'health-red';   // Critical
+                        } else if (mem > 80) {
+                            healthClass = 'health-yellow'; // Caution
+                        }
                     }
-                    
-                    if (eq.uptime === 'Pending' || !eq.last_updated) healthClass = ''; 
-                    
-                    // CRITICAL FIX: Only add if not empty to prevent DOMTokenList error
+
+                    // Only add if not empty to prevent DOMTokenList error
                     if (healthClass) {
                         eqEl.classList.add(healthClass);
                     }
 
-                    const updatedTime = eq.last_updated ? new Date(eq.last_updated.replace(' ', 'T')).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Pending';
+                    const updatedTime = eq.last_updated ? new Date(eq.last_updated.replace(' ', 'T') + 'Z').toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Pending';
                     
                     eqEl.innerHTML = `
                         <button class="remove-btn" onclick="removeEquipment('${eq.id}')">&times;</button>
@@ -633,9 +645,14 @@
     }
 
     function openExtractionModal(eq) {
-        const healthLabel = eq.uptime === 'Pending' || !eq.last_updated ? 'Pending'
-            : (eq.mem_usage_raw > 80) ? '🔴 Critical'
-            : (eq.mem_usage_raw >= 70) ? '🟡 Caution'
+        const mem = eq.mem_usage_raw || 0;
+        const ageMinutes = eq.last_updated
+            ? (Date.now() - new Date(eq.last_updated.replace(' ', 'T') + 'Z').getTime()) / 60000
+            : null;
+        const healthLabel = !eq.last_updated ? 'Pending'
+            : ageMinutes > 45       ? '⚫ Offline'
+            : mem > 90              ? '🔴 Critical'
+            : mem > 80              ? '🟡 Caution'
             : '🟢 Healthy';
 
         const lastUpdated = eq.last_updated

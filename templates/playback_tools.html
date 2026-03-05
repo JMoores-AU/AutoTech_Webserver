@@ -286,9 +286,24 @@
                 </div>
 
                 <!-- Big Countdown -->
-                <div style="text-align: center; margin: 24px 0;">
+                <div style="text-align: center; margin: 16px 0 12px;">
                     <div id="sidebarCountdown" style="font-size: 3rem; font-weight: 700; color: var(--theme-primary); line-height: 1;">--:--</div>
-                    <div style="font-size: 0.7rem; text-transform: uppercase; color: var(--theme-text-muted); margin-top: 4px; letter-spacing: 0.5px;"></div>
+                    <div id="sidebarStatus" style="font-size: 0.7rem; text-transform: uppercase; color: var(--theme-text-muted); margin-top: 4px; letter-spacing: 0.5px;">WAITING</div>
+                </div>
+
+                <!-- File Metadata -->
+                <div style="background: var(--theme-bg-card); border: 1px solid var(--theme-border); border-radius: 6px; padding: 10px 12px; margin-bottom: 12px; font-size: 0.72rem; display: flex; flex-direction: column; gap: 6px;">
+                    <div style="display: flex; justify-content: space-between; gap: 8px;">
+                        <span style="color: var(--theme-text-muted);">Expected</span>
+                        <span id="sidebarNextFileTime" style="color: var(--theme-text); font-weight: 600;">--</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; gap: 8px;">
+                        <span style="color: var(--theme-text-muted);">Confidence</span>
+                        <span id="sidebarConfidence" style="color: var(--theme-text); font-weight: 600;">--</span>
+                    </div>
+                    <div style="border-top: 1px solid var(--theme-border); padding-top: 6px; color: var(--theme-text-muted); word-break: break-all;">
+                        <span id="sidebarNextFileName">--</span>
+                    </div>
                 </div>
 
                 <!-- Download Button -->

@@ -130,6 +130,7 @@ def no_live_network(mocker):
         ('app.blueprints.system_health.check_network_connectivity', False),
         ('app.blueprints.system_health.is_online_network', False),
         ('app.blueprints.equipment.is_online_network', False),
+        ('app.utils.is_online_network', False),
     ]
     for target, value in targets:
         try:

@@ -69,8 +69,9 @@ ptx_uptime_checker = {
     'last_cycle_start': None,
     'last_cycle_end': None,
     'next_cycle': None,
-    'interval_minutes': 30,  # Check every 30 minutes
-    'status': 'stopped'  # stopped, running, waiting, error
+    'interval_minutes': 60,  # 1hr cycle
+    'ssh_workers': 0,        # SSH thread pool size used last cycle
+    'status': 'stopped'      # stopped, pinging, checking, waiting, error
 }
 
 # ========================================
@@ -132,6 +133,12 @@ ptx_db_sync = {
 # ACTIVE TRU CONNECTIONS
 # ========================================
 active_tru_connections = {}
+
+# ========================================
+# ACTIVE FLIGHT RECORDER CONNECTIONS
+# ========================================
+active_fr_connections = {}
+# Keys: 'atmon', 'download', 'rdp'
 
 # ========================================
 # TERMINAL SESSIONS (T1 Legacy)

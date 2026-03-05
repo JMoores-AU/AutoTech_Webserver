@@ -310,6 +310,7 @@ from app.blueprints.admin_logs import bp as admin_logs_bp
 from app.blueprints.ptx_reboot import bp as ptx_reboot_bp
 from app.blueprints.vnc import bp as vnc_bp
 from app.blueprints.tru import bp as tru_bp
+from app.blueprints.flight_recorder import bp as fr_bp
 from app.blueprints.usb_client import bp as usb_client_bp
 from app.blueprints.system_health import bp as system_health_bp
 from app.blueprints.fleet_monitor import bp as fleet_monitor_bp
@@ -324,6 +325,7 @@ app.register_blueprint(admin_logs_bp)
 app.register_blueprint(ptx_reboot_bp)
 app.register_blueprint(vnc_bp)
 app.register_blueprint(tru_bp)
+app.register_blueprint(fr_bp)
 app.register_blueprint(usb_client_bp)
 app.register_blueprint(system_health_bp)
 app.register_blueprint(fleet_monitor_bp)
@@ -684,6 +686,12 @@ if __name__ == '__main__':
         )
         fleet_monitor_updater['thread'].start()
         fleet_monitor_updater['running'] = True
+
+        # Start PTX Uptime Checker background worker (runs silently, updates uptime.db)
+        ptx_uptime_checker['stop_event'].clear()
+        ptx_uptime_checker['running'] = True
+        ptx_uptime_checker['thread'] = threading.Thread(target=ptx_uptime_checker_worker, daemon=True)
+        ptx_uptime_checker['thread'].start()
 
         # Development server configuration
         server_port = int(os.environ.get('AUTOTECH_PORT', 8888))

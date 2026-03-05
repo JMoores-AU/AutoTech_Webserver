@@ -464,6 +464,35 @@
                         <span style="font-size:0.9rem;color:var(--theme-text);">Use the <strong>Search Equipment</strong> box in the sidebar to look up any equipment ID or PTX IP address.</span>
                     </div>
 
+                    {% if not online %}
+                    <!-- Dev mode mock entries — only visible when offline -->
+                    <div style="margin-top:8px;">
+                        <div style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.6px;color:var(--theme-text-muted);margin-bottom:12px;font-weight:600;">🔧 Dev Mode — Mock Entries</div>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;">
+                            <button onclick="quickSearch('DEV_AHG_PTXC')" style="text-align:left;background:var(--theme-bg-card);border:1px solid var(--theme-border);border-radius:6px;padding:10px 14px;cursor:pointer;color:var(--theme-text);">
+                                <div style="font-size:0.8rem;font-weight:600;margin-bottom:3px;">DEV_AHG_PTXC</div>
+                                <div style="font-size:0.72rem;color:var(--theme-text-muted);">EMV · PTXC (old) · No AVI · Online</div>
+                            </button>
+                            <button onclick="quickSearch('DEV_AHG_PTX10')" style="text-align:left;background:var(--theme-bg-card);border:1px solid var(--theme-border);border-radius:6px;padding:10px 14px;cursor:pointer;color:var(--theme-text);">
+                                <div style="font-size:0.8rem;font-weight:600;margin-bottom:3px;">DEV_AHG_PTX10</div>
+                                <div style="font-size:0.72rem;color:var(--theme-text-muted);">EMV · PTX10 · AVI · Online</div>
+                            </button>
+                            <button onclick="quickSearch('DEV_AHG_PTXCNEW')" style="text-align:left;background:var(--theme-bg-card);border:1px solid var(--theme-border);border-radius:6px;padding:10px 14px;cursor:pointer;color:var(--theme-text);">
+                                <div style="font-size:0.8rem;font-weight:600;margin-bottom:3px;">DEV_AHG_PTXCNEW</div>
+                                <div style="font-size:0.72rem;color:var(--theme-text-muted);">EMV · PTXC New OS · AVI · Degraded</div>
+                            </button>
+                            <button onclick="quickSearch('DEV_K830E')" style="text-align:left;background:var(--theme-bg-card);border:1px solid var(--theme-border);border-radius:6px;padding:10px 14px;cursor:pointer;color:var(--theme-text);">
+                                <div style="font-size:0.8rem;font-weight:600;margin-bottom:3px;">DEV_K830E</div>
+                                <div style="font-size:0.72rem;color:var(--theme-text-muted);">AT · K830E · PTXC · AVI + FR · Online</div>
+                            </button>
+                            <button onclick="quickSearch('DEV_K930E')" style="text-align:left;background:var(--theme-bg-card);border:1px solid var(--theme-border);border-radius:6px;padding:10px 14px;cursor:pointer;color:var(--theme-text);">
+                                <div style="font-size:0.8rem;font-weight:600;margin-bottom:3px;">DEV_K930E</div>
+                                <div style="font-size:0.72rem;color:var(--theme-text-muted);">AT · K930E · PTX10 · AVI + FR · Online</div>
+                            </button>
+                        </div>
+                    </div>
+                    {% endif %}
+
                 </div>
 
                 <!-- Results Section -->
@@ -572,6 +601,9 @@
         const IS_OFFLINE = config.isOffline;
         let currentEquipment = null;
         let truConnected = false;
+        let frConnected = false;
+        let frModalData = null;
+        let frStatusInterval = null;
 
         function showToast(message, type = 'info') {
             const container = document.getElementById('toastContainer');
@@ -676,12 +708,18 @@
             document.getElementById('landingState').style.display = 'none';
             saveRecent(query);
 
-            // Silently close any active TRU tunnel before searching new equipment
+            // Silently close any active TRU/FR tunnels before searching new equipment
             if (truConnected) {
                 fetch('/api/tru_disconnect', { method: 'POST' }).catch(() => {});
                 truConnected = false;
                 updateTRUStatus(false);
                 closeTRUModal();
+            }
+            if (frConnected) {
+                fetch('/api/fr_disconnect', { method: 'POST' }).catch(() => {});
+                frConnected = false;
+                updateFRStatus(false);
+                closeFRModal();
             }
 
             const resultsSection = document.getElementById('resultsSection');
@@ -840,7 +878,7 @@
                                 📹 Open AVI
                             </button>
                             ${flightRecorderIP ? `
-                            <button class="action-btn btn-flight" onclick="openFlightRecorder('${flightRecorderIP}')">
+                            <button class="action-btn btn-flight" onclick="openFRModal('${data.OID}', '${data.ptx_ip || ''}', '${flightRecorderIP}', '${ptxModel}')">
                                 🛩️ Flight Recorder
                             </button>
                             ` : ''}
@@ -850,7 +888,12 @@
                             <button class="action-btn btn-cleanup" ${!data.ptx_ip ? 'disabled' : ''} onclick="openCleanupModal('${data.ptx_ip}', '${data.OID}')">
                                 🧹 Clean Logs
                             </button>
-                        </div> 
+                            ${data.ptx_ip && data.vehicle_status !== 'Online' && data.vehicle_status !== 'Simulated' ? `
+                            <button class="action-btn" style="background:#dc2626;color:#fff;" onclick="rebootPTXFromFinder('${data.ptx_ip}', '${data.OID}')">
+                                🔌 Reboot PTX
+                            </button>
+                            ` : ''}
+                        </div>
                         <div class="action-log" id="actionLog"></div>
                     </div>
                 </div>
@@ -970,16 +1013,304 @@
             });
         }
         
+        async function rebootPTXFromFinder(ip, equipmentId) {
+            if (!confirm(`Reboot PTX for ${equipmentId} (${ip})? This will disconnect active sessions.`)) return;
+            showToast(`Sending reboot command to ${equipmentId}...`, 'info');
+            try {
+                const r = await fetch('/api/ptx_reboot', {
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ ip_address: ip, equipment_id: equipmentId })
+                });
+                const data = await r.json();
+                showToast(data.success ? (data.message || 'Reboot command sent') : (data.message || 'Reboot failed'),
+                          data.success ? 'success' : 'error');
+            } catch(e) { showToast('Reboot request failed', 'error'); }
+        }
+
         function openAVI(ip) {
             if (!ip) { showToast('No AVI IP available', 'error'); return; }
             window.open(`http://${ip}`, '_blank');
             showToast('Opening AVI interface', 'info');
         }
         
-        function openFlightRecorder(ip) {
-            if (!ip) { showToast('No Flight Recorder IP available', 'error'); return; }
-            window.open(`http://${ip}`, '_blank');
-            showToast('Opening Flight Recorder', 'info');
+        // ---- Flight Recorder Modal ----
+
+        function openFRModal(eqId, ptxIp, frIp, ptxType) {
+            frModalData = { eqId, ptxIp, frIp, ptxType };
+            buildFRModal();
+        }
+
+        function buildFRModal() {
+            const existing = document.getElementById('frModal');
+            if (existing) existing.remove();
+            clearInterval(frStatusInterval);
+            frStatusInterval = null;
+
+            const { eqId, ptxIp, frIp, ptxType } = frModalData;
+            const ptxTag = ptxType
+                ? `<span style="font-size:0.75rem;background:#92400e;color:#fff;padding:2px 7px;border-radius:4px;margin-left:6px;">${ptxType}</span>`
+                : '';
+
+            const modal = document.createElement('div');
+            modal.id = 'frModal';
+            modal.className = 'modal-overlay';
+            modal.onclick = e => { if (e.target === modal) closeFRModal(); };
+
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>🛩️ Flight Recorder ${ptxTag}</h3>
+                        <button class="modal-close" onclick="closeFRModal()">×</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="tru-info-grid">
+                            <div class="tru-info-row"><label>Equipment</label><span>${eqId}</span></div>
+                            <div class="tru-info-row">
+                                <label>PTX IP</label>
+                                <span style="font-family:'Consolas',monospace;">${ptxIp} <button class="btn-copy" onclick="copyToClipboard('${ptxIp}')">📋</button></span>
+                            </div>
+                            <div class="tru-info-row">
+                                <label>FR IP</label>
+                                <span style="font-family:'Consolas',monospace;">${frIp} <button class="btn-copy" onclick="copyToClipboard('${frIp}')">📋</button></span>
+                            </div>
+                        </div>
+
+                        <div style="margin:14px 0 0;display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                            <button id="frBtnAtmon" class="action-btn btn-flight" onclick="setupFRAtmon()" style="text-align:left;line-height:1.5;">
+                                🔬 ATMonitor<br><span style="font-size:0.7rem;opacity:0.75;">Port-forward :50000 via PTX</span>
+                            </button>
+                            <button id="frBtnDownload" class="action-btn btn-flight" onclick="setupFRDownload()" style="text-align:left;line-height:1.5;">
+                                📥 FR Download<br><span style="font-size:0.7rem;opacity:0.75;">SOCKS5 proxy → WinSCP FTP</span>
+                            </button>
+                            <button id="frBtnReset" class="action-btn" style="background:#b91c1c;color:#fff;text-align:left;line-height:1.5;" onclick="resetFR()">
+                                🔄 FR Reset<br><span style="font-size:0.7rem;opacity:0.85;">Send reset command via PTX</span>
+                            </button>
+                            <button id="frBtnRdp" class="action-btn btn-flight" onclick="setupFRRdp()" style="text-align:left;line-height:1.5;">
+                                🖥️ FR Login (RDP)<br><span style="font-size:0.7rem;opacity:0.75;">Port-forward :33890 → mstsc</span>
+                            </button>
+                            <button class="action-btn" style="background:#1d4ed8;color:#fff;text-align:left;line-height:1.5;grid-column:span 2;"
+                                    onclick="window.open('http://${frIp}','_blank');showToast('Opening Flight Recorder web UI','info');">
+                                🌐 Open Web UI<br><span style="font-size:0.7rem;opacity:0.85;">Browser tab → http://${frIp}</span>
+                            </button>
+                        </div>
+
+                        <div id="frDownloadOptions" style="display:none;margin-top:8px;background:var(--theme-bg);border-radius:4px;padding:8px 12px;border:1px solid var(--theme-border);">
+                            <label style="display:flex;align-items:center;gap:8px;font-size:0.85rem;cursor:pointer;">
+                                <input type="checkbox" id="frUseTls"> Use explicit TLS <span style="color:var(--theme-text-muted);font-size:0.78rem;">(Dash 5 trucks)</span>
+                            </label>
+                            <button class="action-btn btn-flight" style="margin-top:8px;width:100%;" onclick="confirmFRDownload()">📥 Connect via SOCKS5 Proxy</button>
+                        </div>
+
+                        <div style="margin:14px 0 6px;font-size:0.8rem;font-weight:600;color:var(--theme-text-muted);text-transform:uppercase;letter-spacing:0.5px;">
+                            Active Tunnels <span id="frLastPoll" style="font-weight:normal;font-size:0.7rem;margin-left:6px;"></span>
+                        </div>
+                        <div id="frTunnelStatus" style="background:var(--theme-bg);border-radius:var(--radius-sm);padding:8px 12px;min-height:38px;">
+                            <div style="color:var(--theme-text-muted);font-size:0.85rem;padding:4px 0;">No active tunnels</div>
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="display:flex;gap:8px;justify-content:flex-end;">
+                        <button class="action-btn" style="background:#dc2626;" onclick="disconnectFR()">🔌 Disconnect All</button>
+                        <button class="action-btn btn-flight" onclick="closeFRModal()">Close</button>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(modal);
+            pollFRStatus();
+            frStatusInterval = setInterval(pollFRStatus, 5000);
+        }
+
+        async function setupFRAtmon() {
+            const btn = document.getElementById('frBtnAtmon');
+            if (btn) { btn.disabled = true; }
+            try {
+                const { eqId, ptxIp, frIp, ptxType } = frModalData;
+                const r = await fetch('/api/fr_atmon', {
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ equipment_name: eqId, ptx_ip: ptxIp, fr_ip: frIp, ptx_type: ptxType })
+                });
+                const data = await r.json();
+                if (data.success) {
+                    frConnected = true;
+                    updateFRStatus(true, eqId);
+                    showToast(data.message, data.simulated ? 'info' : 'success');
+                } else {
+                    showToast(data.message || 'ATMonitor tunnel failed', 'error');
+                }
+            } catch(e) { showToast('ATMonitor connection error', 'error'); }
+            finally {
+                if (btn) btn.disabled = false;
+                pollFRStatus();
+            }
+        }
+
+        function setupFRDownload() {
+            const opts = document.getElementById('frDownloadOptions');
+            if (opts) opts.style.display = opts.style.display === 'none' ? 'block' : 'none';
+        }
+
+        async function confirmFRDownload() {
+            const btn = document.getElementById('frBtnDownload');
+            const useTls = document.getElementById('frUseTls')?.checked || false;
+            if (btn) btn.disabled = true;
+            try {
+                const { eqId, ptxIp, frIp, ptxType } = frModalData;
+                const r = await fetch('/api/fr_download', {
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ equipment_name: eqId, ptx_ip: ptxIp, fr_ip: frIp, ptx_type: ptxType, use_tls: useTls })
+                });
+                const data = await r.json();
+                if (data.success) {
+                    frConnected = true;
+                    updateFRStatus(true, eqId);
+                    showToast(data.message, data.simulated ? 'info' : 'success');
+                    const opts = document.getElementById('frDownloadOptions');
+                    if (opts) opts.style.display = 'none';
+                } else {
+                    showToast(data.message || 'FR Download setup failed', 'error');
+                }
+            } catch(e) { showToast('FR Download error', 'error'); }
+            finally {
+                if (btn) btn.disabled = false;
+                pollFRStatus();
+            }
+        }
+
+        async function resetFR() {
+            if (!confirm('Send FR reset command? This will restart the Flight Recorder.')) return;
+            const btn = document.getElementById('frBtnReset');
+            if (btn) btn.disabled = true;
+            try {
+                const { ptxIp, frIp, ptxType } = frModalData;
+                const r = await fetch('/api/fr_reset', {
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ ptx_ip: ptxIp, fr_ip: frIp, ptx_type: ptxType })
+                });
+                const data = await r.json();
+                showToast(data.success ? (data.message || 'FR reset sent') : (data.message || 'Reset failed'),
+                          data.success ? 'success' : 'error');
+                if (data.success && data.output) {
+                    const statusEl = document.getElementById('frTunnelStatus');
+                    if (statusEl) {
+                        const outputDiv = document.createElement('div');
+                        outputDiv.style.cssText = 'margin-top:8px;font-size:0.78rem;color:var(--theme-text-muted);font-family:Consolas,monospace;white-space:pre-wrap;';
+                        outputDiv.textContent = data.output;
+                        statusEl.appendChild(outputDiv);
+                    }
+                }
+            } catch(e) { showToast('FR Reset error', 'error'); }
+            finally {
+                if (btn) btn.disabled = false;
+            }
+        }
+
+        async function setupFRRdp() {
+            const btn = document.getElementById('frBtnRdp');
+            if (btn) btn.disabled = true;
+            try {
+                const { eqId, ptxIp, frIp, ptxType } = frModalData;
+                const r = await fetch('/api/fr_rdp', {
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ equipment_name: eqId, ptx_ip: ptxIp, fr_ip: frIp, ptx_type: ptxType })
+                });
+                const data = await r.json();
+                if (data.success) {
+                    frConnected = true;
+                    updateFRStatus(true, eqId);
+                    showToast(data.message, data.simulated ? 'info' : 'success');
+                } else {
+                    showToast(data.message || 'RDP tunnel failed', 'error');
+                }
+            } catch(e) { showToast('FR Login error', 'error'); }
+            finally {
+                if (btn) btn.disabled = false;
+                pollFRStatus();
+            }
+        }
+
+        async function pollFRStatus() {
+            const statusEl = document.getElementById('frTunnelStatus');
+            const pollEl = document.getElementById('frLastPoll');
+            if (!statusEl) { clearInterval(frStatusInterval); return; }
+            try {
+                const r = await fetch('/api/fr_status');
+                const data = await r.json();
+                if (pollEl) pollEl.textContent = '· updated ' + new Date().toLocaleTimeString([], {hour12: false});
+
+                if (!data.success || data.count === 0) {
+                    statusEl.innerHTML = '<div style="color:var(--theme-text-muted);font-size:0.85rem;padding:4px 0;">No active tunnels</div>';
+                    return;
+                }
+
+                const tunnelLabels = {
+                    atmon: '🔬 ATMonitor :50000',
+                    download: '📥 Download SOCKS5 :1080',
+                    rdp: '🖥️ RDP :33890'
+                };
+                let html = '';
+                for (const [key, conn] of Object.entries(data.connections)) {
+                    const dot = conn.alive && conn.listening ? '🟢' : conn.alive ? '🟡' : '🔴';
+                    const simTag = conn.simulated ? ' <span style="font-size:0.7rem;color:#a855f7;background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.3);padding:1px 4px;border-radius:3px;">sim</span>' : '';
+                    const stateLabel = conn.alive && conn.listening
+                        ? `<span style="color:#22c55e;font-weight:600;">Active${simTag}</span>`
+                        : conn.alive
+                            ? '<span style="color:#f59e0b;">Port not ready</span>'
+                            : '<span style="color:#ef4444;">Tunnel died</span>';
+                    html += `<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--theme-border);font-size:0.85rem;">
+                        <span>${dot} ${tunnelLabels[key] || key}</span>
+                        ${stateLabel}
+                    </div>`;
+                }
+                statusEl.innerHTML = html || '<div style="color:var(--theme-text-muted);font-size:0.85rem;">No port data</div>';
+            } catch(e) {
+                if (statusEl) statusEl.innerHTML = '<div style="color:#ef4444;font-size:0.85rem;padding:4px 0;">Failed to check status</div>';
+            }
+        }
+
+        async function disconnectFR() {
+            try {
+                const r = await fetch('/api/fr_disconnect', { method: 'POST' });
+                const data = await r.json();
+                showToast(data.success ? 'FR tunnels disconnected' : (data.message || 'Disconnect failed'),
+                          data.success ? 'info' : 'error');
+            } catch(e) { showToast('FR disconnect error', 'error'); }
+            frConnected = false;
+            updateFRStatus(false);
+            closeFRModal();
+        }
+
+        function updateFRStatus(active, eqName) {
+            let banner = document.getElementById('frStatusBanner');
+            if (!active) {
+                if (banner) banner.remove();
+                return;
+            }
+            if (!banner) {
+                const actionsSection = document.querySelector('.actions-section');
+                if (!actionsSection) return;
+                banner = document.createElement('div');
+                banner.id = 'frStatusBanner';
+                banner.style.cssText = 'display:flex;align-items:center;justify-content:space-between;background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.4);border-radius:6px;padding:8px 12px;margin-bottom:10px;font-size:0.85rem;';
+                actionsSection.parentNode.insertBefore(banner, actionsSection);
+            }
+            banner.innerHTML = `
+                <span style="color:#f59e0b;">🛩️ FR tunnel active \u2014 ${eqName || 'equipment'}</span>
+                <span style="display:flex;gap:6px;">
+                    <button onclick="reopenFRModal()" style="background:rgba(245,158,11,0.2);color:#f59e0b;border:1px solid rgba(245,158,11,0.4);border-radius:4px;padding:4px 10px;cursor:pointer;font-size:0.8rem;">📊 Status</button>
+                    <button onclick="disconnectFR()" style="background:#dc2626;color:#fff;border:none;border-radius:4px;padding:4px 10px;cursor:pointer;font-size:0.8rem;">🔌 Disconnect</button>
+                </span>
+            `;
+        }
+
+        function reopenFRModal() {
+            if (frModalData) buildFRModal();
+        }
+
+        function closeFRModal() {
+            clearInterval(frStatusInterval);
+            frStatusInterval = null;
+            const modal = document.getElementById('frModal');
+            if (modal) modal.remove();
         }
         
         async function openTRU(equipmentId, ptxIP, aviIP) {
@@ -1596,11 +1927,14 @@
             }
         }
 
-        // Clean up health monitoring and TRU tunnels on page unload
+        // Clean up health monitoring and TRU/FR tunnels on page unload
         window.addEventListener('beforeunload', () => {
             stopHealthMonitoring();
             if (truConnected) {
                 navigator.sendBeacon('/api/tru_disconnect', '');
+            }
+            if (frConnected) {
+                navigator.sendBeacon('/api/fr_disconnect', '');
             }
         });
 

@@ -52,8 +52,8 @@ def _detect_ptx_type(plink_path: str, ip: str):
     # Try PTXC (dlog/gold) first — fastest probe
     try:
         probe = subprocess.run(
-            [plink_path, '-v', '-batch', '-l', 'dlog', '-pw', 'gold', ip, 'echo ptxc_ok'],
-            capture_output=True, text=True, timeout=8, creationflags=flags,
+            [plink_path, '-v', '-l', 'dlog', '-pw', 'gold', ip, 'echo ptxc_ok'],
+            input='y\n', capture_output=True, text=True, timeout=8, creationflags=flags,
         )
         if probe.returncode == 0 and 'ptxc_ok' in probe.stdout:
             return 'PTXC', 'dlog', 'gold'
@@ -63,8 +63,8 @@ def _detect_ptx_type(plink_path: str, ip: str):
     # Try mms/modular — check architecture to distinguish PTXC (New OS) from PTX10
     try:
         probe = subprocess.run(
-            [plink_path, '-batch', '-l', 'mms', '-pw', 'modular', ip, 'uname -m'],
-            capture_output=True, text=True, timeout=8, creationflags=flags,
+            [plink_path, '-l', 'mms', '-pw', 'modular', ip, 'uname -m'],
+            input='y\n', capture_output=True, text=True, timeout=8, creationflags=flags,
         )
         if probe.returncode == 0:
             if 'arm' in probe.stdout.lower():
@@ -187,7 +187,7 @@ def api_tru_setup():
         # One plink process, three port forwards into the AVI/PTX internal subnet
         flags = subprocess.CREATE_NO_WINDOW if platform.system() == 'Windows' else 0
         tunnel_cmd = [
-            plink_path, '-v', '-batch', '-N',
+            plink_path, '-v', '-N',
             '-l', ssh_user, '-pw', ssh_pass,
             '-L', '5001:192.168.0.101:8002',
             '-L', '5002:192.168.0.102:8002',
@@ -197,10 +197,17 @@ def api_tru_setup():
 
         proc = subprocess.Popen(
             tunnel_cmd,
-            creationflags=flags,
+            stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
+            creationflags=flags,
         )
+        # Answer host key prompt if key not yet in PuTTY registry
+        try:
+            proc.stdin.write(b'y\n')
+            proc.stdin.flush()
+        except Exception:
+            pass
 
         # Give plink time to bind ports
         time.sleep(2)

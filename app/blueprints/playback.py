@@ -46,6 +46,10 @@ logger = logging.getLogger(__name__)
 
 bp = Blueprint('playback', __name__, url_prefix='')
 
+# 60-second cache for predict-next-file (avoids SSH on every 2-second frontend poll)
+_predict_cache: dict = {'result': None, 'ts': 0.0}
+_PREDICT_CACHE_TTL = 60  # seconds
+
 
 # ========================================
 # PLAYBACK MONITOR CONTROL
@@ -704,6 +708,21 @@ def api_playback_predict_next_file():
         if not paramiko:
             return jsonify({'success': False, 'error': 'SSH library not available'})
 
+        # Return cached result if fresh (avoids SSH on every 2-second frontend poll)
+        now_ts = time.monotonic()
+        if _predict_cache['result'] and (now_ts - _predict_cache['ts']) < _PREDICT_CACHE_TTL:
+            cached = dict(_predict_cache['result'])
+            if cached.get('has_prediction') and cached.get('next_file_time'):
+                try:
+                    next_time = datetime.fromisoformat(cached['next_file_time'])
+                    countdown = int((next_time - datetime.now()).total_seconds())
+                    cached['countdown_seconds'] = countdown
+                    cached['is_overdue'] = countdown < 0
+                except Exception:
+                    pass
+            cached['from_cache'] = True
+            return jsonify(cached)
+
         # Connect to server
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -802,12 +821,12 @@ def api_playback_predict_next_file():
         else:
             confidence = 'low'
 
-        return jsonify({
+        result = {
             'success': True,
             'has_prediction': True,
             'last_file_time': last_file_time.isoformat(),
-            'next_file_time': predicted_next_with_buffer.isoformat(),  # Return buffered time for UI countdown
-            'predicted_file_time': predicted_next.isoformat(),  # Actual file timestamp (for reference)
+            'next_file_time': predicted_next_with_buffer.isoformat(),
+            'predicted_file_time': predicted_next.isoformat(),
             'last_file_name': last_file_name,
             'next_file_name': next_file_name,
             'countdown_seconds': countdown_seconds,
@@ -815,7 +834,10 @@ def api_playback_predict_next_file():
             'files_analyzed': len(file_timestamps),
             'confidence': confidence,
             'is_overdue': countdown_seconds < 0
-        })
+        }
+        _predict_cache['result'] = result
+        _predict_cache['ts'] = time.monotonic()
+        return jsonify(result)
 
     except Exception as e:
         logger.error(f"Predict next file error: {e}")

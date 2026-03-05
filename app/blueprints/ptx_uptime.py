@@ -55,19 +55,21 @@ def handle_ptx_uptime():
         # Determine whether JS should auto-trigger a background sync on page load
         db_count = ptx_uptime_db.get_record_count()
         last_live_sync = ptx_uptime_db.get_sync_metadata('last_live_sync')
+        local_report_exists = any(os.path.exists(p) for p in _report_file_candidates())
+
         auto_sync = False
-        if online:
-            if db_count == 0 or not last_live_sync:
+        if db_count == 0 or not last_live_sync:
+            # Always sync if DB has no data
+            auto_sync = local_report_exists or online
+        elif local_report_exists or online:
+            try:
+                last_sync_dt = datetime.fromisoformat(last_live_sync)
+                auto_sync = (datetime.now() - last_sync_dt) > timedelta(minutes=10)
+            except ValueError:
                 auto_sync = True
-            else:
-                try:
-                    last_sync_dt = datetime.fromisoformat(last_live_sync)
-                    auto_sync = (datetime.now() - last_sync_dt) > timedelta(minutes=10)
-                except ValueError:
-                    auto_sync = True
-        # ?refresh= param forces a sync via JS (same as auto_sync=True)
+        # ?refresh= param forces a sync
         if 'refresh' in request.args or request.args.get('sync', '').lower() == 'true':
-            auto_sync = online
+            auto_sync = local_report_exists or online
 
         high_uptime_equipment = ptx_uptime_db.get_high_uptime(min_days=3)
         statistics = ptx_uptime_db.get_statistics()
@@ -176,6 +178,15 @@ def handle_frontrunner_status():
 # BACKGROUND SYNC HELPER
 # ==============================================================================
 
+def _report_file_candidates():
+    """Return ordered list of local PTX_Uptime_Report.html candidate paths."""
+    return [
+        os.path.join(BASE_DIR, 'PTX_Uptime_Report.html'),              # USB root (legacy MMS scripts)
+        os.path.join(BASE_DIR, 'AutoTech', 'PTX_Uptime_Report.html'),  # USB AutoTech subfolder
+        os.path.join(BASE_DIR, 'backups', 'PTX_Uptime_Report.html'),   # Dev fallback
+    ]
+
+
 def _run_ptx_sync_background():
     """Background thread worker for PTX DB sync. Updates state.ptx_db_sync when done."""
     try:
@@ -183,7 +194,19 @@ def _run_ptx_sync_background():
         added = 0
         updated = 0
 
-        if is_online_network() and ptx_uptime_tool:
+        # Always check for a local report file first — the MMS legacy scripts
+        # place PTX_Uptime_Report.html at the USB root (e.g. E:\), so no SSH needed.
+        local_report = next((p for p in _report_file_candidates() if os.path.exists(p)), None)
+
+        if local_report:
+            logger.info(f"PTX sync: using local report at {local_report}")
+            updated, added = ptx_uptime_db.sync_from_html_report(local_report)
+            ptx_uptime_db.set_sync_metadata('last_live_sync', datetime.now().isoformat())
+            ptx_uptime_db.set_sync_metadata('last_live_path', local_report)
+
+        elif is_online_network() and ptx_uptime_tool:
+            # No local file — SSH download from MMS server as fallback
+            logger.info("PTX sync: no local report found, attempting SSH download from MMS")
             result = ptx_uptime_tool.run(password=MMS_SERVER['password'])
             if not result.get('success'):
                 state.ptx_db_sync['last_result'] = {
@@ -221,14 +244,11 @@ def _run_ptx_sync_background():
             ptx_uptime_db.set_sync_metadata('last_live_path', result.get('file_path', ''))
 
         else:
-            report_path = os.path.join(BASE_DIR, 'backups', 'PTX_Uptime_Report.html')
-            if not os.path.exists(report_path):
-                state.ptx_db_sync['last_result'] = {
-                    'success': False,
-                    'error': 'Offline and no PTX_Uptime_Report.html found',
-                }
-                return
-            updated, added = ptx_uptime_db.sync_from_html_report(report_path)
+            state.ptx_db_sync['last_result'] = {
+                'success': False,
+                'error': 'No PTX_Uptime_Report.html found and cannot connect to MMS server',
+            }
+            return
 
         state.ptx_db_sync['last_result'] = {
             'success': True,
@@ -422,12 +442,6 @@ def api_ptx_update_status():
 def api_start_ptx_uptime_checker():
     """Start the background PTX uptime checker."""
     try:
-        if not is_online_network():
-            return jsonify({
-                'success': False,
-                'error': 'PTX uptime checker requires online network connection'
-            }), 400
-
         checker = state.ptx_uptime_checker
         if checker['running']:
             return jsonify({
@@ -490,7 +504,8 @@ def api_ptx_uptime_checker_status():
             'last_cycle_start': checker['last_cycle_start'],
             'last_cycle_end': checker['last_cycle_end'],
             'next_cycle': checker['next_cycle'],
-            'interval_minutes': checker['interval_minutes']
+            'interval_minutes': checker['interval_minutes'],
+            'ssh_workers': checker.get('ssh_workers', 0),
         })
 
     except Exception as e:
@@ -502,9 +517,6 @@ def api_ptx_uptime_checker_status():
 def api_check_single_ptx_uptime():
     """Check uptime for a single PTX equipment."""
     try:
-        if not is_online_network():
-            return jsonify({'success': False, 'error': 'Online network connection required'}), 400
-
         ptx_uptime_db = state.ptx_uptime_db
         data = request.get_json()
         ip_address = data.get('ip_address')

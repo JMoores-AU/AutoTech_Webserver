@@ -131,72 +131,102 @@ EQUIPMENT_PROFILES = {
     'Other': {'has_flight_recorder': False, 'ptx_offset': 0}
 }
 
-# Mock equipment database for testing / offline mode
+# Mock equipment database for offline / dev mode testing.
+# Covers all meaningful combinations: EMV vs AT, all 3 PTX variants,
+# with/without AVI, with/without flight recorder, healthy vs degraded.
 MOCK_EQUIPMENT_DB = {
-    'RD111': {
-        'OID': 'RD111',
-        'profile': 'K930E',
-        'ptx_model': 'PTX10',
-        'ptx_ip': '10.110.20.110',
-        'avi_ip': '10.111.21.112',
-        'flight_recorder_ip': '10.110.20.111',
-        'vehicle_status': 'Online',
-        'ssh_status': 'Connected'
-    },
-    'RD190': {
-        'OID': 'RD190',
-        'profile': 'K830E',
-        'ptx_model': 'PTXC',
-        'ptx_ip': '10.110.19.190',
-        'avi_ip': '10.111.19.191',
-        'flight_recorder_ip': '10.110.19.191',
-        'vehicle_status': 'Online',
-        'ssh_status': 'Connected'
-    },
-    'AHG135': {
-        'OID': 'AHG135',
-        'profile': 'PTX10',
-        'ptx_model': 'PTX10',
-        'ptx_ip': '10.110.19.135',
-        'avi_ip': None,
+    # --- EMV (AHG) entries — no flight recorder ---
+    'DEV_AHG_PTXC': {
+        'OID': 'DEV_AHG_PTXC',
+        'profile': 'AHG',
+        'ptx_model': 'PTXC',        # Old PTXC — dlog/gold credentials
+        'ptxc_found': True,
+        'ptx_ip': '10.110.20.70',
+        'avi_ip': None,             # Some EMVs have no AVI
         'flight_recorder_ip': None,
         'vehicle_status': 'Online',
-        'ssh_status': 'Connected'
+        'ssh_status': 'Connected',
+        'health': {
+            'cpu_usage': '42.10%',
+            'memory_usage': '58.30%',
+            'uptime': '12 days, 4 hours',
+            'disk_usage': '/dev/mmcblk0p3  5.6G  2.1G  3.2G  40% /media/realroot/home',
+            'disk_percent': '40%',
+        },
     },
-    'TEST1': {
-        'OID': 'TEST1',
-        'profile': 'K830E',
-        'ptx_model': 'PTXC',
-        'ptx_ip': '10.110.20.201',
-        'avi_ip': '10.111.20.202',
-        'flight_recorder_ip': '10.110.20.202',
+    'DEV_AHG_PTX10': {
+        'OID': 'DEV_AHG_PTX10',
+        'profile': 'AHG',
+        'ptx_model': 'PTX10',       # PTX10 — mms/modular, x86_64
+        'ptxc_found': False,
+        'ptx_ip': '10.110.20.95',
+        'avi_ip': '10.111.20.96',
+        'flight_recorder_ip': None,
         'vehicle_status': 'Online',
         'ssh_status': 'Connected',
         'health': {
-            'cpu_usage': '85.30%',
-            'memory_usage': '78.45%',
-            'uptime': '45 days, 12 hours',
-            'disk_usage': '/dev/mmcblk0p3  5.6G  4.2G  1.1G  79% /media/realroot/home',
-            'disk_percent': '79%'
-        }
+            'cpu_usage': '31.50%',
+            'memory_usage': '44.20%',
+            'uptime': '3 days, 18 hours',
+            'disk_usage': '/dev/sda1  20G  7.2G  12G  38% /home',
+            'disk_percent': '38%',
+        },
     },
-    'TEST2': {
-        'OID': 'TEST2',
-        'profile': 'K930E',
-        'ptx_model': 'PTX10',
-        'ptx_ip': '10.110.21.150',
-        'avi_ip': '10.111.21.151',
-        'flight_recorder_ip': '10.110.21.151',
-        'vehicle_status': 'Degraded',
+    'DEV_AHG_PTXCNEW': {
+        'OID': 'DEV_AHG_PTXCNEW',
+        'profile': 'AHG',
+        'ptx_model': 'PTXC (New OS)',   # New-OS PTXC — mms/modular, ARM
+        'ptxc_found': False,
+        'ptx_ip': '10.110.20.110',
+        'avi_ip': '10.111.20.111',
+        'flight_recorder_ip': None,
+        'vehicle_status': 'Degraded',   # Critical health — exercises Reboot PTX button
         'ssh_status': 'Connected',
         'health': {
-            'cpu_usage': '22.10%',
-            'memory_usage': '65.20%',
-            'uptime': '2 hours, 15 minutes',
-            'disk_usage': '/dev/sda1  20G  8.5G  10G  46% /home',
-            'disk_percent': '46%'
-        }
-    }
+            'cpu_usage': '87.40%',
+            'memory_usage': '91.20%',
+            'uptime': '0 days, 3 hours',
+            'disk_usage': '/dev/mmcblk0p3  5.6G  5.1G  0.3G  95% /media/realroot/home',
+            'disk_percent': '95%',
+        },
+    },
+    # --- AT (Autonomous Truck) entries — K830E/K930E, includes flight recorder ---
+    'DEV_K830E': {
+        'OID': 'DEV_K830E',
+        'profile': 'K830E',
+        'ptx_model': 'PTXC',        # Old PTXC — dlog/gold credentials
+        'ptxc_found': True,
+        'ptx_ip': '10.110.19.190',
+        'avi_ip': '10.111.19.191',
+        'flight_recorder_ip': '10.110.19.191',  # PTX last octet + 1
+        'vehicle_status': 'Online',
+        'ssh_status': 'Connected',
+        'health': {
+            'cpu_usage': '55.60%',
+            'memory_usage': '72.30%',
+            'uptime': '7 days, 22 hours',
+            'disk_usage': '/dev/mmcblk0p3  5.6G  3.8G  1.5G  72% /media/realroot/home',
+            'disk_percent': '72%',
+        },
+    },
+    'DEV_K930E': {
+        'OID': 'DEV_K930E',
+        'profile': 'K930E',
+        'ptx_model': 'PTX10',       # PTX10 — mms/modular, x86_64
+        'ptxc_found': False,
+        'ptx_ip': '10.110.21.111',
+        'avi_ip': '10.111.21.112',
+        'flight_recorder_ip': '10.110.21.112',  # PTX last octet + 1
+        'vehicle_status': 'Online',
+        'ssh_status': 'Connected',
+        'health': {
+            'cpu_usage': '28.90%',
+            'memory_usage': '51.70%',
+            'uptime': '21 days, 9 hours',
+            'disk_usage': '/dev/sda1  20G  9.1G  10G  48% /home',
+            'disk_percent': '48%',
+        },
+    },
 }
 
 # ========================================
