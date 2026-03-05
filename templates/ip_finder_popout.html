@@ -790,10 +790,13 @@
             closeTRUModal();
         }
 
+        let lastTRUData = null;
+
         function updateTRUStatus(active, eqName) {
             let banner = document.getElementById('truStatusBanner');
             if (!active) {
                 if (banner) banner.remove();
+                lastTRUData = null;
                 return;
             }
             if (!banner) {
@@ -806,13 +809,21 @@
             }
             banner.innerHTML = `
                 <span style="color:#10b981;">🚛 TRU tunnel active \u2014 ${eqName || equipmentId}</span>
-                <button onclick="disconnectTRU()" style="background:#dc2626;color:#fff;border:none;border-radius:4px;padding:4px 10px;cursor:pointer;font-size:0.8rem;">🔌 Disconnect</button>
+                <span style="display:flex;gap:6px;">
+                    <button onclick="reopenTRUModal()" style="background:rgba(16,185,129,0.2);color:#10b981;border:1px solid rgba(16,185,129,0.4);border-radius:4px;padding:4px 10px;cursor:pointer;font-size:0.8rem;">📊 Status</button>
+                    <button onclick="disconnectTRU()" style="background:#dc2626;color:#fff;border:none;border-radius:4px;padding:4px 10px;cursor:pointer;font-size:0.8rem;">🔌 Disconnect</button>
+                </span>
             `;
+        }
+
+        function reopenTRUModal() {
+            if (lastTRUData) { showTRUModal(lastTRUData); }
         }
 
         let truStatusInterval = null;
 
         function showTRUModal(data) {
+            lastTRUData = data;
             const existing = document.getElementById('truModal');
             if (existing) existing.remove();
 
