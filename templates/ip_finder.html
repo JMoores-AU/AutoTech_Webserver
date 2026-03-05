@@ -1045,7 +1045,7 @@
                 banner = document.createElement('div');
                 banner.id = 'truStatusBanner';
                 banner.style.cssText = 'display:flex;align-items:center;justify-content:space-between;background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.4);border-radius:6px;padding:8px 12px;margin-bottom:10px;font-size:0.85rem;';
-                actionsSection.insertBefore(banner, actionsSection.firstChild);
+                actionsSection.parentNode.insertBefore(banner, actionsSection);
             }
             banner.innerHTML = `
                 <span style="color:#10b981;">🚛 TRU tunnel active \u2014 ${equipmentName || 'equipment'}</span>
