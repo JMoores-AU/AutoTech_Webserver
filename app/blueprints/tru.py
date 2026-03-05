@@ -133,12 +133,26 @@ def api_tru_setup():
 
         # Offline / dev mode — simulate tunnels
         if not is_online_network():
+            avi_ip = data.get('avi_ip', '').strip()
+            ports = {'gnss1': 5001, 'gnss2': 5002, 'test_gnss': 5003}
+            state.active_tru_connections[equipment_name] = {
+                'process': None,
+                'equipment_name': equipment_name,
+                'ip': equipment_ip,
+                'tunnel_host': avi_ip or equipment_ip,
+                'avi_ip': avi_ip or None,
+                'ptx_type': 'PTXC (simulated)',
+                'ports': ports,
+                'simulated': True,
+                'started_at': datetime.now().isoformat(),
+            }
             return jsonify({
                 'success': True,
                 'message': f'TRU access simulated for {equipment_name} (offline mode)',
                 'equipment_name': equipment_name,
                 'ip_address': equipment_ip,
-                'ports': {'gnss1': 5001, 'gnss2': 5002, 'test_gnss': 5003},
+                'avi_ip': avi_ip or None,
+                'ports': ports,
                 'ptx_type': 'PTXC (simulated)',
                 'tru_launched': False,
                 'simulated': True,
@@ -267,13 +281,14 @@ def api_tru_status():
         for name, conn in state.active_tru_connections.items():
             proc = conn.get('process')
             ports = conn.get('ports', {})
-            alive = proc is not None and proc.poll() is None
+            simulated = conn.get('simulated', False)
+            alive = simulated or (proc is not None and proc.poll() is None)
 
             ports_status = {}
             for port_name, port_num in ports.items():
                 ports_status[port_name] = {
                     'port': port_num,
-                    'listening': _check_port(port_num) if alive else False,
+                    'listening': True if simulated else (_check_port(port_num) if alive else False),
                 }
 
             connections[name] = {
@@ -286,6 +301,7 @@ def api_tru_status():
                 'ports_status': ports_status,
                 'started_at': conn.get('started_at'),
                 'alive': alive,
+                'simulated': simulated,
             }
 
         return jsonify({

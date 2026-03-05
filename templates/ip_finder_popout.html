@@ -943,15 +943,18 @@
                 if (!conn.alive) {
                     html = '<div style="color:#ef4444;font-size:0.85rem;padding:4px 0;">🔴 Tunnel process died — reconnect</div>';
                 } else {
+                    const simTag = conn.simulated ? ' <span style="font-size:0.7rem;color:#a855f7;background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.3);padding:1px 5px;border-radius:3px;">simulated</span>' : '';
                     for (const [key, label] of Object.entries(portLabels)) {
                         const ps_entry = ps[key] || {};
                         const listening = ps_entry.listening;
                         const port = ps_entry.port || (key === 'gnss1' ? 5001 : key === 'gnss2' ? 5002 : 5003);
                         const dot   = listening ? '🟢' : '🔴';
-                        const state = listening ? '<span style="color:#22c55e;font-weight:600;">Listening</span>' : '<span style="color:#ef4444;">Not listening</span>';
+                        const stateLabel = listening
+                            ? `<span style="color:#22c55e;font-weight:600;">Listening${simTag}</span>`
+                            : '<span style="color:#ef4444;">Not listening</span>';
                         html += `<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--theme-border);font-size:0.85rem;">
                             <span>${dot} ${label} <span style="font-family:'Consolas',monospace;color:var(--theme-text-muted);font-size:0.8rem;">localhost:${port}</span></span>
-                            ${state}
+                            ${stateLabel}
                         </div>`;
                     }
                 }
